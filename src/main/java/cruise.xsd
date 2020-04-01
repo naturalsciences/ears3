@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" elementFormDefault="qualified"
+	targetNamespace="http://www.eurofleets.eu/" xmlns:ewsl="http://www.eurofleets.eu/">
+	<xs:element name="cruise">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element ref="ewsl:id"/>
+				<xs:element ref="ewsl:cruiseName"/>
+				<xs:element ref="ewsl:startDate"/>
+				<xs:element ref="ewsl:endDate"/>
+				<xs:element ref="ewsl:objectives"/>
+				<xs:element ref="ewsl:chiefScientist"/>
+				<xs:element ref="ewsl:platform"/>
+				<xs:element ref="ewsl:center"/>
+				<xs:element ref="ewsl:harbor"/>
+				<xs:element ref="ewsl:seaAreaList"/>
+			</xs:sequence>
+			<xs:attribute name="id" use="required" type="xs:NCName"/>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="id" type="xs:string"/>
+	<xs:element name="cruiseName" type="xs:string"/>
+	<xs:element name="startDate" type="xs:string"/>
+	<xs:element name="endDate" type="xs:string"/>
+	<xs:element name="objectives" type="xs:NCName"/>
+	<xs:element name="chiefScientist">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element ref="ewsl:name"/>
+				<xs:element ref="ewsl:organization"/>
+			</xs:sequence>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="name" type="xs:string"/>
+	<xs:element name="organization" type="xs:string"/>
+	<xs:element name="platform">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element ref="ewsl:code"/>
+				<xs:element ref="ewsl:class"/>
+			</xs:sequence>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="code" type="xs:string"/>
+	<xs:element name="class" type="xs:string"/>
+	<xs:element name="center">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element ref="ewsl:collateCenter"/>
+			</xs:sequence>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="collateCenter" type="xs:string"/>
+	<xs:element name="harbor">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element ref="ewsl:starting"/>
+				<xs:element ref="ewsl:arrival"/>
+			</xs:sequence>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="starting" type="xs:string"/>
+	<xs:element name="arrival" type="xs:string"/>
+	<xs:element name="seaAreaList">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element maxOccurs="unbounded" ref="ewsl:seaArea"/>
+			</xs:sequence>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="seaArea">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element ref="ewsl:seaAreaURN"/>
+			</xs:sequence>
+			<xs:attribute name="id" use="required" type="xs:NCName"/>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="seaAreaURN" type="xs:NCName"/>
+</xs:schema>
