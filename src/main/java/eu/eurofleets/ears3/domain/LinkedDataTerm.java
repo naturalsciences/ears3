@@ -1,6 +1,7 @@
 package eu.eurofleets.ears3.domain;
 
 import be.naturalsciences.bmdc.cruise.model.ILinkedDataTerm;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import java.io.Serializable;
 import java.util.Objects;
 import javax.persistence.Column;
@@ -94,6 +95,8 @@ public class LinkedDataTerm implements ILinkedDataTerm, Serializable {
     }
 
     @Override
+    @XmlTransient
+    @JsonIgnore
     public ILinkedDataTerm getTerm() {
         return this;
     }

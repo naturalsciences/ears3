@@ -20,7 +20,7 @@ public class EventList {
     @XmlElement(name = "event")
     private List<Event> events = null;
 
-    public List<Event> getCruises() {
+    public List<Event> getEvents() {
         return this.events;
     }
 
@@ -28,9 +28,3 @@ public class EventList {
         this.events = events;
     }
 }
-
-
-/* Location:              /home/thomas/Documents/Project-Eurofleets2/meetings/2016-11-03-04-workshop/VM/shared/ef_workshop/ears2.war!/WEB-INF/classes/eu/eurofleets/ears2/domain/event/EventList.class
- * Java compiler version: 7 (51.0)
- * JD-Core Version:       0.7.1
- */

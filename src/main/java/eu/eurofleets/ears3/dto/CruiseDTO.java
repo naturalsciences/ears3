@@ -1,4 +1,5 @@
 package eu.eurofleets.ears3.dto;
+
 import java.time.OffsetDateTime;
 import java.util.Collection;
 import java.util.List;
@@ -14,21 +15,25 @@ import java.util.List;
  */
 public class CruiseDTO {
 
-    public String identifier; 
+    public String identifier;
     public OffsetDateTime startDate;
     public OffsetDateTime endDate;
-    public String collateCentre; 
-    public String departureHarbour; 
-    public String arrivalHarbour; 
+    public String collateCentre;
+    public String departureHarbour;
+    public String arrivalHarbour;
     public List<PersonDTO> chiefScientists;
     public List<String> seaAreas;
-    public Collection<Integer> programs;
+    public Collection<String> programs;
     public String platform;
     public String objectives;
-    public boolean isCancelled; 
+    public String purpose;
+    public boolean isCancelled;
     public List<String> P02;
-    public String name; 
-    
-    
+    public String name;
+    public String finalReportUrl;
+    public String planningUrl;
+    public String trackImageUrl;
+    public String dataUrl;
+    public String trackGmlUrl;
 
 }

@@ -17,15 +17,19 @@ public class ProgramDTO {
     public List<PersonDTO> principalInvestigators;
     public String description;
     public List<String> projects;
+    public String name;
+    public String sampling;
 
     public ProgramDTO() {
     }
 
-    public ProgramDTO(String identifier, List<PersonDTO> principalInvestigators, String description, List<String> projects) {
+    public ProgramDTO(String identifier, List<PersonDTO> principalInvestigators, String description, List<String> projects, String name, String sampling) {
         this.identifier = identifier;
         this.principalInvestigators = principalInvestigators;
         this.description = description;
         this.projects = projects;
+        this.name = name;
+        this.sampling = sampling;
     }
 
 }

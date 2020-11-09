@@ -16,7 +16,7 @@ import java.util.Set;
  *
  * @author thomas
  */
-public  interface EarsService<S extends IConcept> {
+public interface EarsService<S extends IConcept> {
 
     void deleteById(String id);
 
@@ -31,5 +31,5 @@ public  interface EarsService<S extends IConcept> {
     S findByName(String name);
 
     Iterable<S> saveAll(Collection<S> things);
-    
+
 }

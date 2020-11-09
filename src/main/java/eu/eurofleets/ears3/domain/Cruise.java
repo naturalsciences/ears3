@@ -1,5 +1,6 @@
 package eu.eurofleets.ears3.domain;
 
+import be.naturalsciences.bmdc.cruise.model.ICoordinate;
 import be.naturalsciences.bmdc.cruise.model.ICruise;
 import be.naturalsciences.bmdc.cruise.model.IEvent;
 import be.naturalsciences.bmdc.cruise.model.IHarbour;
@@ -11,6 +12,8 @@ import be.naturalsciences.bmdc.cruise.model.IProgram;
 import be.naturalsciences.bmdc.cruise.model.IProject;
 import be.naturalsciences.bmdc.cruise.model.ISeaArea;
 import be.naturalsciences.bmdc.cruise.model.ITool;
+import com.fasterxml.jackson.annotation.JsonFormat;
+import dto.Navigation;
 import java.io.Serializable;
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
@@ -18,11 +21,12 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
 import javax.persistence.Column;
-import javax.persistence.ElementCollection;
 import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
+import javax.persistence.JoinColumn;
+import javax.persistence.JoinTable;
 import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
@@ -30,6 +34,10 @@ import javax.persistence.Transient;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlRootElement;
+import javax.xml.bind.annotation.XmlTransient;
+import javax.xml.bind.annotation.XmlType;
+import org.hibernate.annotations.Cascade;
+import org.hibernate.annotations.CascadeType;
 import org.hibernate.annotations.Formula;
 
 /*
@@ -46,13 +54,22 @@ import org.hibernate.annotations.Formula;
 @XmlAccessorType(XmlAccessType.FIELD) //ignore all the getters
 public class Cruise implements ICruise, Serializable {
 
-    @Column(unique = true, nullable = false, length = 100)
-    private String identifier; //the identifier used by the operator for the cruise, like BE11-2018/08
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private int id;
+    private long id;
+
+    @Column(unique = true, nullable = false, length = 100)
+    private String identifier; //the identifier used by the operator for the cruise, like BE11-2018/08
+
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ssXXX")
     private OffsetDateTime startDate;
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ssXXX")
     private OffsetDateTime endDate;
+    private String finalReportUrl;
+    private String planningUrl;
+    private String trackImageUrl;
+    private String dataUrl;
+    private String trackGmlUrl;
     @ManyToOne(optional = false)
     private Organisation collateCentre; //the data centre that will do the data management and dissemination, an identifier in an external vocabulary, e.g. EDMO
     @ManyToOne(optional = false)
@@ -60,21 +77,58 @@ public class Cruise implements ICruise, Serializable {
     @ManyToOne(optional = false)
     private Harbour arrivalHarbour; //an identifier in an external vocabulary, e.g. C38 (can be urn or url)
     @ManyToMany()
+    @JoinTable(
+            name = "cruise_chief_scientists",
+            joinColumns = {
+                @JoinColumn(name = "cruise_id")},
+            inverseJoinColumns = {
+                @JoinColumn(name = "chief_scientist_id")}
+    )
     private Collection<Person> chiefScientists;
     @ManyToMany()
-    private Collection<SeaArea> seaAreas;
+    public Collection<SeaArea> seaAreas;
     @ManyToMany()
+    @JoinTable(
+            name = "cruise_programs",
+            joinColumns = {
+                @JoinColumn(name = "cruise_id")},
+            inverseJoinColumns = {
+                @JoinColumn(name = "program_id")}
+    )
     private Collection<Program> programs;
     @ManyToOne(optional = false)
     private Platform platform;
     private String objectives;
     private boolean isCancelled; //additional field so that cancelled cruises don't need to be deleted from the database. They just don't show up in EARS.
-    @OneToMany()
+    @ManyToMany()
+    @JoinTable(
+            name = "cruise_p02",
+            joinColumns = {
+                @JoinColumn(name = "cruise_id")},
+            inverseJoinColumns = {
+                @JoinColumn(name = "p02_id")}
+    )
+
     private Collection<LinkedDataTerm> P02;
     private String name; //a full name like 'MAST3' or 'SAMSON-67', not an identifier like a sequential number
+    private String purpose;
 
     @Transient
-    private Collection<Event> events; //the events associated with this cruise. Not stored in the database, but retrieved via a query.
+    @Formula("(select e from event e left join cruise c where e.timeStamp >= c.startDate and e.timeStamp <= c.endDate and e.platform=c.platform)")
+    private Collection<Event> events; //the events associated with this cruise. Stored in the database, but not via a PK-FK relation.
+    @XmlTransient
+    @Transient
+    private Collection<Navigation> navigations; //the track of this cruise. Not stored in the database, but retrieved via a query.
+    @Transient
+    private Collection<Coordinate> track; //the track of this cruise. Not stored in the database, but retrieved via a query.
+    @Transient
+    private double westBoundLongitude;
+    @Transient
+    private double eastBoundLongitude;
+    @Transient
+    private double northBoundLatitude;
+    @Transient
+    private double southBoundLatitude;
 
     @Override
     public String getIdentifier() {
@@ -86,13 +140,11 @@ public class Cruise implements ICruise, Serializable {
         this.identifier = identifier;
     }
 
-    @Override
-    public int getId() {
+    public long getId() {
         return id;
     }
 
-    @Override
-    public void setId(int id) {
+    public void setId(long id) {
         this.id = id;
     }
 
@@ -172,6 +224,7 @@ public class Cruise implements ICruise, Serializable {
     }
 
     @Override
+    @Cascade({CascadeType.SAVE_UPDATE, CascadeType.DELETE})
     public void setPrograms(Collection<? extends IProgram> programs) {
         this.programs = (Collection<Program>) programs;
     }
@@ -236,6 +289,46 @@ public class Cruise implements ICruise, Serializable {
         this.events = (Collection<Event>) events;
     }
 
+    public String getFinalReportUrl() {
+        return finalReportUrl;
+    }
+
+    public void setFinalReportUrl(String finalReportUrl) {
+        this.finalReportUrl = finalReportUrl;
+    }
+
+    public String getPlanningUrl() {
+        return planningUrl;
+    }
+
+    public void setPlanningUrl(String planningUrl) {
+        this.planningUrl = planningUrl;
+    }
+
+    public String getTrackImageUrl() {
+        return trackImageUrl;
+    }
+
+    public void setTrackImageUrl(String trackImageUrl) {
+        this.trackImageUrl = trackImageUrl;
+    }
+
+    public String getTrackGmlUrl() {
+        return trackGmlUrl;
+    }
+
+    public void setTrackGmlUrl(String trackGmlUrl) {
+        this.trackGmlUrl = trackGmlUrl;
+    }
+
+    public String getDataUrl() {
+        return dataUrl;
+    }
+
+    public void setDataUrl(String dataUrl) {
+        this.dataUrl = dataUrl;
+    }
+
     @Override
     public Collection<ILinkedDataTerm> getProjectTerms() {
         Collection<ILinkedDataTerm> r = new ArrayList<>();
@@ -253,7 +346,7 @@ public class Cruise implements ICruise, Serializable {
 
     @Override
     public Collection<ILinkedDataTerm> getSeaAreaTerms() {
-        Collection<ILinkedDataTerm> r = new ArrayList<>();
+        Collection<ILinkedDataTerm> r = new HashSet<>();
         if (seaAreas != null) {
             for (ISeaArea a : seaAreas) {
                 if (a.getTerm() != null) {
@@ -286,4 +379,71 @@ public class Cruise implements ICruise, Serializable {
         return tools;
     }
 
+    public Collection<Navigation> getNavigations() {
+        return this.navigations;
+    }
+
+    public void setNavigations(Collection<Navigation> navigations) {
+        this.navigations = navigations;
+    }
+
+    @Override
+    public Collection<? extends ICoordinate> getTrack() {
+        return this.track;
+    }
+
+    @Override
+    public void setTrack(Collection<? extends ICoordinate> coordinates) {
+        this.track = (Collection<Coordinate>) coordinates;
+    }
+
+    @Override
+    public void setSouthBoundLatitude(double y) {
+        this.southBoundLatitude = y;
+    }
+
+    @Override
+    public void setNorthBoundLatitude(double y) {
+        this.northBoundLatitude = y;
+    }
+
+    @Override
+    public void setWestBoundLongitude(double x) {
+        this.westBoundLongitude = x;
+    }
+
+    @Override
+    public void setEastBoundLongitude(double x) {
+        this.eastBoundLongitude = x;
+    }
+
+    @Override
+    public double getWestBoundLongitude() {
+        return westBoundLongitude;
+    }
+
+    @Override
+    public double getEastBoundLongitude() {
+        return eastBoundLongitude;
+    }
+
+    @Override
+    public double getNorthBoundLatitude() {
+        return northBoundLatitude;
+    }
+
+    @Override
+    public double getSouthBoundLatitude() {
+        return southBoundLatitude;
+    }
+
+    @Override
+    public String getPurpose() {
+        return purpose;
+    }
+
+    @Override
+    public void setPurpose(String purpose) {
+        this.purpose = purpose;
+    }
 }

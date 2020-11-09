@@ -18,6 +18,10 @@ public class PersonDTO {
     public String faxNumber;
     public String email;
 
+    public PersonDTO() {
+
+    }
+
     public PersonDTO(String firstName, String lastName, String organisation, String phoneNumber, String faxNumber, String email) {
         this.firstName = firstName;
         this.lastName = lastName;

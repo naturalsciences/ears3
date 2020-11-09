@@ -13,7 +13,7 @@ import org.springframework.stereotype.Repository;
 public abstract interface LinkedDataTermRepository
         extends CrudRepository<LinkedDataTerm, Long> {
 
-    @Query("select ldt from LinkedDataTerm ldt where ldt.identifier=?1")
+    @Query("select ldt from LinkedDataTerm ldt where ldt.identifier=?1 or ldt.urn=?1")
     public LinkedDataTerm findByIdentifier(String identifier);
     
     @Query("select ldt from LinkedDataTerm ldt where ldt.identifier in (?1)")

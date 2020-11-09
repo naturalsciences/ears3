@@ -27,23 +27,24 @@ import javax.xml.bind.annotation.XmlRootElement;
  * @author thomas
  */
 @Entity
-/*@Table(
+@Table(
         uniqueConstraints
-        = @UniqueConstraint(columnNames = {"first_name", "last_name"})
-)*/
+        = @UniqueConstraint(columnNames = {"first_name", "last_name", "organisation_id"})
+)
 @XmlRootElement
 @XmlAccessorType(XmlAccessType.FIELD) //ignore all the getters
 public class Person implements IPerson, Serializable {
 
-    @Column(nullable = false)
+    @Column(nullable = false, name = "first_name")
     private String firstName;
-    @Column(nullable = false)
+    @Column(nullable = false, name = "last_name")
     private String lastName;
     @ManyToOne(optional = true)
     private Organisation organisation; //an identifier in an external vocabulary, e.g. EDMO (can be urn or url)
 
     private String phoneNumber;
     private String faxNumber;
+    @Column(unique = true)
     private String email;
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

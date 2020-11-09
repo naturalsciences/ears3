@@ -6,6 +6,7 @@ import be.naturalsciences.bmdc.cruise.model.ILinkedDataTerm;
 import be.naturalsciences.bmdc.cruise.model.IOrganisation;
 import be.naturalsciences.bmdc.cruise.model.IPlatform;
 import be.naturalsciences.bmdc.cruise.model.ITool;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -44,12 +45,18 @@ public class Platform implements IPlatform, Serializable {
     private LinkedDataTerm platformClass; //an identifier in an external vocabulary, e.g. L06 (can be urn or url)
     @ManyToOne(optional = true)
     private Organisation vesselOperator; //unfortunately not retrievable!
-    @XmlTransient
     @OneToMany(mappedBy = "platform")
+    @XmlTransient
+    @JsonIgnore
     private Collection<Cruise> cruises;
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
+    @OneToMany(mappedBy = "platform")
+    @XmlTransient
+    @JsonIgnore
+    private Collection<Event> events;
 
     public Platform() {
     }
@@ -94,9 +101,9 @@ public class Platform implements IPlatform, Serializable {
     @Override
     public Set<? extends ITool> getInstruments() {
         Set<ITool> tools = new HashSet();
-        if (cruises != null) {
-            for (ICruise cruise : cruises) {
-                tools.addAll(cruise.getInstruments());
+        if (events != null) {
+            for (IEvent event : events) {
+                tools.add(event.getTool());
             }
         }
         return tools;
@@ -114,13 +121,7 @@ public class Platform implements IPlatform, Serializable {
 
     @Override
     public Collection<? extends IEvent> getEvents() {
-        Set<IEvent> events = new HashSet();
-        if (cruises != null) {
-            for (ICruise cruise : cruises) {
-                events.addAll(cruise.getEvents());
-            }
-        }
-        return events;
+        return this.events;
     }
 
     public Long getId() {

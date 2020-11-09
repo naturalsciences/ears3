@@ -43,10 +43,45 @@ public class SyncSchedulerTest {
         this.mockMvc = MockMvcBuilders.webAppContextSetup(this.wac).build();
     }
 
+    @Test
+    @Ignore
+    public void testSyncDatabase() throws Exception {
+        MvcResult mvcResult = this.mockMvc.perform(MockMvcRequestBuilders.get("/sync/database"))
+                .andDo(print())
+                .andExpect(status().is(200))
+                .andReturn();
+    }
+
+    @Test
+    @Ignore
+    public void testSyncSeaAreas() throws Exception {
+        MvcResult mvcResult = this.mockMvc.perform(MockMvcRequestBuilders.get("/sync/seas"))
+                .andDo(print())
+                .andExpect(status().is(200))
+                .andReturn();
+    }
+
+    @Test
+    @Ignore
+    public void testSyncShips() throws Exception {
+        MvcResult mvcResult = this.mockMvc.perform(MockMvcRequestBuilders.get("/sync/ships"))
+                .andDo(print())
+                .andExpect(status().is(200))
+                .andReturn();
+    }
+
+    @Test
+    @Ignore
+    public void testSyncHarbours() throws Exception {
+        MvcResult mvcResult = this.mockMvc.perform(MockMvcRequestBuilders.get("/sync/harbours"))
+                .andDo(print())
+                .andExpect(status().is(200))
+                .andReturn();
+    }
 
     @Test
     public void testSyncAll() throws Exception {
-        MvcResult mvcResult = this.mockMvc.perform(MockMvcRequestBuilders.post("/sync/all"))
+        MvcResult mvcResult = this.mockMvc.perform(MockMvcRequestBuilders.get("/sync/all"))
                 .andDo(print())
                 .andExpect(status().isOk())
                 .andReturn();

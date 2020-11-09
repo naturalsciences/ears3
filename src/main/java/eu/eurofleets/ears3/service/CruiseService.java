@@ -1,6 +1,9 @@
 package eu.eurofleets.ears3.service;
 
+import be.naturalsciences.bmdc.cruise.model.ICruise;
 import be.naturalsciences.bmdc.cruise.model.ILinkedDataTerm;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import eu.eurofleets.ears3.domain.Cruise;
 import eu.eurofleets.ears3.domain.Harbour;
 import eu.eurofleets.ears3.domain.LinkedDataTerm;
@@ -18,6 +21,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.regex.Pattern;
 import org.apache.commons.collections4.IterableUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -33,9 +37,11 @@ public class CruiseService {
     private final PlatformRepository platformRepository;
 
     @Autowired
-    private ProgramService programService;
+    public ProgramService programService;
     @Autowired
-    private PersonService personService;
+    public PersonService personService;
+    @Autowired
+    public LinkedDataTermService linkedDataTermService;
 
     public static Logger log = Logger.getLogger(CruiseService.class.getSimpleName());
 
@@ -49,12 +55,12 @@ public class CruiseService {
     }
 
     public List<Cruise> findAll() {
-        return IterableUtils.toList(this.cruiseRepository.findAll());
+        return this.cruiseRepository.findAll();
     }
 
     public List<Cruise> findAllByPlatformCode(String code) {
         Assert.notNull(code, "Platform code must not be null");
-        return null;
+        return this.cruiseRepository.findByPlatformCode(code);
     }
 
     public Cruise findById(long id) {
@@ -63,11 +69,57 @@ public class CruiseService {
     }
 
     public Cruise findByIdentifier(String identifier) {
-        Assert.notNull(identifier, "Identifier must not be null");
+        Assert.notNull(identifier, "Cruise identifier must not be null");
         return this.cruiseRepository.findByIdentifier(ILinkedDataTerm.cleanUrl(identifier));
     }
 
+    @Autowired
+    private ObjectMapper objectMapper;
+
     public Cruise save(CruiseDTO dto) {
+        String json;
+        try {
+            json = objectMapper.writeValueAsString(dto);
+        } catch (JsonProcessingException ex) {
+            Logger.getLogger(CruiseService.class.getName()).log(Level.SEVERE, null, ex);
+        }
+
+        if (dto.identifier == null) {
+            log.log(Level.SEVERE, "Can't further process cruise " + dto.identifier + ". identifier is missing.");
+            throw new IllegalArgumentException("Cruise must have an identifier.");
+        }
+        if (dto.name == null) {
+            log.log(Level.SEVERE, "Can't further process cruise " + dto.identifier + ". name is missing.");
+            throw new IllegalArgumentException("Cruise must have a name.");
+        }
+        if (dto.startDate == null) {
+            log.log(Level.SEVERE, "Can't further process cruise " + dto.identifier + ". startDate is missing.");
+            throw new IllegalArgumentException("Cruise must have a start date.");
+        }
+        if (dto.endDate == null) {
+            log.log(Level.SEVERE, "Can't further process cruise " + dto.identifier + ". endDate is missing.");
+            throw new IllegalArgumentException("Cruise must have an end date.");
+        }
+        if (dto.objectives == null) {
+            log.log(Level.SEVERE, "Can't further process cruise " + dto.identifier + ". objectives is missing.");
+            throw new IllegalArgumentException("Cruise must have an objective.");
+        }
+        if (dto.departureHarbour == null) {
+            log.log(Level.SEVERE, "Can't further process cruise " + dto.identifier + ". departureHarbour is missing.");
+            throw new IllegalArgumentException("Cruise must have a departure harbour.");
+        }
+        if (dto.arrivalHarbour == null) {
+            log.log(Level.SEVERE, "Can't further process cruise " + dto.identifier + ". arrivalHarbour is missing.");
+            throw new IllegalArgumentException("Cruise must have a arrival harbour.");
+        }
+        if (dto.platform == null) {
+            log.log(Level.SEVERE, "Can't further process cruise " + dto.identifier + ". platform is missing.");
+            throw new IllegalArgumentException("Cruise must have a platform.");
+        }
+        if (dto.chiefScientists == null || dto.chiefScientists.isEmpty()) {
+            log.log(Level.SEVERE, "Can't further process cruise " + dto.identifier + ". chiefScientists is missing.");
+            throw new IllegalArgumentException("Cruise must have at least one Chief Scientist.");
+        }
         try {
             Cruise cruise = new Cruise();
             cruise.setIdentifier(dto.identifier);
@@ -75,7 +127,16 @@ public class CruiseService {
             cruise.setStartDate(dto.startDate);
             cruise.setEndDate(dto.endDate);
             cruise.setObjectives(dto.objectives);
-
+            cruise.setPurpose(dto.purpose);
+            cruise.setDataUrl(dto.dataUrl);
+            cruise.setFinalReportUrl(dto.finalReportUrl);
+            cruise.setPlanningUrl(dto.planningUrl);
+            cruise.setTrackImageUrl(dto.trackImageUrl);
+            cruise.setTrackGmlUrl(dto.trackGmlUrl);
+            Cruise foundCruise = cruiseRepository.findByIdentifier(dto.identifier);
+            if (foundCruise != null) {
+                cruise.setId(foundCruise.getId());
+            }
             Harbour arrivalHarbour = harbourRepository.findByIdentifier(ILinkedDataTerm.cleanUrl(dto.arrivalHarbour));
             Harbour departureHarbour = harbourRepository.findByIdentifier(ILinkedDataTerm.cleanUrl(dto.departureHarbour));
             Collection<Person> chiefScientists = new ArrayList<>();
@@ -93,19 +154,33 @@ public class CruiseService {
 
             Collection<Program> programs = new ArrayList<>();
             if (dto.programs != null) {
-                for (Integer i : dto.programs) {
-                    Program p = programService.findById(Long.valueOf(i));
-                    programs.add(p);
+                for (String program : dto.programs) {
+                    if (program != null) {
+                        Program p = programService.findByIdentifier(program);
+                        programs.add(p);
+                        //p.addCruise(cruise);
+                        //this.programService.save(p);
+                    }
                 }
             }
             Collection<SeaArea> seaAreas = new ArrayList<>();
             if (dto.seaAreas != null) {
                 for (String sea : dto.seaAreas) {
-                    SeaArea s = seaAreaRepository.findByIdentifier(ILinkedDataTerm.cleanUrl(sea));
-                    seaAreas.add(s);
+                    if (sea != null) {
+                        SeaArea s = seaAreaRepository.findByIdentifier(ILinkedDataTerm.cleanUrl(sea));
+                        seaAreas.add(s);
+                    }
                 }
             }
-
+            Collection<LinkedDataTerm> PO2s = new ArrayList<>();
+            if (dto.P02 != null) {
+                for (String po2 : dto.P02) {
+                    if (po2 != null) {
+                        LinkedDataTerm p = linkedDataTermService.findByIdentifier(po2);
+                        PO2s.add(p);
+                    }
+                }
+            }
             cruise.setArrivalHarbour(arrivalHarbour);
             cruise.setDepartureHarbour(departureHarbour);
             cruise.setChiefScientists(chiefScientists);
@@ -113,7 +188,8 @@ public class CruiseService {
             cruise.setPlatform(platform);
             cruise.setPrograms(programs);
             cruise.setSeaAreas(seaAreas);
-            return this.cruiseRepository.save(cruise);//.getId(); } catch (Exception e) {
+            cruise.setP02(PO2s);
+            return this.cruiseRepository.save(cruise); //.getId(); } catch (Exception e) {
         } catch (Exception e) {
             log.log(Level.SEVERE, "exception!", e);
             throw e;

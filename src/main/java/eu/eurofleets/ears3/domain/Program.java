@@ -6,6 +6,7 @@ import be.naturalsciences.bmdc.cruise.model.IProgram;
 import be.naturalsciences.bmdc.cruise.model.IProject;
 import java.io.Serializable;
 import java.util.Collection;
+import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.GeneratedValue;
@@ -14,7 +15,8 @@ import javax.persistence.ManyToMany;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlRootElement;
-
+import javax.xml.bind.annotation.XmlTransient;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 /*
  * To change this license header, choose License Headers in Project Properties.
  * To change this template file, choose Tools | Templates
@@ -29,18 +31,25 @@ import javax.xml.bind.annotation.XmlRootElement;
 @XmlAccessorType(XmlAccessType.FIELD) //ignore all the getters
 public class Program implements IProgram, Serializable {
 
+    @Column(unique = true, nullable = false)
     private String identifier;
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    @ManyToMany()
+    @XmlTransient
+    @JsonIgnore
+    @ManyToMany(mappedBy = "programs")
     private Collection<Cruise> cruises;
     @ManyToMany()
     private Collection<Person> principalInvestigators;
 
+    @Column(length = 4000)
     private String description;
     @ManyToMany()
     private Collection<Project> projects;
+    private String name;
+    @Column(length = 2000)
+    private String sampling;
 
     public Program() {
     }
@@ -83,6 +92,10 @@ public class Program implements IProgram, Serializable {
         this.cruises = (Collection<Cruise>) cruises;
     }
 
+    public void addCruise(Cruise cruise) {
+        this.cruises.add(cruise);
+    }
+
     @Override
     public Collection<? extends IPerson> getPrincipalInvestigators() {
         return principalInvestigators;
@@ -111,5 +124,25 @@ public class Program implements IProgram, Serializable {
     @Override
     public void setProjects(Collection<? extends IProject> projects) {
         this.projects = (Collection<Project>) projects;
+    }
+
+    @Override
+    public String getSampling() {
+        return sampling;
+    }
+
+    @Override
+    public String getName() {
+        return name;
+    }
+
+    @Override
+    public void setSampling(String sampling) {
+        this.sampling = sampling;
+    }
+
+    @Override
+    public void setName(String name) {
+        this.name = name;
     }
 }

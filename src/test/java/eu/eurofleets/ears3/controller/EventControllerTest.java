@@ -7,8 +7,10 @@ package eu.eurofleets.ears3.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import eu.eurofleets.ears3.Application;
+import static eu.eurofleets.ears3.controller.CruiseControllerTest.getTestProgram1;
 import eu.eurofleets.ears3.domain.Event;
 import eu.eurofleets.ears3.domain.LinkedDataTerm;
+import eu.eurofleets.ears3.domain.Program;
 import eu.eurofleets.ears3.domain.Property;
 import eu.eurofleets.ears3.domain.SamplingEvent;
 import eu.eurofleets.ears3.domain.Tool;
@@ -16,14 +18,21 @@ import eu.eurofleets.ears3.dto.CruiseDTO;
 import eu.eurofleets.ears3.dto.EventDTO;
 import eu.eurofleets.ears3.dto.LinkedDataTermDTO;
 import eu.eurofleets.ears3.dto.PersonDTO;
+import eu.eurofleets.ears3.dto.PlatformDTO;
 import eu.eurofleets.ears3.dto.ProgramDTO;
 import eu.eurofleets.ears3.dto.PropertyDTO;
 import eu.eurofleets.ears3.dto.ToolDTO;
+import java.io.UnsupportedEncodingException;
+import java.time.Instant;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.UUID;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+import static org.hamcrest.Matchers.not;
 import static org.hamcrest.core.StringContains.containsString;
 import org.junit.Before;
 import org.junit.Test;
@@ -67,6 +76,7 @@ public class EventControllerTest {
     }
 
     @Test
+    @Ignore
     public void testHome() throws Exception {
         MvcResult mvcResult = this.mockMvc.perform(MockMvcRequestBuilders.get("/events"))
                 .andDo(print())
@@ -81,17 +91,42 @@ public class EventControllerTest {
     @Autowired
     private ObjectMapper objectMapper;
 
-    private EventDTO getTestEvent() {
-        PersonDTO joan = new PersonDTO("Joan", "Backers", null, null, null, null);
+    public static EventDTO getTestEvent() {
+        PersonDTO joan = new PersonDTO("Joan", "Backers", null, null, null, "joan.backers@naturalsciences.be");
         EventDTO event = new EventDTO();
-        event.identifier = "e3c8df0d-02e9-446d-a59b-224a14b89f9a";
-        event.timeStamp = OffsetDateTime.parse("2019-05-06T16:44:18Z");
+        event.identifier = null; //this is a purely new event.
+        event.eventDefinitionId = "e3c8df0d-02e9-446d-a59b-224a14b89f9a";
+        event.timeStamp = OffsetDateTime.parse("2019-04-25T11:08:00Z");
         event.toolCategory = new LinkedDataTermDTO("http://vocab.nerc.ac.uk/collection/L05/current/50/", null, "sediment grabs");
         event.tool = new ToolDTO(new LinkedDataTermDTO("http://vocab.nerc.ac.uk/collection/L22/current/TOOL0653/", null, "Van Veen grab"), null);
         event.process = new LinkedDataTermDTO("http://ontologies.ef-ears.eu/ears2/1#pro_1", null, "Sampling");
         event.action = new LinkedDataTermDTO("http://ontologies.ef-ears.eu/ears2/1#act_2", null, "End");
         event.subject = new LinkedDataTermDTO("http://vocab.nerc.ac.uk/collection/C77/current/G71/", null, "In-situ seafloor measurement/sampling");
         event.actor = joan;
+        event.platform = "SDN:C17::11BE";
+        List<PropertyDTO> properties = new ArrayList<>();
+        properties.add(new PropertyDTO(new LinkedDataTermDTO("http://ontologies.orr.org/fish_count", null, "fish_count"), "89", null));
+        properties.add(new PropertyDTO(new LinkedDataTermDTO("http://ontologies.ef-ears.eu/ears2/1/11BE#pry_21", null, "depth_m"), "3", "m"));
+        properties.add(new PropertyDTO(new LinkedDataTermDTO("http://ontologies.ef-ears.eu/ears2/1#pry_4", null, "label"), "W04", null));
+        properties.add(new PropertyDTO(new LinkedDataTermDTO("http://ontologies.ef-ears.eu/ears2/1#pry_16", null, "sampleId"), "20190506_12", null));
+        event.properties = properties;
+        return event;
+    }
+
+    public static EventDTO getTestEvent2() {
+        PersonDTO joan = new PersonDTO("Joan", "Backers", null, null, null, "jb@rbins.be");
+        EventDTO event = new EventDTO();
+        event.identifier = null;//UUID.randomUUID().toString();
+        event.eventDefinitionId = "e3c8ff9d-02e9-446d-a59b-224a14b89f9a";
+        event.timeStamp = OffsetDateTime.parse("2008-11-07T12:08:00Z");
+        //event.timeStamp = OffsetDateTime.of(2008, 11, 8, 23, 20, 40, 0, ZoneOffset.UTC);
+        event.toolCategory = new LinkedDataTermDTO("http://vocab.nerc.ac.uk/collection/L05/current/50/", null, "sediment grabs");
+        event.tool = new ToolDTO(new LinkedDataTermDTO("http://vocab.nerc.ac.uk/collection/L22/current/TOOL0653/", null, "Van Veen grab"), null);
+        event.process = new LinkedDataTermDTO("http://ontologies.ef-ears.eu/ears2/1#pro_1", null, "Sampling");
+        event.action = new LinkedDataTermDTO("http://ontologies.ef-ears.eu/ears2/1#act_2", null, "End");
+        event.subject = new LinkedDataTermDTO("http://vocab.nerc.ac.uk/collection/C77/current/G71/", null, "In-situ seafloor measurement/sampling");
+        event.actor = joan;
+        event.platform = "SDN:C17::11BE";
 
         List<PropertyDTO> properties = new ArrayList<>();
         properties.add(new PropertyDTO(new LinkedDataTermDTO("http://ontologies.orr.org/fish_count", null, "fish_count"), "89", null));
@@ -103,17 +138,107 @@ public class EventControllerTest {
     }
 
     @Test
-    public void testPostEvent() throws Exception {
-        String json = objectMapper.writeValueAsString(getTestEvent());
-        MvcResult mvcResult = this.mockMvc.perform(MockMvcRequestBuilders.post("/event").contentType(MediaType.APPLICATION_JSON).content(json))
+    public void testPostAndDeleteEvent() throws Exception {
+        EventDTO e = getTestEvent();
+        e.program = "2020-MF";
+        CruiseControllerTest.postProgram(this.mockMvc, "2020-MF", objectMapper);
+
+        String json = objectMapper.writeValueAsString(e);
+        MvcResult mvcResult = this.mockMvc.perform(MockMvcRequestBuilders.post("/event").accept(MediaType.APPLICATION_XML).contentType(MediaType.APPLICATION_JSON).content(json))
                 .andDo(print())
                 .andExpect(status().isCreated())
-                .andExpect(content().string(containsString("<identifier>e3c8df0d-02e9-446d-a59b-224a14b89f9a</identifier>")))
+                .andExpect(content().string(containsString("<eventDefinitionId>e3c8df0d-02e9-446d-a59b-224a14b89f9a</eventDefinitionId>")))
                 .andExpect(content().string(containsString("<subject>"))).andExpect(content().string(containsString("<identifier>http://vocab.nerc.ac.uk/collection/C77/current/G71</identifier><name>In-situ seafloor measurement/sampling</name><urn>SDN:C77::G71</urn></subject><tool><term>"))).andExpect(content().string(containsString("<identifier>http://vocab.nerc.ac.uk/collection/L22/current/TOOL0653</identifier><name>Van Veen grab</name><urn>SDN:L22::TOOL0653</urn></term>"))).andExpect(content().string(containsString("</tool><toolCategory>"))).andExpect(content().string(containsString("<identifier>http://vocab.nerc.ac.uk/collection/L05/current/50</identifier><name>sediment grabs</name><urn>SDN:L05::50</urn></toolCategory><process>"))).andExpect(content().string(containsString("<identifier>http://ontologies.ef-ears.eu/ears2/1#pro_1</identifier><name>Sampling</name><urn>ears:pro::1</urn></process><action>"))).andExpect(content().string(containsString("<identifier>http://ontologies.ef-ears.eu/ears2/1#act_2</identifier><name>End</name><urn>ears:act::2</urn></action>")))
-                .andExpect(content().string(containsString("<properties><key>"))).andExpect(content().string(containsString("<identifier>http://ontologies.orr.org/fish_count</identifier><name>fish_count</name></key><value>89</value>")))
+                .andExpect(content().string(containsString("<property><key><id>"))).andExpect(content().string(containsString("<identifier>http://ontologies.orr.org/fish_count</identifier><name>fish_count</name></key><value>89</value><id>")))
+                .andExpect(content().string(containsString("SDN:C17::11BE")))
+                .andExpect(content().string(not(containsString("<creationTime/>"))))
+                .andExpect(content().string(not(containsString("<timeStamp/>"))))
+                .andExpect(content().string(not(containsString("<instrumentTime/>"))))
                 .andReturn();
 
-        String content = mvcResult.getResponse().getContentAsString();
-        assertTrue(StringUtils.countOccurrencesOf(content, "<properties>") == 4);
+        String contentAsString = mvcResult.getResponse().getContentAsString();
+        Pattern p = Pattern.compile("</id><identifier>(.*?)<\\/identifier>");
+        Matcher m = p.matcher(contentAsString);
+        String eventIdentifier = null;
+        if (m.find()) {
+            eventIdentifier = m.group(1);
+        }
+        assertTrue(StringUtils.countOccurrencesOf(contentAsString, "<property>") == 4);
+
+        mvcResult = this.mockMvc.perform(MockMvcRequestBuilders.get("/events")).andDo(print())
+                .andExpect(status().is(200))
+                .andExpect(content().string(containsString("<identifier>" + eventIdentifier + "</identifier>"))).andReturn();
+
+
+        /*  mvcResult = this.mockMvc.perform(MockMvcRequestBuilders.delete("/event?identifier=" + eventIdentifier))
+                .andDo(print())
+                .andExpect(status().is(204)).andReturn();
+
+        mvcResult = this.mockMvc.perform(MockMvcRequestBuilders.get("/event?identifier=" + eventIdentifier))
+                .andDo(print())
+                .andExpect(status().is(404))
+                .andReturn();*/
+    }
+
+    public static String getIdentifier(MvcResult mvcResult) throws UnsupportedEncodingException {
+        String contentAsString = mvcResult.getResponse().getContentAsString();
+        Pattern p = Pattern.compile("</id><identifier>(.*?)<\\/identifier>");
+        Matcher m = p.matcher(contentAsString);
+        String eventIdentifier = null;
+        if (m.find()) {
+            eventIdentifier = m.group(1);
+        }
+        return eventIdentifier;
+    }
+
+    public static void deleteEvent(MockMvc mockMvc, MvcResult mvcResult) throws Exception {
+        String eventId = getIdentifier(mvcResult);
+
+        MvcResult mvcResult2 = mockMvc.perform(MockMvcRequestBuilders.delete("/event?identifier=" + eventId))
+                .andDo(print())
+                .andExpect(status().is(204)).andReturn();
+    }
+
+    public static MvcResult postEvent(MockMvc mockMvc, EventDTO e, ObjectMapper objectMapper) throws Exception {
+        String json = objectMapper.writeValueAsString(e);
+        return mockMvc.perform(MockMvcRequestBuilders.post("/event").contentType(MediaType.APPLICATION_JSON).content(json))
+                .andReturn();
+
+    }
+
+    @Test
+    public void testGetEventsByActorAndProgram() throws Exception {
+        EventDTO e = getTestEvent();
+        String programIdentifier = "2020-MF";
+        ProgramDTO pr = CruiseControllerTest.getTestProgram1(programIdentifier);
+
+        String json = objectMapper.writeValueAsString(pr);
+
+        MvcResult mvcResult = this.mockMvc.perform(MockMvcRequestBuilders.post("/program").contentType(MediaType.APPLICATION_JSON).content(json))
+                .andReturn();
+
+        e.actor.firstName = "Adalbert";
+        e.actor.lastName = "Hoogendrave";
+        e.actor.email = "sol.invictus@hubris.org";
+        e.program = programIdentifier;
+        String email = e.actor.email;
+        String platform = e.platform;
+        json = objectMapper.writeValueAsString(e);
+        MvcResult mvcResultCrE1 = this.mockMvc.perform(MockMvcRequestBuilders.post("/event").contentType(MediaType.APPLICATION_JSON).content(json))
+                .andReturn();
+
+        MvcResult mvcResultCrE2 = this.mockMvc.perform(MockMvcRequestBuilders.post("/event").contentType(MediaType.APPLICATION_JSON).content(json))
+                .andReturn();
+
+        //platformIdentifier", "programIdentifier", "actorEmail
+        mvcResult = this.mockMvc.perform(MockMvcRequestBuilders.get("/events?actorEmail=" + email + "&platformIdentifier=" + platform + "&programIdentifier=" + programIdentifier).contentType(MediaType.APPLICATION_JSON).content(json))
+                .andDo(print())
+                .andReturn();
+        String contentAsString = mvcResult.getResponse().getContentAsString();
+        assertTrue(StringUtils.countOccurrencesOf(contentAsString, e.actor.lastName) == 2);
+        assertTrue(StringUtils.countOccurrencesOf(contentAsString, e.actor.email) == 2);
+
+        deleteEvent(this.mockMvc, mvcResultCrE1);
+        deleteEvent(this.mockMvc, mvcResultCrE2);
     }
 }

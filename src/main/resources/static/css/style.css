@@ -1,0 +1,13 @@
+h1 {
+    color: red;
+    width: 500px;
+    border: 1px solid black;
+}
+
+#id_eid {
+    display: none;
+}
+
+.succesSended {
+    visibility: hidden;
+}

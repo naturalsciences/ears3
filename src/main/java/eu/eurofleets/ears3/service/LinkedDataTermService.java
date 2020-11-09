@@ -31,7 +31,7 @@ public class LinkedDataTermService {
     }
 
     public LinkedDataTerm findByIdentifier(String identifier) {
-        Assert.notNull(identifier, "Identifier must not be null");
+        Assert.notNull(identifier, "LinkedDataTerm identifier must not be null");
         return this.ldtRepository.findByIdentifier(ILinkedDataTerm.cleanUrl(identifier));
     }
 

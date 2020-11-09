@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="en">
+    <!--HTML5 doctype -->
+
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+        <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/css/bootstrap.min.css"
+              integrity="sha384-9aIt2nRpC12Uk9gS9baDl411NQApFmC26EwAOH8WgZl5MYYxFfc+NcPb1dKGj7Sk"
+              crossorigin="anonymous">
+        <link rel="stylesheet" type="text/css" href="css/bootstrap-select.css">
+        <link rel="stylesheet" type="text/css" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/css/bootstrap-theme.min.css">
+        <title>Authentication</title>
+        <link rel="stylesheet" type="text/css" href="css/style.css">
+    </head>
+
+    <body>
+        <nav class="navbar navbar-expand-md navbar-light ">
+            <div class="container"> <a class="navbar-brand text-primary" href="#">
+                    <i class="fa d-inline fa-lg fa-stop-circle"></i>
+                    <b>EARS</b>
+                </a> <button class="navbar-toggler navbar-toggler-right border-0" type="button"
+                             data-toggle="collapse" data-target="#navbar4">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+                <div class="collapse navbar-collapse" id="navbar4">
+                    <ul class="navbar-nav ml-auto">
+                        <li class="nav-item"> <a class="nav-link" href="./login">Settings</a> </li>
+                        <li class="nav-item"> <a class="nav-link" href="./event">Event</a> </li>
+                        <li class="nav-item"> <a class="nav-link" href="./events">Events</a> </li>
+                    </ul>
+                </div>
+            </div>
+        </nav>
+        <div class="container">
+            <div>
+                <form class="form-group">
+                    <div class="form-group">
+                        <input type="text" class="form-control" id="id_FirstName" placeholder="Firstname" required>
+                    </div>
+                    <div class="form-group">
+                        <input type="text" class="form-control" id="id_LastName" placeholder="Lastname" required>
+                    </div>
+
+                    <div class="form-group">
+                        <input type="text" class="form-control" id="id_Program" placeholder="Program" >
+                    </div>
+                    <div class="form-group" id="div_Platform">
+                        <select name="platform" id="id_Platform" class="selectpicker target platform  form-control"
+                                data-live-search="true" title="Platform">
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <a class="btn btn-primary btn-block" data-toggle="collapse"
+                           href="#multiCollapseExample1" role="button" aria-expanded="false"
+                           aria-controls="multiCollapseExample1">Edmo Organisation</a>
+                        <div class="collapse edmoOrganisation" id="multiCollapseExample1">
+                            <div class="form-group"  id="div_Organisation">
+                                <select name="organisation" id="id_Organisation"
+                                        class="selectpicker target edmo  form-control"
+                                        data-live-search="true" title="Edmo Organisation">
+                                </select>
+                            </div>
+                            <!-- <div class="form-group">
+                                   <input type="phoneNumber" class="form-control" id="id_PhoneNumber" disabled
+                                          placeholder="PhoneNumber" >
+                            </div>
+                            <div class="form-group">
+                                   <input type="faxNumber" class="form-control" id="id_FaxNumber" disabled
+                                          placeholder="FaxNumber">
+                            </div>
+                            <div class="form-group">
+                                   <input type="input" class="form-control" id="id_Email" disabled
+                                          placeholder="Email">
+                            </div> -->
+                        </div>
+                    </div>
+
+                    <!-- <div class="form-group">
+                           <a class="btn btn-primary btn-block" type="button" data-toggle="collapse"
+                                  href="#multiCollapseExample2" aria-expanded="false">
+                                  Other Organisation</a>
+                           <div class="collapse otherOrganisation" id="multiCollapseExample2">
+                                  <div class="collapse" id="multiCollapseExample2">
+                                         <div class="form-group"  id="div_Organisationp">
+                                                <input type="organisation" class="form-control"
+                                                       id="id_Organisationp" placeholder="Other Organisation">
+                                         </div>
+                                         <div class="form-group">
+                                                <input type="phoneNumber" class="form-control"
+                                                       id="id_PhoneNumberp" width="100%"
+                                                       placeholder="PhoneNumber">
+                                         </div>
+                                         <div class="form-group">
+                                                <input type="faxNumber" class="form-control" id="id_FaxNumberp"
+                                                       placeholder="FaxNumber">
+                                         </div>
+                                         <div class="form-group">
+                                                <input type="email" class="form-control" id="id_Emailp"
+                                                       placeholder="Email">
+                                         </div>
+                                  </div>
+                           </div>
+                    </div> -->
+
+
+                    <button id="id_Submit" type="submit" class="btn btn-primary  btn-block">Save</button>
+                </form>
+            </div>
+        </div>
+        <!--pour optimisation ne pas toucher les scripts ci dessous -->
+        <script src="js/jquery-3.5.1.js"></script>
+        <!--production reference  <script src="jquery-3.5.1.min.js"></script>
+ <script src="utilJQuery.js"></script>-->
+        <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js"
+                integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo"
+        crossorigin="anonymous"></script>
+        <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/js/bootstrap.min.js"
+                integrity="sha384-OgVRvuATP1z7JjHLkuOU7Xw704+h835Lr+6QL9UvYjZE3Ipu6Tp75j7Bh/kR0JKI"
+        crossorigin="anonymous"></script>
+        <script src="js/bootstrap-select.js"></script>
+        <script>
+            $(document).ready(function () {
+                if (typeof localStorage != 'undefined' && JSON) {
+                    $.getScript("js/onchangeEdmo.js")
+                    if (JSON.parse(localStorage.getItem('ears_authentication')) == null) {
+                        $.getJSON("json/c17.json",
+                                function (data) {
+                                    var select_option_data = '';
+                                    select_option_data += '<option value=1></option>'
+                                    $.each(data.vocabulary.element, function (key, item) {
+                                        select_option_data += '<option value="' + item.key + '">' + item.label + '  ' + item.key + '</option>'
+                                    });
+                                    $("#id_Platform")
+                                            .html(select_option_data)
+                                            .selectpicker('refresh');
+                                }
+                        );
+                        $.getJSON("json/edmo.json",
+                                function (data) {
+                                    var select_option_data = '';
+                                    select_option_data += '<option value=1></option>'
+                                    $.each(data.vocabulary.citRespParty, function (key, item) {     //": [        
+                                        select_option_data += '<option value="' + item.rpOrgName.SDNIdent + '">' + item.rpOrgName.text + '</option>'
+                                        //    alert(item.rpOrgName.text + '  ' + item.rpOrgName.SDNIdent);
+                                        //   alert(item.rpCntInfo.cntPhone.voiceNum + '  ' + item.rpCntInfo.cntPhone.faxNum);
+                                        //  alert(item.rpCntInfo.cntAddress.eMailAdd);
+                                    });
+                                    $("#id_Organisation")
+                                            .html(select_option_data)
+                                            .selectpicker('refresh');
+
+                                }
+                        );
+                        $('form').submit(function () {
+
+
+
+ // if (($("#id_Platform").val() == 1)||($("#id_Platform").val() == '')) {
+ //    $("#div_Platform").addClass("alert alert-danger");
+ //    return false;
+ // } 
+ // else{
+ //        $("#div_Platform").removeClass("alert alert-danger");   
+ // }
+
+
+
+ // if ((($("#id_Organisation").val() == 1)||($("#id_Organisation").val() == '')) && ($("#id_Organisationp").val() == ''))
+ // {
+ //        $("#div_Organisation").addClass("alert alert-danger");
+ //        $("#div_Organisationp").addClass("alert alert-danger");
+ //        return false;
+ // }
+ // else{
+ //        $("#div_Organisation").removeClass("alert alert-danger");
+ //        $("#div_Organisationp").removeClass("alert alert-danger");
+ // }
+
+                            var firstName = '';
+                            var lastName = '';
+                            var program = '';
+                            var platform = '';
+                            var organisation = '';
+                            var phoneNumber = '';
+                            var faxNumber = '';
+                            var email = '';
+
+
+ //||($('.selectpicker#id_Organisation').val()!= 1)
+
+                            if (($('.selectpicker#id_Organisation').val() != "")) {
+                                //alert('edmo=>'+$("#id_Organisation  option:selected").val() +$("#id_Organisation").find("option:selected").text());
+                                //var selectedItem = $('.selectpicker#id_Organisation').val();
+                                //alert(selectedItem);
+                                organisation = $("#id_Organisation").val();
+ //  phoneNumber=$("#id_PhoneNumber").val();
+ //  faxNumber=$("#id_FaxNumber").val();
+ //  email=$("#id_Email").val();
+                            }
+ //  else {
+ //       // alert('pas edmo');
+ //  organisation =$("#id_Organisationp").val();
+ //  phoneNumber=$("#id_PhoneNumberp").val();
+ //  faxNumber=$("#id_FaxNumberp").val();
+ //  email=$("#id_Emailp").val();
+
+
+ // }
+                            firstName = $("#id_FirstName").val();
+                            lastName = $("#id_LastName").val();
+                            program = $("#id_Program").val();
+                            platform = $("#id_Platform").val();
+                            var authentication = {
+                                firstName: firstName,
+                                lastName: lastName,
+                                program: program,
+                                platform: platform,
+                                organisation: organisation,
+                                phoneNumber: phoneNumber,
+                                faxNumber: faxNumber,
+                                email: email
+                            };
+                            var authentication_json = JSON.stringify(authentication);
+                            localStorage.setItem('ears_authentication', authentication_json);
+                        });
+                    } else {
+                        window.location.href = './settings';
+                    }
+                } else {
+                    alert("Sorry, your browser does not support local storage.");
+                }
+                ;
+            });
+        </script>
+    </body>
+</html>

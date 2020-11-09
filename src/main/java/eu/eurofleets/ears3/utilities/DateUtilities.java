@@ -19,9 +19,3 @@
      return DATE_FORMAT.format(date);
    }
  }
-
-
-/* Location:              /home/thomas/Documents/Project-Eurofleets2/meetings/2016-11-03-04-workshop/VM/shared/ef_workshop/ears2.war!/WEB-INF/classes/eu.eurofleets.ears3/utilities/DateUtilities.class
- * Java compiler version: 7 (51.0)
- * JD-Core Version:       0.7.1
- */

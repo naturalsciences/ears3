@@ -24,6 +24,7 @@ import javax.xml.bind.annotation.XmlRootElement;
  * @author thomas
  */
 public class LinkedDataTermDTO {
+
     public String identifier;  //an identifier in an external vocabulary, i.e. the EARS ontology
     public String transitiveIdentifier;  //an identifier in a transitive vocanbulary, i.e. the BODC Tool list L22 (can only be url)
     public String name;
@@ -36,5 +37,11 @@ public class LinkedDataTermDTO {
         this.transitiveIdentifier = transitiveIdentifier;
         this.name = name;
     }
-    
+
+    public LinkedDataTermDTO(ILinkedDataTerm linkedDataTerm) {
+        this.identifier = linkedDataTerm.getIdentifier();
+        this.transitiveIdentifier = linkedDataTerm.getTransitiveIdentifier();
+        this.name = linkedDataTerm.getName();
+    }
+
 }

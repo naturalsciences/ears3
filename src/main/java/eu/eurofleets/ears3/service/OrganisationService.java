@@ -33,7 +33,9 @@ public class OrganisationService implements EarsService<Organisation> {
     }
 
     public Organisation findByIdentifier(String identifier) {
-        Assert.notNull(identifier, "Organisation identifier must not be null");
+        if (identifier == null) {
+            return null;
+        }
         Organisation r = idCache.get(identifier);
         if (r != null) {
             return r;
