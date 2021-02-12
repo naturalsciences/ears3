@@ -9,7 +9,6 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import eu.eurofleets.ears3.utilities.InstantAdapter;
 import java.time.Instant;
 import javax.persistence.MappedSuperclass;
-import javax.xml.bind.annotation.XmlType;
 import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 
 /**

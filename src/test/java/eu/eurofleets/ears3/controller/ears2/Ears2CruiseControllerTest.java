@@ -3,11 +3,14 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package eu.eurofleets.ears3.controller;
+package eu.eurofleets.ears3.controller.ears2;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import eu.eurofleets.ears3.Application;
-import eu.eurofleets.ears3.domain.Person;
-import java.util.List;
+import eu.eurofleets.ears3.controller.rest.CruiseControllerTest;
+import eu.eurofleets.ears3.domain.ears2.CruiseBeanList;
+import eu.eurofleets.ears3.dto.CruiseDTO;
+import java.util.UUID;
 import static org.hamcrest.core.StringContains.containsString;
 import org.junit.After;
 import org.junit.AfterClass;
@@ -15,14 +18,18 @@ import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import static org.junit.Assert.*;
+import org.junit.Ignore;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.ComponentScan;
+import org.springframework.core.env.Environment;
+import org.springframework.http.MediaType;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.context.web.WebAppConfiguration;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
+import org.springframework.test.web.servlet.ResultHandler;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
@@ -30,15 +37,12 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
 
-/**
- *
- * @author thomas
- */
 @RunWith(SpringRunner.class)
 @SpringBootTest(classes = {Application.class}, properties = "spring.main.allow-bean-definition-overriding=true")
 @WebAppConfiguration
 @ComponentScan(basePackages = {"eu.eurofleets.ears3.domain", " eu.eurofleets.ears3.service"})
-public class PersonControllerTest {
+@Ignore
+public class Ears2CruiseControllerTest {
 
     @Autowired
     private WebApplicationContext wac;
@@ -55,19 +59,25 @@ public class PersonControllerTest {
                 .andReturn();*/
     }
 
-    /**
-     * Test of getPersonByFullName method, of class PersonController.
-     */
+    @Autowired
+    private ObjectMapper objectMapper;
+
+    @Autowired
+    private Environment env;
+
     @Test
-    public void testGetPersonByFullName() throws Exception {
-        //first run the EventControllerTest test.
-        String firstName = "Adalbert";
-        String lastName = "Hoogendrave";
-        MvcResult mvcResult = this.mockMvc.perform(MockMvcRequestBuilders.get("/person?fullName=" + firstName + " " + lastName))
+    public void testPostAndUpdateCruise() throws Exception {
+        String identifier = "BE11/2007_18-" + UUID.randomUUID();
+        CruiseDTO cruise = CruiseControllerTest.getTestCruise1(identifier);
+        cruise.collateCentre = "SDN:EDMO::230";
+        CruiseControllerTest.postCruise(this.mockMvc, cruise, objectMapper);
+
+        MvcResult mvcResult = this.mockMvc.perform(MockMvcRequestBuilders.get("/ears2/cruises?platformCode=SDN:C17::11BE"))
                 .andDo(print())
                 .andExpect(status().is(200))
-                .andExpect(content().string(containsString("<firstName>" + firstName + "</firstName><lastName>" + lastName + "</lastName>"))).andReturn();
+                .andExpect(content().string(containsString("{\"name\":\"Valérie+Dulière\",\"organisationCode\":\"SDN:EDMO::3330\",\"organisationName\":\"Royal Belgian Institute of Natural Sciences, Operational Directorate Natural Environment, Belgian Marine Data Centre\",\"country\":\"Belgium\"}"))).andReturn();
 
+        CruiseControllerTest.deleteCruise(identifier, this.mockMvc);
     }
 
 }

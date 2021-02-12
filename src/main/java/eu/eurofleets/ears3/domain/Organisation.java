@@ -8,7 +8,6 @@ package eu.eurofleets.ears3.domain;
 import be.naturalsciences.bmdc.cruise.model.ICountry;
 import be.naturalsciences.bmdc.cruise.model.ILinkedDataTerm;
 import be.naturalsciences.bmdc.cruise.model.IOrganisation;
-import eu.eurofleets.ears3.dto.OrganisationDTO;
 import java.io.Serializable;
 import javax.persistence.Entity;
 import javax.persistence.Id;

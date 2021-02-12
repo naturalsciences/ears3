@@ -19,6 +19,7 @@ import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.Objects;
 import java.util.Set;
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -29,13 +30,11 @@ import javax.persistence.JoinColumn;
 import javax.persistence.JoinTable;
 import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
-import javax.persistence.OneToMany;
 import javax.persistence.Transient;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlTransient;
-import javax.xml.bind.annotation.XmlType;
 import org.hibernate.annotations.Cascade;
 import org.hibernate.annotations.CascadeType;
 import org.hibernate.annotations.Formula;
@@ -90,6 +89,7 @@ public class Cruise implements ICruise, Serializable {
     @ManyToMany()
     @JoinTable(
             name = "cruise_programs",
+            //TODO add uniqueconstraint
             joinColumns = {
                 @JoinColumn(name = "cruise_id")},
             inverseJoinColumns = {
@@ -98,6 +98,7 @@ public class Cruise implements ICruise, Serializable {
     private Collection<Program> programs;
     @ManyToOne(optional = false)
     private Platform platform;
+    @Column(length = 5000)
     private String objectives;
     private boolean isCancelled; //additional field so that cancelled cruises don't need to be deleted from the database. They just don't show up in EARS.
     @ManyToMany()
@@ -446,4 +447,62 @@ public class Cruise implements ICruise, Serializable {
     public void setPurpose(String purpose) {
         this.purpose = purpose;
     }
+
+    public void addChiefScientists(Collection<Person> chiefScientists) {
+        if (this.chiefScientists == null) {
+            this.chiefScientists = chiefScientists;
+        } else {
+            this.chiefScientists.addAll(chiefScientists);
+        }
+    }
+
+    public void addPrograms(Collection<Program> programs) {
+        if (this.programs == null) {
+            this.programs = programs;
+        } else {
+            this.programs.addAll(programs);
+        }
+    }
+
+    public void addSeaAreas(Collection<SeaArea> seaAreas) {
+        if (this.seaAreas == null) {
+            this.seaAreas = seaAreas;
+        } else {
+            this.seaAreas.addAll(seaAreas);
+        }
+    }
+
+    public void addP02(Collection<LinkedDataTerm> P02) {
+        if (this.P02 == null) {
+            this.P02 = P02;
+        } else {
+            this.P02.addAll(P02);
+        }
+    }
+
+    @Override
+    public int hashCode() {
+        int hash = 3;
+        hash = 11 * hash + Objects.hashCode(this.identifier);
+        return hash;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (obj == null) {
+            return false;
+        }
+        if (getClass() != obj.getClass()) {
+            return false;
+        }
+        final Cruise other = (Cruise) obj;
+        if (!Objects.equals(this.identifier, other.identifier)) {
+            return false;
+        }
+        return true;
+    }
+
 }

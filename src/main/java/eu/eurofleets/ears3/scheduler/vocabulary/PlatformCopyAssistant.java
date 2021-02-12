@@ -7,11 +7,9 @@ package eu.eurofleets.ears3.scheduler.vocabulary;
 
 import be.naturalsciences.bmdc.cruise.model.IConcept;
 import eu.eurofleets.ears3.AbstractConcept;
-import eu.eurofleets.ears3.domain.Country;
 import eu.eurofleets.ears3.domain.LinkedDataTerm;
 import eu.eurofleets.ears3.domain.Platform;
 import eu.eurofleets.ears3.service.LinkedDataTermService;
-import eu.eurofleets.ears3.service.PlatformService;
 import gnu.trove.map.hash.THashMap;
 import java.util.Map;
 

@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package eu.eurofleets.ears3.controller;
+package eu.eurofleets.ears3.controller.rest;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import eu.eurofleets.ears3.Application;
@@ -23,16 +23,14 @@ import eu.eurofleets.ears3.domain.SamplingEvent;
 import eu.eurofleets.ears3.domain.SeaArea;
 import eu.eurofleets.ears3.domain.Tool;
 import eu.eurofleets.ears3.dto.EventDTO;
-import eu.eurofleets.ears3.dto.LinkedDataTermDTO;
-import eu.eurofleets.ears3.dto.PersonDTO;
-import eu.eurofleets.ears3.dto.PropertyDTO;
-import eu.eurofleets.ears3.dto.ToolDTO;
+import eu.eurofleets.ears3.dto.ProgramDTO;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
+import static org.hamcrest.Matchers.not;
 import static org.hamcrest.core.StringContains.containsString;
 import org.junit.Before;
 import org.junit.Test;
@@ -61,6 +59,7 @@ import org.springframework.web.context.WebApplicationContext;
 @SpringBootTest(classes = {Application.class}, properties = "spring.main.allow-bean-definition-overriding=true")
 @WebAppConfiguration
 @ComponentScan(basePackages = {"eu.eurofleets.ears3.domain", " eu.eurofleets.ears3.service"})
+@Ignore
 public class SmlControllerTest {
 
     @Autowired
@@ -132,7 +131,7 @@ public class SmlControllerTest {
         event.setProgram(pr);
         List<Property> properties = new ArrayList<>();
         properties.add(new Property(new LinkedDataTerm("http://ontologies.orr.org/fish_count", null, "fish_count"), "89", null));
-        properties.add(new Property(new LinkedDataTerm("http://ontologies.ef-ears.eu/ears2/1/11BE#pry_21", null, "depth_m"), "3", "m"));
+        properties.add(new Property(new LinkedDataTerm("http://ontologies.ef-ears.eu/ears2/1#pry_21", null, "depth_m"), "3", "m"));
         properties.add(new Property(new LinkedDataTerm("http://ontologies.ef-ears.eu/ears2/1#pry_4", null, "label"), "W04", null));
         properties.add(new Property(new LinkedDataTerm("http://ontologies.ef-ears.eu/ears2/1#pry_16", null, "sampleId"), "20190506_12", null));
         event.setProperties(properties);
@@ -150,7 +149,7 @@ public class SmlControllerTest {
         event2.setProgram(pr);
         event2.setPlatform(p);
         List<Property> properties2 = new ArrayList<>();
-        properties2.add(new Property(new LinkedDataTerm("http://ontologies.ef-ears.eu/ears2/1/11BE#pry_21", null, "depth_m"), "19", "m"));
+        properties2.add(new Property(new LinkedDataTerm("http://ontologies.ef-ears.eu/ears2/1#pry_21", null, "depth_m"), "19", "m"));
         properties2.add(new Property(new LinkedDataTerm("http://ontologies.ef-ears.eu/ears2/1#pry_4", null, "label"), "W08", null));
         properties2.add(new Property(new LinkedDataTerm("http://ontologies.ef-ears.eu/ears2/1#pry_16", null, "deployment"), "20190506_12", null));
         event2.setProperties(properties);
@@ -168,7 +167,7 @@ public class SmlControllerTest {
         event3.setPlatform(p);
         event3.setProgram(pr);
         List<Property> properties3 = new ArrayList<>();
-        properties3.add(new Property(new LinkedDataTerm("http://ontologies.ef-ears.eu/ears2/1/11BE#pry_21", null, "depth_m"), "5", "m"));
+        properties3.add(new Property(new LinkedDataTerm("http://ontologies.ef-ears.eu/ears2/1#pry_21", null, "depth_m"), "5", "m"));
         properties3.add(new Property(new LinkedDataTerm("http://ontologies.ef-ears.eu/ears2/1#pry_4", null, "label"), "W03", null));
         properties3.add(new Property(new LinkedDataTerm("http://ontologies.ef-ears.eu/ears2/1#pry_16", null, "deployment"), "20190506_17", null));
         event3.setProperties(properties);
@@ -199,7 +198,8 @@ public class SmlControllerTest {
 
         EventDTO e = EventControllerTest.getTestEvent();
         e.program = "2020-MF";
-        CruiseControllerTest.postProgram(this.mockMvc, "2020-MF", objectMapper);
+        ProgramDTO pr = ProgramControllerTest.getTestProgram1("MF-2020");
+        ProgramControllerTest.postProgram(this.mockMvc, pr, objectMapper);
         json = objectMapper.writeValueAsString(e);
 
         MvcResult createEvent = this.mockMvc.perform(MockMvcRequestBuilders.post("/event").contentType(MediaType.APPLICATION_JSON).content(json))
@@ -219,12 +219,10 @@ public class SmlControllerTest {
         MvcResult readSmlAfter = this.mockMvc.perform(MockMvcRequestBuilders.get("/sml?platformUrn=SDN:C17::11BE"))
                 .andDo(print())
                 .andExpect(status().isOk())
-                .andExpect(content().string(containsString("<sml:component name=\"Van Veen grab\" xlink:href=\"https://ears.bmdc.be/ears3/sml?deviceUrn=SDN:L22::TOOL0653\"/>")))
+                .andExpect(content().string(containsString("<sml:component name=\"Van Veen grab\" xlink:href=")))
+                .andExpect(content().string(containsString("/ears3/sml?deviceUrn=SDN:L22::TOOL0653&amp;platformUrn=SDN:C17::11BE\"/>")))
+                .andExpect(content().string(not(containsString("deviceUrn=null"))))
                 .andReturn();
-
-        String smlAfter = readSmlAfter.getResponse().getContentAsString();
-        int a = 5;
-        //  assertTrue(content.contains("cruises"));
     }
 
     @Test
@@ -241,7 +239,7 @@ public class SmlControllerTest {
                 .andExpect(content().string(containsString("<swe:Count definition=\"http://ontologies.orr.org/fish_count\">")))
                 .andExpect(content().string(containsString("<swe:label>fish_count</swe:label>")))
                 .andExpect(content().string(containsString("<swe:value>89</swe:value>")))
-                .andExpect(content().string(containsString("<swe:Quantity definition=\"http://ontologies.ef-ears.eu/ears2/1/11BE#pry_21\">")))
+                .andExpect(content().string(containsString("<swe:Quantity definition=\"http://ontologies.ef-ears.eu/ears2/1#pry_21\">")))
                 .andExpect(content().string(containsString("<swe:Text definition=\"http://ontologies.ef-ears.eu/ears2/1#pry_4\">")))
                 .andReturn();
 

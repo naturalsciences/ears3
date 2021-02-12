@@ -1,10 +1,7 @@
 package eu.eurofleets.ears3.service;
 
-import eu.eurofleets.ears3.domain.Cruise;
-import eu.eurofleets.ears3.domain.LinkedDataTerm;
+import be.naturalsciences.bmdc.cruise.model.ILinkedDataTerm;
 import eu.eurofleets.ears3.domain.Tool;
-import eu.eurofleets.ears3.domain.Tool;
-import eu.eurofleets.ears3.dto.LinkedDataTermDTO;
 import eu.eurofleets.ears3.dto.ToolDTO;
 import java.util.Collection;
 import java.util.HashMap;
@@ -12,15 +9,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
-import javax.persistence.PersistenceException;
-import javax.transaction.Transactional;
-import javax.validation.ConstraintViolationException;
 import org.apache.commons.collections4.IterableUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.dao.DataIntegrityViolationException;
-import org.springframework.data.jpa.repository.Query;
-import org.springframework.data.repository.CrudRepository;
-import org.springframework.stereotype.Repository;
 import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
 
@@ -98,10 +88,13 @@ public class ToolService implements EarsService<Tool> {
         if (tool == null) {
             return null;
         }
-        try {
+        String urn = ILinkedDataTerm.getUrnFromUrl(tool.getTerm().getIdentifier());
+        Tool existingTool = findByIdentifier(tool.getTerm().getIdentifier());
+        if (existingTool == null) {
+            tool.getTerm().setUrn(urn);
             return toolRepository.save(tool);
-        } catch (DataIntegrityViolationException | PersistenceException | ConstraintViolationException ex) { //
-            return findByIdentifier(tool.getTerm().getIdentifier());
+        } else {
+            return existingTool;
         }
     }
 
@@ -109,11 +102,7 @@ public class ToolService implements EarsService<Tool> {
         if (tool == null) {
             return null;
         }
-        try {
-            return toolRepository.save(new Tool(tool));
-        } catch (DataIntegrityViolationException | PersistenceException | ConstraintViolationException ex) { //
-            return findByIdentifier(tool.tool.identifier);
-        }
+        return findOrCreate(new Tool(tool));
     }
 
 }

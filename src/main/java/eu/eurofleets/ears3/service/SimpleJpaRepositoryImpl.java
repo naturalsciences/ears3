@@ -5,7 +5,6 @@
  */
 package eu.eurofleets.ears3.service;
 
-import eu.eurofleets.ears3.domain.Cruise;
 import java.io.Serializable;
 import javax.persistence.EntityManager;
 import org.springframework.data.jpa.repository.support.JpaEntityInformation;

@@ -1,25 +1,15 @@
 package eu.eurofleets.ears3.dto;
 
 import eu.eurofleets.ears3.domain.*;
-import be.naturalsciences.bmdc.cruise.model.IEvent;
-import be.naturalsciences.bmdc.cruise.model.ILinkedDataTerm;
 import be.naturalsciences.bmdc.cruise.model.IPerson;
-import be.naturalsciences.bmdc.cruise.model.IProgram;
-import be.naturalsciences.bmdc.cruise.model.IProperty;
-import be.naturalsciences.bmdc.cruise.model.ITool;
-import java.io.Serializable;
+import com.fasterxml.jackson.annotation.JsonFormat;
+import eu.eurofleets.ears3.utilities.OffsetDateTimeAdapter;
 import java.time.OffsetDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.Collection;
-import javax.persistence.Entity;
-import javax.persistence.Id;
-import javax.persistence.Inheritance;
-import javax.persistence.InheritanceType;
-import javax.persistence.ManyToOne;
-import javax.persistence.OneToMany;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlRootElement;
+import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 
 /*
  * To change this license header, choose License Headers in Project Properties.
@@ -30,12 +20,14 @@ import javax.xml.bind.annotation.XmlRootElement;
  *
  * @author thomas
  */
-@XmlRootElement
+@XmlRootElement(name = "event")
 @XmlAccessorType(XmlAccessType.FIELD) //ignore all the getters
 public class EventDTO {
 
     public String identifier;
     public String eventDefinitionId;
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ssZ")
+    @XmlJavaTypeAdapter(value = OffsetDateTimeAdapter.class)
     public OffsetDateTime timeStamp;
     public PersonDTO actor;
     public LinkedDataTermDTO subject;
@@ -75,8 +67,8 @@ public class EventDTO {
         LinkedDataTermDTO subject = new LinkedDataTermDTO(event.getSubject());
         LinkedDataTermDTO toolCategory = new LinkedDataTermDTO(event.getToolCategory());
         ToolDTO tool = new ToolDTO(event.getTool().getTerm(), event.getTool().getParentTool());
-        LinkedDataTermDTO process = new LinkedDataTermDTO();
-        LinkedDataTermDTO action = new LinkedDataTermDTO();
+        LinkedDataTermDTO process = new LinkedDataTermDTO(event.getProcess());
+        LinkedDataTermDTO action = new LinkedDataTermDTO(event.getAction());
 
         this.identifier = event.getIdentifier();
         this.eventDefinitionId = event.getEventDefinitionId();

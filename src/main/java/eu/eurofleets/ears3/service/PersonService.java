@@ -7,12 +7,8 @@ package eu.eurofleets.ears3.service;
 
 import eu.eurofleets.ears3.domain.Organisation;
 import eu.eurofleets.ears3.domain.Person;
-import eu.eurofleets.ears3.domain.Program;
 import java.util.List;
-import javax.persistence.PersistenceException;
-import javax.validation.ConstraintViolationException;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
 
@@ -82,8 +78,5 @@ public class PersonService {
             }
         }
         return personRepository.save(person);
-        // } catch (DataIntegrityViolationException | PersistenceException | ConstraintViolationException ex) { //
-        //     return findByNameAndOrganisation(person);
-        // }
     }
 }

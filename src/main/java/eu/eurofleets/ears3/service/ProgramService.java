@@ -7,10 +7,13 @@ import eu.eurofleets.ears3.domain.Program;
 import eu.eurofleets.ears3.domain.Project;
 import eu.eurofleets.ears3.dto.PersonDTO;
 import eu.eurofleets.ears3.dto.ProgramDTO;
+import java.time.Instant;
+import java.time.OffsetDateTime;
+import java.time.ZoneOffset;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Date;
 import java.util.List;
+import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.apache.commons.collections4.IterableUtils;
@@ -40,8 +43,8 @@ public class ProgramService {
         this.organisationRepository = organisationRepository;
     }
 
-    public List<Program> findAll() {
-        return IterableUtils.toList(this.programRepository.findAll());
+    public Set<Program> findAll() {
+        return this.programRepository.findAll();
     }
 
     public Program findById(long id) {
@@ -54,13 +57,12 @@ public class ProgramService {
         return this.programRepository.findByIdentifier(identifier);
     }
 
-    public List<Program> findByCruiseId(long cruiseId) {
-        Assert.notNull(cruiseId, "platform Code must not be null");
-        return this.programRepository.findByCruiseId(cruiseId);
-    }
-
     public void save(Program program) {
         this.programRepository.save(program);
+    }
+
+    public void delete(Program program) {
+        this.programRepository.delete(program);
     }
 
     public Program save(ProgramDTO dto) {
@@ -137,13 +139,20 @@ public class ProgramService {
         this.programRepository.deleteByIdentifier(identifier);
     }
 
-    public List<Program> findByCruiseIdentifier(String cruiseIdentifier) {
-        return new ArrayList<>();//    throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    public Set<Program> findByCruiseIdentifier(String cruiseIdentifier) {
+        return this.programRepository.findByCruiseIdentifier(cruiseIdentifier);
     }
+
+    public Set<Program> findByVesselIdentifier(String vesselIdentifier) {
+       return this.programRepository.findByVesselIdentifier(vesselIdentifier);
+    }
+
+    public Set<Program> findCurrent() {
+        return this.programRepository.findAtDate(Instant.now().atOffset(ZoneOffset.UTC));
+    }
+
+    public Set<Program> findByAtDate(OffsetDateTime at) {
+        return this.programRepository.findAtDate(at);
+    }
+
 }
-
-
-/* Location:              /home/thomas/Documents/Project-Eurofleets2/meetings/2016-11-03-04-workshop/VM/shared/ef_workshop/ears2.war!/WEB-INF/classes/eu/eurofleets/ears2/service/ProgramServiceImpl.class
- * Java compiler version: 7 (51.0)
- * JD-Core Version:       0.7.1
- */

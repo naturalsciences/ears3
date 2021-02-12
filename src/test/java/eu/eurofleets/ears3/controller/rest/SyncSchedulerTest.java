@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package eu.eurofleets.ears3.controller;
+package eu.eurofleets.ears3.controller.rest;
 
 import eu.eurofleets.ears3.Application;
 import org.junit.Before;
@@ -31,6 +31,7 @@ import org.springframework.web.context.WebApplicationContext;
 @SpringBootTest(classes = {Application.class}, properties = "spring.main.allow-bean-definition-overriding=true")
 @WebAppConfiguration
 @ComponentScan(basePackages = {"eu.eurofleets.ears3.domain", " eu.eurofleets.ears3.service"})
+@Ignore
 public class SyncSchedulerTest {
 
     @Autowired
@@ -80,6 +81,7 @@ public class SyncSchedulerTest {
     }
 
     @Test
+    @Ignore
     public void testSyncAll() throws Exception {
         MvcResult mvcResult = this.mockMvc.perform(MockMvcRequestBuilders.get("/sync/all"))
                 .andDo(print())

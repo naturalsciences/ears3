@@ -1,7 +1,6 @@
 package eu.eurofleets.ears3.service;
 
 import eu.eurofleets.ears3.domain.Country;
-import eu.eurofleets.ears3.domain.LinkedDataTerm;
 import java.util.List;
 import java.util.Set;
 import org.springframework.data.jpa.repository.Modifying;

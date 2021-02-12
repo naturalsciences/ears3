@@ -7,8 +7,6 @@ package eu.eurofleets.ears3.scheduler.vocabulary;
 
 import be.naturalsciences.bmdc.cruise.model.IConcept;
 import eu.eurofleets.ears3.AbstractConcept;
-import eu.eurofleets.ears3.domain.Country;
-import eu.eurofleets.ears3.domain.Harbour;
 import eu.eurofleets.ears3.domain.SeaArea;
 import static eu.eurofleets.ears3.scheduler.vocabulary.HarbourCopyAssistant.getJsonKeyVals;
 import gnu.trove.map.hash.THashMap;

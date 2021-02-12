@@ -1,13 +1,21 @@
 package eu.eurofleets.ears3.controller.rest;
 
+import eu.eurofleets.ears3.domain.Cruise;
+import eu.eurofleets.ears3.domain.Message;
 import eu.eurofleets.ears3.domain.Program;
 import eu.eurofleets.ears3.domain.ProgramList;
 import eu.eurofleets.ears3.dto.ProgramDTO;
 import eu.eurofleets.ears3.service.CruiseService;
 import eu.eurofleets.ears3.service.EventService;
 import eu.eurofleets.ears3.service.ProgramService;
+import java.time.Instant;
+import java.time.OffsetDateTime;
+import java.time.ZoneOffset;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.List;
-import javax.websocket.server.PathParam;
+import java.util.Set;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -29,25 +37,58 @@ public class ProgramController {
 
     public static final String DEFAULT_VALUE = "_";
     @Autowired
-    private EventService eventService;
-    @Autowired
     private ProgramService programService;
     @Autowired
     private CruiseService cruiseService;
 
-    @RequestMapping(method = {RequestMethod.GET}, value = {"programs"}, produces = {"application/xml", "application/json"})
-    public ProgramList getProgramList(@RequestParam(required = false, defaultValue = "") String cruiseIdentifier) {
-        List<Program> res;
-        // List<Program> res;
+    @RequestMapping(method = {RequestMethod.GET}, value = {"programs"}, produces = {"application/xml; charset=utf-8", "application/json"})
+    public ProgramList getPrograms() {
+        Set<Program> res = this.programService.findAll();
+        Set<Program> currents = this.programService.findCurrent();
+        List r = new ArrayList<>(res);
+        r.addAll(0, currents);
+        res = new LinkedHashSet(r);
+        return new ProgramList(res);
+    }
+
+    @RequestMapping(method = {RequestMethod.GET}, value = {"programs"}, params = {"cruiseIdentifier"}, produces = {"application/xml; charset=utf-8", "application/json"})
+    public ProgramList getPrograms(@RequestParam(required = false, defaultValue = "") String cruiseIdentifier) {
+        Set<Program> res;
         if (cruiseIdentifier == null || "".equals(cruiseIdentifier)) {
             res = this.programService.findAll();
         } else {
             res = this.programService.findByCruiseIdentifier(cruiseIdentifier);
         }
+        Set<Program> currents = this.programService.findCurrent();
+        List<Program> r = new ArrayList<>(res);
+        r.addAll(0, currents);
+        res = new LinkedHashSet(r);
         return new ProgramList(res);
     }
 
-    @RequestMapping(method = {RequestMethod.GET}, value = {"program/{id}"}, produces = {"application/xml", "application/json"})
+    @RequestMapping(method = {RequestMethod.GET}, value = {"programs"}, params = {"startDate", "endDate"}, produces = {"application/xml; charset=utf-8", "application/json"})
+    public ProgramList getPrograms(@RequestParam(required = false, defaultValue = "") String startDate, @RequestParam(required = false, defaultValue = "") String endDate) { //@DateTimeFormat(iso = ISO.DATE_TIME)
+        OffsetDateTime start = OffsetDateTime.parse(startDate);
+        OffsetDateTime end = OffsetDateTime.parse(endDate);
+        Set<Program> res = new HashSet<>();
+        /* if (cruiseIdentifier == null || "".equals(cruiseIdentifier) && startDate == null && endDate == null) {
+            res = this.programService.findAll();
+        } else if (!"".equals(cruiseIdentifier)) {
+            res = this.programService.findByCruiseIdentifier(cruiseIdentifier);
+        } else*/ if (start == null && endDate == null) {
+            res = this.programService.findAll();
+        } else if (end == null) {
+            end = Instant.now().atOffset(ZoneOffset.UTC);
+        }
+        Set<Cruise> findByDate = cruiseService.findAllBetweenDate(start, end, null);
+        for (Cruise cruise : findByDate) {
+            res.addAll(this.programService.findByCruiseIdentifier(cruise.getIdentifier()));
+        }
+
+        return new ProgramList(res);
+    }
+
+    @RequestMapping(method = {RequestMethod.GET}, value = {"program/{id}"}, produces = {"application/xml; charset=utf-8", "application/json"})
     public Program getProgramById(@PathVariable(value = "id") String id) {
         Program program = this.programService.findById(Long.parseLong(id));
         if (program != null) {
@@ -57,7 +98,12 @@ public class ProgramController {
         }
     }
 
-    @RequestMapping(method = {RequestMethod.GET}, value = {"program"}, params = {"identifier"}, produces = {"application/xml", "application/json"})
+    @RequestMapping(method = {RequestMethod.GET}, value = {"program/current"}, produces = {"application/xml; charset=utf-8", "application/json"})
+    public ProgramList getCurrent() {
+        return new ProgramList(this.programService.findCurrent());
+    }
+
+    @RequestMapping(method = {RequestMethod.GET}, value = {"program"}, params = {"identifier"}, produces = {"application/xml; charset=utf-8", "application/json"})
     public Program getProgramByidentifier(@RequestParam(required = true, value = "identifier") String identifier) {
         Program program = this.programService.findByIdentifier(identifier);
         if (program != null) {
@@ -67,47 +113,14 @@ public class ProgramController {
         }
     }
 
-    /*
-    @RequestMapping(method = {org.springframework.web.bind.annotation.RequestMethod.GET}, value = {"insertProgram"}, params = {"id", "cruiseId"}, produces = {"application/xml"})
-    public Message insertProgram(@RequestParam(required = true) String id, @RequestParam(required = true) String cruiseId, @RequestParam(required = false) String originatorCode, @RequestParam(required = false) String PIName, @RequestParam(required = false) String description, @RequestParam(required = false) String projects)
-            throws ParseException {
-        Program program = new Program();
-        program.setId(id);
-        program.setCruiseId(cruiseId);
-        program.setOriginatorcode(originatorCode);
-        program.setPIName(PIName);
-        program.setDescription(description);
-
-        if (projects != null) {
-            String[] projectsArray = projects.split("\\,");
-            Set<ProjectO> projectsSet = new HashSet();
-
-            for (String str : projectsArray) {
-                ProjectO project = null;
-                try {
-                    project = this.programService.getProject(str);
-                } catch (NumberFormatException e) {
-                }
-                if (project == null) {
-                    project = new ProjectO(str, "Name:" + str);
-                }
-                projectsSet.add(project);
-            }
-            program.setProjects(projectsSet);
-        }
-
-        this.programService.setProgram(program);
-        return new Message(program.getProgramId(), "Program inserted");
-    }*/
-    @PostMapping(value = {"program"}, produces = {"application/xml", "application/json"})
+    @PostMapping(value = {"program"}, produces = {"application/xml; charset=utf-8", "application/json"})
     @ResponseStatus(HttpStatus.CREATED)
-    public ResponseEntity<Program> createProgram(@RequestBody ProgramDTO programDTO) {
-        //return Response.status(HttpStatus.CREATED.value()).entity(this.cruiseService.save(cruiseDTO)).build();
-        //  return ResponseEntity.ok(this.cruiseService.save(cruiseDTO).getId());//<>(this.cruiseService.save(cruiseDTO), HttpStatus.CREATED);
-        return new ResponseEntity<Program>(this.programService.save(programDTO), HttpStatus.CREATED);
+    public ResponseEntity<Message<ProgramDTO>> createProgram(@RequestBody ProgramDTO programDTO) {
+        Program program = this.programService.save(programDTO);
+        return new ResponseEntity<Message<ProgramDTO>>(new Message<ProgramDTO>(HttpStatus.CREATED.value(), program.getIdentifier(), programDTO), HttpStatus.CREATED);
     }
 
-    @DeleteMapping(value = {"program"}, params = {"identifier"}, produces = {"application/xml", "application/json"})
+    @DeleteMapping(value = {"program"}, params = {"identifier"}, produces = {"application/xml; charset=utf-8", "application/json"})
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public String removeProgramByIdentifier(@RequestParam(required = true) String identifier) {
         this.programService.deleteByIdentifier(identifier);

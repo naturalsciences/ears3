@@ -6,6 +6,7 @@
 package eu.eurofleets.ears3.utilities;
 
 import java.time.OffsetDateTime;
+import java.time.format.DateTimeFormatter;
 import javax.xml.bind.annotation.adapters.XmlAdapter;
 
 /**
@@ -15,11 +16,11 @@ import javax.xml.bind.annotation.adapters.XmlAdapter;
 public class OffsetDateTimeAdapter extends XmlAdapter<String, OffsetDateTime> {
 
     public OffsetDateTime unmarshal(String v) throws Exception {
-        return OffsetDateTime.parse(v);
+        return OffsetDateTime.parse(v, DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ssZ"));
     }
 
     public String marshal(OffsetDateTime v) throws Exception {
-        return v.toString();
+        return v.format(DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ssZ"));
     }
 
 }

@@ -1,12 +1,9 @@
 package eu.eurofleets.ears3.service;
 
-import eu.eurofleets.ears3.domain.Cruise;
 import eu.eurofleets.ears3.domain.Event;
-import eu.eurofleets.ears3.dto.EventDTOList;
 import java.time.OffsetDateTime;
 import java.util.Date;
 import java.util.List;
-import java.util.Optional;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
@@ -31,16 +28,19 @@ public abstract interface EventRepository
     @Query("select e from Event e where e.identifier = ?1")
     public abstract Event findByIdentifier(String identifier);
 
-    @Query("select e from Event e where e.timeStamp between ?1 and ?2")
+    @Query("select e from Event e where e.timeStamp between ?1 and ?2 order by e.timeStamp")
     public abstract List<Event> findByTimeStampBetween(OffsetDateTime paramDate1, OffsetDateTime paramDate2);
 
-    @Query("select e from Event e left join Tool t on e.tool=t.id left join LinkedDataTerm l on l.id=t.term where l.identifier= ?1 or l.urn= ?1")
+    @Query("select e from Event e left join Tool t on e.tool=t.id left join LinkedDataTerm l on l.id=t.term where l.identifier= ?1 or l.urn= ?1 order by e.timeStamp")
     public abstract List<Event> findByTool(String identifier);
 
-    @Query("select e from Event e inner join Platform p on e.platform = p.id left join LinkedDataTerm l on l.id=p.term where l.identifier= ?1 or l.urn= ?1")
-    public abstract List<Event> findByPlatformCode(String platformCode);
+    @Query("select e from Event e inner join Platform p on e.platform = p.id left join LinkedDataTerm l on l.id=p.term where l.identifier= ?1 or l.urn= ?1 order by e.timeStamp")
+    public abstract List<Event> findByPlatformCode(String platformIdentifier);
 
-    @Query("select e from Event e left join Platform pl on e.platform = pl.id left join Program p on e.program = p.id left join Person pe on e.actor = pe.id left join LinkedDataTerm l on l.id=pl.term where (l.identifier= ?1 or l.urn= ?1) and COALESCE(?2, pe.email) = pe.email and COALESCE(?3, p.identifier) = p.identifier")
+    @Query("select e from Event e inner join Cruise c on e.timeStamp between c.startDate and c.endDate order by e.timeStamp")
+    public abstract List<Event> findByCruise(String platformCode);
+
+    @Query("select e from Event e left join Platform pl on e.platform = pl.id left join Program p on e.program = p.id left join Person pe on e.actor = pe.id left join LinkedDataTerm l on l.id=pl.term where (l.identifier= ?1 or l.urn= ?1) and COALESCE(cast(?2 as string), pe.email) = pe.email and COALESCE(cast(?3 as string), p.identifier) = p.identifier order by e.timeStamp")
     public abstract List<Event> findByPlatformActorAndProgram(String platformCode, String personEmail, String programIdentifier);
 
     @Modifying
@@ -48,6 +48,12 @@ public abstract interface EventRepository
     @Query("delete from Event e where e.identifier=?1")
     public void deleteByIdentifier(String identifier);
 
-    @Query("select e from Event e where e.creationTime >= ?1 or e.modificationTime >= ?1")
+    @Query("select e from Event e where e.creationTime >= ?1 or e.modificationTime >= ?1 order by e.timeStamp")
     public abstract List<Event> findByCreatedOrModifiedAfter(OffsetDateTime after);
+
+    @Query("select e from Event e left join Platform pl on e.platform = pl.id left join Program p on e.program = p.id left join Person pe on e.actor = pe.id left join LinkedDataTerm l on l.id=pl.term where (COALESCE(cast(?1 as string), l.identifier) = l.identifier or COALESCE(cast(?1 as string), l.urn) = l.urn) and COALESCE(cast(?2 as string), pe.email) = pe.email and COALESCE(cast(?3 as string), p.identifier) = p.identifier and e.timeStamp between ?4 and ?5 order by e.timeStamp")
+    public List<Event> findAllByPlatformActorProgramAndDates(String platformIdentifier, String personEmail, String programIdentifier, OffsetDateTime start, OffsetDateTime end);
+
+    @Query("select e from Event e left join Program p on e.program = p.id left join Person pe on e.actor = pe.id inner join Cruise c on e.timeStamp between c.startDate and c.endDate where COALESCE(cast(?1 as string), c.identifier) = c.identifier and COALESCE(cast(?3 as string), pe.email) = pe.email and COALESCE(cast(?2 as string), p.identifier) = p.identifier order by e.timeStamp")
+    public List<Event> findAllByCruiseProgramAndActor(String cruiseIdentifier, String programIdentifier, String actorEmail);
 }

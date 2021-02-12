@@ -37,10 +37,9 @@ public class EventDTOList extends ArrayList<EventDTO> {
             this.events.add(new EventDTO(event));
         }
     }
-
-    @JsonProperty("events")
+    
     @XmlElement(name = "event")
-    private List<EventDTO> events = null;
+    private List<EventDTO> events;
 
     public List<EventDTO> getEvents() {
         return this.events;

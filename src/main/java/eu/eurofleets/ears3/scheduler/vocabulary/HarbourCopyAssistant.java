@@ -9,14 +9,11 @@ import be.naturalsciences.bmdc.cruise.model.IConcept;
 import eu.eurofleets.ears3.AbstractConcept;
 import eu.eurofleets.ears3.domain.Country;
 import eu.eurofleets.ears3.domain.Harbour;
-import eu.eurofleets.ears3.domain.LinkedDataTerm;
-import eu.eurofleets.ears3.domain.Platform;
 import eu.eurofleets.ears3.service.CountryService;
 import gnu.trove.map.hash.THashMap;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import org.springframework.beans.factory.annotation.Autowired;
 
 /**
  *

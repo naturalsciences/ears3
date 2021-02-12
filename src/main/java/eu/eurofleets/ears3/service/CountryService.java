@@ -2,7 +2,6 @@ package eu.eurofleets.ears3.service;
 
 import be.naturalsciences.bmdc.cruise.model.ILinkedDataTerm;
 import eu.eurofleets.ears3.domain.Country;
-import eu.eurofleets.ears3.domain.LinkedDataTerm;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;

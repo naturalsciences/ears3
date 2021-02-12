@@ -11,3 +11,33 @@ h1 {
 .succesSended {
     visibility: hidden;
 }
+
+table, tr, td {
+    border: none;
+}
+
+table#recentEvents{
+    border-collapse: collapse;
+    width:100%;
+    table-layout:fixed;
+}
+
+table#recentEvents td {
+    border-bottom: lightgrey thin solid;
+    max-width:50%;
+    min-width:50%;
+    width:50%;
+    vertical-align: middle;
+}
+
+table#recentEvents button {
+    vertical-align: top;
+    height:100%;
+    max-width:80%;
+}
+
+table#recentEvents p{
+    font-size: 70%;
+}
+
+

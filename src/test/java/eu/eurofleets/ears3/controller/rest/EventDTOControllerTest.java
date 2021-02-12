@@ -3,22 +3,18 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package eu.eurofleets.ears3.controller;
+package eu.eurofleets.ears3.controller.rest;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import eu.eurofleets.ears3.Application;
 import eu.eurofleets.ears3.dto.EventDTO;
-import eu.eurofleets.ears3.dto.EventDTOList;
+import eu.eurofleets.ears3.dto.ProgramDTO;
 import java.time.Instant;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
-import org.junit.After;
-import org.junit.AfterClass;
 import org.junit.Before;
-import org.junit.BeforeClass;
 import org.junit.Test;
-import static org.junit.Assert.*;
 import org.junit.Ignore;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -33,7 +29,6 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
-import org.springframework.util.StringUtils;
 import org.springframework.web.context.WebApplicationContext;
 
 /**
@@ -44,6 +39,7 @@ import org.springframework.web.context.WebApplicationContext;
 @SpringBootTest(classes = {Application.class}, properties = "spring.main.allow-bean-definition-overriding=true")
 @WebAppConfiguration
 @ComponentScan(basePackages = {"eu.eurofleets.ears3.domain", " eu.eurofleets.ears3.service"})
+@Ignore
 public class EventDTOControllerTest {
 
     @Autowired
@@ -71,7 +67,8 @@ public class EventDTOControllerTest {
         MvcResult postEvent = EventControllerTest.postEvent(this.mockMvc, e, objectMapper);
         OffsetDateTime after = Instant.now().atOffset(ZoneOffset.UTC);
         Thread.sleep(2000);
-        CruiseControllerTest.postProgram(this.mockMvc, "2020-MF", objectMapper);
+        ProgramDTO pr = ProgramControllerTest.getTestProgram1("MF-2020");
+        ProgramControllerTest.postProgram(this.mockMvc, pr, objectMapper);
         MvcResult postEvent2 = EventControllerTest.postEvent(this.mockMvc, e, objectMapper);
 
         MvcResult mvcResult = this.mockMvc.perform(MockMvcRequestBuilders.get("/dto/events.json").contentType(MediaType.APPLICATION_JSON))

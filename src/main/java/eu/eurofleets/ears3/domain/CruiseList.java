@@ -1,5 +1,6 @@
 package eu.eurofleets.ears3.domain;
 
+import java.util.Collection;
 import java.util.List;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
@@ -13,19 +14,18 @@ public class CruiseList {
     public CruiseList() {
     }
 
-    public CruiseList(List<Cruise> cruises) {
+    public CruiseList(Collection<Cruise> cruises) {
         this.cruises = cruises;
     }
 
     @XmlElement(name = "cruise")
-    private List<Cruise> cruises = null;
+    private Collection<Cruise> cruises = null;
 
-    public List<Cruise> getCruises() {
+    public Collection<Cruise> getCruises() {
         return this.cruises;
     }
 
-    public void setCruises(List<Cruise> cruises) {
+    public void setCruises(Collection<Cruise> cruises) {
         this.cruises = cruises;
     }
 }
-

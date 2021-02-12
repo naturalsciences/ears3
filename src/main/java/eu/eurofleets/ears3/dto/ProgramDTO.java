@@ -6,11 +6,16 @@
 package eu.eurofleets.ears3.dto;
 
 import java.util.List;
+import javax.xml.bind.annotation.XmlAccessType;
+import javax.xml.bind.annotation.XmlAccessorType;
+import javax.xml.bind.annotation.XmlRootElement;
 
 /**
  *
  * @author thomas
  */
+@XmlRootElement(name = "program")
+@XmlAccessorType(XmlAccessType.FIELD) //ignore all the getters
 public class ProgramDTO {
 
     public String identifier;

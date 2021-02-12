@@ -8,12 +8,13 @@ import be.naturalsciences.bmdc.cruise.model.IPlatform;
 import be.naturalsciences.bmdc.cruise.model.IProgram;
 import be.naturalsciences.bmdc.cruise.model.IProperty;
 import be.naturalsciences.bmdc.cruise.model.ITool;
-import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import java.io.Serializable;
 import java.time.OffsetDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
@@ -286,6 +287,29 @@ public class Event implements IEvent, Serializable {
     @Override
     public String toString() {
         return tool.getTerm().getName() + " " + process.getName() + " " + action.getName() + " at " + timeStamp.format(DateTimeFormatter.ISO_INSTANT);
+    }
+
+    /**
+     * *
+     * Return the value and unit of a property of this provided the propertyUrl
+     * parameter.
+     *
+     * @param propertyUrl
+     * @return
+     */
+    public List<String> getPropertyValues(String propertyUrl) {
+        List<String> r = new ArrayList<>();
+        for (Property property : properties) {
+            if (property.getKey().getIdentifier().equals(propertyUrl)) {
+                if (property.getUom() != null) {
+                    r.add(property.getValue() + " " + property.getUom());
+                } else {
+                    r.add(property.getValue());
+                }
+            }
+
+        }
+        return r;
     }
 
 }

@@ -1,11 +1,8 @@
 package eu.eurofleets.ears3.service;
 
 import eu.eurofleets.ears3.utilities.DatagramUtilities;
-import be.naturalsciences.bmdc.cruise.model.ILinkedDataTerm;
-import be.naturalsciences.bmdc.cruise.model.IPerson;
 import eu.eurofleets.ears3.domain.Cruise;
 import eu.eurofleets.ears3.domain.Event;
-import eu.eurofleets.ears3.domain.EventList;
 import eu.eurofleets.ears3.domain.LinkedDataTerm;
 import eu.eurofleets.ears3.domain.Navigation;
 import eu.eurofleets.ears3.domain.Organisation;
@@ -17,15 +14,10 @@ import eu.eurofleets.ears3.domain.Thermosal;
 import eu.eurofleets.ears3.domain.Tool;
 import eu.eurofleets.ears3.domain.Weather;
 import eu.eurofleets.ears3.dto.EventDTO;
-import eu.eurofleets.ears3.dto.EventDTOList;
-import eu.eurofleets.ears3.dto.LinkedDataTermDTO;
-import eu.eurofleets.ears3.dto.PersonDTO;
 import eu.eurofleets.ears3.dto.PropertyDTO;
-import eu.eurofleets.ears3.dto.ToolDTO;
-import eu.eurofleets.ears3.scheduler.vocabulary.SyncScheduler;
 import java.io.IOException;
 import java.net.MalformedURLException;
-import java.net.URL;
+import java.time.Duration;
 import java.time.Instant;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
@@ -34,12 +26,17 @@ import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 import java.util.UUID;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.Executor;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.apache.commons.collections4.IterableUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Bean;
 import org.springframework.core.env.Environment;
 import org.springframework.http.HttpStatus;
+import org.springframework.scheduling.annotation.Async;
+import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
 import org.springframework.web.server.ResponseStatusException;
@@ -80,15 +77,14 @@ public class EventService {
     private final Environment env;
 
     @Autowired
-    public EventService(EventRepository eventRepository, Environment env) {
+    public EventService(EventRepository eventRepository, Environment env) throws MalformedURLException {
         this.eventRepository = eventRepository;
         this.env = env;
-        try {
-            navUtil = new DatagramUtilities<>(Navigation.class, env.getProperty("ears.navigation.server"));
-            thermosalUtil = new DatagramUtilities<>(Thermosal.class, env.getProperty("ears.navigation.server"));
-            weatherUtil = new DatagramUtilities<>(Weather.class, env.getProperty("ears.navigation.server"));
-        } catch (MalformedURLException e) {
-        }
+        String navigationServer = env.getProperty("ears.navigation.server");
+
+        navUtil = new DatagramUtilities<>(Navigation.class, navigationServer);
+        thermosalUtil = new DatagramUtilities<>(Thermosal.class, navigationServer);
+        weatherUtil = new DatagramUtilities<>(Weather.class, navigationServer);
     }
 
     public Event findById(Long id) {
@@ -125,13 +121,28 @@ public class EventService {
         return this.eventRepository.findByTool(tool.getTerm().getIdentifier());
     }
 
-    public List<Event> findAllByPlatformCode(String code) {
-        Assert.notNull(code, "Platform code must not be null");
-        return this.eventRepository.findByPlatformCode(code);
+    public List<Event> findAllByPlatformCode(String platformIdentifier) {
+        Assert.notNull(platformIdentifier, "Platform code must not be null");
+        return this.eventRepository.findByPlatformCode(platformIdentifier);
+    }
+
+    public List<Event> findByCruise(String cruiseIdentifier) {
+        Assert.notNull(cruiseIdentifier, "Cruise identifier code must not be null");
+        return this.eventRepository.findByCruise(cruiseIdentifier);
     }
 
     public List<Event> findAllByPlatformActorAndProgram(String platformIdentifier, String personEmail, String programIdentifier) {
+        if (personEmail == null) {
+            personEmail = "";
+        }
+        if (programIdentifier == null) {
+            programIdentifier = "";
+        }
         return this.eventRepository.findByPlatformActorAndProgram(platformIdentifier, personEmail, programIdentifier);
+    }
+
+    public List<Event> findAllByPlatformActorProgramAndDates(String platformIdentifier, String personEmail, String programIdentifier, OffsetDateTime start, OffsetDateTime end) {
+        return this.eventRepository.findAllByPlatformActorProgramAndDates(platformIdentifier, personEmail, programIdentifier, start, end);
     }
 
     public List<Event> findCreatedOrModifiedAfter(OffsetDateTime after) {
@@ -164,8 +175,8 @@ public class EventService {
         if (eventDTO.process == null) {
             throw new IllegalArgumentException("Event must have a process.");
         }
-        if (eventDTO.timeStamp == null) {
-            throw new IllegalArgumentException("Event must have a timeStamp.");
+        if (eventDTO.identifier != null && eventDTO.timeStamp == null) {
+            throw new IllegalArgumentException("An event that will be modified must have a timeStamp.");
         }
         if (eventDTO.platform == null) {
             throw new IllegalArgumentException("Event must have a platform.");
@@ -174,18 +185,43 @@ public class EventService {
             Event event = new Event();
             event.setEventDefinitionId(eventDTO.eventDefinitionId);
             String identifier = eventDTO.identifier;
+            OffsetDateTime serverTime = Instant.now().atOffset(ZoneOffset.UTC);
+            boolean drift = false;
             if (identifier == null) { //it is brand new
                 identifier = UUID.randomUUID().toString();
                 event.setCreationTime(Instant.now().atOffset(ZoneOffset.UTC));
-                try {
-                    Navigation last = navUtil.last();
-                    if (last != null) {
-                        event.setTimeStamp(last.getInstrumentTime().atOffset(ZoneOffset.UTC));
+                OffsetDateTime dtoTime = eventDTO.getTimeStamp();
+                if (dtoTime == null) {
+                    try {
+                        if (navUtil != null) {
+                            Navigation last = navUtil.last();
+                            if (last != null) {
+                                OffsetDateTime acquisitionTime = last.getInstrumentTime().atOffset(ZoneOffset.UTC);
+                                System.out.println("acquisition time (" + navUtil.getBaseUrl() + "): " + acquisitionTime.toString());
+                                System.out.println("server time: " + serverTime.toString());
+                                System.out.println("event timestamp: none given");
+                                Duration acquisitiondrift = Duration.between(acquisitionTime, serverTime); //positive if server ahead of acquisition, negative if acquisition ahead of server
+                                long acquisitionDiff = acquisitiondrift.toMinutes();
+                                if (acquisitionDiff > 2) { //if the acquisition is lagging behind server for more than 2 minutes
+                                    eventDTO.setTimeStamp(serverTime);
+                                    drift = true;
+                                } else {//if the server is lagging behind acquisition, or equal, take the acquisition
+                                    eventDTO.setTimeStamp(acquisitionTime);
+                                }
+                            } else {
+                                System.out.println("acquisition time returned null");
+                                System.out.println("server time: " + serverTime.toString());
+                                System.out.println("event timestamp: none given");
+                                eventDTO.setTimeStamp(serverTime);
+                            }
+                        } else {
+                            eventDTO.setTimeStamp(serverTime);
+                        }
+                    } catch (IOException e) {
+                        log.log(Level.SEVERE, "Couldn't reach the acquisition server. Timestamp set to server time.", e);
+                        eventDTO.setTimeStamp(serverTime);
                     }
-                } catch (IOException e) {
-                    log.log(Level.SEVERE, "Couldn't reach the acquisition server. Timestamp not changed.", e);
                 }
-
             } else { //it might already exist
                 Event existingEvent = eventRepository.findByIdentifier(identifier);
                 if (existingEvent != null) {
@@ -195,6 +231,7 @@ public class EventService {
                     throw new ResponseStatusException(HttpStatus.NOT_FOUND, "You tried modifying an event with identifier " + identifier + " but no such event exists.");
                 }
             }
+            event.setTimeStamp(eventDTO.getTimeStamp());
             event.setIdentifier(identifier);
 
             LinkedDataTerm action = ldtService.findOrCreate(eventDTO.action);
@@ -237,33 +274,48 @@ public class EventService {
             event.setTimeStamp(eventDTO.timeStamp);
             event.setTool(tool);
             event.setToolCategory(toolCategory);
+            new Thread() {
+                @Override
+                public void run() {
+                    enrichEventWithAcquisition(event);
+                }
+            }.start();
 
-            Collection<Navigation> navigations = new ArrayList<>();
-            Collection<Weather> weathers = new ArrayList<>();
-            Collection<Thermosal> thermosals = new ArrayList<>();
-            try {
-                Navigation nearestNav = navUtil.nearest(event.getTimeStamp());
-                navigations.add(nearestNav);
-                navigationService.saveAll(navigations);
-
-                Weather nearestWeather = weatherUtil.nearest(event.getTimeStamp());
-                weathers.add(nearestWeather);
-                weatherService.saveAll(weathers);
-
-                Thermosal nearestThermosal = thermosalUtil.nearest(event.getTimeStamp());
-                thermosals.add(nearestThermosal);
-                thermosalService.saveAll(thermosals);
-            } catch (IOException e) {
-                log.log(Level.SEVERE, "Couldn't reach the acquisition server", e);
-            }
-
-            event.setNavigation(navigations);
-            event.setWeather(weathers);
-            event.setThermosal(thermosals);
             return this.eventRepository.save(event);
         } catch (Exception e) {
             log.log(Level.SEVERE, "An exception was thrown while creating/modifying this event", e);
             throw e;
+        }
+    }
+
+    private void enrichEventWithAcquisition(Event event) {
+        Collection<Navigation> navigations = new ArrayList<>();
+        Collection<Weather> weathers = new ArrayList<>();
+        Collection<Thermosal> thermosals = new ArrayList<>();
+        try {
+            Navigation nearestNav = navUtil.nearest(event.getTimeStamp());
+            if (nearestNav != null) {
+                navigations.add(nearestNav);
+                navigationService.saveAll(navigations);
+                event.setNavigation(navigations);
+            }
+
+            Weather nearestWeather = weatherUtil.nearest(event.getTimeStamp());
+            if (nearestWeather != null) {
+                weathers.add(nearestWeather);
+                weatherService.saveAll(weathers);
+                event.setWeather(weathers);
+            }
+
+            Thermosal nearestThermosal = thermosalUtil.nearest(event.getTimeStamp());
+            if (nearestThermosal != null) {
+                thermosals.add(nearestThermosal);
+                thermosalService.saveAll(thermosals);
+                event.setThermosal(thermosals);
+            }
+            this.eventRepository.save(event);
+        } catch (IOException e) {
+            log.log(Level.SEVERE, "Couldn't reach the acquisition server. No acquisition coupled with this event (event was created however).", e);
         }
     }
 
@@ -277,5 +329,10 @@ public class EventService {
 
     public void deleteByTimeStampBetween(Date startDate, Date endDate) {
         this.eventRepository.deleteByTimeStampBetween(startDate, endDate);
+    }
+
+    public List<Event> findAllByCruiseProgramAndActor(String cruiseIdentifier, String programIdentifier, String actorEmail) {
+        return this.eventRepository.findAllByCruiseProgramAndActor(cruiseIdentifier, programIdentifier, actorEmail);
+
     }
 }

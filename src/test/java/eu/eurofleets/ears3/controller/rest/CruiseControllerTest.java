@@ -3,15 +3,14 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package eu.eurofleets.ears3.controller;
+package eu.eurofleets.ears3.controller.rest;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import eu.eurofleets.ears3.Application;
-import eu.eurofleets.ears3.domain.Cruise;
 import eu.eurofleets.ears3.dto.CruiseDTO;
-import eu.eurofleets.ears3.dto.EventDTO;
 import eu.eurofleets.ears3.dto.PersonDTO;
 import eu.eurofleets.ears3.dto.ProgramDTO;
+import java.time.Instant;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 import java.util.ArrayList;
@@ -21,10 +20,10 @@ import java.util.UUID;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import static org.hamcrest.core.StringContains.containsString;
+import static org.junit.Assert.assertTrue;
 import org.junit.Before;
-import org.junit.Test;
-import static org.junit.Assert.*;
 import org.junit.Ignore;
+import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -40,6 +39,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
+import org.springframework.util.StringUtils;
 import org.springframework.web.context.WebApplicationContext;
 
 /**
@@ -47,9 +47,10 @@ import org.springframework.web.context.WebApplicationContext;
  * @author thomas
  */
 @RunWith(SpringRunner.class)
-@SpringBootTest(classes = {Application.class}, properties = "spring.main.allow-bean-definition-overriding=true")
+@SpringBootTest(classes = {Application.class}, properties = {"spring.main.allow-bean-definition-overriding=true", "ears.navigation.server=https://ears.bmdc.be"})
 @WebAppConfiguration
 @ComponentScan(basePackages = {"eu.eurofleets.ears3.domain", " eu.eurofleets.ears3.service"})
+@Ignore
 public class CruiseControllerTest {
 
     @Autowired
@@ -96,16 +97,6 @@ public class CruiseControllerTest {
         return c;
     }
 
-    public static ProgramDTO getTestProgram1(String identifier) {
-        List<PersonDTO> principalInvestigators1 = Arrays.asList(new PersonDTO[]{new PersonDTO("Katrijn", "Baetens", "SDN:EDMO::3330", "02/2209091", "02/2208081", "kbaetens@naturalsciences.be"), new PersonDTO("Valérie", "Dulière", "SDN:EDMO::3330", "02/2209090", "02/2208080", "vduliere@naturalsciences.be")});
-        return new ProgramDTO(identifier, principalInvestigators1, "validating the modeling efforts of the last 2 years using the COHERENS model. Rubber ducks will be released. ", null, "RUBBER-DUCK", "No sampling");
-    }
-
-    public static ProgramDTO getTestProgram2(String identifier) {
-        List<PersonDTO> principalInvestigators2 = Arrays.asList(new PersonDTO[]{new PersonDTO("Kris", "Hostens", "SDN:EDMO::ILVO", "057/2209091", "057/2208081", "khostens@ilvo.be")});
-        return new ProgramDTO("KH1", principalInvestigators2, "Fisheries monitoring", null, "Fisheries monitoring", "Beam trawl 4 and 8m");
-    }
-
     public static CruiseDTO getTestCruise2(String identifier) {
         CruiseDTO c = new CruiseDTO();
         c.arrivalHarbour = "SDN:C38::BSH4510";
@@ -130,21 +121,14 @@ public class CruiseControllerTest {
     private static UUID programUUID;
     private static String programId;
 
-    public static MvcResult postProgram(MockMvc mockMvc, String programIdentifier, ObjectMapper objectMapper) throws Exception {
-        ProgramDTO pr = CruiseControllerTest.getTestProgram1(programIdentifier);
-
-        String json = objectMapper.writeValueAsString(pr);
-
-        return mockMvc.perform(MockMvcRequestBuilders.post("/program").contentType(MediaType.APPLICATION_JSON).content(json))
-                .andReturn();
-    }
-
     public static String postCruise(MockMvc mockMvc, CruiseDTO cruise, ObjectMapper objectMapper) throws Exception {
         String json = objectMapper.writeValueAsString(cruise);
+
+        String identifier = cruise.identifier;
         MvcResult mvcResult = mockMvc.perform(MockMvcRequestBuilders.post("/cruise").contentType(MediaType.APPLICATION_JSON).content(json))
                 .andDo(print())
                 .andExpect(status().isCreated())
-                .andExpect(content().string(containsString("</seaAreas><programs><identifier>KB_")))
+                .andExpect(content().string(containsString("<identifier>" + identifier + "</identifier>")))
                 .andReturn();
 
         String contentAsString = mvcResult.getResponse().getContentAsString();
@@ -157,27 +141,53 @@ public class CruiseControllerTest {
         return cruiseId;
     }
 
-    @Test
-    public void testPostProgram() throws Exception {
-        programUUID = UUID.randomUUID();
-        ProgramDTO program = getTestProgram1("KB_" + programUUID);
-        String json = objectMapper.writeValueAsString(program);
-
-        MvcResult mvcResult = this.mockMvc.perform(MockMvcRequestBuilders.post("/program").contentType(MediaType.APPLICATION_JSON).content(json))
+    public static void deleteCruise(String identifier, MockMvc mockMvc) throws Exception {
+        MvcResult mvcResult = mockMvc.perform(MockMvcRequestBuilders.delete("/cruise?identifier=" + identifier))
                 .andDo(print())
-                .andExpect(status().isCreated())
-                .andExpect(content().string(containsString("<identifier>KB_" + programUUID + "</identifier>")))
-                .andExpect(content().string(containsString("<description>" + program.description + "</description>")))
-                .andReturn();
-
+                .andExpect(status().is(204)).andReturn();
     }
 
     @Test
+    @Ignore
+    public void testPostAndGetCurrent() throws Exception {
+        String identifier = "BE11/2007_18-" + UUID.randomUUID();
+        CruiseDTO cruise = getTestCruise1(identifier);
+        String programIdentifier = "KB_" + UUID.randomUUID().toString();
+        ProgramDTO program = ProgramControllerTest.getTestProgram1(programIdentifier);
+        ProgramControllerTest.postProgram(this.mockMvc, program, objectMapper);
+        cruise.programs = new ArrayList<>();
+        cruise.programs.add(program.identifier);
+        cruise.startDate = Instant.now().atOffset(ZoneOffset.UTC).minusDays(5);
+        cruise.endDate = Instant.now().atOffset(ZoneOffset.UTC).plusDays(5);
+        postCruise(mockMvc, cruise, objectMapper);
+
+        MvcResult mvcResult = this.mockMvc.perform(MockMvcRequestBuilders.get("/cruise/current"))
+                .andDo(print())
+                .andExpect(status().is(200))
+                .andExpect(content().string(containsString("<identifier>" + identifier + "</identifier>")))
+                .andExpect(content().string(containsString("</seaAreas><programs><identifier>KB_")))
+                .andExpect(content().string(containsString("SDN:P02::VDFC")))
+                .andExpect(content().string(containsString("SDN:C19::1_2"))).andReturn();
+
+        mvcResult = this.mockMvc.perform(MockMvcRequestBuilders.get("/program/current"))
+                .andDo(print())
+                .andExpect(status().is(200))
+                .andExpect(content().string(containsString("<identifier>" + programIdentifier + "</identifier>")))
+                .andReturn();
+        String contentAsString = mvcResult.getResponse().getContentAsString();
+        int programCount = StringUtils.countOccurrencesOf(contentAsString, "<program>");
+        assertTrue(programCount == 1);
+        deleteCruise(identifier, mockMvc);
+        ProgramControllerTest.deleteProgram(programIdentifier, mockMvc);
+    }
+
+    @Test
+    @Ignore
     public void testPostAndUpdateCruise() throws Exception {
         CruiseDTO cruise = getTestCruise1("BE11/2007_18-" + UUID.randomUUID());
         programUUID = UUID.randomUUID();
-        ProgramDTO program = getTestProgram1("KB_" + programUUID);
-        postProgram(this.mockMvc, program.identifier, objectMapper);
+        ProgramDTO program = ProgramControllerTest.getTestProgram1("KB_" + programUUID);
+        ProgramControllerTest.postProgram(this.mockMvc, program, objectMapper);
         cruise.programs = new ArrayList<>();
         cruise.programs.add(program.identifier);
         String cruiseId = postCruise(mockMvc, cruise, objectMapper);
@@ -208,8 +218,8 @@ public class CruiseControllerTest {
         cruise.programs = new ArrayList<>();
 
         programUUID = UUID.randomUUID();
-        ProgramDTO program = getTestProgram1("KB_" + programUUID);
-        postProgram(this.mockMvc, program.identifier, objectMapper);
+        ProgramDTO program = ProgramControllerTest.getTestProgram1("KB_" + programUUID);
+        ProgramControllerTest.postProgram(this.mockMvc, program, objectMapper);
         cruise.programs.add(program.identifier);
         String json = objectMapper.writeValueAsString(cruise);
         MvcResult mvcResult = this.mockMvc.perform(MockMvcRequestBuilders.post("/cruise").contentType(MediaType.APPLICATION_JSON).content(json))
@@ -237,14 +247,16 @@ public class CruiseControllerTest {
     }
 
     @Test
+    @Ignore
     public void testGetCruiseCSR() throws Exception {
         String identifier = "BE11/2007_18-" + UUID.randomUUID();
         CruiseDTO cruise = getTestCruise1(identifier);
         cruise.programs = new ArrayList<>();
-
+        cruise.objectives = "The project is part of the continuous surveillance and evaluation of the quality of the marine environment in the region of the Belgian part of the North Sea 'BPNS' in the framework of the national obligations toward the Joint Assessment and Monitoring Programme (JAMP) of the OSPAR commission and the Water Framework Directive of the EC (2000/60/EC). OD Nature determines nutrients, salinity, suspended matter, dissolved oxygen, TOC and POC, chlorophyll a, phaeophytine, optical parameters and organic contaminants in the water column. Phytoplankton biomass and species composition as well as benthos species composition and biomass are also determined as part of the monitoring program. The other determinants (e.g. heavy metals and organic contaminants) in sediment and biota are determined in collaboration with ILVO-Fishery (ecological monitoring). Quality assurance and quality control during sampling and in the laboratory receive a high priority within the project.In this research project, novel and integrated passive sampler (PS)-based approaches (modelling and measurements) will be developed for both chemical exposure (monitoring) and biological effect assessment (passive dosing). Through the use of a broader array of PS techniques, applicable in a wide polarity range, the project will focus on the quantitation of an extended set of priority and emerging organic micropollutants and metals (targeted approach). Next to that, untargeted analysis with high-resolution mass spectrometry will be performed to develop qualitative screening approaches able to detect trace levels of a virtually unlimited number of known (suspect) and possibly unknown contaminants. For a selection of compounds, both the total concentration and labile fraction (i.e. bioavailable) will be determined. Additionally, to trace the Suspended Particulate Matter (SPM) towards its origin, carbon (12C/13C) and nitrogen (14N/15N) stable isotope ratios will be measured, since organic matter from marine and terrestrial origin has a different isotopic C and sometimes N signature. In some cases, the sources of the organic matter present in the marine environment might be identified. In addition, modelling techniques will be of great support.In the framework of the assessment of the effects of the construction and operation of offshore wind farms on small cetaceans, the RBINS uses Passive Acoustic Monitoring Devices: porpoise detectors (C-PoDs). A C-PoD consists of a hydrophone, a processor, batteries and a digital timing and logging system, and has an autonomy of up to four months (www.chelonia.co.uk). Data obtained provide an indication of the presence of harbor porpoises in the vicinity of the device, up to a distance of approximately 300m. Data obtained from one PoD can give an indication of presence/absence of porpoises, and can be compared to data obtained from PoDs moored at other locations – as such, the presence of porpoise in wind farm areas can be compared to the presence of porpoises in reference areas as well as compared throughout the year.Based on the results of standardised and ship-based seabird counts, the Research Institute for Nature and Forest (INBO) investigates the effects of offshore wind turbines on the presence of seabirds. Therefore, the INBO performs monthly surveys along fixed monitoring routes through the impact and control areas.The project ”MOMO” is part of the general and permanent duties of monitoring and evaluation of the effects of all human activities on the marine ecosystem to which Belgium is committed following the OSPAR-convention (1992). The general goals of the project are to reduce the dredging work on the BCS and in the coastal harbors and to obtain a detailed insight into the physical processes involved in the marine environment were the dredging works take place. This implies on the one hand policy supported research to decrease the sedimentation in the dredging areas and to evaluate alternative disposal strategies. On the other hand fundamental research on cohesive sediment dynamics is carried out in order to plan and estimate the effect of disposal of fine grained sediments on the marine ecosystem. The latter is carried out using numerical models and in situ measurements.Radiological monitoring on the Belgian part of the North Sea 'BPNS' in the frame of national and international obligations. Survey in the vicinity of the Franco-Belgian border; influence of aquatic releases from foreign nuclear sites on the marine environment; influence on the food chain. Radioactivity measurements on 25 fishes, 20 water samples (5 areas, 4x/y) and 20 sediment samples (5 areas, 4 x/y). Measurements: alpha spectrometry (fish), gamma spectrometry (fish, water and sediment), alpha- and beta-activity, K-40 (water). Program in the frame of the Belgian Federal Agency of Nuclear Control (FANC).";
+        //objectives=string longer than 4000 chars.
         programUUID = UUID.randomUUID();
-        ProgramDTO program = getTestProgram1("KB_" + programUUID);
-        postProgram(this.mockMvc, program.identifier, objectMapper);
+        ProgramDTO program = ProgramControllerTest.getTestProgram1("KB_" + programUUID);
+        ProgramControllerTest.postProgram(this.mockMvc, program, objectMapper);
         cruise.programs.add(program.identifier);
 
         postCruise(mockMvc, cruise, objectMapper);
@@ -259,6 +271,7 @@ public class CruiseControllerTest {
                 .andExpect(content().string(containsString("<gml:posList srsName=\"http://www.opengis.net/gml/srs/epsg.xml#4326\" srsDimension=\"2\">")))
                 .andExpect(content().string(containsString("COMMISSION REGULATION (EC) No 1205/2008")))
                 .andExpect(content().string(containsString("<gmx:Anchor xlink:href=\"https://www.seadatanet.org/urnurl/SDN:L08::" + licenseString)))
+                .andExpect(content().string(containsString("disposal strategies.</gco:CharacterString>")))
                 .andReturn();
 
         mvcResult = this.mockMvc.perform(MockMvcRequestBuilders.delete("/cruise?identifier=" + identifier))

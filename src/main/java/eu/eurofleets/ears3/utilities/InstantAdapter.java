@@ -6,7 +6,6 @@
 package eu.eurofleets.ears3.utilities;
 
 import java.time.Instant;
-import java.time.OffsetDateTime;
 import javax.xml.bind.annotation.adapters.XmlAdapter;
 
 /**

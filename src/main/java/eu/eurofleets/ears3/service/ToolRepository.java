@@ -1,6 +1,5 @@
 package eu.eurofleets.ears3.service;
 
-import eu.eurofleets.ears3.domain.SeaArea;
 import eu.eurofleets.ears3.domain.Tool;
 import java.util.List;
 import java.util.Set;

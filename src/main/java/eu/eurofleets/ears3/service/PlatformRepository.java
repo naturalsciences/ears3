@@ -1,6 +1,5 @@
 package eu.eurofleets.ears3.service;
 
-import eu.eurofleets.ears3.domain.Organisation;
 import eu.eurofleets.ears3.domain.Platform;
 import java.util.List;
 import java.util.Set;

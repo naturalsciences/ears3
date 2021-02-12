@@ -5,13 +5,12 @@ import be.naturalsciences.bmdc.cruise.csr.CSRBuilder;
 import be.naturalsciences.bmdc.cruise.csr.CSRPrinter;
 import be.naturalsciences.bmdc.cruise.model.ICoordinate;
 import be.naturalsciences.bmdc.cruise.model.ISeaArea;
-import dto.EarsObjectList;
-import dto.Navigation;
 import eu.eurofleets.ears3.domain.Coordinate;
 import eu.eurofleets.ears3.domain.Cruise;
 import eu.eurofleets.ears3.domain.CruiseList;
 import eu.eurofleets.ears3.domain.License;
-import eu.eurofleets.ears3.domain.LinkedDataTerm;
+import eu.eurofleets.ears3.domain.Message;
+import eu.eurofleets.ears3.domain.Program;
 import eu.eurofleets.ears3.domain.SeaArea;
 import eu.eurofleets.ears3.dto.CruiseDTO;
 import eu.eurofleets.ears3.service.CruiseService;
@@ -21,20 +20,17 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.URL;
 import java.net.URLConnection;
+import java.time.Instant;
+import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-import javax.websocket.server.PathParam;
 import javax.xml.bind.JAXBException;
-import model.ProjectManager;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.Environment;
 import org.springframework.http.HttpStatus;
@@ -49,7 +45,6 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.client.ResourceAccessException;
 import org.springframework.web.server.ResponseStatusException;
 
 @RestController
@@ -66,19 +61,46 @@ public class CruiseController {
     @Autowired
     private Environment env;
 
-    @RequestMapping(method = {RequestMethod.GET}, value = {"cruises"}, produces = {"application/xml; charset=utf-8", "application/json; charset=utf-8"})
-    public CruiseList getCruises(@RequestParam(required = false, defaultValue = "") String platformCode) {
-        List<Cruise> res;
+    @RequestMapping(method = {RequestMethod.GET}, value = {"alive"}, produces = {"text/plain"})
+    public String getAlive() {
+        return "";
+    }
+
+    // @RequestMapping(method = {RequestMethod.GET}, value = {"cruises"}, produces = {"application/xml; charset=utf-8", "application/json"})
+    private CruiseList getCruises(String platformCode) {
+        Collection<Cruise> res;
         if (platformCode == null || "".equals(platformCode)) {
             res = this.cruiseService.findAll();
         } else {
-            res = this.cruiseService.findAllByPlatformCode(platformCode);
+            res = this.cruiseService.findAllByPlatformIdentifier(platformCode);
         }
 
         return new CruiseList(res);
     }
 
-    @RequestMapping(method = {RequestMethod.GET}, value = {"cruise/{id}"}, produces = {"application/xml; charset=utf-8", "application/json; charset=utf-8"})
+    @RequestMapping(method = {RequestMethod.GET}, value = {"cruises"}, produces = {"application/xml; charset=utf-8", "application/json"})
+    public CruiseList getCruisesAt(@RequestParam(required = false, defaultValue = "") String platformIdentifier, @RequestParam(required = false) OffsetDateTime startDate, @RequestParam(required = false) OffsetDateTime endDate, @RequestParam(required = false) OffsetDateTime atDate) {
+        if (startDate == null && endDate == null && atDate == null) {
+            return getCruises(platformIdentifier);
+        }
+        if (startDate != null && endDate == null) {
+            endDate = Instant.now().atOffset(ZoneOffset.UTC);
+        }
+        if (startDate == null && endDate != null) {
+            startDate = OffsetDateTime.parse("1900-01-01", DateTimeFormatter.ISO_DATE);
+        }
+
+        Set<Cruise> res;
+        if (atDate == null) {
+            res = this.cruiseService.findAllBetweenDate(startDate, endDate, platformIdentifier);
+        } else {
+            res = this.cruiseService.findAtDate(atDate, platformIdentifier);
+        }
+
+        return new CruiseList(res);
+    }
+
+    @RequestMapping(method = {RequestMethod.GET}, value = {"cruise/{id}"}, produces = {"application/xml; charset=utf-8", "application/json"})
     public Cruise getCruiseById(@PathVariable(value = "id") String id) {
         System.out.println("id: " + id);
         Cruise cruise = this.cruiseService.findById(Long.parseLong(id));
@@ -89,7 +111,7 @@ public class CruiseController {
         }
     }
 
-    @RequestMapping(method = {RequestMethod.GET}, value = {"cruise"}, params = {"identifier"}, produces = {"application/xml; charset=utf-8", "application/json; charset=utf-8"})
+    @RequestMapping(method = {RequestMethod.GET}, value = {"cruise"}, params = {"identifier"}, produces = {"application/xml; charset=utf-8", "application/json"})
     public Cruise getCruiseByidentifier(@RequestParam(required = true, value = "identifier") String identifier) {
         Cruise cruise = this.cruiseService.findByIdentifier(identifier);
         if (cruise != null) {
@@ -99,6 +121,11 @@ public class CruiseController {
         }
     }
 
+    @RequestMapping(method = {RequestMethod.GET}, value = {"cruise/current"}, produces = {"application/xml; charset=utf-8", "application/json"})
+    public CruiseList getCurrent() {
+        return new CruiseList(this.cruiseService.findCurrent());
+    }
+
     @RequestMapping(method = {RequestMethod.GET}, value = {"cruise/csr"}, params = {"identifier"}, produces = {"application/xml; charset=utf-8"})
     public String getCSRByName(@RequestParam(required = true, value = "identifier") String identifier) throws JAXBException, IOException {
         Cruise cruise = this.cruiseService.findByIdentifier(identifier);
@@ -106,7 +133,10 @@ public class CruiseController {
             List<Coordinate> coordinates = new ArrayList();
             String startDate = cruise.getStartDate().withOffsetSameInstant(ZoneOffset.UTC).format(DateTimeFormatter.ISO_DATE_TIME);
             String endDate = cruise.getEndDate().withOffsetSameInstant(ZoneOffset.UTC).format(DateTimeFormatter.ISO_DATE_TIME);
-            URL website = new URL(env.getProperty("ears.navigation.server") + "/ears2Nav/nav/getBetween/datagram?startDate=" + startDate + "&endDate=" + endDate);
+
+            /*DatagramUtilities<Navigation> navUtil = new DatagramUtilities<>(Navigation.class, env.getProperty("ears.navigation.server"));
+            List<Navigation> between = navUtil.between(cruise.getStartDate(), cruise.getEndDate());*/
+            URL website = new URL(env.getProperty("ears.navigation.server") + "/ears3Nav/nav/getBetween/datagram?startDate=" + startDate + "&endDate=" + endDate);
             URLConnection connection = website.openConnection();
 
             InputStreamReader ipsr = new InputStreamReader(connection.getInputStream());
@@ -115,18 +145,20 @@ public class CruiseController {
             String headingString = null;
             double heading = 0;
             while ((line = br.readLine()) != null) {
-                String lon = line.split(",")[3];
-                String lat = line.split(",")[4];
-                if (lat != null && !lat.isEmpty() && lon != null && !lon.isEmpty()) {
-                    String[] split = line.split(",");
-                    if (split.length >= 6) {
-                        headingString = split[5];
-                        if (Math.abs(Double.valueOf(headingString) - heading) > 0.5) {
-                            heading = Double.valueOf(headingString);
-                            Coordinate c = new Coordinate();
-                            c.x = Double.valueOf(lon);
-                            c.y = Double.valueOf(lat);
-                            coordinates.add(c);
+                if (line.startsWith("$")) { //EARS datagram
+                    String lon = line.split(",")[3];
+                    String lat = line.split(",")[4];
+                    if (lat != null && !lat.isEmpty() && lon != null && !lon.isEmpty()) {
+                        String[] split = line.split(",");
+                        if (split.length >= 6) {
+                            headingString = split[5];
+                            if (Math.abs(Double.valueOf(headingString) - heading) > 0.5) {
+                                heading = Double.valueOf(headingString);
+                                Coordinate c = new Coordinate();
+                                c.x = Double.valueOf(lon);
+                                c.y = Double.valueOf(lat);
+                                coordinates.add(c);
+                            }
                         }
                     }
                 }
@@ -169,9 +201,9 @@ public class CruiseController {
         }
     }
 
-    @PostMapping(value = {"cruise"}, produces = {"application/xml", "application/json"})
+    @PostMapping(value = {"cruise"}, produces = {"application/xml; charset=utf-8", "application/json"})
     @ResponseStatus(HttpStatus.CREATED)
-    public ResponseEntity<Cruise> createCruise(@RequestBody CruiseDTO cruiseDTO) {
+    public ResponseEntity<Message<CruiseDTO>> createCruise(@RequestBody CruiseDTO cruiseDTO) {
         if (cruiseDTO.platform == null) {
             String property = env.getProperty("ears.platform");
             if (property != null) {
@@ -180,141 +212,17 @@ public class CruiseController {
                 throw new IllegalArgumentException("No platform has been provided in the POST body and no platform has been set in the web service configuration.");
             }
         }
-        return new ResponseEntity<Cruise>(this.cruiseService.save(cruiseDTO), HttpStatus.CREATED);
-
+        Cruise cruise = this.cruiseService.save(cruiseDTO);
+        return new ResponseEntity<Message<CruiseDTO>>(new Message<CruiseDTO>(HttpStatus.CREATED.value(), cruise.getIdentifier(), cruiseDTO), HttpStatus.CREATED);
     }
 
-    @DeleteMapping(value = {"cruise"}, params = {"identifier"}, produces = {"application/xml; charset=utf-8", "application/json; charset=utf-8"})
+    @DeleteMapping(value = {"cruise"}, params = {"identifier"}, produces = {"application/xml; charset=utf-8", "application/json"})
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public String removeCruiseByIdentifier(@RequestParam(required = true) String identifier) {
         this.cruiseService.deleteByIdentifier(identifier);
         return "";
     }
-
-    /*@RequestMapping(method = {org.springframework.web.bind.annotation.RequestMethod.GET}, value = {"insertCruise"}, params = {"id", "cruiseName"}, produces = {"application/xml"})
-    public Message insertCruise(@RequestParam(required = true) String id, @RequestParam(required = true) String cruiseName, @RequestParam(required = false) String startDate, @RequestParam(required = false) String endDate, @RequestParam(required = false) String chiefScientist, @RequestParam(required = false) String csorg, @RequestParam(required = false) String platformCode, @RequestParam(required = false) String platformClass, @RequestParam(required = false) String objectives, @RequestParam(required = false) String collateCenter, @RequestParam(required = false) String startingHarbor, @RequestParam(required = false) String arrivalHarbor, @RequestParam(required = false) String seaAreas)
-            throws ParseException {
-        Cruise cruise = new Cruise();
-        cruise.setId(id);
-        cruise.setName(cruiseName);
-        if (startDate != null) {
-            cruise.setStartDate(DateUtilities.parseDate(startDate));
-        }
-        if (endDate != null) {
-            cruise.setEndDate(DateUtilities.parseDate(endDate));
-        }
-        cruise.setChiefScientist(chiefScientist);
-        cruise.setChiefScientistOrganisation(csorg);
-        cruise.setPlatformCode(platformCode);
-        cruise.setPlatformClass(platformClass);
-        cruise.setObjectives(objectives);
-        cruise.setCollateCenter(collateCenter);
-        cruise.setStartingHarbor(startingHarbor);
-        cruise.setArrivalHarbor(arrivalHarbor);
-
-        if (seaAreas != null) {
-            String[] seaAreasAsArray = seaAreas.split("\\,");
-            Set<SeaAreaO> seaAreasSet = new HashSet();
-
-            for (String str : seaAreasAsArray) {
-                SeaAreaO seaArea = null;
-                try {
-                    seaArea = this.cruiseService.getSeaArea(str);
-                } catch (NumberFormatException e) {
-                }
-                if (seaArea == null) {
-                    seaArea = new SeaAreaO(str, "urn:" + str);
-                }
-                seaAreasSet.add(seaArea);
-            }
-            cruise.setSeaAreas(seaAreasSet);
-        }
-
-        this.cruiseService.setCruise(cruise);
-
-        return new Message(cruise.getCruiseId(), "Cruise inserted");
-    }
-
-    @RequestMapping(method = {org.springframework.web.bind.annotation.RequestMethod.GET}, value = {"insertCruise"}, params = {"newId", "originId"}, produces = {"application/xml"})
-    public Message insertCruiseByModifyingId(@RequestParam(required = true) String newId, @RequestParam(required = true) String originId) {
-        Cruise cruise = this.cruiseService.getCruiseById(originId);
-        Message res = new Message("-1", "Cruise not inserted");
-        if (cruise == null) {
-            res = new Message("-1", "Cruise " + originId + " does not exist");
-        } else {
-            try {
-              //  this.cruiseService.setCruise(newId, cruise);
-                res = new Message(newId, "Cruise inserted Succesfully");
-            } catch (DuplicateIdException e) {
-                res = new Message("-1", "Cruise " + newId + " exists in the DataBase");
-            } catch (Exception e) {
-                res = new Message("-1", "Cruise " + newId + " Some errores occurred coping the Cruise. The Cruise has not been copied to DDBB ");
-            }
-        }
-
-        return res;
-    }
-
-    @RequestMapping(method = {org.springframework.web.bind.annotation.RequestMethod.GET}, value = {"modifyCruise"}, params = {"id"}, produces = {"application/xml"})
-    public Message modifyCruise(@RequestParam(required = true) String id, @RequestParam(required = false) String cruiseName, @RequestParam(required = false) String startDate, @RequestParam(required = false) String endDate, @RequestParam(required = false) String chiefScientist, @RequestParam(required = false) String csorg, @RequestParam(required = false) String platformCode, @RequestParam(required = false) String platformClass, @RequestParam(required = false) String objectives, @RequestParam(required = false) String collateCenter, @RequestParam(required = false) String startingHarbor, @RequestParam(required = false) String arrivalHarbor, @RequestParam(required = false) String seaAreas)
-            throws ParseException {
-        Cruise cruise = this.cruiseService.getCruiseById(id);
-        if (cruiseName != null) {
-            cruise.setName(cruiseName);
-        }
-        if (startDate != null) {
-            cruise.setStartDate(DateUtilities.parseDate(startDate));
-        }
-        if (endDate != null) {
-            cruise.setEndDate(DateUtilities.parseDate(endDate));
-        }
-        if (chiefScientist != null) {
-            cruise.setChiefScientist(chiefScientist);
-        }
-        if (csorg != null) {
-            cruise.setChiefScientistOrganisation(csorg);
-        }
-        if (platformCode != null) {
-            cruise.setPlatformCode(platformCode);
-        }
-        if (platformClass != null) {
-            cruise.setPlatformClass(platformClass);
-        }
-        if (objectives != null) {
-            cruise.setObjectives(objectives);
-        }
-        if (collateCenter != null) {
-            cruise.setCollateCenter(collateCenter);
-        }
-        if (startingHarbor != null) {
-            cruise.setStartingHarbor(startingHarbor);
-        }
-        if (arrivalHarbor != null) {
-            cruise.setArrivalHarbor(arrivalHarbor);
-        }
-        if (seaAreas != null) {
-            String[] seaAreasAsArray = seaAreas.split("\\,");
-            Set<SeaAreaO> seaAreasSet = new HashSet();
-
-            for (String str : seaAreasAsArray) {
-                SeaAreaO seaArea = null;
-                try {
-                    seaArea = this.cruiseService.getSeaArea(str);
-                } catch (NumberFormatException e) {
-                }
-                if (seaArea == null) {
-                    seaArea = new SeaAreaO(str, "urn:" + str);
-                }
-                seaAreasSet.add(seaArea);
-            }
-            cruise.setSeaAreas(seaAreasSet);
-        }
-
-        this.cruiseService.setCruise(cruise);
-
-        return new Message(cruise.getCruiseId(), "Cruise modified");
-    }
-
+    /*
     @RequestMapping(method = {org.springframework.web.bind.annotation.RequestMethod.GET}, value = {"removeCruise"}, params = {"startDate", "endDate"}, produces = {"application/xml"})
     public Message removeCruiseByDateRange(@RequestParam(required = true, value = "startDate") String startDate, @RequestParam(required = true, value = "endDate") String endDate)
             throws ParseException {

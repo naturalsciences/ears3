@@ -17,6 +17,8 @@ import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlTransient;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import java.util.Objects;
+
 /*
  * To change this license header, choose License Headers in Project Properties.
  * To change this template file, choose Tools | Templates
@@ -29,7 +31,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 @Entity
 @XmlRootElement
 @XmlAccessorType(XmlAccessType.FIELD) //ignore all the getters
-public class Program implements IProgram, Serializable {
+public class Program implements IProgram, Serializable, Comparable {
 
     @Column(unique = true, nullable = false)
     private String identifier;
@@ -144,5 +146,45 @@ public class Program implements IProgram, Serializable {
     @Override
     public void setName(String name) {
         this.name = name;
+    }
+
+    @Override
+    public int hashCode() {
+        int hash = 7;
+        hash = 59 * hash + Objects.hashCode(this.identifier);
+        return hash;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (obj == null) {
+            return false;
+        }
+        if (getClass() != obj.getClass()) {
+            return false;
+        }
+        final Program other = (Program) obj;
+        if (!Objects.equals(this.identifier, other.identifier)) {
+            return false;
+        }
+        return true;
+    }
+
+    @Override
+    public int compareTo(Object obj) {
+        if (this == obj) {
+            return 0;
+        }
+        if (obj == null) {
+            return -1;
+        }
+        if (getClass() != obj.getClass()) {
+            return -1;
+        }
+        final Program other = (Program) obj;
+        return this.identifier.compareTo(other.identifier);
     }
 }

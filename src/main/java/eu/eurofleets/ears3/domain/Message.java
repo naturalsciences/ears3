@@ -1,45 +1,60 @@
 package eu.eurofleets.ears3.domain;
 
+import be.naturalsciences.bmdc.cruise.model.IEarsEntity;
+import eu.eurofleets.ears3.dto.CruiseDTO;
+import eu.eurofleets.ears3.dto.EventDTO;
+import eu.eurofleets.ears3.dto.ProgramDTO;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
+import javax.xml.bind.annotation.XmlAnyElement;
+import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlElementWrapper;
 import javax.xml.bind.annotation.XmlRootElement;
+import javax.xml.bind.annotation.XmlSeeAlso;
 
 @XmlRootElement
+@XmlSeeAlso({EventDTO.class, CruiseDTO.class, ProgramDTO.class})
 @XmlAccessorType(XmlAccessType.FIELD)
-public class Message {
+public class Message<E> {
 
-    public static final long RESPONSE_OK = 0L;
-    public static final long RESPONSE_NOK = -1L;
-    private String code;
-    private String description;
+    /**
+     * The error message.
+     */
+    public String message;
+
+    /**
+     * The http status code.
+     */
+    public int code;
+
+    /**
+     * The identifier of the created entity
+     */
+    public String identifier;
+
+    /**
+     * The error exceptionType.
+     */
+    public String exceptionType;
+
+    @XmlAnyElement(lax=true)
+    public E object;
 
     public Message() {
     }
 
-    public Message(String code, String description) {
+    public Message(String message, int code, String identifier, String exceptionType, E object) {
+        this.message = message;
         this.code = code;
-        this.description = description;
+        this.identifier = identifier;
+        this.exceptionType = exceptionType;
+        this.object = object;
     }
 
-    public String getCode() {
-        return this.code;
-    }
-
-    public void setCode(String code) {
+    public Message(int code, String identifier, E object) {
         this.code = code;
+        this.identifier = identifier;
+        this.object = object;
     }
 
-    public String getDescription() {
-        return this.description;
-    }
-
-    public void setDescription(String description) {
-        this.description = description;
-    }
 }
-
-
-/* Location:              /home/thomas/Documents/Project-Eurofleets2/meetings/2016-11-03-04-workshop/VM/shared/ef_workshop/ears2.war!/WEB-INF/classes/eu/eurofleets/ears2/domain/message/Message.class
- * Java compiler version: 7 (51.0)
- * JD-Core Version:       0.7.1
- */

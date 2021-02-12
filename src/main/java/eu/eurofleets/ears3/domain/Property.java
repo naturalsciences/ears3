@@ -2,7 +2,6 @@ package eu.eurofleets.ears3.domain;
 
 import be.naturalsciences.bmdc.cruise.model.ILinkedDataTerm;
 import be.naturalsciences.bmdc.cruise.model.IProperty;
-import com.fasterxml.jackson.annotation.JsonBackReference;
 import java.io.Serializable;
 import javax.persistence.Column;
 import javax.persistence.Entity;

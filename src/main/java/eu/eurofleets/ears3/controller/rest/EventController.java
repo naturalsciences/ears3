@@ -1,23 +1,29 @@
 package eu.eurofleets.ears3.controller.rest;
 
-import be.naturalsciences.bmdc.cruise.model.IPerson;
-import eu.eurofleets.ears3.domain.Cruise;
+import be.naturalsciences.bmdc.cruise.model.IProperty;
+import be.naturalsciences.bmdc.ontology.writer.StringUtils;
+import com.opencsv.CSVWriter;
 import eu.eurofleets.ears3.domain.Event;
 import eu.eurofleets.ears3.domain.EventList;
+import eu.eurofleets.ears3.domain.Message;
 import eu.eurofleets.ears3.domain.Navigation;
-import eu.eurofleets.ears3.domain.Person;
-import eu.eurofleets.ears3.dto.CruiseDTO;
+import eu.eurofleets.ears3.domain.Thermosal;
+import eu.eurofleets.ears3.domain.Weather;
 import eu.eurofleets.ears3.dto.EventDTO;
-import eu.eurofleets.ears3.dto.EventDTOList;
-import eu.eurofleets.ears3.dto.LinkedDataTermDTO;
-import eu.eurofleets.ears3.dto.PersonDTO;
-import eu.eurofleets.ears3.dto.ToolDTO;
 import eu.eurofleets.ears3.service.CruiseService;
 import eu.eurofleets.ears3.service.EventService;
 import eu.eurofleets.ears3.service.ProgramService;
-import eu.eurofleets.ears3.utilities.DatagramUtilities;
+import java.io.IOException;
+import java.io.Writer;
+import java.time.Instant;
+import java.time.OffsetDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
-import javax.websocket.server.PathParam;
+import java.util.Map;
+import java.util.TreeMap;
+import org.apache.commons.io.output.StringBuilderWriter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.Environment;
 import org.springframework.http.HttpStatus;
@@ -32,7 +38,6 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.server.ResponseStatusException;
 
 @RestController
 @CrossOrigin(origins = "*", maxAge = 3600)
@@ -49,24 +54,178 @@ public class EventController {
     @Autowired
     private Environment env;
 
-    @RequestMapping(method = {RequestMethod.GET}, value = {"events"}, produces = {"application/xml; charset=utf-8", "application/json; charset=utf-8"})
+    /*@RequestMapping(method = {RequestMethod.GET}, value = {"events"}, produces = {"application/xml; charset=utf-8", "application/json"})
     public EventList getEvents() {
         List<Event> res = this.eventService.findAll();
         return new EventList(res);
+    }*/
+    public static String sanitizeParam(Map<String, String> allParams, String name) {
+        String get = allParams.get(name);
+        if (get == null || get.equals("") || get.equals(" ")) {
+            return null;
+        } else {
+            return get;
+        }
     }
 
-    @RequestMapping(method = {RequestMethod.GET}, value = {"events"}, params = {"platformIdentifier"}, produces = {"application/xml; charset=utf-8", "application/json; charset=utf-8"})
-    public EventList getEvents(@RequestParam(required = false, defaultValue = "") String platformIdentifier) {
-        List<Event> res;
-        if (platformIdentifier == null || "".equals(platformIdentifier)) {
-            res = this.eventService.findAll();
-        } else {
-            res = this.eventService.findAllByPlatformCode(platformIdentifier);
+    @RequestMapping(method = {RequestMethod.GET}, value = {"events"}, produces = {"application/xml; charset=utf-8", "application/json"})
+    public EventList getEvents(@RequestParam Map<String, String> allParams) {
+        String platformIdentifier = sanitizeParam(allParams, "platformIdentifier");
+        String cruiseIdentifier = sanitizeParam(allParams, "cruiseIdentifier");
+        String programIdentifier = sanitizeParam(allParams, "programIdentifier");
+        String actorEmail = sanitizeParam(allParams, "actorEmail");
+        String startDate = sanitizeParam(allParams, "startDate");
+        String endDate = sanitizeParam(allParams, "endDate");
+        OffsetDateTime start = null;
+        OffsetDateTime end = null;
+        if (startDate != null) {
+            start = OffsetDateTime.parse(startDate);
         }
+        if (endDate != null) {
+            end = OffsetDateTime.parse(endDate);
+        }
+
+        List<Event> res = null;
+        if (platformIdentifier == null && programIdentifier == null && actorEmail == null && start == null && end == null && cruiseIdentifier == null) {
+            res = this.eventService.findAll();
+        } else if (programIdentifier == null && actorEmail == null && start == null && end == null && cruiseIdentifier == null) {
+            res = this.eventService.findAllByPlatformCode(platformIdentifier);
+        } else if (cruiseIdentifier == null) {
+            res = this.eventService.findAllByPlatformActorProgramAndDates(platformIdentifier, actorEmail, programIdentifier, start, end);
+        } else {
+            res = this.eventService.findAllByCruiseProgramAndActor(cruiseIdentifier, programIdentifier, actorEmail);
+        }
+
         return new EventList(res);
     }
 
-    @RequestMapping(method = {RequestMethod.GET}, value = {"events"}, params = {"platformIdentifier", "programIdentifier", "actorEmail"}, produces = {"application/xml; charset=utf-8", "application/json; charset=utf-8"})
+    private static String doubleOrNull(Double val) {
+        return (val != null) ? val.toString() : "";
+    }
+
+    private static String instantOrNull(Instant val) {
+        return (val != null) ? val.toString() : "";
+    }
+
+    @RequestMapping(method = {RequestMethod.GET}, value = {"events.csv"}, produces = {"text/csv; charset=utf-8"})
+    public String getEventsAsCSV(@RequestParam(value = "platformIdentifier", required = false, defaultValue = "") String platformIdentifier) throws IOException {
+
+        List<Event> events;
+        if (platformIdentifier == null || "".equals(platformIdentifier)) {
+            events = this.eventService.findAll();
+        } else {
+            events = this.eventService.findAllByPlatformCode(platformIdentifier);
+        }
+
+        List<String> header = new ArrayList<>(Arrays.asList("Time stamp", "Actor", "Tool category", "Tool", "Process", "Action",
+                "Acquisition Timestamp", "Latitude", "Longitude", "Depth", "Surface water temperature", "Heading", "Course over Ground", "Speed over Ground"));
+        Map<String, String> properties = new TreeMap<>();
+        for (Event event : events) {
+            for (IProperty property : event.getProperties()) {
+                properties.put(property.getKey().getIdentifier(), property.getKey().getName());
+            }
+        }
+        for (Map.Entry<String, String> entry : properties.entrySet()) {
+            String propertyName = entry.getValue();
+            header.add(propertyName);
+        }
+        /*  header.addAll(Arrays.asList("Heading", "Course over Ground", "Speed over Ground",
+                "Salinity", "Conductivity", "Sigma T", "Wind speed", "Wind direction",
+                "Air temperature", "Air pressure", "Solar Radiation", "Turbidity L",
+                "Turbidity H", "OBS L", "OBS H", "Salinity", "Chlorophyll", "Blue Algae",
+                "CDOM", "pH", "Fluorescence", "pCO2", "PAR"));*/
+
+        header.addAll(Arrays.asList("Salinity", "Conductivity", "Sigma T", "Wind speed", "Wind direction",
+                "Air temperature", "Air pressure", "Solar Radiation"));
+
+        String[] entry = new String[header.size()];
+        entry = header.toArray(entry);
+
+        Writer writer = new StringBuilderWriter();
+        CSVWriter csvWriter = null;
+
+        csvWriter = new CSVWriter(writer, ',');
+        csvWriter.writeNext(entry, true);
+
+        for (Event event : events) {
+            Navigation nav = (Navigation) (new ArrayList(event.getNavigation())).get(0);
+            Thermosal tss = (Thermosal) (new ArrayList(event.getThermosal())).get(0);
+            Weather met = (Weather) (new ArrayList(event.getWeather())).get(0);
+            List<String> elements = new ArrayList<>(Arrays.asList(
+                    event.getTimeStamp().format(DateTimeFormatter.ISO_OFFSET_DATE_TIME),
+                    event.getActor().getFirstName() + event.getActor().getLastName(),
+                    event.getToolCategory().getName(),
+                    event.getTool().getTerm().getName(),
+                    event.getProcess().getName(),
+                    event.getAction().getName()
+            ));
+            if (nav != null) {
+                elements.addAll(Arrays.asList(
+                        instantOrNull(nav.getTimeStamp()),
+                        doubleOrNull(nav.getLat()),
+                        doubleOrNull(nav.getLon()),
+                        doubleOrNull(nav.getDepth()),
+                        doubleOrNull(tss.getTemperature()),
+                        doubleOrNull(nav.getHeading()),
+                        doubleOrNull(nav.getCog()),
+                        doubleOrNull(nav.getSog())));
+            } else {
+                elements.addAll(Arrays.asList(
+                        "",
+                        "",
+                        "",
+                        "",
+                        "",
+                        "",
+                        "",
+                        ""));
+            }
+
+            for (String propertyUrl : properties.keySet()) {
+                List<String> propertyValues = event.getPropertyValues(propertyUrl);
+                if (propertyValues != null) {
+                    elements.add(StringUtils.join(propertyValues, ","));
+                } else {
+                    elements.add("");
+                }
+            }
+            if (tss != null) {
+                elements.addAll(Arrays.asList(
+                        doubleOrNull(tss.getSalinity()),
+                        doubleOrNull(tss.getConductivity()),
+                        doubleOrNull(tss.getSigmat())));
+            } else {
+                elements.addAll(Arrays.asList(
+                        "",
+                        "",
+                        ""));
+            }
+            if (met != null) {
+                elements.addAll(Arrays.asList(
+                        doubleOrNull(met.getWindSpeedAverage()),
+                        doubleOrNull(met.getWindDirection()),
+                        doubleOrNull(met.getAtmosphericTemperature()),
+                        doubleOrNull(met.getAtmosphericPressure()),
+                        doubleOrNull(met.getSolarRadiation())));
+            } else {
+                elements.addAll(Arrays.asList(
+                        "",
+                        "",
+                        "",
+                        "",
+                        ""));
+            }
+            entry = new String[elements.size()];
+            entry = elements.toArray(entry);
+
+            csvWriter.writeNext(entry, true);
+        }
+        writer.flush();
+        writer.close();
+        return writer.toString();
+    }
+
+    /*@RequestMapping(method = {RequestMethod.GET}, value = {"events"}, produces = {"application/xml; charset=utf-8", "application/json"})
     public EventList getEventsByActorAndProgram(@RequestParam(required = false, defaultValue = "") String platformIdentifier, @RequestParam(required = false, defaultValue = "") String programIdentifier, @RequestParam(required = false, defaultValue = "") String actorEmail) {
         List<Event> res;
         if ((programIdentifier == null || "".equals(programIdentifier)) && (actorEmail == null || "".equals(actorEmail))) {
@@ -75,8 +234,7 @@ public class EventController {
             res = this.eventService.findAllByPlatformActorAndProgram(platformIdentifier, actorEmail, programIdentifier);
         }
         return new EventList(res);
-    }
-
+    }*/
     @RequestMapping(method = {RequestMethod.GET}, value = {"event/{id}"}, produces = {"application/xml", "application/json"})
     public Event getEventById(@PathVariable(value = "id") String id) {
         return this.eventService.findById(Long.parseLong(id));
@@ -88,9 +246,9 @@ public class EventController {
         return this.eventService.findByIdentifier(identifier);
     }
 
-    @PostMapping(value = {"event"}, produces = {"application/xml", "application/json"})
+    @PostMapping(value = {"event"}, produces = {"application/xml; charset=utf-8", "application/json"})
     @ResponseStatus(HttpStatus.CREATED)
-    public ResponseEntity<Event> createEvent(@RequestBody EventDTO eventDTO) {
+    public ResponseEntity<Message<EventDTO>> createEvent(@RequestBody EventDTO eventDTO) {
         if (eventDTO.platform == null) {
             String property = env.getProperty("ears.platform");
             if (property != null) {
@@ -99,10 +257,13 @@ public class EventController {
                 throw new IllegalArgumentException("No platform has been provided in the POST body and no platform has been set in the web service configuration.");
             }
         }
-        return new ResponseEntity<Event>(this.eventService.save(eventDTO), HttpStatus.CREATED);
+        Event event = this.eventService.save(eventDTO);
+        eventDTO = new EventDTO(event);
+        return new ResponseEntity<Message<EventDTO>>(new Message<EventDTO>(HttpStatus.CREATED.value(), event.getIdentifier(), eventDTO), HttpStatus.CREATED);
+        // return new ResponseEntity<Event>(, HttpStatus.CREATED);event
     }
 
-    @DeleteMapping(value = {"event"}, params = {"identifier"}, produces = {"application/xml; charset=utf-8", "application/json; charset=utf-8"})
+    @DeleteMapping(value = {"event"}, params = {"identifier"}, produces = {"application/xml; charset=utf-8", "application/json"})
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public String removeEventByIdentifier(@RequestParam(required = true) String identifier) {
         this.eventService.deleteByIdentifier(identifier);

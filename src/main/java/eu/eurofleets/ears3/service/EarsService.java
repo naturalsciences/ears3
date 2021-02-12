@@ -6,7 +6,6 @@
 package eu.eurofleets.ears3.service;
 
 import be.naturalsciences.bmdc.cruise.model.IConcept;
-import eu.eurofleets.ears3.domain.Harbour;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;

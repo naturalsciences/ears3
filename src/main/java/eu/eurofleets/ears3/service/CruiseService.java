@@ -1,6 +1,5 @@
 package eu.eurofleets.ears3.service;
 
-import be.naturalsciences.bmdc.cruise.model.ICruise;
 import be.naturalsciences.bmdc.cruise.model.ILinkedDataTerm;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -14,15 +13,16 @@ import eu.eurofleets.ears3.domain.Program;
 import eu.eurofleets.ears3.domain.SeaArea;
 import eu.eurofleets.ears3.dto.CruiseDTO;
 import eu.eurofleets.ears3.dto.PersonDTO;
-import eu.eurofleets.ears3.dto.ProgramDTO;
+import java.time.Instant;
+import java.time.OffsetDateTime;
+import java.time.ZoneOffset;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
 import java.util.List;
+import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import java.util.regex.Pattern;
-import org.apache.commons.collections4.IterableUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
@@ -58,11 +58,6 @@ public class CruiseService {
         return this.cruiseRepository.findAll();
     }
 
-    public List<Cruise> findAllByPlatformCode(String code) {
-        Assert.notNull(code, "Platform code must not be null");
-        return this.cruiseRepository.findByPlatformCode(code);
-    }
-
     public Cruise findById(long id) {
         Assert.notNull(id, "Cruise Id must not be null");
         return this.cruiseRepository.findById(id).orElse(null);
@@ -71,6 +66,34 @@ public class CruiseService {
     public Cruise findByIdentifier(String identifier) {
         Assert.notNull(identifier, "Cruise identifier must not be null");
         return this.cruiseRepository.findByIdentifier(ILinkedDataTerm.cleanUrl(identifier));
+    }
+
+    public Set<Cruise> findAllByPlatformIdentifier(String platformIdentifier) {
+        Assert.notNull(platformIdentifier, "Platform code must not be null");
+        return this.cruiseRepository.findByPlatformCode(platformIdentifier);
+    }
+
+    public Set<Cruise> findAllBetweenDate(OffsetDateTime startDate, OffsetDateTime endDate, String platformIdentifier) {
+        if (startDate == null) {
+            throw new IllegalArgumentException("startDate cannot be null");
+        }
+        if (platformIdentifier == null) {
+            return this.cruiseRepository.findBetweenDate(startDate, endDate);
+        } else {
+            return this.cruiseRepository.findBetweenDate(startDate, endDate, platformIdentifier);
+        }
+    }
+
+    public Set<Cruise> findAtDate(OffsetDateTime at, String platformIdentifier) {
+        if (platformIdentifier == null) {
+            return this.cruiseRepository.findAtDate(at);
+        } else {
+            return this.cruiseRepository.findAtDate(at, platformIdentifier);
+        }
+    }
+
+    public Set<Cruise> findCurrent() {
+        return this.cruiseRepository.findAtDate(Instant.now().atOffset(ZoneOffset.UTC));
     }
 
     @Autowired
@@ -99,6 +122,10 @@ public class CruiseService {
         if (dto.endDate == null) {
             log.log(Level.SEVERE, "Can't further process cruise " + dto.identifier + ". endDate is missing.");
             throw new IllegalArgumentException("Cruise must have an end date.");
+        }
+        if (dto.endDate.isBefore(dto.startDate)) {
+            log.log(Level.SEVERE, "Can't further process cruise " + dto.identifier + ". endDate is before startDate.");
+            throw new IllegalArgumentException("Cruise's endDate is before startDate.");
         }
         if (dto.objectives == null) {
             log.log(Level.SEVERE, "Can't further process cruise " + dto.identifier + ". objectives is missing.");
@@ -183,12 +210,12 @@ public class CruiseService {
             }
             cruise.setArrivalHarbour(arrivalHarbour);
             cruise.setDepartureHarbour(departureHarbour);
-            cruise.setChiefScientists(chiefScientists);
+            cruise.addChiefScientists(chiefScientists);
             cruise.setCollateCentre(collateCentre);
             cruise.setPlatform(platform);
-            cruise.setPrograms(programs);
-            cruise.setSeaAreas(seaAreas);
-            cruise.setP02(PO2s);
+            cruise.addPrograms(programs);
+            cruise.addSeaAreas(seaAreas);
+            cruise.addP02(PO2s);
             return this.cruiseRepository.save(cruise); //.getId(); } catch (Exception e) {
         } catch (Exception e) {
             log.log(Level.SEVERE, "exception!", e);

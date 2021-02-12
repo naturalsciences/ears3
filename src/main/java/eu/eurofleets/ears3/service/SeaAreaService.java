@@ -1,8 +1,6 @@
 package eu.eurofleets.ears3.service;
 
 import eu.eurofleets.ears3.domain.SeaArea;
-import eu.eurofleets.ears3.domain.LinkedDataTerm;
-import eu.eurofleets.ears3.domain.Project;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;

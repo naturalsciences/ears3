@@ -14,23 +14,15 @@ import eu.eurofleets.ears3.domain.Platform;
 import eu.eurofleets.ears3.domain.Project;
 import eu.eurofleets.ears3.domain.SeaArea;
 import eu.eurofleets.ears3.domain.Tool;
-import eu.eurofleets.ears3.service.CountryRepository;
 import eu.eurofleets.ears3.service.CountryService;
-import eu.eurofleets.ears3.service.CruiseService;
 import eu.eurofleets.ears3.service.EarsService;
-import eu.eurofleets.ears3.service.HarbourRepository;
 import eu.eurofleets.ears3.service.HarbourService;
 import eu.eurofleets.ears3.service.LinkedDataTermRepository;
 import eu.eurofleets.ears3.service.LinkedDataTermService;
-import eu.eurofleets.ears3.service.OrganisationRepository;
 import eu.eurofleets.ears3.service.OrganisationService;
-import eu.eurofleets.ears3.service.PlatformRepository;
 import eu.eurofleets.ears3.service.PlatformService;
-import eu.eurofleets.ears3.service.ProjectRepository;
 import eu.eurofleets.ears3.service.ProjectService;
-import eu.eurofleets.ears3.service.SeaAreaRepository;
 import eu.eurofleets.ears3.service.SeaAreaService;
-import eu.eurofleets.ears3.service.ToolRepository;
 import eu.eurofleets.ears3.service.ToolService;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -44,7 +36,6 @@ import javax.annotation.PostConstruct;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.data.repository.CrudRepository;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -132,22 +123,8 @@ public class SyncScheduler {
         VESSEL_OPERATORS.put("SDN:C17::33H4", "SDN:EDMO::3706");
     }
 
-    @Bean(name = "asyncExec")
-    public Executor asyncExecutor() {
-        ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
-        executor.setCorePoolSize(3);
-        executor.setMaxPoolSize(3);
-        executor.setQueueCapacity(10);
-        executor.setThreadNamePrefix("AsynchThread-");
-        executor.setAllowCoreThreadTimeOut(true);
-        executor.setKeepAliveSeconds(5 * 60);
-        executor.initialize();
-
-        return executor;
-    }
-
     @RequestMapping(method = {RequestMethod.GET}, path = "ships")
-    @Async("asyncExec")
+    @Async("asyncExecutor")
     public CompletableFuture<String> syncShips() {
         log.log(Level.INFO, "Syncing ships");
         try {
@@ -186,7 +163,7 @@ public class SyncScheduler {
     }
 
     @RequestMapping(method = {RequestMethod.GET}, path = "organisations")
-    @Async("asyncExec")
+    @Async("asyncExecutor")
     public CompletableFuture<String> syncOrganisations() throws Exception {
         log.log(Level.INFO, "Syncing organisations");
         try {
@@ -213,7 +190,7 @@ public class SyncScheduler {
     }
 
     @RequestMapping(method = {RequestMethod.GET}, path = "harbours")
-    @Async("asyncExec")
+    @Async("asyncExecutor")
     public CompletableFuture<String> syncHarbours() {
         log.log(Level.INFO, "Syncing harbours");
         try {
@@ -239,35 +216,35 @@ public class SyncScheduler {
     }
 
     @RequestMapping(method = {RequestMethod.GET}, path = "seas")
-    @Async("asyncExec")
+    @Async("asyncExecutor")
     public CompletableFuture<String> syncSeas() {
-        sync(SeaArea.class, new ExternalHelper(SeaArea.class,  new SeaAreaCopyAssistant()));
+        sync(SeaArea.class, new ExternalHelper(SeaArea.class, new SeaAreaCopyAssistant()));
         return CompletableFuture.completedFuture("Finished syncing sea areas");
     }
 
     @RequestMapping(method = {RequestMethod.GET}, path = "countries")
-    @Async("asyncExec")
+    @Async("asyncExecutor")
     public CompletableFuture<String> syncCountries() {
         sync(Country.class, new ExternalHelper(Country.class, null));
         return CompletableFuture.completedFuture("Finished syncing countries");
     }
 
     @RequestMapping(method = {RequestMethod.GET}, path = "tools")
-    @Async("asyncExec")
+    @Async("asyncExecutor")
     public CompletableFuture<String> syncTools() {
         sync(Tool.class, new ExternalHelper(Tool.class, null));
         return CompletableFuture.completedFuture("Finished syncing tools");
     }
 
     @RequestMapping(method = {RequestMethod.GET}, path = "projects")
-    @Async("asyncExec")
+    @Async("asyncExecutor")
     public CompletableFuture<String> syncProjects() {
         sync(Project.class, new ExternalProjectHelper());
         return CompletableFuture.completedFuture("Finished syncing projects");
     }
 
     @RequestMapping(method = {RequestMethod.GET}, path = "all")
-    @Async("asyncExec")
+    @Async("asyncExecutor")
     public CompletableFuture<String> sync() throws Exception {
         synchronizeExternal();
         return CompletableFuture.completedFuture("Finished syncing all external vocabularies");
@@ -300,5 +277,9 @@ public class SyncScheduler {
         syncTools();
         syncOrganisations();
         syncProjects();
+        syncSubjects();
+    }
+
+    private void syncSubjects() {
     }
 }

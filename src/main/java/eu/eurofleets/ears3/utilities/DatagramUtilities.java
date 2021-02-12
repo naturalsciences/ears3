@@ -6,7 +6,6 @@
 package eu.eurofleets.ears3.utilities;
 
 import eu.eurofleets.ears3.domain.Acquisition;
-import eu.eurofleets.ears3.domain.Coordinate;
 import eu.eurofleets.ears3.domain.Navigation;
 import eu.eurofleets.ears3.domain.Thermosal;
 import eu.eurofleets.ears3.domain.Weather;
@@ -15,7 +14,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.lang.reflect.Field;
-import java.lang.reflect.Method;
+import java.net.ConnectException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLConnection;
@@ -49,12 +48,30 @@ public class DatagramUtilities<A extends Acquisition> {
 
     public DatagramUtilities(Class<A> cls, String baseUrl) throws MalformedURLException {
         this.cls = cls;
-        this.baseUrl = new URL(baseUrl);
+        Logger.getLogger(DatagramUtilities.class.getName()).log(Level.INFO, "Initialized DatagramUtilities for class " + cls + " using base url " + baseUrl);
+        this.baseUrl = new URL(baseUrl.replaceAll("\\/$", ""));
+    }
+
+    public URL getBaseUrl() {
+        return this.baseUrl;
+    }
+
+    private URL getEndpointUrl(String endpoint) {
+        try {
+            if (this.baseUrl == null) {
+                return new URL("http://" + endpoint);
+            } else {
+                return new URL(baseUrl, endpoint);
+            }
+        } catch (MalformedURLException ex) {
+            Logger.getLogger(DatagramUtilities.class.getName()).log(Level.SEVERE, null, ex);
+            return null;
+        }
     }
 
     public A last() throws IOException {
         try {
-            List<A> r = analyzeDatagram(new URL(baseUrl, "ears2Nav/" + abbrevs.get(this.cls) + "/getLast/datagram"));
+            List<A> r = analyzeDatagram(new URL(baseUrl, "/ears3Nav/" + abbrevs.get(this.cls) + "/getLast/datagram"));
             return r.isEmpty() ? null : r.get(0);
         } catch (MalformedURLException ex) {
             Logger.getLogger(DatagramUtilities.class.getName()).log(Level.SEVERE, null, ex);
@@ -63,9 +80,12 @@ public class DatagramUtilities<A extends Acquisition> {
     }
 
     public A nearest(OffsetDateTime at) throws IOException {
+        if (at == null) {
+            throw new IllegalArgumentException("Provided nearest time is null!");
+        }
         String atString = at.withOffsetSameInstant(ZoneOffset.UTC).format(DateTimeFormatter.ISO_DATE_TIME);
         try {
-            List<A> r = analyzeDatagram(new URL(baseUrl, "ears2Nav/" + abbrevs.get(this.cls) + "/getNearest/datagram?date=" + atString));
+            List<A> r = analyzeDatagram(new URL(baseUrl, "/ears3Nav/" + abbrevs.get(this.cls) + "/getNearest/datagram?date=" + atString));
             return r.isEmpty() ? null : r.get(0);
         } catch (MalformedURLException ex) {
             Logger.getLogger(DatagramUtilities.class.getName()).log(Level.SEVERE, null, ex);
@@ -74,59 +94,68 @@ public class DatagramUtilities<A extends Acquisition> {
     }
 
     public List<A> between(OffsetDateTime start, OffsetDateTime stop) throws IOException {
+        if (start == null) {
+            throw new IllegalArgumentException("Provided start time is null!");
+        }
+        if (stop == null) {
+            throw new IllegalArgumentException("Provided end time is null!");
+        }
         String startString = start.withOffsetSameInstant(ZoneOffset.UTC).format(DateTimeFormatter.ISO_DATE_TIME);
         String endString = stop.withOffsetSameInstant(ZoneOffset.UTC).format(DateTimeFormatter.ISO_DATE_TIME);
         try {
-            return analyzeDatagram(new URL(baseUrl, "ears2Nav/" + abbrevs.get(this.cls) + "/getBetween/datagram?startDate=" + startString + "&endDate=" + endString));
+            return analyzeDatagram(new URL(baseUrl, "/ears3Nav/" + abbrevs.get(this.cls) + "/getBetween/datagram?startDate=" + startString + "&endDate=" + endString));
         } catch (MalformedURLException ex) {
             Logger.getLogger(DatagramUtilities.class.getName()).log(Level.SEVERE, null, ex);
         }
         return null;
     }
 
-    private List<A> analyzeDatagram(URL endpoint) throws IOException {
-
-        // URL endpoint = new URL(env.getProperty("ears.navigation.server") + "nav/getNearest/datagram?date=" + endDate);
+    private List<A> analyzeDatagram(URL endpoint) throws IOException, ConnectException {
         URLConnection connection = endpoint.openConnection();
-
         InputStreamReader ipsr = new InputStreamReader(connection.getInputStream());
         BufferedReader br = new BufferedReader(ipsr);
         String line;
-
         List<A> result = new ArrayList<>();
         try {
             while ((line = br.readLine()) != null) {
-                line = line.replace(",,", ", ,");
-                line = line.replaceAll(",$", ", ");
-                String[] vals = line.split(",");
-                A a = cls.newInstance();
+                if (line.startsWith("$")) {
+                    System.out.println("Read " + line + " from " + endpoint);
+                    line = line.replace(",,", ", ,");
+                    line = line.replaceAll(",$", ", ");
+                    String[] vals = line.split(",");
+                    A acquisitionValue = cls.newInstance();
+                    if (vals.length >= 3) {
+                        String dt = "20" + vals[1].substring(0, 2) + "-" + vals[1].substring(2, 4) + "-" + vals[1].substring(4, 6);
+                        String tm = vals[2].substring(0, 2) + ":" + vals[2].substring(2, 4) + ":" + vals[2].substring(4, 6) + "Z";
+                        acquisitionValue.setInstrumentTime(Instant.parse(dt + "T" + tm));
 
-                try {
-                    String dt = "20" + vals[1].substring(0, 2) + "-" + vals[1].substring(2, 4) + "-" + vals[1].substring(4, 6);
-                    String tm = vals[2].substring(0, 2) + ":" + vals[2].substring(2, 4) + ":" + vals[2].substring(4, 6) + "Z";
-                    a.setInstrumentTime(Instant.parse(dt + "T" + tm));
-                } catch (Exception e) {
-                    int b = 5;
-                }
-
-                for (Field field : cls.getDeclaredFields()) {
-                    if (field.isAnnotationPresent(DatagramOrder.class)) {
-                        DatagramOrder annotation = field.getAnnotation(DatagramOrder.class);
-                        int index = annotation.value();
-                        String value = vals[index];
-                        if (!" ".equals(value) && value.contains(".")) {
-                            field.setAccessible(true);
-                            field.set(a, Double.valueOf(value));
+                        for (Field field : cls.getDeclaredFields()) {
+                            if (field.isAnnotationPresent(DatagramOrder.class)) {
+                                DatagramOrder annotation = field.getAnnotation(DatagramOrder.class);
+                                int index = annotation.value();
+                                String value = null;
+                                if (index < vals.length) {
+                                    value = vals[index];
+                                }
+                                if (value != null && !" ".equals(value) && value.contains(".")) {
+                                    field.setAccessible(true);
+                                    field.set(acquisitionValue, Double.valueOf(value));
+                                }
+                            }
                         }
+                        result.add(acquisitionValue);
                     }
+                } else {
+                    System.out.println("Line is not an EARS datagram (using " + endpoint + ").");
                 }
-                result.add(a);
             }
             br.close();
+
         } catch (InstantiationException | IllegalArgumentException | IllegalAccessException e) {
-            Logger.getLogger(DatagramUtilities.class.getName()).log(Level.SEVERE, null, e);
+            Logger.getLogger(DatagramUtilities.class.getName()).log(Level.SEVERE, "Could't set property of " + cls.getName() + " Acquisition entity", e);
         }
         return result;
+
     }
 
 }
