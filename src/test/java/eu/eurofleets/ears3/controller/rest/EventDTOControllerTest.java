@@ -7,12 +7,15 @@ package eu.eurofleets.ears3.controller.rest;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import eu.eurofleets.ears3.Application;
+import static eu.eurofleets.ears3.controller.rest.EventControllerTest.getIdentifiers;
 import eu.eurofleets.ears3.dto.EventDTO;
 import eu.eurofleets.ears3.dto.ProgramDTO;
 import java.time.Instant;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
+import java.util.List;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.Ignore;
@@ -76,7 +79,8 @@ public class EventDTOControllerTest {
                 .andExpect(status().is(200))
                 .andReturn();
 
-        String identifier = EventControllerTest.getIdentifier(postEvent);
+        List<String> tmp = new ArrayList(getIdentifiers(mvcResult));
+        String identifier = tmp.get(0);
         mvcResult = this.mockMvc.perform(MockMvcRequestBuilders.get("/dto/event.json?identifier=" + identifier).contentType(MediaType.APPLICATION_JSON))
                 .andDo(print())
                 .andExpect(status().is(200))
@@ -87,7 +91,7 @@ public class EventDTOControllerTest {
                 .andDo(print())
                 .andReturn();
         contentAsString = mvcResult.getResponse().getContentAsString();
-     //   assertTrue(StringUtils.countOccurrencesOf(contentAsString, "event") == 1);
+        //   assertTrue(StringUtils.countOccurrencesOf(contentAsString, "event") == 1);
 
         EventControllerTest.deleteEvent(this.mockMvc, postEvent);
         EventControllerTest.deleteEvent(this.mockMvc, postEvent2);

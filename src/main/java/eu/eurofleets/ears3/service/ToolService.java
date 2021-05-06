@@ -20,8 +20,12 @@ public class ToolService implements EarsService<Tool> {
     private final ToolRepository toolRepository;
 
     @Autowired
-    public ToolService(ToolRepository toolRepository) {
+    private LinkedDataTermService ldtService;
+
+    @Autowired
+    public ToolService(ToolRepository toolRepository, LinkedDataTermRepository linkedDataTermRepository) {
         this.toolRepository = toolRepository;
+
     }
 
     public List<Tool> findAll() {
@@ -94,7 +98,8 @@ public class ToolService implements EarsService<Tool> {
             tool.getTerm().setUrn(urn);
             return toolRepository.save(tool);
         } else {
-            return existingTool;
+            existingTool.setParentTool(tool.getParentTool());
+            return toolRepository.save(existingTool);
         }
     }
 

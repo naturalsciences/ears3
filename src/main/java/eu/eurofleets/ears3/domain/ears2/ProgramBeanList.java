@@ -5,11 +5,9 @@
  */
 package eu.eurofleets.ears3.domain.ears2;
 
-import eu.eurofleets.ears3.domain.Cruise;
 import eu.eurofleets.ears3.domain.Program;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Set;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;

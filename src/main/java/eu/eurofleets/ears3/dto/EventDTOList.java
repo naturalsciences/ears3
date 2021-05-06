@@ -5,7 +5,6 @@
  */
 package eu.eurofleets.ears3.dto;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
 import eu.eurofleets.ears3.domain.Event;
 import java.util.ArrayList;
 import java.util.List;

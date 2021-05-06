@@ -15,6 +15,8 @@ import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.StringJoiner;
+import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
@@ -52,6 +54,7 @@ public class Event implements IEvent, Serializable {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
 
+    @Column(unique = true, nullable = false, length = 36) //uuid length
     private String identifier;
     private String eventDefinitionId;
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ssXXX")
@@ -310,6 +313,14 @@ public class Event implements IEvent, Serializable {
 
         }
         return r;
+    }
+
+    public String getPrincipalInvestigators() {
+        StringJoiner sj = new StringJoiner(", ");
+        for (IPerson pi : this.getProgram().getPrincipalInvestigators()) {
+            sj.add(((Person) pi).getFirstNameLastName());
+        }
+        return sj.toString();
     }
 
 }

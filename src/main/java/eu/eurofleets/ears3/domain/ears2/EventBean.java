@@ -1,22 +1,15 @@
 package eu.eurofleets.ears3.domain.ears2;
 
 import be.naturalsciences.bmdc.cruise.model.ILinkedDataTerm;
-import be.naturalsciences.bmdc.cruise.model.IPerson;
 import be.naturalsciences.bmdc.cruise.model.IProperty;
-import be.naturalsciences.bmdc.utils.JsonUtils;
 import eu.eurofleets.ears3.domain.Event;
 import eu.eurofleets.ears3.domain.Property;
 import java.io.Serializable;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Set;
 import java.util.StringJoiner;
 import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlElement;
-import javax.xml.bind.annotation.XmlElementWrapper;
 import javax.xml.bind.annotation.XmlRootElement;
-import javax.xml.bind.annotation.XmlTransient;
 
 @XmlRootElement(namespace = "http://www.eurofleets.eu/", name = "event")
 public class EventBean implements Serializable {

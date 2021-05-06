@@ -24,10 +24,10 @@ import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 public class CruiseDTO {
 
     public String identifier;
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ssXXX")
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ssX")
     @XmlJavaTypeAdapter(value = OffsetDateTimeAdapter.class)
     public OffsetDateTime startDate;
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ssXXX")
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ssX")
     @XmlJavaTypeAdapter(value = OffsetDateTimeAdapter.class)
     public OffsetDateTime endDate;
     public String collateCentre;

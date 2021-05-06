@@ -2,9 +2,7 @@ package eu.eurofleets.ears3.service;
 
 import eu.eurofleets.ears3.domain.Program;
 import java.time.OffsetDateTime;
-import java.util.List;
 import java.util.Optional;
-import java.util.Set;
 import java.util.SortedSet;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;

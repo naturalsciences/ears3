@@ -6,10 +6,6 @@
 package eu.eurofleets.ears3.controller.rest;
 
 import eu.eurofleets.ears3.domain.Message;
-import java.sql.SQLException;
-import javax.xml.bind.annotation.XmlAccessType;
-import javax.xml.bind.annotation.XmlAccessorType;
-import javax.xml.bind.annotation.XmlRootElement;
 import org.hibernate.exception.ConstraintViolationException;
 import org.postgresql.util.PSQLException;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -31,7 +27,7 @@ import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExcep
 public class RestResponseExceptionHandler
         extends ResponseEntityExceptionHandler {
 
-    @ExceptionHandler(value = {IllegalArgumentException.class, IllegalStateException.class, ResponseStatusException.class, ArrayIndexOutOfBoundsException.class, PSQLException.class, DataIntegrityViolationException.class, ConstraintViolationException.class})
+    @ExceptionHandler(value = {IllegalArgumentException.class, IllegalStateException.class, ResponseStatusException.class, ArrayIndexOutOfBoundsException.class, PSQLException.class, DataIntegrityViolationException.class, ConstraintViolationException.class, ClassNotFoundException.class})
     protected ResponseEntity<Object> handleConflict(
             RuntimeException ex, WebRequest request) {
         HttpStatus status = null;
@@ -47,7 +43,7 @@ public class RestResponseExceptionHandler
         // build response body
         Message response = new Message();
 
-        response.exceptionType = ex.getClass().getSimpleName();
+        response.exceptionType = ex.getClass().getSimpleName() + ": " + ex.getMessage();
         response.message = ex.getMessage();
         response.code = status.value();
 

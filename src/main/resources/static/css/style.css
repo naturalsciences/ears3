@@ -1,3 +1,7 @@
+body{
+    font-size:100%;
+}
+
 h1 {
     color: red;
     width: 500px;
@@ -8,21 +12,17 @@ h1 {
     display: none;
 }
 
-.succesSended {
-    visibility: hidden;
-}
-
 table, tr, td {
     border: none;
 }
 
-table#recentEvents{
+table#recentEventDefinitionTable{
     border-collapse: collapse;
     width:100%;
     table-layout:fixed;
 }
 
-table#recentEvents td {
+table#recentEventDefinitionTable td {
     border-bottom: lightgrey thin solid;
     max-width:50%;
     min-width:50%;
@@ -30,14 +30,26 @@ table#recentEvents td {
     vertical-align: middle;
 }
 
-table#recentEvents button {
+table#recentEventDefinitionTable tr {
+    min-height: 10%;
+}
+
+table#recentEventDefinitionTable button {
     vertical-align: top;
     height:100%;
     max-width:80%;
 }
 
-table#recentEvents p{
-    font-size: 70%;
+table#recentEventDefinitionTable p{
+    font-size: 80%;
 }
 
+table#dropdownMenuTable td{
+  line-height:35px;
+}
 
+button p.close-btn{
+    text-align: right;
+    font-weight: bolder;
+    font-size: 130% !important;
+}

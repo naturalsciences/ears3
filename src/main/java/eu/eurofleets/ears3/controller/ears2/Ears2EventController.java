@@ -1,44 +1,20 @@
 package eu.eurofleets.ears3.controller.ears2;
 
-import eu.eurofleets.ears3.controller.rest.*;
-import be.naturalsciences.bmdc.cruise.model.IProperty;
-import be.naturalsciences.bmdc.ontology.writer.StringUtils;
-import com.opencsv.CSVWriter;
 import eu.eurofleets.ears3.domain.Event;
-import eu.eurofleets.ears3.domain.EventList;
-import eu.eurofleets.ears3.domain.Navigation;
-import eu.eurofleets.ears3.domain.Thermosal;
-import eu.eurofleets.ears3.domain.Weather;
 import eu.eurofleets.ears3.domain.ears2.EventBean;
 import eu.eurofleets.ears3.domain.ears2.EventBeanList;
-import eu.eurofleets.ears3.dto.EventDTO;
 import eu.eurofleets.ears3.service.CruiseService;
 import eu.eurofleets.ears3.service.EventService;
 import eu.eurofleets.ears3.service.ProgramService;
-import java.io.IOException;
-import java.io.Writer;
-import java.time.Instant;
 import java.time.OffsetDateTime;
-import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
-import java.util.TreeMap;
-import org.apache.commons.io.output.StringBuilderWriter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.Environment;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController

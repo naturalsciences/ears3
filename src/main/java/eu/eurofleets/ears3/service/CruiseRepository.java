@@ -3,7 +3,6 @@ package eu.eurofleets.ears3.service;
 import eu.eurofleets.ears3.domain.Cruise;
 import java.time.OffsetDateTime;
 import java.util.Date;
-import java.util.List;
 import java.util.Set;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;

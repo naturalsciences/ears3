@@ -10,7 +10,6 @@ import eu.eurofleets.ears3.domain.Cruise;
 import eu.eurofleets.ears3.domain.CruiseList;
 import eu.eurofleets.ears3.domain.License;
 import eu.eurofleets.ears3.domain.Message;
-import eu.eurofleets.ears3.domain.Program;
 import eu.eurofleets.ears3.domain.SeaArea;
 import eu.eurofleets.ears3.dto.CruiseDTO;
 import eu.eurofleets.ears3.service.CruiseService;

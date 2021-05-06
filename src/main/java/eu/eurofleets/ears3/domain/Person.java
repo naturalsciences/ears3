@@ -168,4 +168,8 @@ public class Person implements IPerson, Serializable {
         this.id = id;
     }
 
+    public String getFirstNameLastName() {
+        return getFirstName() + " " + getLastName();
+    }
+
 }

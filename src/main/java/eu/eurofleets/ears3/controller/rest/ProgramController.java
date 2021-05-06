@@ -6,7 +6,6 @@ import eu.eurofleets.ears3.domain.Program;
 import eu.eurofleets.ears3.domain.ProgramList;
 import eu.eurofleets.ears3.dto.ProgramDTO;
 import eu.eurofleets.ears3.service.CruiseService;
-import eu.eurofleets.ears3.service.EventService;
 import eu.eurofleets.ears3.service.ProgramService;
 import java.time.Instant;
 import java.time.OffsetDateTime;

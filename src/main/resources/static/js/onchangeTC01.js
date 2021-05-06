@@ -2,6 +2,10 @@ $("#idSelect_tc").change(function () {
 // ////alert( $( "#idSelect_tc" ).val());   
 const jsonRdfLocation = "../ontology/vessel/sparql?q=PREFIX%20owl%3A%20%3Chttp%3A%2F%2Fwww.w3.org%2F2002%2F07%2Fowl%23%3E%0APREFIX%20dc%3A%20%3Chttp%3A%2F%2Fpurl.org%2Fdc%2Felements%2F1.1%2F%3E%0APREFIX%20skos%3A%3Chttp%3A%2F%2Fwww.w3.org%2F2004%2F02%2Fskos%2Fcore%23%3E%0APREFIX%20ears2%3A%3Chttp%3A%2F%2Fontologies.ef-ears.eu%2Fears2%2F1%23%3E%0APREFIX%20xsd%3A%3Chttp%3A%2F%2Fwww.w3.org%2F2001%2FXMLSchema%23%3E%0ASELECT%20DISTINCT%20%3Feid%20%28str%28%3Fc%29%20as%20%3Fcu%29%20%28str%28%3Fcc%29%20as%20%3Fctu%29%20%3Fcl%20%28str%28%3Ft%29%20%20as%20%3Ftu%29%20%28str%28%3Ftc%29%20as%20%3Fttu%29%20%3Ftl%20%28str%28%3Fp%29%20as%20%3Fpu%29%20%3Fpl%20%28str%28%3Fa%29%20as%20%3Fau%29%20%3Fal%0AWHERE%20%7B%0A%7B%0AOPTIONAL%20%7B%0A%3Fc%20a%20ears2%3AToolCategory.%0A%3Ft%20a%20ears2%3ATool.%0A%3Fe%20ears2%3AhasProcess%20%3Fp.%0A%3Fe%20ears2%3AhasAction%20%3Fa.%20%0A%3Fe%20ears2%3AwithTool%20%3Ft.%20%0A%3Ft%20ears2%3AisMemberOf%20%3Fc.%0A%3Fe%20ears2%3AasConcept%20%3Fec.%0A%3Fec%20dc%3Aidentifier%20%3Feid.%0A%3Fc%20ears2%3AasConcept%20%3Fcc.%0A%3Fcc%20skos%3AprefLabel%20%3Fcl%20.%0A%3Ft%20ears2%3AasConcept%20%3Ftc.%0A%3Ftc%20skos%3AprefLabel%20%3Ftl%20.%0A%3Fp%20ears2%3AasConcept%20%3Fpc.%0A%3Fpc%20skos%3AprefLabel%20%3Fpl%20.%0A%3Fa%20ears2%3AasConcept%20%3Fac.%0A%3Fac%20skos%3AprefLabel%20%3Fal%20%20%7D%0A%20%7D%0A%0A%7D%0AORDER%20BY%20%3Fpl%20%3Fal";
         var arraySelectedValues = [];
+        var lockElementId = $(this).attr('id').split('_')[1] + "_lock";
+        var lockElement = $("#"+lockElementId);
+        var unlockElementId = $(this).attr('id').split('_')[1] + "_unlock";
+        var unlockElement = $("#"+unlockElementId);
         x = - 1;
         var cu = '';
         var tu = '';
@@ -78,7 +82,7 @@ var endCondition = ")";
 
 
 
-
+                        ////alert(condition_q);           
 
 
                         //   console.log('====--------------------->' + resultJson.length);
@@ -88,12 +92,12 @@ var endCondition = ")";
                                 select_option_data_TU += '<option value="' + item.tu.value + '">' + item.tl.value + '</option>'
                                 select_option_data_AU += '<option value="' + item.au.value + '">' + item.al.value + '</option>'
 
-                                // //alert(condition_q);
+                                //
 
                                 if ($('#idSelect_tc').attr('disabled') != 'disabled') {//mettre à jour donc avec ql condition
                         //for this ToolCategory => set up Process
                         if (condition_q) {
-                        //alert('TOOLCATEGORY');
+                        //alert('TOOL');
                         var events = $.grep(tc, function (e) {
                         return item.cu.value === e.cu.value &&
                                 item.cl.value === e.cl.value;
@@ -101,6 +105,7 @@ var endCondition = ")";
                                 if (events.length === 0) {
                         tc.push(item);
                         }
+                        
                         var select_option_data = '';
                                 select_option_data += '<option value=1></option>'
                                 $.each(tc, function (key, unique) {
@@ -114,17 +119,42 @@ var endCondition = ")";
                         }
 
 
+                        if ($('#idSelect_t').attr('disabled') != 'disabled') {//tc = cu
 
-                        if ($('#idSelect_p').attr('disabled') != 'disabled') {
-                        //for this ToolCategory => set up Process
+                        //for this ToolCategory  => set up  Tool
                         if (condition_q) {
-                        var events = $.grep(p, function (e) {
+                        var events = $.grep(t, function (e) { //cu = tc
+                        return item.tu.value === e.tu.value &&
+                                item.tl.value === e.tl.value;
+                        });
+                                if (events.length === 0) {
+                        t.push(item);
+                        }
+                        
+                        var select_option_data = '';
+                                select_option_data += '<option value=1></option>'
+                                $.each(t, function (key, unique) {
+                                select_option_data += '<option value="' + unique.tu.value + '">' + unique.tl.value + '</option>'
+
+                                });
+                                $("#idSelect_t")
+                                .html(select_option_data)
+                                .selectpicker('refresh');
+                        }
+                        }
+                        
+                            
+                        if ($('#idSelect_p').attr('disabled') != 'disabled') {
+                        //for this ToolCategory  => set up  Process
+                        if (condition_q) {
+                        var events = $.grep(p, function (e) { //cu = tc
                         return item.pu.value === e.pu.value &&
                                 item.pl.value === e.pl.value;
                         });
                                 if (events.length === 0) {
                         p.push(item);
                         }
+                        
                         var select_option_data = '';
                                 select_option_data += '<option value=1></option>'
                                 $.each(p, function (key, unique) {
@@ -139,29 +169,6 @@ var endCondition = ")";
 
 
 
-
-                        if ($('#idSelect_t').attr('disabled') != 'disabled') {//tc = cu
-
-                        //for this ToolCategory  => set up  Tool
-                        if (condition_q) {
-                        var events = $.grep(t, function (e) { //cu = tc
-                        return item.tu.value === e.tu.value &&
-                                item.tl.value === e.tl.value;
-                        });
-                                if (events.length === 0) {
-                        t.push(item);
-                        }
-                        var select_option_data = '';
-                                select_option_data += '<option value=1></option>'
-                                $.each(t, function (key, unique) {
-                                select_option_data += '<option value="' + unique.tu.value + '">' + unique.tl.value + '</option>'
-
-                                });
-                                $("#idSelect_t")
-                                .html(select_option_data)
-                                .selectpicker('refresh');
-                        }
-                        }
 
 
 
@@ -264,16 +271,6 @@ var endCondition = ")";
                 }
 
                 }
-
-
-
-
-
-
-
-
-
-
 
 
 

@@ -33,6 +33,7 @@ import org.springframework.web.context.WebApplicationContext;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.multipart;
+import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import org.springframework.util.Base64Utils;
@@ -46,7 +47,6 @@ import org.springframework.web.util.UriUtils;
 @SpringBootTest(classes = {Application.class}, properties = "spring.main.allow-bean-definition-overriding=true")
 @WebAppConfiguration
 @ComponentScan(basePackages = {"eu.eurofleets.ears3.domain", " eu.eurofleets.ears3.service"})
-@Ignore
 public class OntologyControllerTest {
 
     @Autowired
@@ -69,6 +69,7 @@ public class OntologyControllerTest {
      * Test of uploadVesselOntology method, of class OntologyController.
      */
     @Test
+    @Ignore
     public void testUploadVesselOntology() throws Exception {
         System.out.println("uploadVesselOntology");
 
@@ -103,12 +104,13 @@ public class OntologyControllerTest {
      * Test of uploadProgramOntology method, of class OntologyController.
      */
     @Test
+    @Ignore
     public void testUploadProgramOntology() throws Exception {
         System.out.println("uploadProgramOntology");
         String fileName = "program-abc.rdf";
         MockMultipartFile multipartFile = getMultiPartFile(fileName);
         multipartFile.getOriginalFilename();
-        uploadProgramFile(multipartFile, 202).andExpect(content().string(containsString("File correctly saved")));
+        uploadProgramFile(multipartFile, 202).andExpect(content().string(containsString("<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?><message><message>File correctly saved</message><code>202</code><identifier>program-abc.rdf</identifier></message>")));
 
         fileName = "program-abc_with_problem.rdf";
         multipartFile = getMultiPartFile(fileName);
@@ -119,6 +121,7 @@ public class OntologyControllerTest {
      * Test of getVesselOntology method, of class OntologyController.
      */
     @Test
+    @Ignore
     public void testGetVesselOntology() throws Exception {
         System.out.println("getVesselOntology");
         this.mockMvc.perform(get("/ontology/vessel"))
@@ -132,6 +135,7 @@ public class OntologyControllerTest {
      * Test of getVesselOntologyDate method, of class OntologyController.
      */
     @Test
+    @Ignore
     public void testGetVesselOntologyDate() throws Exception {
         System.out.println("getVesselOntologyDate");
 
@@ -148,6 +152,7 @@ public class OntologyControllerTest {
      * Test of getProgramOntology method, of class OntologyController.
      */
     @Test
+    @Ignore
     public void testGetProgramOntology() throws Exception {
         System.out.println("getProgramOntology");
         this.mockMvc.perform(get("/ontology/program?programIdentifier=program-abc"))
@@ -173,6 +178,7 @@ public class OntologyControllerTest {
      * Test of getProgramOntologyDate method, of class OntologyController.
      */
     @Test
+    @Ignore
     public void testGetProgramOntologyDate() throws Exception {
         System.out.println("getProgramOntologyDate");
         HttpHeaders httpHeaders = new HttpHeaders();
@@ -187,6 +193,7 @@ public class OntologyControllerTest {
      * Test of canAuthenticate method, of class OntologyController.
      */
     @Test
+    @Ignore
     public void testCanAuthenticate() throws Exception {
         System.out.println("canAuthenticate");
         HttpHeaders httpHeaders = new HttpHeaders();
@@ -216,6 +223,7 @@ public class OntologyControllerTest {
      * Test of sparqlEndpoint method, of class OntologyController.
      */
     @Test
+    @Ignore
     public void testSparqlEndpoint() throws Exception {
         System.out.println("sparqlEndpoint");
 
@@ -251,8 +259,53 @@ public class OntologyControllerTest {
                 + "\n"
                 + "}";
         this.mockMvc.perform(get("/ontology/vessel/sparql?q=" + UriUtils.encode(q, "UTF8")).headers(httpHeaders))
-                // .andDo(print())
+                .andDo(print())
                 .andExpect(status().isOk());
+
+    }
+
+    @Test
+    @Ignore
+    public void testSparqlEndpointProgram() throws Exception {
+        System.out.println("sparqlEndpoint");
+
+        HttpHeaders httpHeaders = new HttpHeaders();
+        httpHeaders.add("Accept", "application/json");
+
+        String q = "PREFIX owl: <http://www.w3.org/2002/07/owl#>\n"
+                + "PREFIX dc: <http://purl.org/dc/elements/1.1/>\n"
+                + "PREFIX skos:<http://www.w3.org/2004/02/skos/core#>\n"
+                + "PREFIX ears2:<http://ontologies.ef-ears.eu/ears2/1#>\n"
+                + "PREFIX xsd:<http://www.w3.org/2001/XMLSchema#>\n"
+                + "SELECT DISTINCT ?eid (str(?c) as ?cu) ?cl (str(?t)  as ?tu) ?tl (str(?p) as ?pu) ?pl (str(?a) as ?au) ?al\n"
+                + "WHERE {\n"
+                + "{\n"
+                + "OPTIONAL {\n"
+                + "?c a ears2:ToolCategory.\n"
+                + "?t a ears2:Tool.\n"
+                + "?e ears2:hasProcess ?p.\n"
+                + "?e ears2:hasAction ?a. \n"
+                + "?e ears2:withTool ?t. \n"
+                + "?t ears2:isMemberOf ?c.\n"
+                + "?e ears2:asConcept ?ec.\n"
+                + "?ec dc:identifier ?eid.\n"
+                + "?c ears2:asConcept ?cc.\n"
+                + "?cc skos:prefLabel ?cl .\n"
+                + "?t ears2:asConcept ?tc.\n"
+                + "?tc skos:prefLabel ?tl .\n"
+                + "?p ears2:asConcept ?pc.\n"
+                + "?pc skos:prefLabel ?pl .\n"
+                + "?a ears2:asConcept ?ac.\n"
+                + "?ac skos:prefLabel ?al  }\n"
+                + " }\n"
+                + "\n"
+                + "}";
+
+        this.mockMvc.perform(get("/ontology/vessel/sparql?q=" + UriUtils.encode(q, "UTF8")).headers(httpHeaders))
+                .andExpect(status().isOk()).andExpect(MockMvcResultMatchers.jsonPath("$.results.bindings.length()").value(80));
+
+        this.mockMvc.perform(get("/ontology/vessel/sparql?program=program-abc&q=" + UriUtils.encode(q, "UTF8")).headers(httpHeaders))
+                .andExpect(status().isOk()).andExpect(MockMvcResultMatchers.jsonPath("$.results.bindings.length()").value(80));
 
     }
 }

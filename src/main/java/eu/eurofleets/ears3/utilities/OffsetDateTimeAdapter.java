@@ -16,11 +16,11 @@ import javax.xml.bind.annotation.adapters.XmlAdapter;
 public class OffsetDateTimeAdapter extends XmlAdapter<String, OffsetDateTime> {
 
     public OffsetDateTime unmarshal(String v) throws Exception {
-        return OffsetDateTime.parse(v, DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ssZ"));
+        return OffsetDateTime.parse(v, DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ssX"));
     }
 
     public String marshal(OffsetDateTime v) throws Exception {
-        return v.format(DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ssZ"));
+        return v.format(DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ssX"));
     }
 
 }

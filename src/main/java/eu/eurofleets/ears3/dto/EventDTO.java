@@ -2,10 +2,12 @@ package eu.eurofleets.ears3.dto;
 
 import eu.eurofleets.ears3.domain.*;
 import be.naturalsciences.bmdc.cruise.model.IPerson;
+import be.naturalsciences.bmdc.cruise.model.IProperty;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import eu.eurofleets.ears3.utilities.OffsetDateTimeAdapter;
 import java.time.OffsetDateTime;
 import java.util.Collection;
+import java.util.HashSet;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlRootElement;
@@ -26,7 +28,7 @@ public class EventDTO {
 
     public String identifier;
     public String eventDefinitionId;
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ssZ")
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ssX")
     @XmlJavaTypeAdapter(value = OffsetDateTimeAdapter.class)
     public OffsetDateTime timeStamp;
     public PersonDTO actor;
@@ -70,6 +72,11 @@ public class EventDTO {
         LinkedDataTermDTO process = new LinkedDataTermDTO(event.getProcess());
         LinkedDataTermDTO action = new LinkedDataTermDTO(event.getAction());
 
+        this.properties = new HashSet<>();
+        for (IProperty property : event.getProperties()) {
+            PropertyDTO prop = new PropertyDTO(new LinkedDataTermDTO(property.getKey()), property.getValue(), property.getUom());
+            properties.add(prop);
+        }
         this.identifier = event.getIdentifier();
         this.eventDefinitionId = event.getEventDefinitionId();
         this.timeStamp = event.getTimeStamp();
@@ -79,7 +86,6 @@ public class EventDTO {
         this.toolCategory = toolCategory;
         this.process = process;
         this.action = action;
-        this.properties = null;
         this.program = event.getProgram().getIdentifier();
         this.platform = event.getPlatform().getTerm().getIdentifier();
     }

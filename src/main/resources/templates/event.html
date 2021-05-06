@@ -33,22 +33,37 @@
 
                     <div id="collapseOne" class="collapse show " aria-labelledby="headingOne" data-parent="#id_accordion">
                         <form role="form" class="class_form">
-                            <table id="recentEvents" >                     
+                            <table id="recentEventDefinitionTable" >                     
                                 <!--table-bordered-->
-                                <tr style="min-height: 50px;">
+                                <tr>
                                     <td id="cell0"></td>
                                     <td id="cell1"></td>
                                     <td id="cell2"></td>
                                 </tr>
-                                <tr style="min-height: 50px;"> 
+                                <tr> 
                                     <td id="cell3"></td>
                                     <td id="cell4"></td>
                                     <td id="cell5"></td>
                                 </tr>
-                                <tr style="height: 50px;">                                    
+                                <tr>                                    
                                     <td id="cell6"></td>
                                     <td id="cell7"></td>
                                     <td id="cell8"></td>
+                                </tr>
+                                <tr>                                    
+                                    <td id="cell9"></td>
+                                    <td id="cell10"></td>
+                                    <td id="cell11"></td>
+                                </tr>
+                                <tr>                                    
+                                    <td id="cell12"></td>
+                                    <td id="cell13"></td>
+                                    <td id="cell14"></td>
+                                </tr>
+                                <tr>                                    
+                                    <td id="cell15"></td>
+                                    <td id="cell16"></td>
+                                    <td id="cell17"></td>
                                 </tr>
                             </table>
                         </form>
@@ -57,7 +72,7 @@
             </div>
 
             <form role="form" class="class_form" method="POST">
-                <table class="table" id="laTable">
+                <table class="table" id="dropdownMenuTable">
                     <!--table-bordered-->
                     <tbody>
                         <tr id="tr_tc">
@@ -67,7 +82,7 @@
                                                                 data-live-search="true" data-with="auto">
                                 </select>
                             </td>
-                            <td class="col-6 col-sm-2 cell_hover" id="cell_tc_unlock"> <svg id="tc_unlock"
+                            <td class="col-6 col-sm-2" id="cell_tc_unlock"> <svg id="tc_unlock"
                                                                                             width="1em" height="1em" viewBox="0 0 16 16"
                                                                                             class="bi bi-unlock" fill="green"
                                                                                             xmlns="http://www.w3.org/2000/svg">
@@ -97,7 +112,7 @@
                                                                 data-live-search="true">
 
                                 </select></td>
-                            <td class="col-6 col-sm-2 cell_hover" id="cell_t_unlock"> <svg id="t_unlock"
+                            <td class="col-6 col-sm-2" id="cell_t_unlock"> <svg id="t_unlock"
                                                                                            width="1em" height="1em" viewBox="0 0 16 16"
                                                                                            class="bi bi-unlock" fill="green"
                                                                                            xmlns="http://www.w3.org/2000/svg">
@@ -127,7 +142,7 @@
                                                                data-live-search="true">
 
                                 </select></td>
-                            <td class="col-6 col-sm-2 cell_hover" id="cell_p_unlock"> <svg id="p_unlock"
+                            <td class="col-6 col-sm-2" id="cell_p_unlock"> <svg id="p_unlock"
                                                                                            width="1em" height="1em" viewBox="0 0 16 16"
                                                                                            class="bi bi-unlock" fill="green"
                                                                                            xmlns="http://www.w3.org/2000/svg">
@@ -156,7 +171,7 @@
                                                                data-live-search="true">
 
                                 </select></td>
-                            <td class="col-6 col-sm-2 cell_hover" id="cell_a_unlock">
+                            <td class="col-6 col-sm-2" id="cell_a_unlock">
                                 <svg id="a_unlock" width="1em" height="1em" viewBox="0 0 16 16"
                                      class="bi bi-unlock" fill="green"
                                      xmlns="http://www.w3.org/2000/svg">
@@ -184,7 +199,7 @@
                 </table>
                 <div class="row">
                     <div class="col-sm-12">
-                        <button id="idSubmit" type="submit"
+                        <button id="btnSubmitDropdownChoice" type="submit"
                                 class="btn btn-primary btn-lg btn-block">Submit</button>
                         <!--if alles = 1 => pas correct -->
 
@@ -205,238 +220,504 @@
         </div>
         <script>
             // https://developer.mozilla.org/fr/docs/Web/API/Web_Storage_API
-            var then = new Date();
-            then.setDate(then.getDate() - 30);
-            const eventPostLocation = "../event";
-            const jsonRdfLocation = "../ontology/vessel/sparql?q=PREFIX%20owl%3A%20%3Chttp%3A%2F%2Fwww.w3.org%2F2002%2F07%2Fowl%23%3E%0APREFIX%20dc%3A%20%3Chttp%3A%2F%2Fpurl.org%2Fdc%2Felements%2F1.1%2F%3E%0APREFIX%20skos%3A%3Chttp%3A%2F%2Fwww.w3.org%2F2004%2F02%2Fskos%2Fcore%23%3E%0APREFIX%20ears2%3A%3Chttp%3A%2F%2Fontologies.ef-ears.eu%2Fears2%2F1%23%3E%0APREFIX%20xsd%3A%3Chttp%3A%2F%2Fwww.w3.org%2F2001%2FXMLSchema%23%3E%0ASELECT%20DISTINCT%20%3Feid%20%28str%28%3Fc%29%20as%20%3Fcu%29%20%28str%28%3Fcc%29%20as%20%3Fctu%29%20%3Fcl%20%28str%28%3Ft%29%20%20as%20%3Ftu%29%20%28str%28%3Ftc%29%20as%20%3Fttu%29%20%3Ftl%20%28str%28%3Fp%29%20as%20%3Fpu%29%20%3Fpl%20%28str%28%3Fa%29%20as%20%3Fau%29%20%3Fal%0AWHERE%20%7B%0A%7B%0AOPTIONAL%20%7B%0A%3Fc%20a%20ears2%3AToolCategory.%0A%3Ft%20a%20ears2%3ATool.%0A%3Fe%20ears2%3AhasProcess%20%3Fp.%0A%3Fe%20ears2%3AhasAction%20%3Fa.%20%0A%3Fe%20ears2%3AwithTool%20%3Ft.%20%0A%3Ft%20ears2%3AisMemberOf%20%3Fc.%0A%3Fe%20ears2%3AasConcept%20%3Fec.%0A%3Fec%20dc%3Aidentifier%20%3Feid.%0A%3Fc%20ears2%3AasConcept%20%3Fcc.%0A%3Fcc%20skos%3AprefLabel%20%3Fcl%20.%0A%3Ft%20ears2%3AasConcept%20%3Ftc.%0A%3Ftc%20skos%3AprefLabel%20%3Ftl%20.%0A%3Fp%20ears2%3AasConcept%20%3Fpc.%0A%3Fpc%20skos%3AprefLabel%20%3Fpl%20.%0A%3Fa%20ears2%3AasConcept%20%3Fac.%0A%3Fac%20skos%3AprefLabel%20%3Fal%20%20%7D%0A%20%7D%0A%0A%7D%0AORDER%20BY%20%3Fpl%20%3Fal";
-            class EarsEvent {
-            constructor(sparqlResultElement) {
-            //var ts = new Date();
-            //event.timeStamp = ts.toISOString();
-            //for brand new in-the-moment events no timestamp should be provided.
-            this.eventDefinitionId = sparqlResultElement.eid.value;
-            if (localStorage.actor !== null) {
+var then = new Date();
+then.setDate(then.getDate() - 30);
+const eventPostLocation = "../event";
+const jsonRdfLocation = "../ontology/vessel/sparql?q=PREFIX%20owl%3A%20%3Chttp%3A%2F%2Fwww.w3.org%2F2002%2F07%2Fowl%23%3E%0APREFIX%20dc%3A%20%3Chttp%3A%2F%2Fpurl.org%2Fdc%2Felements%2F1.1%2F%3E%0APREFIX%20skos%3A%3Chttp%3A%2F%2Fwww.w3.org%2F2004%2F02%2Fskos%2Fcore%23%3E%0APREFIX%20ears2%3A%3Chttp%3A%2F%2Fontologies.ef-ears.eu%2Fears2%2F1%23%3E%0APREFIX%20xsd%3A%3Chttp%3A%2F%2Fwww.w3.org%2F2001%2FXMLSchema%23%3E%0ASELECT%20DISTINCT%20%3Feid%20%28str%28%3Fc%29%20as%20%3Fcu%29%20%28str%28%3Fcc%29%20as%20%3Fctu%29%20%3Fcl%20%28str%28%3Ft%29%20%20as%20%3Ftu%29%20%28str%28%3Ftc%29%20as%20%3Fttu%29%20%3Ftl%20%28str%28%3Fp%29%20as%20%3Fpu%29%20%3Fpl%20%28str%28%3Fa%29%20as%20%3Fau%29%20%3Fal%0AWHERE%20%7B%0A%7B%0AOPTIONAL%20%7B%0A%3Fc%20a%20ears2%3AToolCategory.%0A%3Ft%20a%20ears2%3ATool.%0A%3Fe%20ears2%3AhasProcess%20%3Fp.%0A%3Fe%20ears2%3AhasAction%20%3Fa.%20%0A%3Fe%20ears2%3AwithTool%20%3Ft.%20%0A%3Ft%20ears2%3AisMemberOf%20%3Fc.%0A%3Fe%20ears2%3AasConcept%20%3Fec.%0A%3Fec%20dc%3Aidentifier%20%3Feid.%0A%3Fc%20ears2%3AasConcept%20%3Fcc.%0A%3Fcc%20skos%3AprefLabel%20%3Fcl%20.%0A%3Ft%20ears2%3AasConcept%20%3Ftc.%0A%3Ftc%20skos%3AprefLabel%20%3Ftl%20.%0A%3Fp%20ears2%3AasConcept%20%3Fpc.%0A%3Fpc%20skos%3AprefLabel%20%3Fpl%20.%0A%3Fa%20ears2%3AasConcept%20%3Fac.%0A%3Fac%20skos%3AprefLabel%20%3Fal%20%20%7D%0A%20%7D%0A%0A%7D%0AORDER%20BY%20%3Fpl%20%3Fal";
+class EarsEvent {
+    constructor(sparqlResultElement) {
+        //var ts = new Date();
+        //event.timeStamp = ts.toISOString();
+        //for brand new in-the-moment events no timestamp should be provided.
+        this.eventDefinitionId = sparqlResultElement.eid.value;
+        if (localStorage.actor !== null) {
             let actor = JSON.parse(localStorage.actor);
             this.actor = new Object();
             this.actor.firstName = actor.firstName;
             this.actor.lastName = actor.lastName;
             this.actor.email = actor.email;
             this.actor.organisation = actor.organisation;
-            }
-            this.toolCategory = new Object();
-            this.toolCategory.identifier = sparqlResultElement.cu.value;
-            this.toolCategory.name = sparqlResultElement.cl.value;
-            this.tool = new Object();
-            this.tool.tool = new Object();
-            this.tool.tool.identifier = sparqlResultElement.tu.value;
-            this.tool.tool.name = sparqlResultElement.tl.value;
-            this.process = new Object();
-            this.process.identifier = sparqlResultElement.pu.value;
-            this.process.name = sparqlResultElement.pl.value;
-            this.action = new Object();
-            this.action.identifier = sparqlResultElement.au.value;
-            this.action.name = sparqlResultElement.al.value;
-            this.subject = new Object();
-            this.subject.identifier = 'http://vocab.nerc.ac.uk/collection/C77/current/M06/';
-            this.subject.name = 'Routine standard measurements';
-            this.program = null;
-            }
-            }
+        }
+        this.toolCategory = new Object();
+        this.toolCategory.identifier = sparqlResultElement.cu.value;
+        this.toolCategory.name = sparqlResultElement.cl.value;
+        this.tool = new Object();
+        this.tool.tool = new Object();
+        this.tool.tool.identifier = sparqlResultElement.tu.value;
+        this.tool.tool.name = sparqlResultElement.tl.value;
+        this.process = new Object();
+        this.process.identifier = sparqlResultElement.pu.value;
+        this.process.name = sparqlResultElement.pl.value;
+        this.action = new Object();
+        this.action.identifier = sparqlResultElement.au.value;
+        this.action.name = sparqlResultElement.al.value;
+        this.subject = new Object();
+        this.subject.identifier = 'http://vocab.nerc.ac.uk/collection/C77/current/M06/';
+        this.subject.name = 'Routine standard measurements';
+        this.program = null;
+    }
+}
 
-            //just to give an idea on the structure
-            const eventData = {
-            identifier: null,
-                    eventDefinitionId: null,
-                    timeStamp: null,
-                    actor: {
-                    firstName: null,
-                            lastName: null,
-                            organisation: null,
-                            phoneNumber: null,
-                            faxNumber: null,
-                            email: null
-                    },
-                    subject: {
-                    identifier: 'http://vocab.nerc.ac.uk/collection/C77/current/M06/',
-                            transitiveIdentifier: null,
-                            name: 'Routine standard measurements'
-                    },
-                    tool: {
-                    tool: {
-                    identifier: 'http://vocab.nerc.ac.uk/collection/L22/current/TOOL0653/',
-                            transitiveIdentifier: null,
-                            name: 'Van Veen grab'
-                    },
-                            parentTool: null
-                    },
-                    toolCategory: {
-                    identifier: 'http://vocab.nerc.ac.uk/collection/L05/current/50/',
-                            transitiveIdentifier: null,
-                            name: 'sediment grabs'
-                    },
-                    process: {
-                    identifier: 'http://ontologies.ef-ears.eu/ears2/1#pro_1',
-                            transitiveIdentifier: null,
-                            name: 'Sampling'
-                    },
-                    action: {
-                    identifier: 'http://ontologies.ef-ears.eu/ears2/1#act_2',
-                            transitiveIdentifier: null,
-                            name: 'End'
-                    },
-                    program: null,
-                    platform: null
-            };
-            function postEventInner(event, successFunction, errorFunction) {
-            let programFieldVal = $("#programField").val() === "" ? null : $("#programField").val();
-            if (programFieldVal === null) {
-            $('#programField').selectpicker('setStyle', 'btn-warning');
-            } else {
-            $('#programField').selectpicker('setStyle', 'btn-warning', 'remove');
-            $('#programField').selectpicker('setStyle', 'btn-light', 'add');
-            }
+//just to give an idea on the structure
+const eventData = {
+    identifier: null,
+    eventDefinitionId: null,
+    timeStamp: null,
+    actor: {
+        firstName: null,
+        lastName: null,
+        organisation: null,
+        phoneNumber: null,
+        faxNumber: null,
+        email: null
+    },
+    subject: {
+        identifier: 'http://vocab.nerc.ac.uk/collection/C77/current/M06/',
+        transitiveIdentifier: null,
+        name: 'Routine standard measurements'
+    },
+    tool: {
+        tool: {
+            identifier: 'http://vocab.nerc.ac.uk/collection/L22/current/TOOL0653/',
+            transitiveIdentifier: null,
+            name: 'Van Veen grab'
+        },
+        parentTool: null
+    },
+    toolCategory: {
+        identifier: 'http://vocab.nerc.ac.uk/collection/L05/current/50/',
+        transitiveIdentifier: null,
+        name: 'sediment grabs'
+    },
+    process: {
+        identifier: 'http://ontologies.ef-ears.eu/ears2/1#pro_1',
+        transitiveIdentifier: null,
+        name: 'Sampling'
+    },
+    action: {
+        identifier: 'http://ontologies.ef-ears.eu/ears2/1#act_2',
+        transitiveIdentifier: null,
+        name: 'End'
+    },
+    program: null,
+    platform: null
+};
 
-            event.program = programFieldVal;
-            $.ajax({
-            type: "POST",
-                    dataType: "json",
-                    contentType: "application/json;charset=utf-8",
-                    url: eventPostLocation,
-                    data: JSON.stringify(event),
-                    success: function (result) {
-                    console.log("Success: Event created with id:" + result.id + ", identifier:" + result.identifier + " and timeStamp:" + result.timeStamp);
-                    successFunction();
-                    },
-                    error: function (result) {
-                    console.log("Failure: " + result.status + ": " + result.responseText);
-                    console.log(event);
-                    errorFunction();
+function dropdownChanged(dropdown) {
+    //const jsonRdfLocation = "../ontology/vessel/sparql?q=PREFIX%20owl%3A%20%3Chttp%3A%2F%2Fwww.w3.org%2F2002%2F07%2Fowl%23%3E%0APREFIX%20dc%3A%20%3Chttp%3A%2F%2Fpurl.org%2Fdc%2Felements%2F1.1%2F%3E%0APREFIX%20skos%3A%3Chttp%3A%2F%2Fwww.w3.org%2F2004%2F02%2Fskos%2Fcore%23%3E%0APREFIX%20ears2%3A%3Chttp%3A%2F%2Fontologies.ef-ears.eu%2Fears2%2F1%23%3E%0APREFIX%20xsd%3A%3Chttp%3A%2F%2Fwww.w3.org%2F2001%2FXMLSchema%23%3E%0ASELECT%20DISTINCT%20%3Feid%20%28str%28%3Fc%29%20as%20%3Fcu%29%20%28str%28%3Fcc%29%20as%20%3Fctu%29%20%3Fcl%20%28str%28%3Ft%29%20%20as%20%3Ftu%29%20%28str%28%3Ftc%29%20as%20%3Fttu%29%20%3Ftl%20%28str%28%3Fp%29%20as%20%3Fpu%29%20%3Fpl%20%28str%28%3Fa%29%20as%20%3Fau%29%20%3Fal%0AWHERE%20%7B%0A%7B%0AOPTIONAL%20%7B%0A%3Fc%20a%20ears2%3AToolCategory.%0A%3Ft%20a%20ears2%3ATool.%0A%3Fe%20ears2%3AhasProcess%20%3Fp.%0A%3Fe%20ears2%3AhasAction%20%3Fa.%20%0A%3Fe%20ears2%3AwithTool%20%3Ft.%20%0A%3Ft%20ears2%3AisMemberOf%20%3Fc.%0A%3Fe%20ears2%3AasConcept%20%3Fec.%0A%3Fec%20dc%3Aidentifier%20%3Feid.%0A%3Fc%20ears2%3AasConcept%20%3Fcc.%0A%3Fcc%20skos%3AprefLabel%20%3Fcl%20.%0A%3Ft%20ears2%3AasConcept%20%3Ftc.%0A%3Ftc%20skos%3AprefLabel%20%3Ftl%20.%0A%3Fp%20ears2%3AasConcept%20%3Fpc.%0A%3Fpc%20skos%3AprefLabel%20%3Fpl%20.%0A%3Fa%20ears2%3AasConcept%20%3Fac.%0A%3Fac%20skos%3AprefLabel%20%3Fal%20%20%7D%0A%20%7D%0A%0A%7D%0AORDER%20BY%20%3Fpl%20%3Fal";
+    var arraySelectedValues = [];
+    var lockElementId = dropdown.attr('id').split('_')[1] + "_lock";
+    var lockElement = $("#" + lockElementId);
+    var unlockElementId = dropdown.attr('id').split('_')[1] + "_unlock";
+    var unlockElement = $("#" + unlockElementId);
+    x = -1;
+    var cu = '';
+    var tu = '';
+    var pu = '';
+    var au = '';
+    var cu_q = '';
+    var tu_q = '';
+    var pu_q = '';
+    var au_q = '';
+    var condition = '';
+    var condition_q = '';
+    var startCondition = "(";
+    if ($("#idSelect_tc").val() != 1) {
+        cu = "element.cu.value  == " + "'" + $("#idSelect_tc").val() + "'" + "  && ";
+        cu_q = "item.cu.value  == " + "'" + $("#idSelect_tc").val() + "'" + "  && ";
+    }
+
+
+    if ($("#idSelect_t").val() != 1) {
+        tu = "element.tu.value  == " + "'" + $("#idSelect_t").val() + "'" + "  && ";
+        tu_q = "item.tu.value  == " + "'" + $("#idSelect_t").val() + "'" + "  && ";
+    }
+
+    if ($("#idSelect_p").val() != 1) {
+        pu = "element.pu.value  == " + "'" + $("#idSelect_p").val() + "'" + "  && ";
+        pu_q = "item.pu.value  == " + "'" + $("#idSelect_p").val() + "'" + "  && ";
+    }
+
+
+    if ($("#idSelect_a").val() != 1) {
+        au = "element.au.value  == " + "'" + $("#idSelect_a").val() + "'" + "  && ";
+        au_q = "item.au.value  == " + "'" + $("#idSelect_a").val() + "'" + "  && ";
+    }
+
+    var endCondition = ")";
+    condition = startCondition.concat(cu, tu, pu, au, endCondition).replace(/&&([^'&&']*)$/, '' + '$1');
+    condition_q = startCondition.concat(cu_q, tu_q, pu_q, au_q, endCondition).replace(/&&([^'&&']*)$/, '' + '$1');
+    var resultJson = [];
+    $.getJSON(jsonRdfLocation,
+        function(data) {
+
+            var tc = [];
+            var t = [];
+            var p = [];
+            var a = [];
+            $(data.results.bindings).each(function(index, element) {
+                if (eval(condition)) {
+                    resultJson.push(element);
+                }
+            });
+            var aa = '';
+            var select_option_data_PU = '';
+            select_option_data_PU += '<option value=1></option>';
+            var select_option_data_TU = '';
+            select_option_data_TU += '<option value=1></option>';
+            var select_option_data_AU = '';
+            select_option_data_AU += '<option value=1></option>';
+            $.each(resultJson, function(key, item) {
+                aa += 'CU' + '--' + item.cl.value + '--' + item.tl.value + '--' + item.pl.value + '--' + item.al.value + '</br>'
+                select_option_data_PU += '<option value="' + item.pu.value + '">' + item.pl.value + '</option>'
+                select_option_data_TU += '<option value="' + item.tu.value + '">' + item.tl.value + '</option>'
+                select_option_data_AU += '<option value="' + item.au.value + '">' + item.al.value + '</option>'
+
+                if ($('#idSelect_tc').attr('disabled') != 'disabled') { //mettre à jour donc avec ql condition
+                    if (condition_q) {
+                        var events = $.grep(tc, function(e) {
+                            return item.cu.value === e.cu.value &&
+                                item.cl.value === e.cl.value;
+                        });
+                        if (events.length === 0) {
+                            tc.push(item);
+                        }
+
+                        var select_option_data = '';
+                        select_option_data += '<option value=1></option>'
+                        $.each(tc, function(key, unique) {
+                            select_option_data += '<option value="' + unique.cu.value + '">' + unique.cl.value + '</option>'
+
+                        });
+                        $("#idSelect_tc")
+                            .html(select_option_data)
+                            .selectpicker('refresh');
                     }
+                }
+
+
+                if ($('#idSelect_t').attr('disabled') != 'disabled') {
+                    if (condition_q) {
+                        var events = $.grep(t, function(e) {
+                            return item.tu.value === e.tu.value &&
+                                item.tl.value === e.tl.value;
+                        });
+                        if (events.length === 0) {
+                            t.push(item);
+                        }
+
+                        var select_option_data = '';
+                        select_option_data += '<option value=1></option>'
+                        $.each(t, function(key, unique) {
+                            select_option_data += '<option value="' + unique.tu.value + '">' + unique.tl.value + '</option>'
+
+                        });
+                        $("#idSelect_t")
+                            .html(select_option_data)
+                            .selectpicker('refresh');
+                    }
+                }
+
+
+                if ($('#idSelect_p').attr('disabled') != 'disabled') {
+                    //for this ToolCategory => set up Process
+                    if (condition_q) {
+                        var events = $.grep(p, function(e) {
+                            return item.pu.value === e.pu.value &&
+                                item.pl.value === e.pl.value;
+                        });
+                        if (events.length === 0) {
+                            p.push(item);
+                        }
+
+                        var select_option_data = '';
+                        select_option_data += '<option value=1></option>'
+                        $.each(p, function(key, unique) {
+                            select_option_data += '<option value="' + unique.pu.value + '">' + unique.pl.value + '</option>'
+
+                        });
+                        $("#idSelect_p")
+                            .html(select_option_data)
+                            .selectpicker('refresh');
+                    }
+                }
+                if ($('#idSelect_a').attr('disabled') != 'disabled') {
+                    //for this ToolCategory => set up Action
+                    if (condition_q) {
+                        var events = $.grep(a, function(e) {
+                            return item.au.value === e.au.value &&
+                                item.al.value === e.al.value;
+                        });
+                        if (events.length === 0) {
+                            a.push(item);
+                        }
+                        var select_option_data = '';
+                        select_option_data += '<option value=1></option>'
+                        $.each(a, function(key, unique) {
+                            select_option_data += '<option value="' + unique.au.value + '">' + unique.al.value + '</option>'
+
+                        });
+                        $("#idSelect_a")
+                            .html(select_option_data)
+                            .selectpicker('refresh');
+                    }
+                }
             });
+            if ($('#idSelect_tc').attr('disabled') != 'disabled') {
+                if ($('#idSelect_tc option').length == 2) {
+                    $("#idSelect_tc")
+                        .html($("#idSelect_tc").find('option').not(':empty()').first().attr('selected', true))
+                        .selectpicker('refresh');
+                    $('#idSelect_tc').prop('disabled', true);
+                    $('#idSelect_tc').selectpicker('refresh');
+                    $('#tc_lock').css('visibility', 'visible');
+                    $('#tc_unlock').css('visibility', 'hidden');
+                }
             }
 
-            function postEvent(recentEventButton) {
-            recentEventId = recentEventId = recentEventButton.id;
-            postEventByEventDefinition(recentEventId, function () {
+
+
+            if ($('#idSelect_t').attr('disabled') != 'disabled') {
+                if ($('#idSelect_t option').length == 2) {
+                    $("#idSelect_t")
+                        .html($("#idSelect_t").find('option').not(':empty()').first().attr('selected', true))
+                        .selectpicker('refresh');
+                    $('#idSelect_t').prop('disabled', true);
+                    $('#idSelect_t').selectpicker('refresh');
+                    $('#t_lock').css('visibility', 'visible');
+                    $('#t_unlock').css('visibility', 'hidden');
+                }
+
+            }
+
+            if ($('#idSelect_p').attr('disabled') != 'disabled') {
+                if ($('#idSelect_p option').length == 2) {
+                    $("#idSelect_p")
+                        .html($("#idSelect_p").find('option').not(':empty()').first().attr('selected', true))
+                        .selectpicker('refresh');
+                    $('#idSelect_p').prop('disabled', true);
+                    $('#idSelect_p').selectpicker('refresh');
+                    $('#p_lock').css('visibility', 'visible');
+                    $('#p_unlock').css('visibility', 'hidden');
+                }
+            }
+            if ($('#idSelect_a').attr('disabled') != 'disabled') {
+
+                if ($('#idSelect_a option').length == 2) {
+                    $("#idSelect_a")
+                        .html($("#idSelect_a").find('option').not(':empty()').first().attr('selected', true))
+                        .selectpicker('refresh');
+                    $('#idSelect_a').prop('disabled', true);
+                    $('#idSelect_a').selectpicker('refresh');
+                    $('#a_lock').css('visibility', 'visible');
+                    $('#a_unlock').css('visibility', 'hidden');
+                }
+
+            }
+        }
+    );
+    dropdown.prop('disabled', true);
+    dropdown.selectpicker('refresh');
+    lockElement.css('visibility', 'visible');
+    unlockElement.css('visibility', 'hidden');
+}
+
+function postEventInner(event, successFunction, errorFunction) {
+    let programFieldVal = $("#programField").val() === "" ? null : $("#programField").val();
+    if (programFieldVal === null) {
+        $('#programField').selectpicker('setStyle', 'btn-warning');
+    } else {
+        $('#programField').selectpicker('setStyle', 'btn-warning', 'remove');
+        $('#programField').selectpicker('setStyle', 'btn-light', 'add');
+    }
+
+    event.program = programFieldVal;
+    $.ajax({
+        type: "POST",
+        dataType: "json",
+        contentType: "application/json;charset=utf-8",
+        url: eventPostLocation,
+        data: JSON.stringify(event),
+        success: function(result) {
+            console.log("Success: Event created with id:" + result.id + ", identifier:" + result.identifier + " and timeStamp:" + result.timeStamp);
+            successFunction();
+        },
+        error: function(result) {
+            console.log("Failure: " + result.status + ": " + result.responseText);
+            console.log(event);
+            errorFunction();
+        }
+    });
+}
+
+function postEvent(recentEventButton) {
+    recentEventId = recentEventButton.id;
+    if(recentEventId !== recentlyDeletedEventId){
+        postEventByEventDefinition(recentEventId, function() {
             $(recentEventButton).removeClass("btn-warning").addClass("btn-success");
-            setTimeout(function () {
-            $(recentEventButton).removeClass("btn-success");
-            }, 10000)
-                    $("#collapseOne").addClass("show");
-            }, function () {
+            setTimeout(function() {
+                $(recentEventButton).removeClass("btn-success");
+            }, 10000);
+            $("#collapseOne").addClass("show");
+        }, function() {
             $(recentEventButton).removeClass("btn-success").addClass("btn-warning");
-            });
-            }
+        });
+    }
+}
 
-            function postEventByEventDefinition(eventDefinitionId, successFunction, errorFunction) {
-            var startCondition11 = "(";
-            var eid11 = "element.eid.value  == " + "'" + eventDefinitionId + "'" + "  && ";
-            var endCondition11 = ")";
-            var condition11 = startCondition11.concat(eid11, endCondition11).replace(/&&([^'&&']*)$/, '' + '$1');
-            $.getJSON(jsonRdfLocation,
-                    function (data) {
-                    $(data.results.bindings).each(function (index, element) {
-                    if (eval(condition11)) {
+function addEVtoLocalStorage(event){
+        let map = localStorageEventDefsToMap(); //maps preserve insertion order and have unique entries by default
+        size = map.size;
+        map.set(event.eventDefinitionId, event);
+        if (map.size != size) { //addition happened, meaning it is new
+           localStorage.eventDefinitions = JSON.stringify(Array.from(map.entries()));
+        }
+}
+
+function removeEVfromLocalStorage(eventDefinitionId){
+        let map = localStorageEventDefsToMap(); //maps preserve insertion order and have unique entries by default
+        //size = map.size;
+         map.delete(eventDefinitionId);
+       // if (map.size != size) { //deletion happened
+           localStorage.eventDefinitions = JSON.stringify(Array.from(map.entries()));
+       // }
+}
+
+var recentlyDeletedEventId;
+
+function forgetButton(recentEventButtonX) {
+    const button = recentEventButtonX.parentNode.parentNode;
+    button.disabled = true;
+    recentlyDeletedEventId = button.id;
+    removeEVfromLocalStorage(recentlyDeletedEventId);
+    button.remove();                 
+    populateAllScenarios();
+    //button.disabled = false
+}
+
+function postEventByEventDefinition(eventDefinitionId, successFunction, errorFunction) {
+    var startCondition11 = "(";
+    var eid11 = "element.eid.value  == " + "'" + eventDefinitionId + "'" + "  && ";
+    var endCondition11 = ")";
+    var condition11 = startCondition11.concat(eid11, endCondition11).replace(/&&([^'&&']*)$/, '' + '$1');
+    $.getJSON(jsonRdfLocation,
+        function(data) {
+            $(data.results.bindings).each(function(index, element) {
+                if (eval(condition11)) {
                     event = new EarsEvent(element);
                     postEventInner(event, successFunction, errorFunction);
-                    }
-                    }
-                    )
-                    }
-            );
-            }
+                }
+            })
+        }
+    );
+}
 
-            /*function postEventByUrls(toolcategoryUrl, toolUrl, processUrl, actionUrl) {
-             var startCondition11 = "(";
-             var eid11 = "element.eid.value  == " + "'" + recentEventId.id + "'" + "  && ";
-             var endCondition11 = ")";
-             var condition11 = startCondition11.concat(eid11, endCondition11).replace(/&&([^'&&']*)$/, '' + '$1');
-             $.getJSON(jsonRdfLocation,
-             function (data) {
-             $(data.results.bindings).each(function (index, element) {
-             if (eval(condition11)) {
-             postEvent(element)
-             }
-             }
-             )
-             }
-             );
-             }*/
+/*function postEventByUrls(toolcategoryUrl, toolUrl, processUrl, actionUrl) {
+ var startCondition11 = "(";
+ var eid11 = "element.eid.value  == " + "'" + recentEventId.id + "'" + "  && ";
+ var endCondition11 = ")";
+ var condition11 = startCondition11.concat(eid11, endCondition11).replace(/&&([^'&&']*)$/, '' + '$1');
+ $.getJSON(jsonRdfLocation,
+ function (data) {
+ $(data.results.bindings).each(function (index, element) {
+ if (eval(condition11)) {
+ postEvent(element)
+ }
+ }
+ )
+ }
+ );
+ }*/
 
-            function populateScenario(eventDefinitionId) {
-            var startCondition1 = "(";
-            var eid1 = "element.eid.value  == " + "'" + eventDefinitionId + "'" + "  && ";
-            var endCondition1 = ")";
-            var condition1 = startCondition1.concat(eid1, endCondition1).replace(/&&([^'&&']*)$/, '' + '$1');
-            $.getJSON(jsonRdfLocation,
-                    function (data) {
-                    $(data.results.bindings).each(function (index, element) {
-                    if (eval(condition1)) {
-                    $("#recentEvents td#cell" + $('#recentEvents button').length).append("<button id=" + element.eid.value + " type='button' onclick='postEvent(this);' class='btn btn-default text-left'>"
-                            + "<p>" + element.cl.value + "</p><p><strong>" + element.tl.value + "</strong></p><p>" + element.pl.value + "<br>" + element.al.value + "</p></button>");
-                    }
-                    })
-                    }
-            );
-            }
+function populateScenario(eventDefinitionId, rdfBindings) {
+   // console.log("populate scenario for " + eventDefinitionId);
+    var startCondition1 = "(";
+    var eid1 = "element.eid.value  == " + "'" + eventDefinitionId + "'" + "  && ";
+    var endCondition1 = ")";
+    var condition1 = startCondition1.concat(eid1, endCondition1).replace(/&&([^'&&']*)$/, '' + '$1');
+    $(rdfBindings).each(function(index, element) {
+        if (eval(condition1)) {
+            var lastButtonCell = $("#recentEventDefinitionTable td#cell" + $('#recentEventDefinitionTable button').length);
+     //       console.log("populating scenario for " + eventDefinitionId + " (" + element.eid.value + ": " + element.tl.value + ", " + element.pl.value + ", " + element.al.value);
+            lastButtonCell.append("<button id=" + element.eid.value + " type='button' onclick='postEvent(this);' class='btn btn-default text-left'>" +
+                "<p class='close-btn'><a href='#' onclick='forgetButton(this);'>x</a></p><p>" + element.cl.value + "</p><p><strong>" + element.tl.value + "</strong></p><p>" + element.pl.value + "<br>" + element.al.value + "</p></button>");
+        }
+    });
+}
 
-            function isJSON(str) {
-            try {
-            return (JSON.parse(str) && !!str);
-            } catch (e) {
-            return false;
-            }
-            }
+function populateAllScenarios(rdfBindings) {
+    let map = localStorageEventDefsToMap();
+    if (map !== null) {
+        if(rdfBindings == null){
+            $.ajax({ //asynchronous because synchronous messes up the order
+                type: "GET",
+                dataType: "json",
+                async: false,
+                url: jsonRdfLocation,
+                success: function(data) {
+                    rdfBindings = data.results.bindings;
+                }
+            });
+        }
+        $("#recentEventDefinitionTable td").empty(); //remove all buttons
+        for (let [key, value] of map) {
+            populateScenario(key, rdfBindings);
+        }
+    }
+}
 
-            function localStorageEventDefsToMap() {
-            eventDefs = localStorage.eventDefinitions;
-            if (isJSON(eventDefs)) {
-            let map = new Map(JSON.parse(eventDefs));
-            return map;
-            }
-            return null;
-            }
+function isJSON(str) {
+    try {
+        return (JSON.parse(str) && !!str);
+    } catch (e) {
+        return false;
+    }
+}
 
-            if (window.localStorage && typeof window.localStorage !== 'undefined') {
-            $(document).ready(function () {
-            if (localStorage.actor == null) {
+function localStorageEventDefsToMap() {
+    eventDefs = localStorage.eventDefinitions;
+
+    if (isJSON(eventDefs)) {
+        let map = new Map(JSON.parse(eventDefs));
+        return map;
+    }else{
+        return new Map();
+    }
+}
+
+if (window.localStorage && typeof window.localStorage !== 'undefined') {
+    $(document).ready(function() {
+        if (localStorage.actor == null) {
             window.location.href = './settings';
             console.log("redirected back to settings");
-            } else {
+        } else {
             var me = JSON.parse(localStorage.actor);
             $("#settings-link").html(me.firstName + " " + me.lastName);
-            }
-            $('#id_collapse_in').css('visibility', 'hidden');
-            $('#id_collapse_out').css('visibility', 'visible');
-            $(".collapse").on('show.bs.collapse', function () {
+        }
+        $('.sendSuccessOrFailure').hide();
+        $('#id_collapse_in').css('visibility', 'hidden');
+        $('#id_collapse_out').css('visibility', 'visible');
+        $(".collapse").on('show.bs.collapse', function() {
             $('#id_collapse_in').css('visibility', 'visible');
             $('#id_collapse_out').css('visibility', 'hidden');
-            });
-            $(".collapse").on('hide.bs.collapse', function () {
+        });
+        $(".collapse").on('hide.bs.collapse', function() {
             $('#id_collapse_in').css('visibility', 'hidden');
             $('#id_collapse_out').css('visibility', 'visible');
-            });
-            $('.cell_hover').hover(
-                    function () {
-                    $(this).addClass('border border-info');
-                    },
-                    function () {
-                    $(this).removeClass('border border-info');
-                    });
-            $('#id_eid').hide();
-            $.getScript("js/loadDropDownList.js", function () {
+        });
+        $('#id_eid').hide();
+        $.getScript("js/loadDropDownList.js", function() {
             loadDropdownLists(jsonRdfLocation);
-            });
-            //on change dropdown list
-            $.getScript("js/onchangeTC01.js");
-            $.getScript("js/onchangeT01.js");
-            $.getScript("js/onchangeP01.js");
-            $.getScript("js/onchangeA01.js");
-            //if reset tc
-            $("#cell_tc_unlock").click(function () {
+        });
+        //on change dropdown list
+        $("#idSelect_tc, #idSelect_t, #idSelect_p, #idSelect_a").change(function() {
+            dropdownChanged($(this));
+        });
+        //if reset tc
+        $("#cell_tc_unlock").click(function() {
             $.getScript("js/unlock_tc.js");
-            });
-            $("#cell_t_unlock").click(function () {
+        });
+        $("#cell_t_unlock").click(function() {
             $.getScript("js/unlock_t01.js");
             $('#idSelect_t').prop('disabled', false);
             $('#idSelect_t').selectpicker('refresh');
@@ -453,8 +734,8 @@
             $.getScript("js/hide_warning.js");
             //$('#id_form_process').hide();
             $('#id_eid').hide();
-            });
-            $("#cell_p_unlock").click(function () {
+        });
+        $("#cell_p_unlock").click(function() {
             $.getScript("js/unlock_p01.js");
             $('#idSelect_p').prop('disabled', false);
             $('#idSelect_p').selectpicker('refresh');
@@ -466,8 +747,8 @@
             $('#a_unlock').css('visibility', 'visible');
             $.getScript("js/hide_warning.js"); //$('#id_form_process').hide();
             $('#id_eid').hide();
-            });
-            $("#cell_a_unlock").click(function () {
+        });
+        $("#cell_a_unlock").click(function() {
             $.getScript("js/unlock_a01.js");
             $('#idSelect_a').prop('disabled', false);
             $('#idSelect_a').selectpicker('refresh');
@@ -475,89 +756,83 @@
             $('#a_unlock').css('visibility', 'visible');
             $.getScript("js/hide_warning.js"); //$('#id_form_process').hide();
             $('#id_eid').hide();
-            });
-            $('.target').click(function (e) {
+        });
+        $('.target').click(function(e) {
             e.preventDefault();
             $.getScript("js/hide_warning.js"); //    $('#id_form_process').hide();
-            });
-            $('form').submit(function (e) {
+        });
+        $('form').submit(function(e) {
             e.preventDefault();
             eventSubmitDate = new Date(Date.now());
-            if (($("#idSelect_tc").val() == 1)
-                    || ($("#idSelect_t").val() == 1)
-                    || ($("#idSelect_p").val() == 1)
-                    || ($("#idSelect_a").val() == 1)) {
+            if (($("#idSelect_tc").val() == 1) ||
+                ($("#idSelect_t").val() == 1) ||
+                ($("#idSelect_p").val() == 1) ||
+                ($("#idSelect_a").val() == 1)) {
 
-            $.getScript("js/show_warning.js");
+                $.getScript("js/show_warning.js");
             } else {
-            $.getScript("js/hide_warning.js");
-            var condition = '';
-            var startCondition = "(";
-            if ($("#idSelect_tc").val() != 1) {
-            cu = "element.cu.value  == " + "'" + $("#idSelect_tc").val() + "'" + "  && ";
-            }
-            if ($("#idSelect_t").val() != 1) {
-            tu = "element.tu.value  == " + "'" + $("#idSelect_t").val() + "'" + "  && ";
-            }
-            if ($("#idSelect_p").val() != 1) {
-            pu = "element.pu.value  == " + "'" + $("#idSelect_p").val() + "'" + "  && ";
-            }
-            if ($("#idSelect_a").val() != 1) {
-            au = "element.au.value  == " + "'" + $("#idSelect_a").val() + "'" + "  && ";
-            }
-            var endCondition = ")";
-            condition = startCondition.concat(cu, tu, pu, au, endCondition).replace(/&&([^'&&']*)$/, '' + '$1');
-            $.getJSON(jsonRdfLocation,
-                    function (data) {
-                    $(data.results.bindings).each(function (index, element) {
-                    if (eval(condition)) {
-                    let event = new EarsEvent(element);
-                    postEventInner(event, function () {
-                    $('.sendSuccessOrFailure').css('visibility', 'visible').fadeTo(10000, 1).slideUp(500, function () {
+                $.getScript("js/hide_warning.js");
+                var condition = '';
+                var startCondition = "(";
+                if ($("#idSelect_tc").val() != 1) {
+                    cu = "element.cu.value  == " + "'" + $("#idSelect_tc").val() + "'" + "  && ";
+                }
+                if ($("#idSelect_t").val() != 1) {
+                    tu = "element.tu.value  == " + "'" + $("#idSelect_t").val() + "'" + "  && ";
+                }
+                if ($("#idSelect_p").val() != 1) {
+                    pu = "element.pu.value  == " + "'" + $("#idSelect_p").val() + "'" + "  && ";
+                }
+                if ($("#idSelect_a").val() != 1) {
+                    au = "element.au.value  == " + "'" + $("#idSelect_a").val() + "'" + "  && ";
+                }
+                var endCondition = ")";
+                condition = startCondition.concat(cu, tu, pu, au, endCondition).replace(/&&([^'&&']*)$/, '' + '$1');
+                $.getJSON(jsonRdfLocation,
+                    function(data) {
+                        $(data.results.bindings).each(function(index, element) {
+                            if (eval(condition)) {
+                                let event = new EarsEvent(element);
+                                
+                                postEventInner(event, function() {
+                                    $("#btnSubmitDropdownChoice").removeClass("btn-warning").addClass("btn-success");
+                                    setTimeout(function() {
+                                        $("#btnSubmitDropdownChoice").removeClass("btn-success");
+                                    }, 10000);
+                                    $("#collapseOne").addClass("show");
+                                    },
+                                    function() {
+                                        $("#btnSubmitDropdownChoice").removeClass("btn-success").addClass("btn-warning");
+                                });
+        /*
+                                postEventInner(event, function() {
+                                   /* $('.sendSuccessOrFailure').css('visibility', 'visible').fadeTo(10000, 1).slideUp(500, function() {
 
-                    });
-                    }, function () {
-                    $('.sendSuccessOrFailure').css('visibility', 'visible').fadeTo(10000, 1).slideUp(500, function () {
+                                    }); */
+        
+                                 //   $('.sendSuccessOrFailure').show();
+                                 //   $('.sendSuccessOrFailure').attr("fill", "red");
+                              //  }, function() {
+                                   /* $('.sendSuccessOrFailure').css('visibility', 'visible').fadeTo(10000, 1).slideUp(500, function() {
 
-                    });
-                    $('.sendSuccessOrFailure').attr("fill", "red");
-                    });
-                    let map = localStorageEventDefsToMap(); //maps preserve insertion order and have unique entries by default
-                    if (map === null) {
-                    map = new Map();
+                                    });*/
+                                //    $('.sendSuccessOrFailure').show();
+                                //    $('.sendSuccessOrFailure').attr("fill", "green");
+                                //});*/
+                                addEVtoLocalStorage(event);
+                                var  rdfBindings = data.results.bindings;
+                                populateAllScenarios(rdfBindings);
+                            }
+                        });
                     }
-                    if (map.size <= 9) {
-                    size = map.size;
-                    map.set(event.eventDefinitionId, event);
-                    if (map.size != size) { //addition happened, meaning it is new
-                    localStorage.eventDefinitions = JSON.stringify(Array.from(map.entries()));
-                    }
-                    } else { //larger than 9
-
-                    //let firstKey = map.entries().next().value;
-                    //map.delete(firstKey);
-                    }
-                    $("#recentEvents td").empty(); //remove all buttons
-                    for (let [key, value] of map) {
-                    populateScenario(key);
-                    }
-
-                    }
-                    });
-                    }
-            );
+                );
             }
-            });
-            });
-            let map = localStorageEventDefsToMap();
-            if (map !== null) {
-            for (let [key, value] of map) {
-            populateScenario(key);
-            }
-            }
-            } else {
-            alert("Sorry, your browser does not support local storage.");
-            }
+        });
+    });
+    populateAllScenarios();
+} else {
+    alert("Sorry, your browser does not support local storage.");
+}
         </script>
     </body>
 </html>

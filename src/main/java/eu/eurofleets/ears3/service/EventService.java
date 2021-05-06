@@ -25,18 +25,14 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.Executor;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.apache.commons.collections4.IterableUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Bean;
 import org.springframework.core.env.Environment;
 import org.springframework.http.HttpStatus;
-import org.springframework.scheduling.annotation.Async;
-import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
 import org.springframework.web.server.ResponseStatusException;
@@ -105,6 +101,48 @@ public class EventService {
         }
     }
 
+    public static String sanitizeParam(Map<String, String> allParams, String name) {
+        String get = allParams.get(name);
+        if (get == null || get.equals("") || get.equals(" ")) {
+            return null;
+        } else {
+            return get;
+        }
+    }
+
+    public List<Event> advancedFind(Map<String, String> allParams) {
+        String platformIdentifier = sanitizeParam(allParams, "platformIdentifier");
+        String cruiseIdentifier = sanitizeParam(allParams, "cruiseIdentifier");
+        String programIdentifier = sanitizeParam(allParams, "programIdentifier");
+        String actorEmail = sanitizeParam(allParams, "actorEmail");
+        String startDate = sanitizeParam(allParams, "startDate");
+        String endDate = sanitizeParam(allParams, "endDate");
+        OffsetDateTime start = null;
+        OffsetDateTime end = null;
+        if (startDate != null) {
+            start = OffsetDateTime.parse(startDate);
+        }
+        if (endDate != null) {
+            end = OffsetDateTime.parse(endDate);
+        }
+
+        List<Event> res = null;
+        if (platformIdentifier == null && programIdentifier == null && actorEmail == null && start == null && end == null && cruiseIdentifier == null) {
+            res = this.findAll();
+        } else if (programIdentifier == null && actorEmail == null && start == null && end == null && cruiseIdentifier == null) {
+            res = this.findAllByPlatformCode(platformIdentifier);
+        } else if (cruiseIdentifier == null) {
+            if (start != null && end != null) {
+                res = this.findAllByPlatformActorProgramAndDates(platformIdentifier, actorEmail, programIdentifier, start, end);
+            } else {
+                res = this.findAllByPlatformActorAndProgram(platformIdentifier, actorEmail, programIdentifier);
+            }
+        } else {
+            res = this.findAllByCruiseProgramAndActor(cruiseIdentifier, programIdentifier, actorEmail);
+        }
+        return res;
+    }
+
     public List<Event> findAll() {
         return IterableUtils.toList(this.eventRepository.findAll());
     }
@@ -132,13 +170,13 @@ public class EventService {
     }
 
     public List<Event> findAllByPlatformActorAndProgram(String platformIdentifier, String personEmail, String programIdentifier) {
-        if (personEmail == null) {
+       /* if (personEmail == null) {
             personEmail = "";
         }
         if (programIdentifier == null) {
             programIdentifier = "";
-        }
-        return this.eventRepository.findByPlatformActorAndProgram(platformIdentifier, personEmail, programIdentifier);
+        }*/
+        return this.eventRepository.findAllByPlatformActorAndProgram(platformIdentifier, personEmail, programIdentifier);
     }
 
     public List<Event> findAllByPlatformActorProgramAndDates(String platformIdentifier, String personEmail, String programIdentifier, OffsetDateTime start, OffsetDateTime end) {
@@ -180,6 +218,9 @@ public class EventService {
         }
         if (eventDTO.platform == null) {
             throw new IllegalArgumentException("Event must have a platform.");
+        }
+        if (eventDTO.program == null) {
+            throw new IllegalArgumentException("Event must have a program.");
         }
         try {
             Event event = new Event();
@@ -241,9 +282,14 @@ public class EventService {
             LinkedDataTerm toolLdTerm = ldtService.findOrCreate(eventDTO.tool.tool);
             LinkedDataTerm parentToolLdTerm = ldtService.findOrCreate(eventDTO.tool.parentTool);
             Tool tool = new Tool(eventDTO.tool); //create a tool from the DTO
+            toolLdTerm.setTransitiveIdentifier(eventDTO.tool.tool.transitiveIdentifier);
+            if (parentToolLdTerm != null && eventDTO.tool.parentTool != null) {
+                parentToolLdTerm.setTransitiveIdentifier(eventDTO.tool.parentTool.transitiveIdentifier);
+            }
             tool.setTerm(toolLdTerm); //add the linkeddataterm to it
             tool.setParentTool(parentToolLdTerm); //add the parent linkeddataterm to it
             tool = toolService.findOrCreate(tool); //replace it with a managed entity, either by finding it or creating it.
+            
             Platform platform = platformService.findByIdentifier(eventDTO.platform);
             event.setPlatform(platform);
             Person actor = null;
@@ -256,7 +302,7 @@ public class EventService {
             Collection<Property> properties = new ArrayList<>();
             if (eventDTO.properties != null) {
                 for (PropertyDTO propertyDTO : eventDTO.properties) {
-                    LinkedDataTerm propertyLdTerm = new LinkedDataTerm(propertyDTO.key.identifier, null, propertyDTO.key.name);
+                    LinkedDataTerm propertyLdTerm = new LinkedDataTerm(propertyDTO.key.identifier, propertyDTO.key.transitiveIdentifier, propertyDTO.key.name);
                     propertyLdTerm = ldtService.findOrCreate(propertyLdTerm); //replace it with a managed one, either new or selected.
                     Property property = new Property(propertyLdTerm, propertyDTO.value, propertyDTO.uom);
                     propertyService.save(property);

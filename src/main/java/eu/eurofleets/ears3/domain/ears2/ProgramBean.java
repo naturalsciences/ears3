@@ -13,8 +13,6 @@ import be.naturalsciences.bmdc.cruise.model.ILinkedDataTerm;
 import be.naturalsciences.bmdc.cruise.model.IPerson;
 import be.naturalsciences.bmdc.cruise.model.IProgram;
 import be.naturalsciences.bmdc.cruise.model.IProject;
-import eu.eurofleets.ears3.domain.Cruise;
-import eu.eurofleets.ears3.domain.Program;
 import eu.eurofleets.ears3.domain.Project;
 import java.io.Serializable;
 import java.util.HashSet;

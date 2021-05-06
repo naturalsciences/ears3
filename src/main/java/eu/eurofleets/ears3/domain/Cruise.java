@@ -13,7 +13,6 @@ import be.naturalsciences.bmdc.cruise.model.IProject;
 import be.naturalsciences.bmdc.cruise.model.ISeaArea;
 import be.naturalsciences.bmdc.cruise.model.ITool;
 import com.fasterxml.jackson.annotation.JsonFormat;
-import dto.Navigation;
 import java.io.Serializable;
 import java.time.OffsetDateTime;
 import java.util.ArrayList;

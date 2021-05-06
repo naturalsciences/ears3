@@ -6,7 +6,6 @@
 package eu.eurofleets.ears3.domain.ears2;
 
 import be.naturalsciences.bmdc.cruise.model.IPerson;
-import eu.eurofleets.ears3.domain.Person;
 import javax.xml.bind.annotation.XmlElement;
 
 /**
