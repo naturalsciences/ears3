@@ -49,7 +49,7 @@ var endCondition = ")";
         condition_q = startCondition.concat(cu_q, tu_q, pu_q, endCondition).replace(/&&([^'&&']*)$/, '' + '$1');
         var resultJson = [];
         //console.log(condition);
-        $.getJSON(jsonRdfLocation,
+        $.getJSON(jsonVesselRdfLocation,
                 function (data) {
 
                 var tc = [];

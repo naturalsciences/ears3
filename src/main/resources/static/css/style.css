@@ -38,6 +38,7 @@ table#recentEventDefinitionTable button {
     vertical-align: top;
     height:100%;
     max-width:80%;
+    padding-top: 0;
 }
 
 table#recentEventDefinitionTable p{
@@ -52,4 +53,10 @@ button p.close-btn{
     text-align: right;
     font-weight: bolder;
     font-size: 130% !important;
+    /*cursor: move;*/
+    border-bottom: lightgrey thin solid;
+}
+
+.bi-lock {
+    cursor: pointer;
 }

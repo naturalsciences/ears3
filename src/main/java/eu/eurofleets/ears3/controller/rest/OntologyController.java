@@ -328,7 +328,7 @@ public class OntologyController {
     }
 
     @RequestMapping(method = {RequestMethod.GET}, value = {"program/sparql"}, produces = MediaType.APPLICATION_JSON_VALUE)
-    public String programSparqlEndpoint(@RequestParam(value = "q") String sparqlQuery, @RequestParam(value = "programIdentifier") String programIdentifier) throws IOException {
+    public String programSparqlEndpoint(@RequestParam(required = true, value = "q") String sparqlQuery, @RequestParam(required = true, value = "programIdentifier") String programIdentifier) throws IOException {
         sparqlQuery = UriUtils.decode(sparqlQuery, "UTF8");
         Query qry = QueryFactory.create(sparqlQuery);
         String cleanProgramName = cleanProgramName(programIdentifier);
