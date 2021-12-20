@@ -16,6 +16,7 @@ import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
 
@@ -33,6 +34,8 @@ public class ProgramService {
 
     @Autowired
     public ProjectService projectService;
+    @Autowired
+    private Environment env;
 
     @Autowired
     public ProgramService(ProgramRepository programRepository, ProjectRepository projectRepository, OrganisationRepository organisationRepository) {
@@ -55,8 +58,11 @@ public class ProgramService {
         return this.programRepository.findByIdentifier(identifier);
     }
 
-    public void save(Program program) {
-        this.programRepository.save(program);
+    public Program save(Program program) {
+        if (env.getProperty("ears.read-only") == null || !env.getProperty("ears.read-only").equals("false")) {
+            throw new IllegalArgumentException("Cannot create/modify entities on a read-only system.");
+        }
+        return this.programRepository.save(program);
     }
 
     public void delete(Program program) {
@@ -96,7 +102,7 @@ public class ProgramService {
                 }
             }
             program.setProjects(projects);
-            return this.programRepository.save(program);
+            return save(program);
         } catch (Exception e) {
             log.log(Level.SEVERE, "exception!", e);
             throw e;
@@ -142,7 +148,7 @@ public class ProgramService {
     }
 
     public Set<Program> findByVesselIdentifier(String vesselIdentifier) {
-       return this.programRepository.findByVesselIdentifier(vesselIdentifier);
+        return this.programRepository.findByVesselIdentifier(vesselIdentifier);
     }
 
     public Set<Program> findCurrent() {

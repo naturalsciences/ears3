@@ -13,6 +13,7 @@ import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.ComponentScan;
+import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.context.web.WebAppConfiguration;
 import org.springframework.test.web.servlet.MockMvc;
@@ -31,7 +32,7 @@ import org.springframework.web.context.WebApplicationContext;
 @SpringBootTest(classes = {Application.class}, properties = "spring.main.allow-bean-definition-overriding=true")
 @WebAppConfiguration
 @ComponentScan(basePackages = {"eu.eurofleets.ears3.domain", " eu.eurofleets.ears3.service"})
-@Ignore
+@TestPropertySource(locations = "classpath:test.properties")
 public class SyncSchedulerTest {
 
     @Autowired
@@ -47,7 +48,7 @@ public class SyncSchedulerTest {
     @Test
     @Ignore
     public void testSyncDatabase() throws Exception {
-        MvcResult mvcResult = this.mockMvc.perform(MockMvcRequestBuilders.get("/sync/database"))
+        MvcResult mvcResult = this.mockMvc.perform(MockMvcRequestBuilders.get("/api/sync/database"))
                 .andDo(print())
                 .andExpect(status().is(200))
                 .andReturn();
@@ -56,7 +57,7 @@ public class SyncSchedulerTest {
     @Test
     @Ignore
     public void testSyncSeaAreas() throws Exception {
-        MvcResult mvcResult = this.mockMvc.perform(MockMvcRequestBuilders.get("/sync/seas"))
+        MvcResult mvcResult = this.mockMvc.perform(MockMvcRequestBuilders.get("/api/sync/seas"))
                 .andDo(print())
                 .andExpect(status().is(200))
                 .andReturn();
@@ -65,7 +66,7 @@ public class SyncSchedulerTest {
     @Test
     @Ignore
     public void testSyncShips() throws Exception {
-        MvcResult mvcResult = this.mockMvc.perform(MockMvcRequestBuilders.get("/sync/ships"))
+        MvcResult mvcResult = this.mockMvc.perform(MockMvcRequestBuilders.get("/api/sync/ships"))
                 .andDo(print())
                 .andExpect(status().is(200))
                 .andReturn();
@@ -74,7 +75,7 @@ public class SyncSchedulerTest {
     @Test
     @Ignore
     public void testSyncHarbours() throws Exception {
-        MvcResult mvcResult = this.mockMvc.perform(MockMvcRequestBuilders.get("/sync/harbours"))
+        MvcResult mvcResult = this.mockMvc.perform(MockMvcRequestBuilders.get("/api/sync/harbours"))
                 .andDo(print())
                 .andExpect(status().is(200))
                 .andReturn();
@@ -83,7 +84,7 @@ public class SyncSchedulerTest {
     @Test
     @Ignore
     public void testSyncAll() throws Exception {
-        MvcResult mvcResult = this.mockMvc.perform(MockMvcRequestBuilders.get("/sync/all"))
+        MvcResult mvcResult = this.mockMvc.perform(MockMvcRequestBuilders.get("/api/sync/all"))
                 .andDo(print())
                 .andExpect(status().isOk())
                 .andReturn();

@@ -19,5 +19,5 @@ public class ThermosalDTO {
     public Double salinity;
     public Double sigmat;
     public Double conductivity;
-    public Double fluor;
+    public Double rawFluorometry;
 }

@@ -15,10 +15,19 @@ import org.springframework.stereotype.Repository;
 public abstract interface NavigationRepository
         extends CrudRepository<Navigation, Long> {
 
-    @Query("select n from Navigation n where n.instrumentTime = ?1")
-    public Navigation findByDate(OffsetDateTime instrumentTime);
+    @Query("select t from Navigation t where t.instrumentTime = ?1")
+    public Navigation findByInstrumentTime(OffsetDateTime instrumentTime);
 
-    @Query("select n from Navigation n where n.instrumentTime  in (?1)")
-    public List<Navigation> findAllByDate(Set<Instant> instrumentTime);
+    @Query("select t from Navigation t where t.timeStamp = ?1")
+    public Navigation findByTimestamp(OffsetDateTime timeStamp);
+
+    @Query("select t from Navigation t where t.instrumentTime=?1 or (t.instrumentTime is null and t.timeStamp = ?1)")
+    public Navigation findByDate(OffsetDateTime date);
+
+    @Query("select t from Navigation t where t.timeStamp = (select max(t.timeStamp) from Navigation t)")
+    public Navigation findLast();
+
+    @Query("select t from Navigation t where t.instrumentTime  in (?1)")
+    public List<Navigation> findAllByInstrumentTime(Set<OffsetDateTime> instrumentTime);
 
 }

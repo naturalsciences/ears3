@@ -57,6 +57,7 @@ public class Event implements IEvent, Serializable {
     @Column(unique = true, nullable = false, length = 36) //uuid length
     private String identifier;
     private String eventDefinitionId;
+    private String label;
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ssXXX")
     @XmlJavaTypeAdapter(value = OffsetDateTimeAdapter.class)
     private OffsetDateTime timeStamp;
@@ -88,6 +89,14 @@ public class Event implements IEvent, Serializable {
 
     @ManyToOne(optional = true)
     private Program program;
+
+    public String getLabel() {
+        return label;
+    }
+
+    public void setLabel(String label) {
+        this.label = label;
+    }
 
     @ManyToMany()
     @JoinTable(
@@ -317,10 +326,13 @@ public class Event implements IEvent, Serializable {
 
     public String getPrincipalInvestigators() {
         StringJoiner sj = new StringJoiner(", ");
-        for (IPerson pi : this.getProgram().getPrincipalInvestigators()) {
-            sj.add(((Person) pi).getFirstNameLastName());
+        if (this.getProgram() != null) {
+            for (IPerson pi : this.getProgram().getPrincipalInvestigators()) {
+                sj.add(((Person) pi).getFirstNameLastName());
+            }
+            return sj.toString();
         }
-        return sj.toString();
+        return null;
     }
 
 }

@@ -44,12 +44,14 @@ public class WebConfig implements WebMvcConfigurer {
     @Override
     public void addResourceHandlers(ResourceHandlerRegistry registry) {
         registry.addResourceHandler(
-                "/html/js/**",
-                "/html/css/**",
-                "/html/json/**")
+                "/js/**",
+                "/css/**",
+                "/images/**",
+                "/json/**")
                 .addResourceLocations(
                         "classpath:/static/js/",
                         "classpath:/static/css/",
+                        "classpath:/static/images/",
                         "classpath:/static/json/");
     }
 

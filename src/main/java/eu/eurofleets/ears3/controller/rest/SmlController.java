@@ -7,7 +7,10 @@ package eu.eurofleets.ears3.controller.rest;
 
 import be.naturalsciences.bmdc.sensormlgenerator.SensorMLBuilder;
 import be.naturalsciences.bmdc.sensormlgenerator.SensorMLPrinter;
+import eu.eurofleets.ears3.domain.Country;
 import eu.eurofleets.ears3.domain.Event;
+import eu.eurofleets.ears3.domain.LinkedDataTerm;
+import eu.eurofleets.ears3.domain.Organisation;
 import eu.eurofleets.ears3.domain.Platform;
 import eu.eurofleets.ears3.domain.Tool;
 import eu.eurofleets.ears3.service.EventService;
@@ -35,6 +38,10 @@ import org.springframework.web.bind.annotation.RestController;
 @CrossOrigin(origins = "*", maxAge = 3600)
 public class SmlController {
 
+    Country belgium = new Country(new LinkedDataTerm("http://vocab.nerc.ac.uk/collection/C32/current/BE", null, "Belgium"));
+    LinkedDataTerm bmdcT = new LinkedDataTerm("https://edmo.seadatanet.org/report/3330", null, "Royal Belgian Institute of Natural Sciences, Operational Directorate Natural Environment, Belgian Marine Data Centre");
+    Organisation bmdc = new Organisation(bmdcT, "02/555.555", "02/555.556", "info@bmdc.be", "http://odnature.naturalsciences.be/bmdc", "Vautierstraat 1", "Brussel", "1000", belgium);
+
     @Autowired
     private PlatformService platformService;
     @Autowired
@@ -56,7 +63,7 @@ public class SmlController {
         Platform p = this.platformService.findByIdentifier(platformUrn);
         if (p != null) {
 
-            SensorMLBuilder builder = new SensorMLBuilder(p, getUrl(request));
+            SensorMLBuilder builder = new SensorMLBuilder(p, getUrl(request), bmdc);
             PhysicalSystemType physicalSystem = builder.getPhysicalSystem();
             SensorMLPrinter instance = new SensorMLPrinter(physicalSystem, physicalSystem.getClass());
             String result = instance.getResult();
@@ -66,7 +73,7 @@ public class SmlController {
         return "<WebErrorResponse><message>Platform with identifier " + platformUrn + " not found</message></WebErrorResponse>";
     }
 
-    @RequestMapping(method = {RequestMethod.GET}, value = {"sml"}, params = {"deviceUrn","platformUrn"}, produces = {"application/xml"})
+    @RequestMapping(method = {RequestMethod.GET}, value = {"sml"}, params = {"deviceUrn", "platformUrn"}, produces = {"application/xml"})
     public String getPhysicalComponent(HttpServletRequest request, @RequestParam(required = true, value = "deviceUrn") String deviceUrn, @RequestParam(required = true, value = "platformUrn") String platformUrn) throws JAXBException {
         Tool tool = this.toolService.findByIdentifier(deviceUrn);
         if (tool != null) {
@@ -77,7 +84,7 @@ public class SmlController {
                     newEvents.add(event);
                 }
             }
-            SensorMLBuilder builder = new SensorMLBuilder(null, getUrl(request));
+            SensorMLBuilder builder = new SensorMLBuilder(null, getUrl(request), bmdc);
             PhysicalComponentType physicalComponent = builder.getPhysicalComponent(tool, newEvents);
             SensorMLPrinter instance = new SensorMLPrinter(physicalComponent, physicalComponent.getClass());
             return instance.getResult();

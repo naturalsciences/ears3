@@ -28,6 +28,8 @@ public class EventDTO {
 
     public String identifier;
     public String eventDefinitionId;
+    public String label;
+    public String description;
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ssX")
     @XmlJavaTypeAdapter(value = OffsetDateTimeAdapter.class)
     public OffsetDateTime timeStamp;
@@ -42,7 +44,6 @@ public class EventDTO {
     public String platform;
     public Collection<NavigationDTO> navigation;
     public Collection<ThermosalDTO> thermosal;
-
     public Collection<WeatherDTO> weather;
 
     public EventDTO() {
@@ -65,7 +66,7 @@ public class EventDTO {
 
     public EventDTO(Event event) {
         IPerson actor = event.getActor();
-        PersonDTO actorDTO = new PersonDTO(actor.getFirstName(), actor.getLastName(), actor.getOrganisation() != null ? actor.getOrganisation().getTerm().getIdentifier() : null, actor._getPhoneNumber(), actor._getFaxNumber(), actor._getEmailAddress());
+        PersonDTO actorDTO = new PersonDTO(actor.getFirstName(), actor.getLastName(), actor.getOrganisation() != null ? actor.getOrganisation().getTerm().getIdentifier() : null, actor._getPhoneNumber(), actor._getFaxNumber(), actor.getEmail());
         LinkedDataTermDTO subject = new LinkedDataTermDTO(event.getSubject());
         LinkedDataTermDTO toolCategory = new LinkedDataTermDTO(event.getToolCategory());
         ToolDTO tool = new ToolDTO(event.getTool().getTerm(), event.getTool().getParentTool());
@@ -186,4 +187,21 @@ public class EventDTO {
         this.platform = platform;
     }
 
+    public String getLabel() {
+        return label;
+    }
+
+    public void setLabel(String label) {
+        this.label = label;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
+    
 }

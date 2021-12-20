@@ -51,7 +51,7 @@ import org.springframework.web.bind.annotation.RestController;
 @Configuration
 @EnableScheduling
 @RestController()
-@RequestMapping("sync")
+@RequestMapping("api/sync")
 public class SyncScheduler {
 
     public static Logger log = Logger.getLogger(SyncScheduler.class.getSimpleName());

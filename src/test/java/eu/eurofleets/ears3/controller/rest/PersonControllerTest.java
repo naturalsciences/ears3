@@ -21,6 +21,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.http.MediaType;
+import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.context.web.WebAppConfiguration;
 import org.springframework.test.web.servlet.MockMvc;
@@ -40,7 +41,7 @@ import org.springframework.web.context.WebApplicationContext;
 @SpringBootTest(classes = {Application.class}, properties = "spring.main.allow-bean-definition-overriding=true")
 @WebAppConfiguration
 @ComponentScan(basePackages = {"eu.eurofleets.ears3.domain", " eu.eurofleets.ears3.service"})
-@Ignore
+@TestPropertySource(locations="classpath:test.properties")
 public class PersonControllerTest {
 
     @Autowired
@@ -74,7 +75,7 @@ public class PersonControllerTest {
 
         String json = objectMapper.writeValueAsString(pr);
 
-        MvcResult mvcResult = this.mockMvc.perform(MockMvcRequestBuilders.post("/program").contentType(MediaType.APPLICATION_JSON).content(json))
+        MvcResult mvcResult = this.mockMvc.perform(MockMvcRequestBuilders.post("/api/program").contentType(MediaType.APPLICATION_JSON).content(json))
                 .andReturn();
 
         String firstName = "Adalbert";
@@ -91,7 +92,7 @@ public class PersonControllerTest {
 
         MvcResult postEvent = postEvent(this.mockMvc, e, this.objectMapper);
 
-        mvcResult = this.mockMvc.perform(MockMvcRequestBuilders.get("/person?fullName=" + firstName + " " + lastName))
+        mvcResult = this.mockMvc.perform(MockMvcRequestBuilders.get("/api/person?fullName=" + firstName + " " + lastName))
                 .andDo(print())
                 .andExpect(status().is(200))
                 .andExpect(content().string(containsString("<firstName>" + firstName + "</firstName><lastName>" + lastName + "</lastName>"))).andReturn();

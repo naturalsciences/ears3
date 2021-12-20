@@ -83,6 +83,7 @@ public class LinkedDataTerm implements ILinkedDataTerm, Serializable {
         this.name = name;
         this.transitiveIdentifier = transitiveIdentifier;
         this.urn = ILinkedDataTerm.getUrnFromUrl(identifier);
+        this.transitiveUrn = ILinkedDataTerm.getUrnFromUrl(transitiveIdentifier);
     }
 
     public Long getId() {

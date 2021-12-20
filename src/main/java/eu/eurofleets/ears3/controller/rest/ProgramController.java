@@ -7,6 +7,7 @@ import eu.eurofleets.ears3.domain.ProgramList;
 import eu.eurofleets.ears3.dto.ProgramDTO;
 import eu.eurofleets.ears3.service.CruiseService;
 import eu.eurofleets.ears3.service.ProgramService;
+import io.swagger.v3.oas.annotations.Operation;
 import java.time.Instant;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
@@ -31,6 +32,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 
 @RestController
+@RequestMapping(value = "/api")
 @CrossOrigin(origins = "*", maxAge = 3600)
 public class ProgramController {
 
@@ -50,6 +52,7 @@ public class ProgramController {
         return new ProgramList(res);
     }
 
+    @Operation(summary = "Find programs by cruiseIdentifier")
     @RequestMapping(method = {RequestMethod.GET}, value = {"programs"}, params = {"cruiseIdentifier"}, produces = {"application/xml; charset=utf-8", "application/json"})
     public ProgramList getPrograms(@RequestParam(required = false, defaultValue = "") String cruiseIdentifier) {
         Set<Program> res;
@@ -65,6 +68,7 @@ public class ProgramController {
         return new ProgramList(res);
     }
 
+    @Operation(summary = "Find programs by startDate and endDate")
     @RequestMapping(method = {RequestMethod.GET}, value = {"programs"}, params = {"startDate", "endDate"}, produces = {"application/xml; charset=utf-8", "application/json"})
     public ProgramList getPrograms(@RequestParam(required = false, defaultValue = "") String startDate, @RequestParam(required = false, defaultValue = "") String endDate) { //@DateTimeFormat(iso = ISO.DATE_TIME)
         OffsetDateTime start = OffsetDateTime.parse(startDate);

@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en"  xmlns="http://www.w3.org/1999/xhtml" 
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" layout:decorate="~{fragments/f}">
+    <head th:replace="fragments/f :: head"></head>
+    <body>
+        <nav th:replace="fragments/f :: header">
+        </nav>
+        <form  layout:fragment="head-form">
+            <div class="form-group">
+                <select name="program" id="programField"
+                        class="selectpicker target form-control"
+                        data-live-search="true" title="Current program" required>
+                </select>
+            </div>
+        </form>
+        <div class="container" layout:fragment="main">
+            <h1 id="h1">Cruises</h1>
+
+            <table id="cruiseTable" class="display dataTable no-footer">
+                <thead>
+                    <tr>
+                        <th>Identifier</th>
+                        <!--<th>Name</th>-->
+                        <th>Start date</th>
+                        <th>End date</th>
+                        <th>Chief scientist</th>
+                        <th>Cruise summary report</th>
+                        <th>Navigation</th>
+                        <th>Meteorology</th>
+                        <th>Thermosalinometry</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr th:each="cruise : ${cruises}" th:class="${cruiseStat.odd}? 'odd'">
+                        <td th:text="${cruise.identifier}"></td>
+                        <td th:text="${#temporals.format(cruise.startDate, 'yyyy-MM-dd HH:mm:ss')}" th:title="${cruise.startDate}"></td>
+                        <td th:text="${#temporals.format(cruise.endDate, 'yyyy-MM-dd HH:mm:ss')}" th:title="${cruise.endDate}"></td>
+                        <!--<td th:text="${cruise.name}"></td>-->
+                        <td th:text="${cruise.getChiefScientistsString()}"  ></td>
+                        <td><a class="csrLink" th:text="CSR" th:href="@{/api/cruise/csr?identifier={id}(id=${cruise.identifier})}"></a></td>
+                        <td><ul><li><a th:text="CSV" th:href="@{~/ears3Nav/nav/getBetween/datagram?startDate={s}&endDate={e}(s=${cruise.startDateUTC}, e=${cruise.endDateUTC})}"></a></li>
+                                <li><a th:text="XML" th:href="@{~/ears3Nav/nav/getBetween/xml?startDate={s}&endDate={e}(s=${cruise.startDateUTC}, e=${cruise.endDateUTC})}"></a></li>
+                                <li><a th:text="JSON" th:href="@{~/ears3Nav/nav/getBetween/json?startDate={s}&endDate={e}(s=${cruise.startDateUTC}, e=${cruise.endDateUTC})}"></a></li>
+                            </ul>
+                        </td>
+                        <td><ul><li><a th:text="CSV" th:href="@{~/ears3Nav/met/getBetween/datagram?startDate={s}&endDate={e}(s=${cruise.startDateUTC}, e=${cruise.endDateUTC})}"></a></li>
+                                <li><a th:text="XML" th:href="@{~/ears3Nav/met/getBetween/xml?startDate={s}&endDate={e}(s=${cruise.startDateUTC}, e=${cruise.endDateUTC})}"></a></li>
+                                <li><a th:text="JSON" th:href="@{~/ears3Nav/met/getBetween/json?startDate={s}&endDate={e}(s=${cruise.startDateUTC}, e=${cruise.endDateUTC})}"></a></li>
+                            </ul>
+                        </td> 
+                        <td><ul><li><a th:text="CSV" th:href="@{~/ears3Nav/tss/getBetween/datagram?startDate={s}&endDate={e}(s=${cruise.startDateUTC}, e=${cruise.endDateUTC})}"></a></li>
+                                <li><a th:text="XML" th:href="@{~/ears3Nav/tss/getBetween/xml?startDate={s}&endDate={e}(s=${cruise.startDateUTC}, e=${cruise.endDateUTC})}"></a></li>
+                                <li><a th:text="JSON" th:href="@{~/ears3Nav/tss/getBetween/json?startDate={s}&endDate={e}(s=${cruise.startDateUTC}, e=${cruise.endDateUTC})}"></a></li>
+                            </ul>
+                        </td> 
+                    </tr>
+                </tbody>
+            </table>
+            <script src="/ears3/js/jquery.dataTables.min.js" type="application/javascript"></script>
+            <script type="application/javascript">
+                
+                /*var message = null;
+                function printPlatform() {
+                    var h1 = document.getElementById('h1');
+                    var xmlhttp = new XMLHttpRequest(); 
+                    var url = "api/platform/current"
+                    xmlhttp.open("GET", url, true);
+                    xmlhttp.setRequestHeader("Content-type", "text/plain");
+                    xmlhttp.onload = (res) => {
+                      //  console.log(res['target']['response']);
+                        message = res['target']['response'];
+                        h1.innerHTML = 'Cruises@'+message;
+                    };
+                    xmlhttp.send();
+                }*/
+
+                function activateCsrLink(){
+                    $('a.csrLink:not(:has(>svg))').each(function () { //all csr links but not those already evaluated
+                        var $this;
+                        $this = $(this); //retain a reference to the current link
+                        $.ajax({
+                            url:$(this).attr('href'), //be sure to check the right attribute
+                            success: function () { //pass an anonymous callback function
+                                $this.html('<svg aria-hidden="true" focusable="false" data-prefix="fas" width="32"  height="32" data-icon="check" class="svg-inline--fa fa-check fa-w-16" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><path fill="green" d="M173.898 439.404l-166.4-166.4c-9.997-9.997-9.997-26.206 0-36.204l36.203-36.204c9.997-9.998 26.207-9.998 36.204 0L192 312.69 432.095 72.596c9.997-9.997 26.207-9.997 36.204 0l36.203 36.204c9.997 9.997 9.997 26.206 0 36.204l-294.4 294.401c-9.998 9.997-26.207 9.997-36.204-.001z"></path></svg>')
+                            },
+                            error: function (message, status, er) {
+                              // var exceptionType = $(message.responseText).find('message')[0].textContent;
+                               var txt=""
+                               $(message.responseText).find('messages>message').each(
+                                       function( index, element ){
+                                            txt=txt+element.textContent+"\n";
+                                       });
+                               //message.responseText;                    
+                               $this.attr("title",txt).html('<svg aria-hidden="true" focusable="false" data-prefix="fas" width="32"  height="32" data-icon="times" class="svg-inline--fa fa-times fa-w-11" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 352 512"><path fill="red" d="M242.72 256l100.07-100.07c12.28-12.28 12.28-32.19 0-44.48l-22.24-22.24c-12.28-12.28-32.19-12.28-44.48 0L176 189.28 75.93 89.21c-12.28-12.28-32.19-12.28-44.48 0L9.21 111.45c-12.28 12.28-12.28 32.19 0 44.48L109.28 256 9.21 356.07c-12.28 12.28-12.28 32.19 0 44.48l22.24 22.24c12.28 12.28 32.2 12.28 44.48 0L176 322.72l100.07 100.07c12.28 12.28 32.2 12.28 44.48 0l22.24-22.24c12.28-12.28 12.28-32.19 0-44.48L242.72 256z"></path></svg>')
+                            }
+                        });
+                    });
+                }
+                $(document).ready(function () {
+                    //printPlatform();
+                    $.ajax({
+                        url:"api/platform/current",
+                        dataType: 'text',
+                        type: 'GET',
+                        async: true,
+                        success: function (data) { 
+                            var name = $(data).find('term name')[0].textContent;
+
+                            var h1 = document.getElementById('h1');
+                            h1.innerHTML = 'Cruises@'+name;                            
+                        }
+                    });
+                    $('#cruiseTable').on( 'draw.dt',   function () { activateCsrLink(); } ).dataTable({
+                        "lengthMenu": [ [10, 50, 100, -1], [10, 50, 100, "All"] ]
+                    });
+                    activateCsrLink();
+                });
+            </script>
+        </div>
+    </body>
+</html>

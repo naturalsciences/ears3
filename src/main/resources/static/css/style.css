@@ -2,14 +2,13 @@ body{
     font-size:100%;
 }
 
-h1 {
-    color: red;
-    width: 500px;
-    border: 1px solid black;
-}
-
 #id_eid {
     display: none;
+}
+
+.navbar, .container{
+    padding-left: 4px;
+    padding-top: 4px;
 }
 
 table, tr, td {
@@ -46,17 +45,109 @@ table#recentEventDefinitionTable p{
 }
 
 table#dropdownMenuTable td{
-  line-height:35px;
+    line-height:35px;
+    padding-left: 0;
+}
+
+table.dataTable tbody td {
+    padding: 8px 0 !important;
+    border-left: black dotted 1px;
+}
+
+table.dataTable thead th, table.dataTable thead td {
+    padding: 10px 2px !important;
+    cursor: auto !important;
+}
+
+#eventTable tbody tr{
+    cursor: pointer !important;
 }
 
 button p.close-btn{
     text-align: right;
     font-weight: bolder;
-    font-size: 130% !important;
+    font-size: 130%;
     /*cursor: move;*/
     border-bottom: lightgrey thin solid;
 }
 
 .bi-lock {
     cursor: pointer;
+}
+
+.form-group {
+    margin-top: 1em;
+    margin-bottom: 0.5em;
+}
+
+#propertyPopup ul{
+    list-style: none;
+    padding-left:0;
+}
+
+#propertyPopup label.txtBox {
+    width:80px;
+    clear:left;
+    text-align:left;
+    padding-right:16px;
+}
+
+#propertyPopup input {
+    width:30ch;
+}
+
+#propertyPopup input, #propertyPopup label {
+    float:left;
+}
+
+#propertyPopup button{
+    float:left;
+    clear:left;
+    margin-top: 20px;
+}
+/*To have the label moving to the input's edge'*/
+div.form-group p{
+    margin:0;
+    position:relative;
+    display:inline-block;
+}
+
+div.form-group label {
+    padding-top: 2px;
+    padding-right: 10px;
+    padding-bottom: 2px;
+    padding-left: 10px;
+    pointer-events: none;
+    position:absolute;
+    left:6px;
+    top:4px;
+    transition: 0.2s;
+    transition-timing-function: ease;
+    transition-timing-function: cubic-bezier(0.25, 0.1, 0.25, 1);
+    opacity:0.5;
+    background: #fff;
+}
+
+div.form-group input {
+    padding:10px;
+}
+
+div.form-group input:focus + label.txtBox, input:not(:placeholder-shown) + label.txtBox {
+    opacity:1;
+    transform: scale(0.75) translateY(-86%) translateX(-14px);
+}
+/*To have the label moving to the input's edge'*/
+
+.dateField{
+    width: 12ch;
+}
+.timeField{
+    width: 10ch;
+}
+.timeZoneField{
+    width: 8ch;
+}
+select#idSelect_tc+button, select#idSelect_t+button,select#idSelect_p+button,select#idSelect_a+button{
+    padding-left:0;
+    padding-right:2px;
 }

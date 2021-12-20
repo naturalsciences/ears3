@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html lang="en"  xmlns="http://www.w3.org/1999/xhtml" 
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" layout:decorate="~{fragments/f}">
+    <head th:replace="fragments/f :: head"></head>
+    <body>        
+        <nav th:replace="fragments/f :: header">
+        </nav>
+        <form  layout:fragment="head-form">
+            <div class="form-group">
+                <select name="program" id="programField"
+                        class="selectpicker target form-control"
+                        data-live-search="true" title="Current program" required>
+                </select>
+            </div>
+            <div class="form-group">
+                <p>
+                    <input name="station" id="stationField" placeholder=" " type="text" title="Current station" class="form-control" /><label class="txtBox" for="label">Station</label>
+                </p>
+            </div>
+            <div class="form-group">
+                <p>
+                    <input name="label" id="labelField" placeholder=" " type="text" title="Current event label (event identifier, station,...)" class="form-control" /><label class="txtBox" for="label">Event label</label>
+                </p>
+            </div>
+        </form>
+
+        <div class="container" layout:fragment="main">
+            <div class="row">
+                <div class="col-sm-12">
+                    <!--    <div class='alert alert-danger' role='alert' id="id_form_process">All list must be selected.</div>-->
+                    <div class="alert alert-info" role="alert" id="id_eid"></div>
+                </div>
+            </div>
+            <div class="accordion" id="id_accordion">
+                <div class="card">
+                    <div class="card-header" id="headingOne">
+                        <h2 class="mb-0">
+                            <button id="id_collapse_button" class="btn btn-link btn-block text-left" type="button"
+                                    data-toggle="collapse" data-target="#collapseOne" aria-expanded="true" 
+                                    aria-controls="collapseOne">
+                                Common scenarios
+                                <svg id="id_collapse_in" width="1em" height="1em" viewBox="0 0 16 16" class="bi bi-chevron-down pull-right" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+                                    <path fill-rule="evenodd" d="M1.646 4.646a.5.5 0 0 1 .708 0L8 10.293l5.646-5.647a.5.5 0 0 1 .708.708l-6 6a.5.5 0 0 1-.708 0l-6-6a.5.5 0 0 1 0-.708z"/>
+                                </svg>
+
+                                <svg id="id_collapse_out" width="1em" height="1em" viewBox="0 0 16 16" class="bi bi-chevron-up  pull-right" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+                                    <path fill-rule="evenodd" d="M7.646 4.646a.5.5 0 0 1 .708 0l6 6a.5.5 0 0 1-.708.708L8 5.707l-5.646 5.647a.5.5 0 0 1-.708-.708l6-6z"/>
+                                </svg>
+                            </button>
+                        </h2>
+                    </div>
+
+                    <div id="collapseOne" class="collapse show " aria-labelledby="headingOne" data-parent="#id_accordion">
+                        <form role="form" name="form">
+                            <table id="recentEventDefinitionTable" >                     
+                                <!--table-bordered-->
+                                <tr>
+                                    <td id="cell0"></td>
+                                    <td id="cell1"></td>
+                                    <td id="cell2"></td>
+                                </tr>
+                                <tr> 
+                                    <td id="cell3"></td>
+                                    <td id="cell4"></td>
+                                    <td id="cell5"></td>
+                                </tr>
+                                <tr>                                    
+                                    <td id="cell6"></td>
+                                    <td id="cell7"></td>
+                                    <td id="cell8"></td>
+                                </tr>
+                                <tr>                                    
+                                    <td id="cell9"></td>
+                                    <td id="cell10"></td>
+                                    <td id="cell11"></td>
+                                </tr>
+                                <tr>                                    
+                                    <td id="cell12"></td>
+                                    <td id="cell13"></td>
+                                    <td id="cell14"></td>
+                                </tr>
+                                <tr>                                    
+                                    <td id="cell15"></td>
+                                    <td id="cell16"></td>
+                                    <td id="cell17"></td>
+                                </tr>
+                            </table>
+                        </form>
+                    </div>
+                </div>
+            </div>
+            <form role="form" name="form" id="dropdownForm" method="POST">
+                <table class="table" id="dropdownMenuTable">
+                    <!--table-bordered-->
+                    <tbody>
+                        <tr id="tr_tc">
+                            <td class="col-3 col-sm-1">Category</td>
+                            <td class="col-3 col-sm-9"> <select name="clcu" id="idSelect_tc"
+                                                                class="selectpicker  form-control"
+                                                                data-live-search="true" data-with="auto">
+                                </select>
+                            </td>
+                            <td class="col-6 col-sm-2" id="cell_tc_unlock"> <svg id="tc_unlock"
+                                                                                 width="1em" height="1em" viewBox="0 0 16 16"
+                                                                                 class="bi bi-unlock" fill="green"
+                                                                                 xmlns="http://www.w3.org/2000/svg">
+                                    <path fill-rule="evenodd"
+                                          d="M9.655 8H2.333c-.264 0-.398.068-.471.121a.73.73 0 0 0-.224.296 1.626 1.626 0 0 0-.138.59V14c0 .342.076.531.14.635.064.106.151.18.256.237a1.122 1.122 0 0 0 .436.127l.013.001h7.322c.264 0 .398-.068.471-.121a.73.73 0 0 0 .224-.296 1.627 1.627 0 0 0 .138-.59V9c0-.342-.076-.531-.14-.635a.658.658 0 0 0-.255-.237A1.122 1.122 0 0 0 9.655 8zm.012-1H2.333C.5 7 .5 9 .5 9v5c0 2 1.833 2 1.833 2h7.334c1.833 0 1.833-2 1.833-2V9c0-2-1.833-2-1.833-2zM8.5 4a3.5 3.5 0 1 1 7 0v3h-1V4a2.5 2.5 0 0 0-5 0v3h-1V4z" />
+                                </svg>
+
+                                <svg id="tc_lock" width="1em" height="1em" viewBox="0 0 16 16"
+                                     class="bi bi-lock" fill="red"
+                                     xmlns="http://www.w3.org/2000/svg">
+                                    <path fill-rule="evenodd"
+                                          d="M11.5 8h-7a1 1 0 0 0-1 1v5a1 1 0 0 0 1 1h7a1 1 0 0 0 1-1V9a1 1 0 0 0-1-1zm-7-1a2 2 0 0 0-2 2v5a2 2 0 0 0 2 2h7a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-7zm0-3a3.5 3.5 0 1 1 7 0v3h-1V4a2.5 2.5 0 0 0-5 0v3h-1V4z" />
+                                </svg>
+                            </td>
+                        </tr>
+                        <tr id="tr_t">
+                            <td class="col-3 col-sm-1">Tool</td>
+                            <td class="col-3 col-sm-9"> <select name="tltu" id="idSelect_t"
+                                                                class="selectpicker form-control"
+                                                                data-live-search="true">
+
+                                </select></td>
+                            <td class="col-6 col-sm-2" id="cell_t_unlock"> <svg id="t_unlock"
+                                                                                width="1em" height="1em" viewBox="0 0 16 16"
+                                                                                class="bi bi-unlock" fill="green"
+                                                                                xmlns="http://www.w3.org/2000/svg">
+                                    <path fill-rule="evenodd"
+                                          d="M9.655 8H2.333c-.264 0-.398.068-.471.121a.73.73 0 0 0-.224.296 1.626 1.626 0 0 0-.138.59V14c0 .342.076.531.14.635.064.106.151.18.256.237a1.122 1.122 0 0 0 .436.127l.013.001h7.322c.264 0 .398-.068.471-.121a.73.73 0 0 0 .224-.296 1.627 1.627 0 0 0 .138-.59V9c0-.342-.076-.531-.14-.635a.658.658 0 0 0-.255-.237A1.122 1.122 0 0 0 9.655 8zm.012-1H2.333C.5 7 .5 9 .5 9v5c0 2 1.833 2 1.833 2h7.334c1.833 0 1.833-2 1.833-2V9c0-2-1.833-2-1.833-2zM8.5 4a3.5 3.5 0 1 1 7 0v3h-1V4a2.5 2.5 0 0 0-5 0v3h-1V4z" />
+                                </svg>
+
+                                <svg id="t_lock" width="1em" height="1em" viewBox="0 0 16 16"
+                                     class="bi bi-lock" fill="red"
+                                     xmlns="http://www.w3.org/2000/svg">
+                                    <path fill-rule="evenodd"
+                                          d="M11.5 8h-7a1 1 0 0 0-1 1v5a1 1 0 0 0 1 1h7a1 1 0 0 0 1-1V9a1 1 0 0 0-1-1zm-7-1a2 2 0 0 0-2 2v5a2 2 0 0 0 2 2h7a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-7zm0-3a3.5 3.5 0 1 1 7 0v3h-1V4a2.5 2.5 0 0 0-5 0v3h-1V4z" />
+                                </svg>
+                            </td>
+                        </tr>
+                        <tr id="tr_p">
+                            <td class="col-3 col-sm-1">Process</td>
+                            <td class="col-3 col-sm-9"><select name="plpu" id="idSelect_p"
+                                                               class="selectpicker form-control"
+                                                               data-live-search="true">
+
+                                </select></td>
+                            <td class="col-6 col-sm-2" id="cell_p_unlock"> <svg id="p_unlock"
+                                                                                width="1em" height="1em" viewBox="0 0 16 16"
+                                                                                class="bi bi-unlock" fill="green"
+                                                                                xmlns="http://www.w3.org/2000/svg">
+                                    <path fill-rule="evenodd"
+                                          d="M9.655 8H2.333c-.264 0-.398.068-.471.121a.73.73 0 0 0-.224.296 1.626 1.626 0 0 0-.138.59V14c0 .342.076.531.14.635.064.106.151.18.256.237a1.122 1.122 0 0 0 .436.127l.013.001h7.322c.264 0 .398-.068.471-.121a.73.73 0 0 0 .224-.296 1.627 1.627 0 0 0 .138-.59V9c0-.342-.076-.531-.14-.635a.658.658 0 0 0-.255-.237A1.122 1.122 0 0 0 9.655 8zm.012-1H2.333C.5 7 .5 9 .5 9v5c0 2 1.833 2 1.833 2h7.334c1.833 0 1.833-2 1.833-2V9c0-2-1.833-2-1.833-2zM8.5 4a3.5 3.5 0 1 1 7 0v3h-1V4a2.5 2.5 0 0 0-5 0v3h-1V4z" />
+                                </svg>
+
+                                <svg id="p_lock" width="1em" height="1em" viewBox="0 0 16 16"
+                                     class="bi bi-lock" fill="red"
+                                     xmlns="http://www.w3.org/2000/svg">
+                                    <path fill-rule="evenodd"
+                                          d="M11.5 8h-7a1 1 0 0 0-1 1v5a1 1 0 0 0 1 1h7a1 1 0 0 0 1-1V9a1 1 0 0 0-1-1zm-7-1a2 2 0 0 0-2 2v5a2 2 0 0 0 2 2h7a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-7zm0-3a3.5 3.5 0 1 1 7 0v3h-1V4a2.5 2.5 0 0 0-5 0v3h-1V4z" />
+                                </svg>
+                            </td>
+                        </tr>
+                        <tr id="tr_a">
+                            <td class="col-3 col-sm-1">Action</td>
+                            <td class="col-3 col-sm-9"><select name="alau" id="idSelect_a"
+                                                               class="selectpicker form-control"
+                                                               data-live-search="true">
+                                </select></td>
+                            <td class="col-6 col-sm-2" id="cell_a_unlock">
+                                <svg id="a_unlock" width="1em" height="1em" viewBox="0 0 16 16"
+                                     class="bi bi-unlock" fill="green"
+                                     xmlns="http://www.w3.org/2000/svg">pry_4
+                                    <path fill-rule="evenodd"
+                                          d="M9.655 8H2.333c-.264 0-.398.068-.471.121a.73.73 0 0 0-.224.296 1.626 1.626 0 0 0-.138.59V14c0 .342.076.531.14.635.064.106.151.18.256.237a1.122 1.122 0 0 0 .436.127l.013.001h7.322c.264 0 .398-.068.471-.121a.73.73 0 0 0 .224-.296 1.627 1.627 0 0 0 .138-.59V9c0-.342-.076-.531-.14-.635a.658.658 0 0 0-.255-.237A1.122 1.122 0 0 0 9.655 8zm.012-1H2.333C.5 7 .5 9 .5 9v5c0 2 1.833 2 1.833 2h7.334c1.833 0 1.833-2 1.833-2V9c0-2-1.833-2-1.833-2zM8.5 4a3.5 3.5 0 1 1 7 0v3h-1V4a2.5 2.5 0 0 0-5 0v3h-1V4z" />
+                                </svg>
+
+                                <svg id="a_lock" width="1em" height="1em" viewBox="0 0 16 16"
+                                     class="bi bi-lock" fill="red"
+                                     xmlns="http://www.w3.org/2000/svg">
+                                    <path fill-rule="evenodd"
+                                          d="M11.5 8h-7a1 1 0 0 0-1 1v5a1 1 0 0 0 1 1h7a1 1 0 0 0 1-1V9a1 1 0 0 0-1-1zm-7-1a2 2 0 0 0-2 2v5a2 2 0 0 0 2 2h7a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-7zm0-3a3.5 3.5 0 1 1 7 0v3h-1V4a2.5 2.5 0 0 0-5 0v3h-1V4z" />
+                                </svg>
+                            </td>
+                        </tr>
+
+                    </tbody>
+                </table>
+                <div class="row">
+                    <div class="col-sm-12">
+                        <button id="btnSubmitDropdownChoice" type="submit"
+                                class="btn btn-primary btn-lg btn-block">Submit</button>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-sm-12">
+                        <p id="serverBadFeedbackBox" class="alert alert-danger" role="alert" style="visibility: hidden;"></p>
+                    </div>
+                </div>
+                <div id="propertyPopup" title="Enter properties">
+                    <ul></ul>
+                    <button id="btnSubmitEventWithProperties" type="submit"
+                            class="btn btn-primary btn-lg">Submit</button>
+
+                </div>
+            </form>
+            <script src="/ears3/js/ears-events.js" type="application/javascript"></script>
+            <script src="/ears3/js/ears-events-dropdown.js" type="application/javascript"></script>
+            <script type="application/javascript">
+
+                function addEVtoLocalStorage(event) {
+                    let map = localStorageEventDefsToMap(); //maps preserve insertion order and have unique entries by default
+                    size = map.size;
+                    map.set(event.eventDefinitionId, event);
+                    if (map.size != size) { //addition happened, meaning it is new
+                        localStorage.eventDefinitions = JSON.stringify(Array.from(map.entries()));
+                    }
+                }
+
+                function removeEVfromLocalStorage(eventDefinitionId) {
+                    let map = localStorageEventDefsToMap(); //maps preserve insertion order and have unique entries by default
+                    map.delete(eventDefinitionId);
+                    localStorage.eventDefinitions = JSON.stringify(Array.from(map.entries()));
+                }
+
+                var recentlyDeletedEventId;
+
+                function forgetButton(recentEventButtonX) {
+                    const button = recentEventButtonX.parentNode.parentNode;
+                    button.disabled = true;
+                    recentlyDeletedEventId = button.id;
+                    removeEVfromLocalStorage(recentlyDeletedEventId);
+                    button.remove();
+                    populateAllScenarios();
+                }
+
+                function populateScenario(eventDefinitionId, rdfBindings) {
+                    var startCondition1 = "(";
+                    var eid1 = "element.eid.value  == " + "'" + eventDefinitionId + "'" + "  && ";
+                    var endCondition1 = ")";
+                    var condition1 = startCondition1.concat(eid1, endCondition1).replace(/&&([^'&&']*)$/, '' + '$1');
+                    $(rdfBindings).each(function (index, element) {
+                        if (eval(condition1)) {
+                            var lastButtonCell = $("#recentEventDefinitionTable td#cell" + $('#recentEventDefinitionTable button').length);
+                            lastButtonCell.append("<button id=" + element.eid.value + " type='button' onclick='postEvent(this);' class='btn btn-default text-left'>" +
+                                    "<p class='close-btn'><a href='#' onclick='forgetButton(this);'>x</a></p><p>" + element.cl.value + "</p><p><strong>" + element.tl.value + "</strong></p><p>" + element.pl.value + "<br>" + element.al.value + "</p></button>");
+                        }
+                    });
+                }
+
+                function populateAllScenarios(rdfBindings) {
+                    let map = localStorageEventDefsToMap();
+                    if (map !== null) {
+                        if (rdfBindings == null) {
+                            rdfBindings = getBindings(false); //asynchronous because synchronous messes up the order of the buttons
+                        }
+                        $("#recentEventDefinitionTable td").empty(); //remove all buttons
+                        for (let [key, value] of map) {
+                            populateScenario(key, rdfBindings);
+                        }
+                    }
+                }
+                
+
+                function localStorageEventDefsToMap() {
+                    eventDefs = localStorage.eventDefinitions;
+
+                    if (isJSON(eventDefs)) {
+                        let map = new Map(JSON.parse(eventDefs));
+                        return map;
+                    } else {
+                        return new Map();
+                    }
+                }
+
+                if (window.localStorage && typeof window.localStorage !== 'undefined') {
+                    $(document).ready(function () {
+                        if (localStorage.actor == null) {
+                            window.location.href = './settings';
+                            console.log("redirected back to settings");
+                        } else {
+                            var me = JSON.parse(localStorage.actor);
+                            $("#settings-link").html(me.firstName + " " + me.lastName);
+                        }
+                        $('#id_collapse_in').css('visibility', 'hidden');
+                        $('#id_collapse_out').css('visibility', 'visible');
+                        $(".collapse").on('show.bs.collapse', function () {
+                            $('#id_collapse_in').css('visibility', 'visible');
+                            $('#id_collapse_out').css('visibility', 'hidden');
+                        });
+                        $(".collapse").on('hide.bs.collapse', function () {
+                            $('#id_collapse_in').css('visibility', 'hidden');
+                            $('#id_collapse_out').css('visibility', 'visible');
+                        });
+                        $('#id_eid').hide();
+
+                        var rdfBindings = getBindings(false); //asynchronous because synchronous messes up the order of the buttons
+                        populateAllScenarios(rdfBindings);
+
+                        initDropdowns(rdfBindings,null);
+
+                        $("#propertyPopup").dialog({
+                            autoOpen: false,
+                            modal: true,
+                            close: function () {
+                                $(this).find("input").empty(); //clear everything if we close it otherwise values are kept 
+                                $(document).off('click', '#btnSubmitEventWithProperties'); //clear it else previous events are readded each time
+                            }
+                        });
+                    });
+
+                } else {
+                    alert("Sorry, your browser does not support local storage.");
+                }
+            </script>
+        </div>
+
+    </body>
+</html>

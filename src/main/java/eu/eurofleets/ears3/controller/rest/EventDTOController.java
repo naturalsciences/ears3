@@ -11,9 +11,11 @@ import eu.eurofleets.ears3.dto.EventDTOList;
 import eu.eurofleets.ears3.service.CruiseService;
 import eu.eurofleets.ears3.service.EventService;
 import eu.eurofleets.ears3.service.ProgramService;
+import io.swagger.v3.oas.annotations.Operation;
 import java.util.List;
 import java.util.Map;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.env.Environment;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -25,40 +27,23 @@ import org.springframework.web.bind.annotation.RestController;
  * @author thomas
  */
 @RestController()
+@RequestMapping(value = "/api/dto")
 @CrossOrigin(origins = "*", maxAge = 3600)
 public class EventDTOController {
 
     public static final String DEFAULT_VALUE = "_";
     @Autowired
     private EventService eventService;
-    @Autowired
-    private ProgramService programService;
-    @Autowired
-    private CruiseService cruiseService;
-
-    @RequestMapping(method = {RequestMethod.GET}, value = {"dto/events"}, produces = {"application/xml; charset=utf-8", "application/json"})
+    
+    @Operation(summary = "Find all events in DTO format")
+    @RequestMapping(method = {RequestMethod.GET}, value = {"events"}, produces = {"application/xml; charset=utf-8", "application/json"})
     public EventDTOList getEvents(@RequestParam Map<String, String> allParams) {
         List<Event> res = this.eventService.advancedFind(allParams);
         return new EventDTOList(res, true);
     }
 
-    /*   @RequestMapping(method = {RequestMethod.GET}, value = {"events"}, params = {"platformIdentifier"}, produces = {"application/json"})
-    public EventDTOList getEvents(@RequestParam(required = false, defaultValue = "") String platformIdentifier) {
-        List<Event> res;
-        if (platformIdentifier == null || "".equals(platformIdentifier)) {
-            res = this.eventService.findAll();
-        } else {
-            res = this.eventService.findAllByPlatformCode(platformIdentifier);
-        }
-        return new EventDTOList(res, true);
-    }
-
-    @RequestMapping(method = {RequestMethod.GET}, value = {"dto/events"}, params = {"after"}, produces = {"application/json"})
-    public EventDTOList getRecentOrModifiedEvents(@RequestParam(name = "after", required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) OffsetDateTime after) {
-        List<Event> res = this.eventService.findCreatedOrModifiedAfter(after);
-        return new EventDTOList(res, true);
-    }*/
-    @RequestMapping(method = {RequestMethod.GET}, value = {"dto/event"}, params = {"identifier"}, produces = {"application/xml; charset=utf-8", "application/json"})
+    @Operation(summary = "Find a single event by its identifier in DTO format")
+    @RequestMapping(method = {RequestMethod.GET}, value = {"event"}, params = {"identifier"}, produces = {"application/xml; charset=utf-8", "application/json"})
     public EventDTO getEventByIdentifier(@RequestParam(required = true, value = "identifier") String identifier) {
         return new EventDTO(this.eventService.findByIdentifier(identifier));
 

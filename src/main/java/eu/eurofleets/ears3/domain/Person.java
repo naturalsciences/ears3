@@ -16,7 +16,8 @@ import javax.persistence.UniqueConstraint;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlRootElement;
-
+import javax.xml.bind.annotation.XmlTransient;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 /*
  * To change this license header, choose License Headers in Project Properties.
  * To change this template file, choose Tools | Templates
@@ -118,12 +119,12 @@ public class Person implements IPerson, Serializable {
     }
 
     @Override
-    public String _getEmailAddress() {
+    public String getEmail() {
         return email;
     }
 
     @Override
-    public void _setEmailAddress(String email) {
+    public void setEmail(String email) {
         this.email = email;
     }
 
@@ -168,6 +169,8 @@ public class Person implements IPerson, Serializable {
         this.id = id;
     }
 
+    @XmlTransient
+    @JsonIgnore
     public String getFirstNameLastName() {
         return getFirstName() + " " + getLastName();
     }

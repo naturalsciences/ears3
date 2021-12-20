@@ -1,23 +1,43 @@
 package eu.eurofleets.ears3.controller.html;
 
+import be.naturalsciences.bmdc.cruise.model.IProperty;
+import eu.eurofleets.ears3.domain.Event;
+import eu.eurofleets.ears3.service.EventService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 
 @CrossOrigin(origins = "*", maxAge = 3600)
 @Controller()
-@RequestMapping(value = "html")
+@RequestMapping(value = "")
 public class HtmlEventController {
 
-    @RequestMapping(method = {RequestMethod.GET}, value = {"/event", "/index", "", "/", "../"}, produces = {"text/html; charset=utf-8"})
+    @Autowired
+    private EventService eventService;
+
+    @RequestMapping(method = {RequestMethod.GET}, value = {"/event/new", "/index", "", "/", "../"}, produces = {"text/html; charset=utf-8"})
     public String event() {
-        return "event";
+        return "event-new";
     }
 
-    @RequestMapping(method = {RequestMethod.GET}, value = {"/events"}, produces = {"text/html; charset=utf-8"})
+    @GetMapping(value = {"/events"}, produces = {"text/html; charset=utf-8"})
     public String events() {
         return "events";
+    }
+
+    @GetMapping(value = {"event/{id}/edit"}, produces = {"text/html; charset=utf-8"})
+    public String eventEdit(@PathVariable("id") String id, Model model) {
+        Event event = eventService.findByIdentifier(id);
+        model.addAttribute("event", event);
+        IProperty station = event.getProperties().stream().filter(p -> p.getKey().getName().equals("station")).findFirst().orElse(null);
+        String stationS = station == null ? null : station.getValue();
+        model.addAttribute("station", stationS);
+        return "event-edit";
     }
 
     @RequestMapping(method = {RequestMethod.GET}, value = {"/settings"}, produces = {"text/html; charset=utf-8"})

@@ -69,7 +69,7 @@ public class DatagramUtilities<A extends Acquisition> {
         }
     }
 
-    public A last() throws IOException {
+    public A findLast() throws IOException {
         try {
             List<A> r = analyzeDatagram(new URL(baseUrl, "/ears3Nav/" + abbrevs.get(this.cls) + "/getLast/datagram"));
             return r.isEmpty() ? null : r.get(0);
@@ -79,7 +79,7 @@ public class DatagramUtilities<A extends Acquisition> {
         return null;
     }
 
-    public A nearest(OffsetDateTime at) throws IOException {
+    public A findNearest(OffsetDateTime at) throws IOException {
         if (at == null) {
             throw new IllegalArgumentException("Provided nearest time is null!");
         }
@@ -93,7 +93,7 @@ public class DatagramUtilities<A extends Acquisition> {
         return null;
     }
 
-    public List<A> between(OffsetDateTime start, OffsetDateTime stop) throws IOException {
+    public List<A> findBetween(OffsetDateTime start, OffsetDateTime stop) throws IOException {
         if (start == null) {
             throw new IllegalArgumentException("Provided start time is null!");
         }
@@ -127,8 +127,8 @@ public class DatagramUtilities<A extends Acquisition> {
                     if (vals.length >= 3) {
                         String dt = "20" + vals[1].substring(0, 2) + "-" + vals[1].substring(2, 4) + "-" + vals[1].substring(4, 6);
                         String tm = vals[2].substring(0, 2) + ":" + vals[2].substring(2, 4) + ":" + vals[2].substring(4, 6) + "Z";
-                        acquisitionValue.setInstrumentTime(Instant.parse(dt + "T" + tm));
-
+                        acquisitionValue.setInstrumentTime(Instant.parse(dt + "T" + tm).atOffset(ZoneOffset.UTC));
+                        acquisitionValue.setTimeStamp(Instant.parse(dt + "T" + tm).atOffset(ZoneOffset.UTC));
                         for (Field field : cls.getDeclaredFields()) {
                             if (field.isAnnotationPresent(DatagramOrder.class)) {
                                 DatagramOrder annotation = field.getAnnotation(DatagramOrder.class);
@@ -155,7 +155,5 @@ public class DatagramUtilities<A extends Acquisition> {
             Logger.getLogger(DatagramUtilities.class.getName()).log(Level.SEVERE, "Could't set property of " + cls.getName() + " Acquisition entity", e);
         }
         return result;
-
     }
-
 }

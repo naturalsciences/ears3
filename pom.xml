@@ -5,7 +5,7 @@
     <packaging>war</packaging>
     <groupId>eu.eurofleets</groupId>
     <artifactId>ears3</artifactId>
-    <version>0.0.1-SNAPSHOT</version>
+    <version>1.0.0-SNAPSHOT</version>
     <name>ears3</name>
     <description>ears3 persistence library</description>
 
@@ -220,9 +220,24 @@
             <version>4.0</version>
             <type>jar</type>
         </dependency>
+        <dependency>
+            <groupId>org.springdoc</groupId>
+            <artifactId>springdoc-openapi-ui</artifactId>
+            <version>1.5.9</version>
+        </dependency>
+        <dependency>
+            <groupId>nz.net.ultraq.thymeleaf</groupId>
+            <artifactId>thymeleaf-layout-dialect</artifactId>
+            <version>2.5.3</version>
+        </dependency>
+        <dependency>
+            <groupId>org.thymeleaf.extras</groupId>
+            <artifactId>thymeleaf-extras-java8time</artifactId>
+        </dependency>
     </dependencies>
 
     <properties>
+        <log4j2.version>2.17.0</log4j2.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <start-class>eu.eurofleets.ears3.Application</start-class>
         <java.version>8</java.version>

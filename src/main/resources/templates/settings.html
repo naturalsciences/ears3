@@ -7,17 +7,17 @@
             <div>
                 <form class="form-group">
                     <div class="form-group">
-                        <label for="firstNameField">First name</label>
                         <input type="text" class="form-control" id="firstNameField" placeholder="First name" required>
+                        <label class="txtBox" for="firstNameField">First name</label>
                     </div>
                     <div class="form-group">
-                        <label for="lastNameField">Last name</label>
                         <input type="text" class="form-control" id="lastNameField" placeholder="Last name" required>
+                        <label class="txtBox" for="lastNameField">Last name</label>
                     </div>
                     <div class="form-group">
-                        <label for="emailField">Email</label>
                         <input type="email" class="form-control" id="emailField"
                                placeholder="Email" required>
+                        <label class="txtBox" for="emailField">Email</label>
                     </div> 
                     <div class="form-group">
                         <label for="organisationField">Organisation</label>
@@ -30,10 +30,10 @@
                 </form>
             </div>
         </div>
-        <script>
+        <script type="application/javascript">
             if (window.localStorage && typeof localStorage !== 'undefined') {
                 $(document).ready(function () {
-                    //$.getScript("html/js/onchangeEdmo.js");
+                    //$.getScript("js/onchangeEdmo.js");
                     $.getJSON("json/edmo.json",
                             function (data) {
                                 $.each(data.vocabulary.citRespParty, function (key, item) {

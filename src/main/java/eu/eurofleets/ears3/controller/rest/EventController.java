@@ -1,5 +1,6 @@
 package eu.eurofleets.ears3.controller.rest;
 
+import be.naturalsciences.bmdc.cruise.model.IProgram;
 import be.naturalsciences.bmdc.cruise.model.IProperty;
 import com.opencsv.CSVWriter;
 import eu.eurofleets.ears3.domain.Event;
@@ -15,6 +16,7 @@ import eu.eurofleets.ears3.service.ProgramService;
 import java.io.IOException;
 import java.io.Writer;
 import java.time.Instant;
+import java.time.OffsetDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -38,17 +40,14 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
-@RestController
+@RestController()
+@RequestMapping(value = "/api")
 @CrossOrigin(origins = "*", maxAge = 3600)
 public class EventController {
 
     public static final String DEFAULT_VALUE = "_";
     @Autowired
     private EventService eventService;
-    @Autowired
-    private ProgramService programService;
-    @Autowired
-    private CruiseService cruiseService;
 
     @Autowired
     private Environment env;
@@ -72,12 +71,16 @@ public class EventController {
         return (val != null) ? val.toString() : "";
     }
 
+    private static String offsetDateTimeOrNull(OffsetDateTime val) {
+        return (val != null) ? val.toString() : "";
+    }
+
     @RequestMapping(method = {RequestMethod.GET}, value = {"events.csv"}, produces = {"text/csv; charset=utf-8"})
     public String getEventsAsCSV(@RequestParam Map<String, String> allParams) throws IOException {
         List<Event> events = this.eventService.advancedFind(allParams);
 
         List<String> header = new ArrayList<>(Arrays.asList("Time stamp", "Actor", "Program", "Principal Investigator", "Tool category", "Tool category code", "Tool", "Tool code", "Process", "Action",
-                "Acquisition Timestamp", "Latitude", "Longitude", "Depth", "Surface water temperature", "Heading", "Course over Ground", "Speed over Ground"));
+                "Acquisition Timestamp", "Latitude", "Longitude", "Depth", "Heading", "Course over Ground", "Speed over Ground"));
         Map<String, String> properties = new TreeMap<>();
         for (Event event : events) {
             for (IProperty property : event.getProperties()) {
@@ -94,7 +97,7 @@ public class EventController {
                 "Turbidity H", "OBS L", "OBS H", "Salinity", "Chlorophyll", "Blue Algae",
                 "CDOM", "pH", "Fluorescence", "pCO2", "PAR"));*/
 
-        header.addAll(Arrays.asList("Salinity", "Conductivity", "Sigma T", "Wind speed", "Wind direction",
+        header.addAll(Arrays.asList("Surface water temperature", "Salinity", "Conductivity", "Sigma T", "Wind speed", "Wind direction",
                 "Air temperature", "Air pressure", "Solar Radiation"));
 
         String[] entry = new String[header.size()];
@@ -108,13 +111,17 @@ public class EventController {
 
         for (Event event : events) {
             Navigation nav = (event.getNavigation().size() > 0 ? event.getNavigation().iterator().next() : null);
-
-            Thermosal tss = (event.getNavigation().size() > 0 ? event.getThermosal().iterator().next() : null);
-            Weather met = (event.getNavigation().size() > 0 ? event.getWeather().iterator().next() : null);
+            Thermosal tss = (event.getThermosal().size() > 0 ? event.getThermosal().iterator().next() : null);
+            Weather met = (event.getWeather().size() > 0 ? event.getWeather().iterator().next() : null);
+            IProgram program = event.getProgram();
+            String niceProgram = null;
+            if (program != null) { //can't be null but test anyway
+                niceProgram = program.getIdentifier() + (program.getName() != null && !program.getName().isEmpty() ? " (" + program.getName() + ")" : "");
+            }
             List<String> elements = new ArrayList<>(Arrays.asList(
                     event.getTimeStamp().format(DateTimeFormatter.ISO_OFFSET_DATE_TIME),
                     event.getActor().getFirstName() + " " + event.getActor().getLastName(),
-                    event.getProgram().getName(),
+                    niceProgram,
                     event.getPrincipalInvestigators(),
                     event.getToolCategory().getName(),
                     event.getToolCategory().getUrn(),
@@ -125,11 +132,10 @@ public class EventController {
             ));
             if (nav != null) {
                 elements.addAll(Arrays.asList(
-                        instantOrNull(nav.getInstrumentTime()),
+                        offsetDateTimeOrNull(nav.getTime()),
                         doubleOrNull(nav.getLat()),
                         doubleOrNull(nav.getLon()),
                         doubleOrNull(nav.getDepth()),
-                        doubleOrNull(tss.getTemperature()),
                         doubleOrNull(nav.getHeading()),
                         doubleOrNull(nav.getCog()),
                         doubleOrNull(nav.getSog())));
@@ -155,6 +161,7 @@ public class EventController {
             }
             if (tss != null) {
                 elements.addAll(Arrays.asList(
+                        doubleOrNull(tss.getTemperature()),
                         doubleOrNull(tss.getSalinity()),
                         doubleOrNull(tss.getConductivity()),
                         doubleOrNull(tss.getSigmat())));

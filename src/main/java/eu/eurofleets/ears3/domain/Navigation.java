@@ -8,11 +8,17 @@ import javax.xml.bind.annotation.XmlRootElement;
 import eu.eurofleets.ears3.utilities.DatagramOrder;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
+import javax.persistence.NamedNativeQuery;
 import javax.xml.bind.annotation.XmlTransient;
 
 @Entity
 @XmlRootElement
 @XmlAccessorType(XmlAccessType.FIELD) //ignore all the getters
+@NamedNativeQuery(
+        name = "findNavigationByApproximateDate",
+        query = "SELECT t.* FROM navigation t ORDER BY abs(extract('epoch' from time_stamp-?) ) LIMIT 1",
+        resultClass = Navigation.class
+)
 public class Navigation extends Acquisition {
 
     @Id
@@ -100,5 +106,31 @@ public class Navigation extends Acquisition {
 
     public void setSow(Double sow) {
         this.sow = sow;
+    }
+
+    public final static String DATAGRAM_SEPARATOR = ",";
+
+    public String toString() {
+
+        StringBuilder sb = new StringBuilder("$EF");
+        sb.append("POS");
+        sb.append(DATAGRAM_SEPARATOR);
+        sb.append(toDatagramTime());
+        sb.append(DATAGRAM_SEPARATOR);
+        sb.append(lon != null ? lon : "");
+        sb.append(DATAGRAM_SEPARATOR);
+        sb.append(lat != null ? lat : "");
+        sb.append(DATAGRAM_SEPARATOR);
+        sb.append(heading != null ? heading : "");
+        sb.append(DATAGRAM_SEPARATOR);
+        sb.append(sow != null ? sow : "");
+        sb.append(DATAGRAM_SEPARATOR);
+        sb.append(depth != null ? Math.abs(depth) : "");
+        sb.append(DATAGRAM_SEPARATOR);
+        sb.append(cog != null ? cog : "");
+        sb.append(DATAGRAM_SEPARATOR);
+        sb.append(sog != null ? sog : "");
+        return sb.toString();
+
     }
 }

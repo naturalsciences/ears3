@@ -1,98 +1,240 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en"  xmlns="http://www.w3.org/1999/xhtml" 
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" layout:decorate="~{fragments/f}">
+
     <head th:replace="fragments/f :: head"></head>
     <body>
         <nav th:replace="fragments/f :: header"></nav>
-        <div class="container">
-            <table id="lastEvent" class="display dataTable" style="width:100%" role="grid">
+        <form  layout:fragment="head-form">
+            <div class="form-group">
+                <select name="program" id="programField"
+                        class="selectpicker target form-control"
+                        data-live-search="true" title="Current program" required>
+                </select>
+            </div>
+            <div class="form-group">
+                <p>
+                    <input name="station" id="stationField" placeholder=" " type="text" title="Current station" class="form-control" /><label class="txtBox" for="label">Station</label>
+                </p>
+            </div>
+            <div class="form-group">
+                <p>
+                    <input name="label" id="labelField" placeholder=" " type="text" title="Current event label (event identifier, station,...)" class="form-control" /><label class="txtBox" for="label">Event label</label>
+                </p>    
+            </div>
+        </form>
+        <div class="container" layout:fragment="main">
+            <div>
+                Toggle column: <a href="#" class="toggle-vis" data-column="3">Category</a> - <a href="#" class="toggle-vis" data-column="7">Station</a> - <a href="#" class="toggle-vis" data-column="8">Label</a>
+            </div>
+            <div>
+                <input type="checkbox" id="cbOwnEvents" name="cbOwnEvents" value="My own" checked>
+                    <label for="cbOwnEvents">Display only my own events</label>
+            </div>
+            <br />
+            <table id="eventTable" class="display dataTable" style="width:100%" role="grid">
                 <thead>
                     <tr>
-                        <th>timeStamp</th>
-                        <th>toolCategory</th>
+                        <th>identifier</th>
+                        <th>date</th>
+                        <th>time</th>
+                        <th>category</th>
                         <th>tool</th>
                         <th>process</th>
                         <th>action</th>
+                        <th>station</th>
+                        <th>label</th>
+                        <th></th>
+                        <th>actor</th>
                     </tr>
                 </thead>
             </table>
-        </div>
-        <script src="https://cdn.datatables.net/1.10.22/js/jquery.dataTables.min.js"></script>
-        <script>
-            $(document).ready(function () {
-                if (JSON.parse(localStorage.actor) == null) {
-                    window.location.href = './settings';
-                } else {
-                    var me = JSON.parse(localStorage.getItem('actor'));
-                    $("#settings-link").html(me.firstName + " " + me.lastName);
-                }
 
-                $('#lastEvent').DataTable({
-                    responsive: true,
-                    'ajax': {
-                        'url': eventsGetLocation,
-                        'headers': {'Accept': 'application/json;'},
-                        //normal way but pas de souplesse 'dataSrc'
-                        'dataSrc':
-                                function (data) {
-                                    var return_data = new Array();
-                                    $.each(data.events, function (indexInArray, element) {
-                                        if (typeof localStorage.actor !== 'undefined') {
-                                            let actor = JSON.parse(localStorage.actor);
+            <script src="/ears3/js/ears-events.js" type="application/javascript"></script>
+            <script src="/ears3/js/jquery.dataTables.min.js" type="application/javascript"></script>
+            <script type="application/javascript">
 
-                                            if ((element.actor.lastName == actor.lastName) && (element.actor.firstName == actor.firstName)) {
-                                                return_data.push({
-                                                    'timeStamp': element.timeStamp,
-                                                    'toolCategory': element.toolCategory.name,
-                                                    'tool': element.tool.term.name,
-                                                    'process': element.process.name,
-                                                    'action': element.action.name
-                                                })
-                                            } else {
-
-                                            }
-                                        }
-                                    });
-                                    return return_data;
-                                }
+                var table;
+                $(document).ready(function () {
+                    if (JSON.parse(localStorage.actor) == null) {
+                        window.location.href = './settings';
+                    } else {
+                        var me = JSON.parse(localStorage.getItem('actor'));
+                        $("#settings-link").html(me.firstName + " " + me.lastName);
                     }
-                    ,
-                    "columns": [
-                        {'data': 'timeStamp'},
-                        {'data': 'toolCategory'},
-                        {'data': 'tool'},
-                        {'data': 'process'},
-                        {'data': 'action'}
-                    ],
-                    "columnDefs": [
-                        {
-                            "targets": [0],
-                            "visible": true,
-                            "searchable": true
-                        },
-                        {
-                            "targets": [1],
-                            "visible": true,
-                            "searchable": true
+                    
+                    $('#cbOwnEvents').click(function(){ 
+                        $('#eventTable').DataTable().ajax.reload();
+                    }); 
+
+                    table = $('#eventTable').DataTable({
+                        responsive: true,
+                        'ajax': {
+                            'url': eventsGetLocation,
+                            'headers': {'Accept': 'application/json;'},
+                            'dataSrc':
+                                    function (data) {
+                                        var return_data = new Array();
+                                        $.each(data.events, function (indexInArray, event) {
+                                            if (typeof localStorage.actor !== 'undefined') {
+                                                let actor = JSON.parse(localStorage.actor);
+                                                var date = (event.timeStamp.split("T")[0]).replace(/^20/g,"'");
+                                                var time = (event.timeStamp.split("T")[1]).replace(/\+\d{2}:\d{2}$/g,"");
+                                                var station = event.properties.filter(pr => pr.key.name == 'station')[0];
+                                                if (document.getElementById('cbOwnEvents').checked && event.actor.email == actor.email) {
+                                                    return_data.push({
+                                                        'identifier': event.identifier,
+                                                        'date': date,
+                                                        'time': time,
+                                                        'toolCategory': event.toolCategory.name,
+                                                        'tool': event.tool.term.name,
+                                                        'process': event.process.name,
+                                                        'action': event.action.name,
+                                                        'station': station === undefined ? null : station.value,
+                                                        'label': event.label,
+                                                        'actor': event.actor.email
+                                                    })
+                                                } else if (!document.getElementById('cbOwnEvents').checked){
+                                                    return_data.push({
+                                                        'identifier': event.identifier,
+                                                        'date': date,
+                                                        'time': time,
+                                                        'toolCategory': event.toolCategory.name,
+                                                        'tool': event.tool.term.name,
+                                                        'process': event.process.name,
+                                                        'action': event.action.name,
+                                                        'station': station === undefined ? null : station.value,
+                                                        'label': event.label,
+                                                        'actor': event.actor.email
+                                                    })
+                                                }
+                                            }
+                                        });
+                                        return return_data;
+                                    }
                         }
                         ,
-                        {
-                            "targets": [2],
-                            "visible": true,
-                            "searchable": true
-                        },
-                        {
-                            "targets": [3],
-                            "visible": true,
-                            "searchable": true
-                        },
-                        {
-                            "targets": [4],
-                            "visible": true,
-                            "searchable": true
-                        }
-                    ]
+                        "columns": [
+                            {'data': 'identifier'},
+                            {'data': 'date'},
+                            {'data': 'time'},
+                            {'data': 'toolCategory'},
+                            {'data': 'tool'},
+                            {'data': 'process'},
+                            {'data': 'action'},
+                            {'data': 'station'},
+                            {'data': 'label'},
+                            {
+                                render: function (data, type, row) {
+                                    var id = row.identifier;
+                                    var actorEmail = row.actor;
+                                    var actor = JSON.parse(localStorage.actor);
+                                    if(actorEmail==actor.email){
+                                        return '<svg class="deleteEvent" fill="red" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24px" height="24px"><path d="M 10 2 L 9 3 L 5 3 C 4.4 3 4 3.4 4 4 C 4 4.6 4.4 5 5 5 L 7 5 L 17 5 L 19 5 C 19.6 5 20 4.6 20 4 C 20 3.4 19.6 3 19 3 L 15 3 L 14 2 L 10 2 z M 5 7 L 5 20 C 5 21.1 5.9 22 7 22 L 17 22 C 18.1 22 19 21.1 19 20 L 19 7 L 5 7 z M 9 9 C 9.6 9 10 9.4 10 10 L 10 19 C 10 19.6 9.6 20 9 20 C 8.4 20 8 19.6 8 19 L 8 10 C 8 9.4 8.4 9 9 9 z M 15 9 C 15.6 9 16 9.4 16 10 L 16 19 C 16 19.6 15.6 20 15 20 C 14.4 20 14 19.6 14 19 L 14 10 C 14 9.4 14.4 9 15 9 z"/></svg>'
+                                    }else { 
+                                        return '';
+                                    }
+                            }
+                            },{'data': 'actor'}
+                        ],
+                        "order": [ [1, 'asc' ], [2, 'asc'] ],
+                        "columnDefs": [
+                            {
+                                "targets": [0],
+                                "visible": false,
+                                "searchable": false
+                            },
+                            {
+                                "targets": [1],
+                                "visible": true,
+                                "searchable": true,
+                            },
+                            {
+                                "targets": [2],
+                                "visible": true,
+                                "searchable": true
+                            },
+                            {
+                                "targets": [3],
+                                "visible": true,
+                                "searchable": true
+                            },
+                            {
+                                "targets": [4],
+                                "visible": true,
+                                "searchable": true
+                            },
+                            {
+                                "targets": [5],
+                                "visible": true,
+                                "searchable": true
+                            },
+                            {
+                                "targets": [6],
+                                "visible": true,
+                                "searchable": true
+                            },
+                            {
+                                "targets": [7],
+                                "visible": true,
+                                "searchable": true
+                            },
+                            {
+                                "targets": [8],
+                                "visible": true,
+                                "searchable": true
+                            },
+                            {
+                                "targets": [9],
+                                "visible": true,
+                                "searchable": false
+                            },
+                            {
+                                "targets": [10],
+                                "visible": false,
+                                "searchable": false
+                            }
+                        ],
+                        "lengthMenu": [ [25, 50, 100, 200, -1], [25, 50, 100, 200, "All"] ] /*] ]!!!*/
+                    });
                 });
-            });
-        </script>
+
+                $('#eventTable').on('click', 'tbody td:not(:has(svg.deleteEvent))', function () {
+                 var identifier = table.row(this).data().identifier;
+                 window.location.href = './event/' + identifier + '/edit';
+                });
+
+                $('#eventTable').on('click', 'tbody td:has(svg.deleteEvent)', function () {
+                    var row = table.row($(this).parents('tr'));
+                    var identifier = row.data().identifier;
+                    var actorEmail = row.data().actor;
+                    var actor = JSON.parse(localStorage.actor);
+                    if(actorEmail==actor.email){
+                        if (confirm('Are you sure you want to delete this event "'+row.data().tool+'-'+row.data().process+'-'+row.data().action+'?')) {
+                            deleteEvent(identifier);
+                            row.remove().draw();
+                        }
+                    }
+                    else{
+                        alert("You can only delete your own events. The owner is "+actorEmail);
+                    }
+                });
+                $('a.toggle-vis').css("font-weight","bold");
+                $('a.toggle-vis').on( 'click', function (e) {
+                    e.preventDefault();
+                    // Get the column API object
+                    var column = table.column( $(this).attr('data-column') );
+                    // Toggle the visibility
+                    column.visible( ! column.visible() );
+                    if(column.visible()){
+                        $(this).css("font-weight","bold");
+                    }else{
+                        $(this).css("font-weight","normal");
+                    }
+                } );
+
+            </script>
+        </div>
     </body>
 </html>

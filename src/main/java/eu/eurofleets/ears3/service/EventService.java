@@ -1,6 +1,6 @@
 package eu.eurofleets.ears3.service;
 
-import eu.eurofleets.ears3.utilities.DatagramUtilities;
+import eu.eurofleets.ears3.domain.Acquisition;
 import eu.eurofleets.ears3.domain.Cruise;
 import eu.eurofleets.ears3.domain.Event;
 import eu.eurofleets.ears3.domain.LinkedDataTerm;
@@ -15,6 +15,7 @@ import eu.eurofleets.ears3.domain.Tool;
 import eu.eurofleets.ears3.domain.Weather;
 import eu.eurofleets.ears3.dto.EventDTO;
 import eu.eurofleets.ears3.dto.PropertyDTO;
+import eu.eurofleets.ears3.utilities.DatagramUtilities;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.time.Duration;
@@ -66,7 +67,6 @@ public class EventService {
     private DatagramUtilities<Navigation> navUtil;
     private DatagramUtilities<Thermosal> thermosalUtil;
     private DatagramUtilities<Weather> weatherUtil;
-
     public static Logger log = Logger.getLogger(EventService.class.getSimpleName());
 
     @Autowired
@@ -170,12 +170,6 @@ public class EventService {
     }
 
     public List<Event> findAllByPlatformActorAndProgram(String platformIdentifier, String personEmail, String programIdentifier) {
-       /* if (personEmail == null) {
-            personEmail = "";
-        }
-        if (programIdentifier == null) {
-            programIdentifier = "";
-        }*/
         return this.eventRepository.findAllByPlatformActorAndProgram(platformIdentifier, personEmail, programIdentifier);
     }
 
@@ -187,11 +181,10 @@ public class EventService {
         return this.eventRepository.findByCreatedOrModifiedAfter(after);
     }
 
-    public void save(Event event) {
-        this.eventRepository.save(event);
-    }
-
     public Event save(EventDTO eventDTO) {
+        if (env.getProperty("ears.read-only") == null || !env.getProperty("ears.read-only").equals("false")) {
+            throw new IllegalArgumentException("Cannot create/modify entities on a read-only system.");
+        }
         if (eventDTO.actor == null) {
             throw new IllegalArgumentException("Event must have an actor.");
         }
@@ -232,38 +225,29 @@ public class EventService {
                 identifier = UUID.randomUUID().toString();
                 event.setCreationTime(Instant.now().atOffset(ZoneOffset.UTC));
                 OffsetDateTime dtoTime = eventDTO.getTimeStamp();
-                if (dtoTime == null) {
-                    try {
-                        if (navUtil != null) {
-                            Navigation last = navUtil.last();
-                            if (last != null) {
-                                OffsetDateTime acquisitionTime = last.getInstrumentTime().atOffset(ZoneOffset.UTC);
-                                System.out.println("acquisition time (" + navUtil.getBaseUrl() + "): " + acquisitionTime.toString());
-                                System.out.println("server time: " + serverTime.toString());
-                                System.out.println("event timestamp: none given");
-                                Duration acquisitiondrift = Duration.between(acquisitionTime, serverTime); //positive if server ahead of acquisition, negative if acquisition ahead of server
-                                long acquisitionDiff = acquisitiondrift.toMinutes();
-                                if (acquisitionDiff > 2) { //if the acquisition is lagging behind server for more than 2 minutes
-                                    eventDTO.setTimeStamp(serverTime);
-                                    drift = true;
-                                } else {//if the server is lagging behind acquisition, or equal, take the acquisition
-                                    eventDTO.setTimeStamp(acquisitionTime);
-                                }
-                            } else {
-                                System.out.println("acquisition time returned null");
-                                System.out.println("server time: " + serverTime.toString());
-                                System.out.println("event timestamp: none given");
-                                eventDTO.setTimeStamp(serverTime);
-                            }
-                        } else {
+                if (dtoTime == null) { //if it has no time, we add the one from the acquisition
+                    Navigation last = navUtil != null ? navUtil.findLast() : null;
+                    if (last != null) {
+                        OffsetDateTime acquisitionTime = last.getTime();//.atOffset(ZoneOffset.UTC);
+                        System.out.println("acquisition time:" + acquisitionTime.toString());
+                        System.out.println("server time: " + serverTime.toString());
+                        System.out.println("event timestamp: none given");
+                        Duration acquisitiondrift = Duration.between(acquisitionTime, serverTime); //positive if server ahead of acquisition, negative if acquisition ahead of server
+                        long acquisitionDiff = acquisitiondrift.toMinutes();
+                        if (acquisitionTime == null || acquisitionDiff > 2) { //if the acquisition is null or lagging behind server for more than 2 minutes, take the server time
                             eventDTO.setTimeStamp(serverTime);
+                            drift = true;
+                        } else {//if the server is lagging behind acquisition, or equal, take the acquisition
+                            eventDTO.setTimeStamp(acquisitionTime);
                         }
-                    } catch (IOException e) {
-                        log.log(Level.SEVERE, "Couldn't reach the acquisition server. Timestamp set to server time.", e);
+                    } else {
+                        System.out.println("acquisition time: null (last=null)");
+                        System.out.println("server time: " + serverTime.toString());
+                        System.out.println("event timestamp: none given");
                         eventDTO.setTimeStamp(serverTime);
                     }
                 }
-            } else { //it might already exist
+            } else { //it might already exist, and is a modification
                 Event existingEvent = eventRepository.findByIdentifier(identifier);
                 if (existingEvent != null) {
                     event.setId(existingEvent.getId());
@@ -275,6 +259,8 @@ public class EventService {
             event.setTimeStamp(eventDTO.getTimeStamp());
             event.setIdentifier(identifier);
 
+            //Navigation last = navigationService.findLast();
+            // last.getTimeStamp()
             LinkedDataTerm action = ldtService.findOrCreate(eventDTO.action);
             LinkedDataTerm process = ldtService.findOrCreate(eventDTO.process);
             LinkedDataTerm subject = ldtService.findOrCreate(eventDTO.subject);
@@ -289,7 +275,7 @@ public class EventService {
             tool.setTerm(toolLdTerm); //add the linkeddataterm to it
             tool.setParentTool(parentToolLdTerm); //add the parent linkeddataterm to it
             tool = toolService.findOrCreate(tool); //replace it with a managed entity, either by finding it or creating it.
-            
+
             Platform platform = platformService.findByIdentifier(eventDTO.platform);
             event.setPlatform(platform);
             Person actor = null;
@@ -311,66 +297,124 @@ public class EventService {
             }
 
             Program program = programService.findByIdentifier(eventDTO.program);
+            event.setLabel(eventDTO.label != null && eventDTO.label.equals("") ? null : eventDTO.label);
             event.setAction(action);
             event.setActor(actor);
             event.setProcess(process);
             event.setProgram(program);
             event.setProperties(properties);
             event.setSubject(subject);
-            event.setTimeStamp(eventDTO.timeStamp);
             event.setTool(tool);
             event.setToolCategory(toolCategory);
+            //enrichEventWithAcquisition(event);
             new Thread() {
                 @Override
                 public void run() {
-                    enrichEventWithAcquisition(event);
+                    try {
+                        enrichEventWithAcquisition(event);
+                    } catch (IOException ex) {
+                        Logger.getLogger(EventService.class.getName()).log(Level.SEVERE, null, ex);
+                    }
                 }
             }.start();
 
             return this.eventRepository.save(event);
-        } catch (Exception e) {
-            log.log(Level.SEVERE, "An exception was thrown while creating/modifying this event", e);
-            throw e;
+        } catch (Exception ex) {
+            Logger.getLogger(EventService.class.getName()).log(Level.SEVERE, null, ex);
+            return null;
         }
     }
 
-    private void enrichEventWithAcquisition(Event event) {
+    public static final int STALE_DATA_THRESHOLD = 15; //15 minutes is too old
+
+    private boolean dataIsTooOldOrUncomparable(Acquisition data, Event event) {
+        if (event == null) {
+            throw new IllegalArgumentException("Event may not be null");
+        }
+        if (data == null) {
+            return true;
+        }
+        Duration res = Duration.between(data.getTimeStamp(), event.getTimeStamp());
+        return Math.abs(res.toMinutes()) > STALE_DATA_THRESHOLD;
+    }
+
+    private void enrichEventWithAcquisition(Event event) throws IOException {
         Collection<Navigation> navigations = new ArrayList<>();
         Collection<Weather> weathers = new ArrayList<>();
         Collection<Thermosal> thermosals = new ArrayList<>();
-        try {
-            Navigation nearestNav = navUtil.nearest(event.getTimeStamp());
-            if (nearestNav != null) {
+
+        boolean tooOld;
+        boolean persistAcquisition = false;
+        Navigation nearestNav = navigationService.findNearest(event.getTimeStamp());
+        if (dataIsTooOldOrUncomparable(nearestNav, event)) {//if we don't find it directly via the database, or if we found it but it is too old, look in the ears3Nav webservice itself
+            nearestNav = navUtil.findNearest(event.getTimeStamp());
+            persistAcquisition = true;
+        }
+        if (nearestNav != null) {
+            tooOld = dataIsTooOldOrUncomparable(nearestNav, event);
+            System.out.println("Found for event " + event.toString() + " nearest navigation" + (tooOld ? " (too old):" : ":") + nearestNav.toString());
+            if (!tooOld) {
+                if (persistAcquisition) {
+                    navigationService.save(nearestNav);
+                }
                 navigations.add(nearestNav);
-                navigationService.saveAll(navigations);
                 event.setNavigation(navigations);
             }
-
-            Weather nearestWeather = weatherUtil.nearest(event.getTimeStamp());
-            if (nearestWeather != null) {
+        }
+        persistAcquisition = false;
+        Weather nearestWeather = weatherService.findNearest(event.getTimeStamp());
+        if (dataIsTooOldOrUncomparable(nearestWeather, event)) {//if we don't find it directly via the database, or if we found it but it is too old, look in the ears3Nav webservice itself
+            nearestWeather = weatherUtil.findNearest(event.getTimeStamp());
+            persistAcquisition = true;
+        }
+        if (nearestWeather != null) {
+            tooOld = dataIsTooOldOrUncomparable(nearestWeather, event);
+            System.out.println("Found for event " + event.toString() + " nearest weather" + (tooOld ? " (too old):" : ":") + nearestWeather.toString());
+            if (!tooOld) {
+                if (persistAcquisition) {
+                    weatherService.save(nearestWeather);
+                }
                 weathers.add(nearestWeather);
-                weatherService.saveAll(weathers);
                 event.setWeather(weathers);
             }
-
-            Thermosal nearestThermosal = thermosalUtil.nearest(event.getTimeStamp());
-            if (nearestThermosal != null) {
+        }
+        persistAcquisition = false;
+        Thermosal nearestThermosal = thermosalService.findNearest(event.getTimeStamp());
+        if (dataIsTooOldOrUncomparable(nearestThermosal, event)) {//if we don't find it directly via the database, or if we found it but it is too old, look in the ears3Nav webservice itself
+            nearestThermosal = thermosalUtil.findNearest(event.getTimeStamp());
+            persistAcquisition = true;
+        }
+        if (nearestThermosal != null) {
+            tooOld = dataIsTooOldOrUncomparable(nearestThermosal, event);
+            System.out.println("Found for event " + event.toString() + " nearest thermosal" + (tooOld ? " (too old):" : ":") + nearestThermosal.toString());
+            if (!tooOld) {
+                if (persistAcquisition) {
+                    thermosalService.save(nearestThermosal);
+                }
                 thermosals.add(nearestThermosal);
-                thermosalService.saveAll(thermosals);
                 event.setThermosal(thermosals);
             }
-            this.eventRepository.save(event);
-        } catch (IOException e) {
-            log.log(Level.SEVERE, "Couldn't reach the acquisition server. No acquisition coupled with this event (event was created however).", e);
+        }
+        this.eventRepository.save(event);
+    }
+
+    public void deleteById(Long id) {
+        Event event = this.eventRepository.findById(id).orElse(null);
+        if (event != null) {
+            this.eventRepository.deleteById(id);
+        } else {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "There is no event with id " + id);
         }
     }
 
-    public void deleteById(String id) {
-        this.eventRepository.deleteById(Long.valueOf(id));
-    }
-
     public void deleteByIdentifier(String identifier) {
-        this.eventRepository.deleteByIdentifier(identifier);
+        Event event = this.eventRepository.findByIdentifier(identifier);
+        if (event != null) {
+            this.eventRepository.deleteByIdentifier(identifier);
+        } else {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "There is no event with identifier " + identifier);
+        }
+
     }
 
     public void deleteByTimeStampBetween(Date startDate, Date endDate) {
@@ -379,6 +423,5 @@ public class EventService {
 
     public List<Event> findAllByCruiseProgramAndActor(String cruiseIdentifier, String programIdentifier, String actorEmail) {
         return this.eventRepository.findAllByCruiseProgramAndActor(cruiseIdentifier, programIdentifier, actorEmail);
-
     }
 }

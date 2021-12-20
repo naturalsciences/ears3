@@ -1,6 +1,8 @@
 package eu.eurofleets.ears3.dto;
 
 import be.naturalsciences.bmdc.cruise.model.ILinkedDataTerm;
+import javax.xml.bind.annotation.XmlAccessType;
+import javax.xml.bind.annotation.XmlAccessorType;
 
 /*
  * To change this license header, choose License Headers in Project Properties.
@@ -11,6 +13,7 @@ import be.naturalsciences.bmdc.cruise.model.ILinkedDataTerm;
  *
  * @author thomas
  */
+@XmlAccessorType(XmlAccessType.FIELD) //ignore all the getters
 public class LinkedDataTermDTO {
 
     public String identifier;  //an identifier in an external vocabulary, i.e. the EARS ontology

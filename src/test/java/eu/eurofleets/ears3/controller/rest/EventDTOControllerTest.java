@@ -24,6 +24,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.http.MediaType;
+import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.context.web.WebAppConfiguration;
 import org.springframework.test.web.servlet.MockMvc;
@@ -42,7 +43,7 @@ import org.springframework.web.context.WebApplicationContext;
 @SpringBootTest(classes = {Application.class}, properties = "spring.main.allow-bean-definition-overriding=true")
 @WebAppConfiguration
 @ComponentScan(basePackages = {"eu.eurofleets.ears3.domain", " eu.eurofleets.ears3.service"})
-@Ignore
+@TestPropertySource(locations="classpath:test.properties")
 public class EventDTOControllerTest {
 
     @Autowired
@@ -62,7 +63,7 @@ public class EventDTOControllerTest {
      * Test of getRecentOrModifiedEvents method, of class EventDTOController.
      */
     @Test
-    @Ignore
+    @Ignore//pretty weird, json always return empty result
     public void testGetRecentOrModifiedEvents() throws Exception {
         System.out.println("getRecentOrModifiedEvents");
         EventDTO e = EventControllerTest.getTestEvent();
@@ -74,20 +75,20 @@ public class EventDTOControllerTest {
         ProgramControllerTest.postProgram(this.mockMvc, pr, objectMapper);
         MvcResult postEvent2 = EventControllerTest.postEvent(this.mockMvc, e, objectMapper);
 
-        MvcResult mvcResult = this.mockMvc.perform(MockMvcRequestBuilders.get("/dto/events.json").contentType(MediaType.APPLICATION_JSON))
+        MvcResult mvcResult = this.mockMvc.perform(MockMvcRequestBuilders.get("/api/dto/events.json").contentType(MediaType.APPLICATION_JSON))
                 .andDo(print())
                 .andExpect(status().is(200))
                 .andReturn();
 
         List<String> tmp = new ArrayList(getIdentifiers(mvcResult));
         String identifier = tmp.get(0);
-        mvcResult = this.mockMvc.perform(MockMvcRequestBuilders.get("/dto/event.json?identifier=" + identifier).contentType(MediaType.APPLICATION_JSON))
+        mvcResult = this.mockMvc.perform(MockMvcRequestBuilders.get("/api/dto/event.json?identifier=" + identifier).contentType(MediaType.APPLICATION_JSON))
                 .andDo(print())
                 .andExpect(status().is(200))
                 .andReturn();
         String contentAsString = mvcResult.getResponse().getContentAsString();
 
-        mvcResult = this.mockMvc.perform(MockMvcRequestBuilders.get("/dto/events.json?after=" + after.format(DateTimeFormatter.ISO_OFFSET_DATE_TIME)).contentType(MediaType.APPLICATION_JSON))
+        mvcResult = this.mockMvc.perform(MockMvcRequestBuilders.get("/api/dto/events.json?after=" + after.format(DateTimeFormatter.ISO_OFFSET_DATE_TIME)).contentType(MediaType.APPLICATION_JSON))
                 .andDo(print())
                 .andReturn();
         contentAsString = mvcResult.getResponse().getContentAsString();

@@ -15,11 +15,15 @@ import be.naturalsciences.bmdc.cruise.model.ITool;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import java.io.Serializable;
 import java.time.OffsetDateTime;
+import java.time.ZoneId;
+import java.time.ZoneOffset;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
+import java.util.StringJoiner;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
@@ -502,6 +506,22 @@ public class Cruise implements ICruise, Serializable {
             return false;
         }
         return true;
+    }
+
+    public String getChiefScientistsString() {
+        StringJoiner sj = new StringJoiner(", ");
+        for (Person chiefScientist : chiefScientists) {
+            sj.add(chiefScientist.getFirstNameLastName());
+        }
+        return sj.toString();
+    }
+
+    public String getStartDateUTC() {
+        return this.startDate.atZoneSameInstant(ZoneOffset.UTC).format(DateTimeFormatter.ISO_INSTANT);
+    }
+
+    public String getEndDateUTC() {
+        return this.endDate.atZoneSameInstant(ZoneOffset.UTC).format(DateTimeFormatter.ISO_INSTANT);
     }
 
 }

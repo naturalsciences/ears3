@@ -15,10 +15,19 @@ import org.springframework.stereotype.Repository;
 public abstract interface ThermosalRepository
         extends CrudRepository<Thermosal, Long> {
 
-    @Query("select n from Thermosal n where n.instrumentTime = ?1")
-    public Thermosal findByDate(OffsetDateTime instrumentTime);
+    @Query("select t from Thermosal t where t.instrumentTime = ?1")
+    public Thermosal findByInstrumentTime(OffsetDateTime instrumentTime);
 
-    @Query("select n from Thermosal n where n.instrumentTime  in (?1)")
-    public List<Thermosal> findAllByDate(Set<Instant> instrumentTime);
+    @Query("select t from Thermosal t where t.timeStamp = ?1")
+    public Thermosal findByTimestamp(OffsetDateTime timeStamp);
+
+    @Query("select t from Thermosal t where t.instrumentTime=?1 or (t.instrumentTime is null and t.timeStamp = ?1)")
+    public Thermosal findByDate(OffsetDateTime date);
+
+    @Query("select t from Thermosal t where t.timeStamp = (select max(t.timeStamp) from Thermosal t)")
+    public Thermosal findLast();
+
+    @Query("select t from Thermosal t where t.instrumentTime  in (?1)")
+    public List<Thermosal> findAllByInstrumentTime(Set<OffsetDateTime> instrumentTime);
 
 }

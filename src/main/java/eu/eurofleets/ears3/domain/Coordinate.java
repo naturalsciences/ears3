@@ -12,9 +12,14 @@ import be.naturalsciences.bmdc.cruise.model.ICoordinate;
  * @author thomas
  */
 public class Coordinate implements ICoordinate {
-    
-    public double x;
-    public double y;
+
+    public Double x;
+    public Double y;
+
+    public Coordinate(Double x, Double y) {
+        this.x = x;
+        this.y = y;
+    }
 
     @Override
     public double getX() {
@@ -24,6 +29,10 @@ public class Coordinate implements ICoordinate {
     @Override
     public double getY() {
         return y;
+    }
+
+    public boolean isValid() {
+        return x != null && y != null && x != 0 && y != 0;
     }
 
 }

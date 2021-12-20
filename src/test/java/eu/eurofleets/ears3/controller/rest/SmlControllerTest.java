@@ -40,6 +40,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.http.MediaType;
+import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.context.web.WebAppConfiguration;
 import org.springframework.test.web.servlet.MockMvc;
@@ -59,7 +60,7 @@ import org.springframework.web.context.WebApplicationContext;
 @SpringBootTest(classes = {Application.class}, properties = "spring.main.allow-bean-definition-overriding=true")
 @WebAppConfiguration
 @ComponentScan(basePackages = {"eu.eurofleets.ears3.domain", " eu.eurofleets.ears3.service"})
-@Ignore
+@TestPropertySource(locations="classpath:test.properties")
 public class SmlControllerTest {
 
     @Autowired
@@ -122,8 +123,8 @@ public class SmlControllerTest {
         Event event = new SamplingEvent();
         event.setIdentifier("e3c8df0d-02e9-446d-a59b-224a14b89f9a");
         event.setTimeStamp(OffsetDateTime.parse("2019-05-06T16:44:18Z"));
-        event.setToolCategory(new LinkedDataTerm("http://vocab.nerc.ac.uk/collection/L05/current/50/", null, "sediment grabs"));
-        event.setTool(new Tool(new LinkedDataTerm("http://vocab.nerc.ac.uk/collection/L22/current/TOOL0653/", null, "Van Veen grab"), null));
+        event.setToolCategory(new LinkedDataTerm("http://ontologies.ef-ears.eu/ears2/1#ctg_randomnumber","http://vocab.nerc.ac.uk/collection/L05/current/50/", "sediment grabs"));
+        event.setTool(new Tool(new LinkedDataTerm("http://ontologies.ef-ears.eu/ears2/1#dev_randomnumber","http://vocab.nerc.ac.uk/collection/L22/current/TOOL0653/", "Van Veen grab"), null));
         event.setProcess(new LinkedDataTerm("http://ontologies.ef-ears.eu/ears2/1#pro_1", null, "Sampling"));
         event.setAction(new LinkedDataTerm("http://ontologies.ef-ears.eu/ears2/1#act_2", null, "End"));
         event.setSubject(new LinkedDataTerm("http://vocab.nerc.ac.uk/collection/C77/current/G71/", null, "In-situ seafloor measurement/sampling"));
@@ -140,8 +141,8 @@ public class SmlControllerTest {
         Event event2 = new Deployment();
         event2.setIdentifier("e3c8df0d-02e9-446d-a59b-224a14b87890");
         event2.setTimeStamp(OffsetDateTime.parse("2019-05-07T11:10:18Z"));
-        event2.setToolCategory(new LinkedDataTerm("http://vocab.nerc.ac.uk/collection/L05/current/50/", null, "Benthic lander"));
-        event2.setTool(new Tool(new LinkedDataTerm("http://vocab.nerc.ac.uk/collection/L22/current/TOOL0653/", null, "MOMO frame"), null));
+        event2.setToolCategory(new LinkedDataTerm("http://ontologies.ef-ears.eu/ears2/1#ctg_randomnumber", "http://vocab.nerc.ac.uk/collection/L05/current/50/", "Benthic lander"));
+        event2.setTool(new Tool(new LinkedDataTerm("http://ontologies.ef-ears.eu/ears2/1#dev_randomnumber", "\"http://vocab.nerc.ac.uk/collection/L22/current/TOOL0653/", "MOMO frame"), null));
         event2.setProcess(new LinkedDataTerm("http://ontologies.ef-ears.eu/ears2/1#pro_1", null, "Deployment"));
         event2.setAction(new LinkedDataTerm("http://ontologies.ef-ears.eu/ears2/1#act_2", null, "Start"));
         event2.setSubject(new LinkedDataTerm("http://vocab.nerc.ac.uk/collection/C77/current/G71/", null, "Sediment dynamics"));
@@ -158,8 +159,8 @@ public class SmlControllerTest {
         Event event3 = new Deployment();
         event3.setIdentifier("a1c8df0d-02e9-446d-a59b-224345b87890");
         event3.setTimeStamp(OffsetDateTime.parse("2019-05-07T12:50:18Z"));
-        event3.setToolCategory(new LinkedDataTerm("http://vocab.nerc.ac.uk/collection/L05/current/50/", null, "Benthic lander"));
-        event3.setTool(new Tool(new LinkedDataTerm("http://vocab.nerc.ac.uk/collection/L22/current/TOOL0653/", null, "MOMO frame"), null));
+        event3.setToolCategory(new LinkedDataTerm("http://ontologies.ef-ears.eu/ears2/1#ctg_randomnumber", "http://vocab.nerc.ac.uk/collection/L05/current/50/", "Benthic lander"));
+        event3.setTool(new Tool(new LinkedDataTerm("http://ontologies.ef-ears.eu/ears2/1#dev_randomnumber", "\"http://vocab.nerc.ac.uk/collection/L22/current/TOOL0653/", "MOMO frame"), null));
         event3.setProcess(new LinkedDataTerm("http://ontologies.ef-ears.eu/ears2/1#pro_1", null, "Deployment"));
         event3.setAction(new LinkedDataTerm("http://ontologies.ef-ears.eu/ears2/1#act_2", null, "Start"));
         event3.setSubject(new LinkedDataTerm("http://vocab.nerc.ac.uk/collection/C77/current/G71/", null, "Sediment dynamics"));
@@ -192,7 +193,7 @@ public class SmlControllerTest {
     @Test
     public void testGetPhysicalSystem() throws Exception {
         String json = objectMapper.writeValueAsString(CruiseControllerTest.getTestCruise2("BE11/2008_17-" + UUID.randomUUID()));
-        MvcResult createCruise = this.mockMvc.perform(MockMvcRequestBuilders.post("/cruise").contentType(MediaType.APPLICATION_JSON).content(json))
+        MvcResult createCruise = this.mockMvc.perform(MockMvcRequestBuilders.post("/api/cruise").contentType(MediaType.APPLICATION_JSON).content(json))
                 .andExpect(status().isCreated())
                 .andReturn();
 
@@ -202,7 +203,7 @@ public class SmlControllerTest {
         ProgramControllerTest.postProgram(this.mockMvc, pr, objectMapper);
         json = objectMapper.writeValueAsString(e);
 
-        MvcResult createEvent = this.mockMvc.perform(MockMvcRequestBuilders.post("/event").contentType(MediaType.APPLICATION_JSON).content(json))
+        MvcResult createEvent = this.mockMvc.perform(MockMvcRequestBuilders.post("/api/event").contentType(MediaType.APPLICATION_JSON).content(json))
                 .andDo(print())
                 .andExpect(status().isCreated())
                 .andReturn();
@@ -211,7 +212,7 @@ public class SmlControllerTest {
         e.program = "2020-MF";
         json = objectMapper.writeValueAsString(e);
 
-        MvcResult createEvent2 = this.mockMvc.perform(MockMvcRequestBuilders.post("/event").contentType(MediaType.APPLICATION_JSON).content(json))
+        MvcResult createEvent2 = this.mockMvc.perform(MockMvcRequestBuilders.post("/api/event").contentType(MediaType.APPLICATION_JSON).content(json))
                 .andDo(print())
                 .andExpect(status().isCreated())
                 .andReturn();
@@ -220,7 +221,7 @@ public class SmlControllerTest {
                 .andDo(print())
                 .andExpect(status().isOk())
                 .andExpect(content().string(containsString("<sml:component name=\"Van Veen grab\" xlink:href=")))
-                .andExpect(content().string(containsString("/ears3/sml?deviceUrn=SDN:L22::TOOL0653&amp;platformUrn=SDN:C17::11BE\"/>")))
+                .andExpect(content().string(containsString("ears3/sml?deviceUrn=SDN:L22::TOOL0653&amp;platformUrn=SDN:C17::11BE")))
                 .andExpect(content().string(not(containsString("deviceUrn=null"))))
                 .andReturn();
     }

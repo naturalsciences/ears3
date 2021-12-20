@@ -42,9 +42,8 @@ public class LinkedDataTermService {
         if (term == null) {
             return null;
         }
-        String urn = ILinkedDataTerm.getUrnFromUrl(term.identifier);
+
         LinkedDataTerm linkedDataTerm = new LinkedDataTerm(term.identifier, term.transitiveIdentifier, term.name);
-        linkedDataTerm.setUrn(urn);
         return findOrCreate(linkedDataTerm);
     }
     

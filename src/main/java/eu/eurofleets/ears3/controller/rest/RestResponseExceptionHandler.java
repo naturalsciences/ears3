@@ -5,7 +5,10 @@
  */
 package eu.eurofleets.ears3.controller.rest;
 
+import be.naturalsciences.bmdc.cruise.csr.IllegalCSRArgumentException;
 import eu.eurofleets.ears3.domain.Message;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import org.hibernate.exception.ConstraintViolationException;
 import org.postgresql.util.PSQLException;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -27,9 +30,9 @@ import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExcep
 public class RestResponseExceptionHandler
         extends ResponseEntityExceptionHandler {
 
-    @ExceptionHandler(value = {IllegalArgumentException.class, IllegalStateException.class, ResponseStatusException.class, ArrayIndexOutOfBoundsException.class, PSQLException.class, DataIntegrityViolationException.class, ConstraintViolationException.class, ClassNotFoundException.class})
+    @ExceptionHandler(value = {IllegalCSRArgumentException.class, IllegalArgumentException.class, IllegalStateException.class, ResponseStatusException.class, ArrayIndexOutOfBoundsException.class, PSQLException.class, DataIntegrityViolationException.class, ConstraintViolationException.class, ClassNotFoundException.class})
     protected ResponseEntity<Object> handleConflict(
-            RuntimeException ex, WebRequest request) {
+            RuntimeException ex, WebRequest request) throws Exception {
         HttpStatus status = null;
         if (ex instanceof ResponseStatusException) {
             ResponseStatusException rpex = (ResponseStatusException) ex;
@@ -37,19 +40,22 @@ public class RestResponseExceptionHandler
         } else {
             status = HttpStatus.CONFLICT;
         }
+        Logger.getLogger(RestResponseExceptionHandler.class.getName()).log(Level.INFO, "Error captured.", ex);
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(getContentType(request));
 
         // build response body
         Message response = new Message();
 
-        response.exceptionType = ex.getClass().getSimpleName() + ": " + ex.getMessage();
+        response.exceptionType = ex.getClass().getSimpleName();
         response.message = ex.getMessage();
         response.code = status.value();
+        if (ex instanceof IllegalCSRArgumentException) {
+            IllegalCSRArgumentException CSRex = (IllegalCSRArgumentException) ex;
+            response.messages = CSRex.getInvalidArguments();
+        }
 
-        //   headers.setContentType(getContentType(request));
         return new ResponseEntity<>(response, headers, status);
-        // return handleExceptionInternal(ex, response, headers, status, request);
     }
 
     private static MediaType getContentType(WebRequest request) throws NullPointerException, IllegalArgumentException {

@@ -22,7 +22,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
  * @author thomas
  */
 @Controller
-@RequestMapping(value = "html/program")
+@RequestMapping(value = "program")
 public class HtmlProgramController {
 
     @Autowired
@@ -40,7 +40,7 @@ public class HtmlProgramController {
         }
         programService.save(program);
         model.addAttribute("programs", programService.findAll());
-        return "redirect:/html/event";
+        return "redirect:/event";
     }
 
     @GetMapping("/edit/{id}")

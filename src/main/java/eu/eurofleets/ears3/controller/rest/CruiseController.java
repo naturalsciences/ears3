@@ -3,6 +3,7 @@ package eu.eurofleets.ears3.controller.rest;
 import be.naturalsciences.bmdc.cruise.comparator.CoordinateComparator;
 import be.naturalsciences.bmdc.cruise.csr.CSRBuilder;
 import be.naturalsciences.bmdc.cruise.csr.CSRPrinter;
+import be.naturalsciences.bmdc.cruise.csr.IllegalCSRArgumentException;
 import be.naturalsciences.bmdc.cruise.model.ICoordinate;
 import be.naturalsciences.bmdc.cruise.model.ISeaArea;
 import eu.eurofleets.ears3.domain.Coordinate;
@@ -14,6 +15,7 @@ import eu.eurofleets.ears3.domain.SeaArea;
 import eu.eurofleets.ears3.dto.CruiseDTO;
 import eu.eurofleets.ears3.service.CruiseService;
 import eu.eurofleets.ears3.service.SeaAreaService;
+import eu.eurofleets.ears3.utilities.SpatialUtil;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -29,6 +31,8 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.xml.bind.JAXBException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.Environment;
@@ -47,7 +51,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 
 @RestController
-@RequestMapping(value = "/")
+@RequestMapping(value = "/api")
 @CrossOrigin(origins = "*", maxAge = 3600)
 public class CruiseController {
 
@@ -126,10 +130,11 @@ public class CruiseController {
     }
 
     @RequestMapping(method = {RequestMethod.GET}, value = {"cruise/csr"}, params = {"identifier"}, produces = {"application/xml; charset=utf-8"})
-    public String getCSRByName(@RequestParam(required = true, value = "identifier") String identifier) throws JAXBException, IOException {
+    public String getCSRByName(@RequestParam(required = true, value = "identifier") String identifier) throws JAXBException, IOException, IllegalCSRArgumentException {
         Cruise cruise = this.cruiseService.findByIdentifier(identifier);
         if (cruise != null) {
             List<Coordinate> coordinates = new ArrayList();
+
             String startDate = cruise.getStartDate().withOffsetSameInstant(ZoneOffset.UTC).format(DateTimeFormatter.ISO_DATE_TIME);
             String endDate = cruise.getEndDate().withOffsetSameInstant(ZoneOffset.UTC).format(DateTimeFormatter.ISO_DATE_TIME);
 
@@ -137,28 +142,48 @@ public class CruiseController {
             List<Navigation> between = navUtil.between(cruise.getStartDate(), cruise.getEndDate());*/
             URL website = new URL(env.getProperty("ears.navigation.server") + "/ears3Nav/nav/getBetween/datagram?startDate=" + startDate + "&endDate=" + endDate);
             URLConnection connection = website.openConnection();
-
             InputStreamReader ipsr = new InputStreamReader(connection.getInputStream());
             BufferedReader br = new BufferedReader(ipsr);
             String line;
             String headingString = null;
-            double heading = 0;
+            Double heading = null;
+            Double newHeading = null;
+            Coordinate coordinate = null;
+            Coordinate newCoordinate = null;
             while ((line = br.readLine()) != null) {
+                boolean headingFound = false;
                 if (line.startsWith("$")) { //EARS datagram
                     String lon = line.split(",")[3];
                     String lat = line.split(",")[4];
                     if (lat != null && !lat.isEmpty() && lon != null && !lon.isEmpty()) {
-                        String[] split = line.split(",");
-                        if (split.length >= 6) {
-                            headingString = split[5];
-                            if (Math.abs(Double.valueOf(headingString) - heading) > 0.5) {
-                                heading = Double.valueOf(headingString);
-                                Coordinate c = new Coordinate();
-                                c.x = Double.valueOf(lon);
-                                c.y = Double.valueOf(lat);
-                                coordinates.add(c);
+                        if (coordinates.isEmpty()) { //always add the first coordinate
+                            newCoordinate = new Coordinate(Double.valueOf(lon), Double.valueOf(lat));
+                            coordinates.add(newCoordinate);
+                        } else {
+                            String[] split = line.split(",");
+                            /*if (split.length >= 6) { //only check legal datagrams, having heading
+                                headingString = split[5];
+                                if (headingString != null && !headingString.isEmpty()) {
+                                    newHeading = Double.valueOf(headingString);
+                                    headingFound = true;
+                                }
+                            }
+                            if (!headingFound) {*/
+                            newCoordinate = new Coordinate(Double.valueOf(lon), Double.valueOf(lat));
+                            newHeading = SpatialUtil.bearingByCoord(coordinate, newCoordinate);
+                            headingFound = true;
+                            //}
+                            if (newHeading != null && heading != null) {
+                                if (Math.abs(newHeading - heading) > 0.5) {
+                                    //newCoordinate = new Coordinate(Double.valueOf(lon), Double.valueOf(lat));
+                                    if (newCoordinate.isValid()) {
+                                        coordinates.add(newCoordinate);
+                                    }
+                                }
                             }
                         }
+                        heading = newHeading;
+                        coordinate = newCoordinate;
                     }
                 }
             }
@@ -191,7 +216,7 @@ public class CruiseController {
 
             String licenseString = env.getProperty("ears.csr.license");
             License license = License.Licenses.valueOf(licenseString).license;
-            CSRBuilder b = new CSRBuilder(cruise, license);
+            CSRBuilder b = new CSRBuilder(cruise, license,true);
             CSRPrinter p = new CSRPrinter(b);
 
             return p.getResult();

@@ -28,14 +28,14 @@ import org.springframework.context.annotation.Bean;
 public class Application extends SpringBootServletInitializer {
 
     public static void main(String[] args) {
+        System.setProperty("spring.config.name", "ears3");
         SpringApplication.run(Application.class, args);
     }
 
     @Override
     protected SpringApplicationBuilder configure(SpringApplicationBuilder application) {
-        return application.sources(Application.class);
+        return application.sources(Application.class).properties("spring.config.name: ears3");
     }
-    
     
     @Bean
     CommandLineRunner init(StorageService storageService) {

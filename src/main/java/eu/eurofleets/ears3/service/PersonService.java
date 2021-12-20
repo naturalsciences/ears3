@@ -71,8 +71,8 @@ public class PersonService {
         Person foundPerson = personRepository.findByNameAndOrganisation(person.getFirstName(), person.getLastName(), (Organisation) person.getOrganisation());
         if (foundPerson != null) {
             person.setId(foundPerson.getId());
-        } else if (person._getEmailAddress() != null) {
-            foundPerson = personRepository.findByEmail(person._getEmailAddress());
+        } else if (person.getEmail() != null) {
+            foundPerson = personRepository.findByEmail(person.getEmail());
             if (foundPerson != null) {
                 person.setId(foundPerson.getId());
             }

@@ -14,6 +14,9 @@ public class PropertyDTO {
     public LinkedDataTermDTO key;
     public String value;
     public String uom;
+    public boolean mandatory;
+    public boolean multiple;
+    public String valueClass;
 
     public PropertyDTO() {
     }

@@ -19,7 +19,7 @@ public class RootController {
 
     @RequestMapping(method = RequestMethod.GET)
     public String index() {
-        return "redirect:/html/event";
+        return "redirect:/event/new";
     }
 
 }

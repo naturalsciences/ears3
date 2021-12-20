@@ -24,6 +24,7 @@ import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
 
@@ -42,6 +43,10 @@ public class CruiseService {
     public PersonService personService;
     @Autowired
     public LinkedDataTermService linkedDataTermService;
+    @Autowired
+    private ObjectMapper objectMapper;
+    @Autowired
+    private Environment env;
 
     public static Logger log = Logger.getLogger(CruiseService.class.getSimpleName());
 
@@ -96,10 +101,10 @@ public class CruiseService {
         return this.cruiseRepository.findAtDate(Instant.now().atOffset(ZoneOffset.UTC));
     }
 
-    @Autowired
-    private ObjectMapper objectMapper;
-
     public Cruise save(CruiseDTO dto) {
+        if (env.getProperty("ears.read-only") == null || !env.getProperty("ears.read-only").equals("false")) {
+            throw new IllegalArgumentException("Cannot create/modify entities on a read-only system.");
+        }
         String json;
         try {
             json = objectMapper.writeValueAsString(dto);

@@ -9,6 +9,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import eu.eurofleets.ears3.Application;
 import eu.eurofleets.ears3.controller.rest.CruiseControllerTest;
 import eu.eurofleets.ears3.dto.CruiseDTO;
+import java.time.OffsetDateTime;
 import java.util.UUID;
 import static org.hamcrest.core.StringContains.containsString;
 import org.junit.Before;
@@ -59,6 +60,7 @@ public class Ears2CruiseControllerTest {
     private Environment env;
 
     @Test
+    @Ignore
     public void testPostAndUpdateCruise() throws Exception {
         String identifier = "BE11/2007_18-" + UUID.randomUUID();
         CruiseDTO cruise = CruiseControllerTest.getTestCruise1(identifier);
