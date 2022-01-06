@@ -25,10 +25,11 @@
                         <th>Start date</th>
                         <th>End date</th>
                         <th>Chief scientist</th>
-                        <th>Cruise summary report</th>
-                        <th>Navigation</th>
-                        <th>Meteorology</th>
-                        <th>Thermosalinometry</th>
+                        <th>CSR</th>
+                        <th>Events</th>
+                        <th>Nav</th>
+                        <th>Meteo</th>
+                        <th>Thermosal</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -39,6 +40,7 @@
                         <!--<td th:text="${cruise.name}"></td>-->
                         <td th:text="${cruise.getChiefScientistsString()}"  ></td>
                         <td><a class="csrLink" th:text="CSR" th:href="@{/api/cruise/csr?identifier={id}(id=${cruise.identifier})}"></a></td>
+                        <td><a class="eventLink" th:text="Events" th:href="@{/api/events.csv?cruiseIdentifier={id}(id=${cruise.identifier})}"></a></td>
                         <td><ul><li><a th:text="CSV" th:href="@{~/ears3Nav/nav/getBetween/datagram?startDate={s}&endDate={e}(s=${cruise.startDateUTC}, e=${cruise.endDateUTC})}"></a></li>
                                 <li><a th:text="XML" th:href="@{~/ears3Nav/nav/getBetween/xml?startDate={s}&endDate={e}(s=${cruise.startDateUTC}, e=${cruise.endDateUTC})}"></a></li>
                                 <li><a th:text="JSON" th:href="@{~/ears3Nav/nav/getBetween/json?startDate={s}&endDate={e}(s=${cruise.startDateUTC}, e=${cruise.endDateUTC})}"></a></li>

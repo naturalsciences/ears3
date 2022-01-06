@@ -112,9 +112,7 @@ public class ExternalProjectHelper implements IExternalHelper {
                 sb = stringBuilderReplace(sb, "&lt;", "<");
                 sb = stringBuilderReplace(sb, "&gt;", ">");
                 xml = sb.toString();
-//String xml = service.getEdmerpSoap().getList(); //getList();//
 
-//System.out.println(xml);
                 Reader reader = new StringReader(xml);
                 XMLInputFactory factory = XMLInputFactory.newFactory();
 

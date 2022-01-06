@@ -261,7 +261,6 @@ public class OntologyController {
 
     @RequestMapping(method = {RequestMethod.GET}, value = {"vessel/sparql"}, produces = MediaType.APPLICATION_JSON_VALUE)
     public String vesselSparqlEndpoint(@RequestParam(required = true, value = "q") String sparqlQuery, @RequestParam(required = false, value = "program") String program) throws IOException {
-        sparqlQuery = UriUtils.decode(sparqlQuery, "UTF8");
         ResultSet rs;
         if (program == null) {
             Query qry = QueryFactory.create(sparqlQuery);

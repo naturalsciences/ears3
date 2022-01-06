@@ -1,85 +1,90 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en"  xmlns="http://www.w3.org/1999/xhtml" 
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" layout:decorate="~{fragments/f}">
     <head th:replace="fragments/f :: head"></head>
     <body>
         <nav th:replace="fragments/f :: header"></nav>
-        <div class="container">
+        <div class="container" layout:fragment="main">
             <div>
                 <form class="form-group">
                     <div class="form-group">
-                        <input type="text" class="form-control" id="firstNameField" placeholder="First name" required>
-                        <label class="txtBox" for="firstNameField">First name</label>
+                        <p><input name="firstName" type="text" class="form-control" id="firstNameField" placeholder=" " required>
+                                <label class="txtBox" for="firstName">First name</label></p>
                     </div>
                     <div class="form-group">
-                        <input type="text" class="form-control" id="lastNameField" placeholder="Last name" required>
-                        <label class="txtBox" for="lastNameField">Last name</label>
+                        <p>
+                            <input name="lastName" type="text" class="form-control" id="lastNameField" placeholder=" " required>
+                                <label class="txtBox" for="lastName">Last name</label></p>
                     </div>
                     <div class="form-group">
-                        <input type="email" class="form-control" id="emailField"
-                               placeholder="Email" required>
-                        <label class="txtBox" for="emailField">Email</label>
+                        <p>
+                            <input name="email" type="email" class="form-control" id="emailField"
+                                   placeholder=" " required>
+                                <label class="txtBox" for="email">Email</label></p>
                     </div> 
                     <div class="form-group">
-                        <label for="organisationField">Organisation</label>
+
                         <select name="organisation" id="organisationField"
-                                class="selectpicker target edmo  form-control"
+                                class="selectpicker target edmo form-control"
                                 data-live-search="true" title="Organisation">
                         </select>
                     </div>                            
                     <button id="id_Submit" type="submit" class="btn btn-primary  btn-block">Save</button>
                 </form>
             </div>
-        </div>
-        <script type="application/javascript">
-            if (window.localStorage && typeof localStorage !== 'undefined') {
-                $(document).ready(function () {
-                    //$.getScript("js/onchangeEdmo.js");
-                    $.getJSON("json/edmo.json",
-                            function (data) {
-                                $.each(data.vocabulary.citRespParty, function (key, item) {
-                                    $("#organisationField").append($("<option />").val(item.rpOrgName.SDNIdent).text(item.rpOrgName.text));
-                                });
-                                $('#organisationField').selectpicker('refresh');
+
+            <script type="application/javascript">
+                if (window.localStorage && typeof localStorage !== 'undefined') {
+                    $(document).ready(function () {
+                        //$.getScript("js/onchangeEdmo.js");
+                        $.getJSON("json/edmo.json",
+                                function (data) {
+                                    $.each(data.vocabulary.citRespParty, function (key, item) {
+                                        $("#organisationField").append($("<option />").val(item.rpOrgName.SDNIdent).text(item.rpOrgName.text));
+                                    });
+                                    $('#organisationField').selectpicker('refresh');
+
+                                }
+                        ).done(function () {
+                            if (typeof localStorage.actor !== 'undefined') {
+                                //$("#organisationField").val(actor.organisation);
+                                //$('#organisationField').selectpicker('refresh');
+                                $("#organisationField").selectpicker('val', localStorage.actor.organisation);
 
                             }
-                    ).done(function () {
+                        });
                         if (typeof localStorage.actor !== 'undefined') {
-                            //$("#organisationField").val(actor.organisation);
-                            //$('#organisationField').selectpicker('refresh');
-                            $("#organisationField").selectpicker('val', localStorage.actor.organisation);
-
+                            let actor = JSON.parse(localStorage.actor);
+                            $("#firstNameLabel").html(actor.firstName);
+                            $("#lastNameLabel").html(actor.lastName);
+                            $("#programLabel").html(actor.program);
+                            $("#firstNameField").val(actor.firstName);
+                            $("#lastNameField").val(actor.lastName);
+                            $("#emailField").val(actor.email);
+                            $("#settings-link").html(actor.firstName + " " + actor.lastName);
                         }
-                    });
-                    if (typeof localStorage.actor !== 'undefined') {
-                        let actor = JSON.parse(localStorage.actor);
-                        $("#firstNameLabel").html(actor.firstName);
-                        $("#lastNameLabel").html(actor.lastName);
-                        $("#programLabel").html(actor.program);
-                        $("#firstNameField").val(actor.firstName);
-                        $("#lastNameField").val(actor.lastName);
-                        $("#emailField").val(actor.email);
-                        $("#settings-link").html(actor.firstName + " " + actor.lastName);
-                    }
-                    $('form').submit(function () {
-                        var me = {
-                            firstName: $("#firstNameField").val(),
-                            lastName: $("#lastNameField").val(),
-                            email: $("#emailField").val(),
-                            organisation: $("#organisationField").val(),
-                            phoneNumber: null,
-                            faxNumber: null
-                        };
-                        var authentication_json = JSON.stringify(me);
-                        localStorage.actor = authentication_json;
-                        window.location.href = "event";
+                        $('form').submit(function () {
+                            var me = {
+                                firstName: $("#firstNameField").val(),
+                                lastName: $("#lastNameField").val(),
+                                email: $("#emailField").val(),
+                                organisation: $("#organisationField").val(),
+                                phoneNumber: null,
+                                faxNumber: null
+                            };
+                            var authentication_json = JSON.stringify(me);
+                            localStorage.actor = authentication_json;
+                            window.location.href = "event/new";
 
-                        return false;
-                    });
+                            return false;
+                        });
+                    }
+                    );
+                } else {
+                    alert("Sorry, your browser does not support local storage.");
                 }
-                );
-            } else {
-                alert("Sorry, your browser does not support local storage.");
-            }
-        </script>
+            </script>
+        </div>
     </body>
 </html>

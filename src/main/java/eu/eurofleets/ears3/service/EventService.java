@@ -182,6 +182,7 @@ public class EventService {
     }
 
     public Event save(EventDTO eventDTO) {
+        OffsetDateTime serverTime = Instant.now().atOffset(ZoneOffset.UTC);
         if (env.getProperty("ears.read-only") == null || !env.getProperty("ears.read-only").equals("false")) {
             throw new IllegalArgumentException("Cannot create/modify entities on a read-only system.");
         }
@@ -219,19 +220,19 @@ public class EventService {
             Event event = new Event();
             event.setEventDefinitionId(eventDTO.eventDefinitionId);
             String identifier = eventDTO.identifier;
-            OffsetDateTime serverTime = Instant.now().atOffset(ZoneOffset.UTC);
+            
             boolean drift = false;
             if (identifier == null) { //it is brand new
                 identifier = UUID.randomUUID().toString();
-                event.setCreationTime(Instant.now().atOffset(ZoneOffset.UTC));
+                event.setCreationTime(serverTime);
                 OffsetDateTime dtoTime = eventDTO.getTimeStamp();
                 if (dtoTime == null) { //if it has no time, we add the one from the acquisition
                     Navigation last = navUtil != null ? navUtil.findLast() : null;
                     if (last != null) {
                         OffsetDateTime acquisitionTime = last.getTime();//.atOffset(ZoneOffset.UTC);
-                        System.out.println("acquisition time:" + acquisitionTime.toString());
-                        System.out.println("server time: " + serverTime.toString());
-                        System.out.println("event timestamp: none given");
+                        log.log(Level.INFO, "acquisition time:" + acquisitionTime.toString());
+                        log.log(Level.INFO, "server time: " + serverTime.toString());
+                        log.log(Level.INFO, "event timestamp: none given");
                         Duration acquisitiondrift = Duration.between(acquisitionTime, serverTime); //positive if server ahead of acquisition, negative if acquisition ahead of server
                         long acquisitionDiff = acquisitiondrift.toMinutes();
                         if (acquisitionTime == null || acquisitionDiff > 2) { //if the acquisition is null or lagging behind server for more than 2 minutes, take the server time
@@ -241,9 +242,9 @@ public class EventService {
                             eventDTO.setTimeStamp(acquisitionTime);
                         }
                     } else {
-                        System.out.println("acquisition time: null (last=null)");
-                        System.out.println("server time: " + serverTime.toString());
-                        System.out.println("event timestamp: none given");
+                        log.log(Level.INFO, "acquisition time: null (last=null)");
+                        log.log(Level.INFO, "server time: " + serverTime.toString());
+                        log.log(Level.INFO, "event timestamp: none given");
                         eventDTO.setTimeStamp(serverTime);
                     }
                 }
@@ -312,6 +313,7 @@ public class EventService {
                 public void run() {
                     try {
                         enrichEventWithAcquisition(event);
+                        System.out.println("------------------");
                     } catch (IOException ex) {
                         Logger.getLogger(EventService.class.getName()).log(Level.SEVERE, null, ex);
                     }
@@ -334,7 +336,7 @@ public class EventService {
         if (data == null) {
             return true;
         }
-        Duration res = Duration.between(data.getTimeStamp(), event.getTimeStamp());
+        Duration res = Duration.between(data.getTime(), event.getTimeStamp());
         return Math.abs(res.toMinutes()) > STALE_DATA_THRESHOLD;
     }
 
@@ -352,7 +354,7 @@ public class EventService {
         }
         if (nearestNav != null) {
             tooOld = dataIsTooOldOrUncomparable(nearestNav, event);
-            System.out.println("Found for event " + event.toString() + " nearest navigation" + (tooOld ? " (too old):" : ":") + nearestNav.toString());
+            log.log(Level.INFO, "Enriching " + event.toString() + ": nearest nav" + (tooOld ? " (too old):" : ":") + nearestNav.toString());
             if (!tooOld) {
                 if (persistAcquisition) {
                     navigationService.save(nearestNav);
@@ -364,12 +366,12 @@ public class EventService {
         persistAcquisition = false;
         Weather nearestWeather = weatherService.findNearest(event.getTimeStamp());
         if (dataIsTooOldOrUncomparable(nearestWeather, event)) {//if we don't find it directly via the database, or if we found it but it is too old, look in the ears3Nav webservice itself
-            nearestWeather = weatherUtil.findNearest(event.getTimeStamp());
+            nearestWeather = weatherUtil.findNearest(event.getTimeStamp()); //find it via the webservices
             persistAcquisition = true;
         }
         if (nearestWeather != null) {
             tooOld = dataIsTooOldOrUncomparable(nearestWeather, event);
-            System.out.println("Found for event " + event.toString() + " nearest weather" + (tooOld ? " (too old):" : ":") + nearestWeather.toString());
+            log.log(Level.INFO, "Enriching " + event.toString() + ": nearest met" + (tooOld ? " (too old):" : ":") + nearestWeather.toString());
             if (!tooOld) {
                 if (persistAcquisition) {
                     weatherService.save(nearestWeather);
@@ -386,7 +388,7 @@ public class EventService {
         }
         if (nearestThermosal != null) {
             tooOld = dataIsTooOldOrUncomparable(nearestThermosal, event);
-            System.out.println("Found for event " + event.toString() + " nearest thermosal" + (tooOld ? " (too old):" : ":") + nearestThermosal.toString());
+            log.log(Level.INFO, "Enriching " + event.toString() + ": nearest tss" + (tooOld ? " (too old):" : ":") + nearestThermosal.toString());
             if (!tooOld) {
                 if (persistAcquisition) {
                     thermosalService.save(nearestThermosal);

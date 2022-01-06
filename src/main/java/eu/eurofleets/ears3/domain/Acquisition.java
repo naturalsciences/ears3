@@ -53,6 +53,6 @@ public abstract class Acquisition {
 
     public String toDatagramTime() {
         OffsetDateTime datetime = getTime();
-        return DateTimeFormatter.ofPattern("yyyyMMdd").format(datetime) + "," + DateTimeFormatter.ofPattern("HHmmss").withZone(ZoneId.of("UTC")).format(datetime);
+        return DateTimeFormatter.ofPattern("yyMMdd").format(datetime) + "," + DateTimeFormatter.ofPattern("HHmmss").withZone(ZoneId.of("UTC")).format(datetime);
     }
 }

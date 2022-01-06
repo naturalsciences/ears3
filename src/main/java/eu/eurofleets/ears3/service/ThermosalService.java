@@ -77,7 +77,12 @@ public class ThermosalService {
     private Thermosal findByApproximateDate(OffsetDateTime date) {
         Query q = entityManager.createNamedQuery("findThermosalByApproximateDate", Thermosal.class);
         q.setParameter(1, date.toInstant());
-        return (Thermosal) q.getSingleResult();
+        List resultList = q.getResultList();
+        if (resultList.isEmpty()) {
+            return null;
+        } else {
+            return (Thermosal) resultList.get(0);
+        }
     }
 
     public Thermosal save(Thermosal n) {

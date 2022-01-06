@@ -7,6 +7,7 @@ package eu.eurofleets.ears3.controller.rest;
 
 import be.naturalsciences.bmdc.cruise.csr.IllegalCSRArgumentException;
 import eu.eurofleets.ears3.domain.Message;
+import java.time.format.DateTimeParseException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.hibernate.exception.ConstraintViolationException;
@@ -30,7 +31,7 @@ import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExcep
 public class RestResponseExceptionHandler
         extends ResponseEntityExceptionHandler {
 
-    @ExceptionHandler(value = {IllegalCSRArgumentException.class, IllegalArgumentException.class, IllegalStateException.class, ResponseStatusException.class, ArrayIndexOutOfBoundsException.class, PSQLException.class, DataIntegrityViolationException.class, ConstraintViolationException.class, ClassNotFoundException.class})
+    @ExceptionHandler(value = {IllegalCSRArgumentException.class, IllegalArgumentException.class, IllegalStateException.class, ResponseStatusException.class, ArrayIndexOutOfBoundsException.class, PSQLException.class, DataIntegrityViolationException.class, ConstraintViolationException.class, ClassNotFoundException.class, DateTimeParseException.class})
     protected ResponseEntity<Object> handleConflict(
             RuntimeException ex, WebRequest request) throws Exception {
         HttpStatus status = null;

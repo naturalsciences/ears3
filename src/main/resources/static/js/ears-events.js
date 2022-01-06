@@ -1,6 +1,39 @@
 const eventPostLocation = "/ears3/api/event";
-const jsonVesselRdfLocation = "/ears3/ontology/vessel/sparql?q=PREFIX%20owl%3A%20%3Chttp%3A%2F%2Fwww.w3.org%2F2002%2F07%2Fowl%23%3E%0APREFIX%20dc%3A%20%3Chttp%3A%2F%2Fpurl.org%2Fdc%2Felements%2F1.1%2F%3E%0APREFIX%20skos%3A%3Chttp%3A%2F%2Fwww.w3.org%2F2004%2F02%2Fskos%2Fcore%23%3E%0APREFIX%20ears2%3A%3Chttp%3A%2F%2Fontologies.ef-ears.eu%2Fears2%2F1%23%3E%0APREFIX%20xsd%3A%3Chttp%3A%2F%2Fwww.w3.org%2F2001%2FXMLSchema%23%3E%0ASELECT%20DISTINCT%20%3Feid%20(str(%3Fc)%20as%20%3Fcu)%20(str(%3Fcc)%20as%20%3Fctu)%20%3Fcl%20(str(%3Ft)%20%20as%20%3Ftu)%20(str(%3Ftc)%20as%20%3Fttu)%20%3Ftl%20(str(%3Fp)%20as%20%3Fpu)%20%3Fpl%20(str(%3Fa)%20as%20%3Fau)%20%3Fal%0AWHERE%20%7B%0A%7B%0AOPTIONAL%20%7B%0A%3Fc%20a%20ears2%3AToolCategory.%0A%3Ft%20a%20ears2%3ATool.%0A%3Fe%20ears2%3AhasProcess%20%3Fp.%0A%3Fe%20ears2%3AhasAction%20%3Fa.%20%0A%3Fe%20ears2%3AwithTool%20%3Ft.%20%0A%3Ft%20ears2%3AisMemberOf%20%3Fc.%0A%3Fe%20ears2%3AasConcept%20%3Fec.%0A%3Fec%20dc%3Aidentifier%20%3Feid.%0A%3Fc%20ears2%3AasConcept%20%3Fcc.%0A%3Fcc%20skos%3AprefLabel%20%3Fcl%20.%0A%3Ft%20ears2%3AasConcept%20%3Ftc.%0A%3Ftc%20skos%3AprefLabel%20%3Ftl%20.%0A%3Fp%20ears2%3AasConcept%20%3Fpc.%0A%3Fpc%20skos%3AprefLabel%20%3Fpl%20.%0A%3Fa%20ears2%3AasConcept%20%3Fac.%0A%3Fac%20skos%3AprefLabel%20%3Fal.%0A%3Fac%20ears2%3Astatus%20%3Fas%20%20%7D%0A%20%7D%0AFILTER%20(!REGEX(%20%3Fal%2C%20%22%5ENew%20Action%22%20)%20%26%26%20str(%3Fas)%20!%3D%20%27Deprecated%27%20)%0A%7D%0A%0AORDER%20BY%20%3Fpl%20%3Fal%0A";
-const jsonProgramRdfLocation = "/ears3/ontology/program/sparql?q=PREFIX%20owl%3A%20%3Chttp%3A%2F%2Fwww.w3.org%2F2002%2F07%2Fowl%23%3E%0APREFIX%20dc%3A%20%3Chttp%3A%2F%2Fpurl.org%2Fdc%2Felements%2F1.1%2F%3E%0APREFIX%20skos%3A%3Chttp%3A%2F%2Fwww.w3.org%2F2004%2F02%2Fskos%2Fcore%23%3E%0APREFIX%20ears2%3A%3Chttp%3A%2F%2Fontologies.ef-ears.eu%2Fears2%2F1%23%3E%0APREFIX%20xsd%3A%3Chttp%3A%2F%2Fwww.w3.org%2F2001%2FXMLSchema%23%3E%0ASELECT%20DISTINCT%20%3Feid%20%28str%28%3Fc%29%20as%20%3Fcu%29%20%28str%28%3Fcc%29%20as%20%3Fctu%29%20%3Fcl%20%28str%28%3Ft%29%20%20as%20%3Ftu%29%20%28str%28%3Ftc%29%20as%20%3Fttu%29%20%3Ftl%20%28str%28%3Fp%29%20as%20%3Fpu%29%20%3Fpl%20%28str%28%3Fa%29%20as%20%3Fau%29%20%3Fal%0AWHERE%20%7B%0A%7B%0AOPTIONAL%20%7B%0A%3Fc%20a%20ears2%3AToolCategory.%0A%3Ft%20a%20ears2%3ATool.%0A%3Fe%20ears2%3AhasProcess%20%3Fp.%0A%3Fe%20ears2%3AhasAction%20%3Fa.%20%0A%3Fe%20ears2%3AwithTool%20%3Ft.%20%0A%3Ft%20ears2%3AisMemberOf%20%3Fc.%0A%3Fe%20ears2%3AasConcept%20%3Fec.%0A%3Fec%20dc%3Aidentifier%20%3Feid.%0A%3Fc%20ears2%3AasConcept%20%3Fcc.%0A%3Fcc%20skos%3AprefLabel%20%3Fcl%20.%0A%3Ft%20ears2%3AasConcept%20%3Ftc.%0A%3Ftc%20skos%3AprefLabel%20%3Ftl%20.%0A%3Fp%20ears2%3AasConcept%20%3Fpc.%0A%3Fpc%20skos%3AprefLabel%20%3Fpl%20.%0A%3Fa%20ears2%3AasConcept%20%3Fac.%0A%3Fac%20skos%3AprefLabel%20%3Fal%20%20%7D%0A%20%7D%0A%0A%7D%0AORDER%20BY%20%3Fpl%20%3Fal";
+
+const conceptHierarchySPARQL=`PREFIX owl: <http://www.w3.org/2002/07/owl#>
+PREFIX dc: <http://purl.org/dc/elements/1.1/>
+PREFIX skos:<http://www.w3.org/2004/02/skos/core#>
+PREFIX ears2:<http://ontologies.ef-ears.eu/ears2/1#>
+PREFIX xsd:<http://www.w3.org/2001/XMLSchema#>
+SELECT DISTINCT  (str(?e) as ?eid)  (str(?c) as ?cu) (str(?cc) as ?ctu) ?cl (str(?t)  as ?tu) (str(?tc) as ?ttu) ?tl (str(?p) as ?pu) ?pl (str(?a) as ?au) ?al
+WHERE {
+{
+OPTIONAL {
+?c a ears2:ToolCategory.
+?t a ears2:Tool.
+?e ears2:hasProcess ?p.
+?e ears2:hasAction ?a. 
+{?e ears2:withTool ?t.} UNION {?e ears2:withTool ?c.}
+?t ears2:isMemberOf ?c.
+#?e ears2:asConcept ?ec.
+#?ec dc:identifier ?eid.
+?c ears2:asConcept ?cc.
+?cc skos:prefLabel ?cl .
+?t ears2:asConcept ?tc.
+?tc skos:prefLabel ?tl .
+?p ears2:asConcept ?pc.
+?pc skos:prefLabel ?pl .
+?a ears2:asConcept ?ac.
+?ac skos:prefLabel ?al.
+?ac ears2:status ?as  
+}
+ }
+FILTER (!REGEX( ?al, "^New Action" ) && str(?as) != 'Deprecated' )
+}
+
+ORDER BY ?pl ?al`;
+const jsonVesselRdfLocation = "/ears3/ontology/vessel/sparql?q="+encodeURIComponent(conceptHierarchySPARQL);
+const jsonProgramRdfLocation = "/ears3/ontology/program/sparql?q="+encodeURIComponent(conceptHierarchySPARQL);
 
 const eventPropertyRdfLocation = "/ears3/ontology/vessel/sparql?q=PREFIX%20owl%3A%20%3Chttp%3A%2F%2Fwww.w3.org%2F2002%2F07%2Fowl%23%3E%20PREFIX%20dc%3A%20%3Chttp%3A%2F%2Fpurl.org%2Fdc%2Felements%2F1.1%2F%3E%20PREFIX%20skos%3A%3Chttp%3A%2F%2Fwww.w3.org%2F2004%2F02%2Fskos%2Fcore%23%3E%20PREFIX%20ears2%3A%3Chttp%3A%2F%2Fontologies.ef-ears.eu%2Fears2%2F1%23%3E%20PREFIX%20xsd%3A%3Chttp%3A%2F%2Fwww.w3.org%2F2001%2FXMLSchema%23%3E%20SELECT%20DISTINCT%20%3Feid%20(str(%3Fpr)%20as%20%3Fpru)%20%3Fprl%20%3Fmult%20%3Funit%20WHERE%20%7B%20%7B%20OPTIONAL%20%7B%20%3Fe%20ears2%3AhasProperty%20%3Fpr.%20%3Fe%20ears2%3AhasProcess%20%3Fp.%20%3Fe%20ears2%3AhasAction%20%3Fa.%20%3Fe%20ears2%3AwithTool%20%3Ft.%20%3Ft%20ears2%3AisMemberOf%20%3Fc.%20%3Fe%20ears2%3AasConcept%20%3Fec.%20%3Fec%20dc%3Aidentifier%20%3Feid.%20%3Fpr%20ears2%3AasConcept%20%3Fprc.%20%3Fprc%20skos%3AprefLabel%20%3Fprl.%20%3Fpr%20ears2%3Amultiple%20%3Fmult%20%7D%7D%20%7D%20ORDER%20BY%20%3Feid%20";
 

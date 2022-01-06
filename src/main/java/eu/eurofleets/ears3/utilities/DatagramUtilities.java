@@ -35,6 +35,8 @@ import java.util.logging.Logger;
  */
 public class DatagramUtilities<A extends Acquisition> {
 
+    public static Logger log = Logger.getLogger(DatagramUtilities.class.getSimpleName());
+
     private final Class<A> cls;
     private final URL baseUrl;
 
@@ -118,8 +120,9 @@ public class DatagramUtilities<A extends Acquisition> {
         List<A> result = new ArrayList<>();
         try {
             while ((line = br.readLine()) != null) {
+
                 if (line.startsWith("$")) {
-                    System.out.println("Read " + line + " from " + endpoint);
+                    log.log(Level.INFO, "   Read " + line + " from " + endpoint);
                     line = line.replace(",,", ", ,");
                     line = line.replaceAll(",$", ", ");
                     String[] vals = line.split(",");
@@ -146,7 +149,7 @@ public class DatagramUtilities<A extends Acquisition> {
                         result.add(acquisitionValue);
                     }
                 } else {
-                    System.out.println("Line is not an EARS datagram (using " + endpoint + ").");
+                    log.log(Level.INFO, "Line is not an EARS datagram (using " + endpoint + ").");
                 }
             }
             br.close();

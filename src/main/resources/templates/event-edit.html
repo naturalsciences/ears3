@@ -169,8 +169,7 @@
                 if (window.localStorage && typeof window.localStorage !== 'undefined') {
                     $(document).ready(function() {
                         if (localStorage.actor == null) {
-                            window.location.href = './settings';
-                            console.log("redirected back to settings");
+                            window.location.href = '../settings';
                         } else {
                             var me = JSON.parse(localStorage.actor);
                             $("#settings-link").html(me.firstName + " " + me.lastName);

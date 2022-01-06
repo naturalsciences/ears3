@@ -77,7 +77,12 @@ public class WeatherService {
     private Weather findByApproximateDate(OffsetDateTime date) {
         Query q = entityManager.createNamedQuery("findWeatherByApproximateDate", Weather.class);
         q.setParameter(1, date.toInstant());
-        return (Weather) q.getSingleResult();
+        List resultList = q.getResultList();
+        if (resultList.isEmpty()) {
+            return null;
+        } else {
+            return (Weather) resultList.get(0);
+        }
     }
 
     public Weather save(Weather n) {

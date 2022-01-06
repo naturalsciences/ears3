@@ -2,7 +2,6 @@
 <html lang="en"  xmlns="http://www.w3.org/1999/xhtml" 
       xmlns:th="http://www.thymeleaf.org"
       xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" layout:decorate="~{fragments/f}">
-
     <head th:replace="fragments/f :: head"></head>
     <body>
         <nav th:replace="fragments/f :: header"></nav>
@@ -57,7 +56,7 @@
 
                 var table;
                 $(document).ready(function () {
-                    if (JSON.parse(localStorage.actor) == null) {
+                    if (localStorage.actor == null) {
                         window.location.href = './settings';
                     } else {
                         var me = JSON.parse(localStorage.getItem('actor'));

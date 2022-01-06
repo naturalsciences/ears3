@@ -105,7 +105,6 @@ public class CruiseController {
 
     @RequestMapping(method = {RequestMethod.GET}, value = {"cruise/{id}"}, produces = {"application/xml; charset=utf-8", "application/json"})
     public Cruise getCruiseById(@PathVariable(value = "id") String id) {
-        System.out.println("id: " + id);
         Cruise cruise = this.cruiseService.findById(Long.parseLong(id));
         if (cruise != null) {
             return cruise;
