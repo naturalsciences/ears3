@@ -14,6 +14,7 @@ import eu.eurofleets.ears3.domain.Message;
 import eu.eurofleets.ears3.domain.SeaArea;
 import eu.eurofleets.ears3.dto.CruiseDTO;
 import eu.eurofleets.ears3.service.CruiseService;
+import eu.eurofleets.ears3.service.EventService;
 import eu.eurofleets.ears3.service.SeaAreaService;
 import eu.eurofleets.ears3.utilities.SpatialUtil;
 import java.io.BufferedReader;
@@ -68,6 +69,8 @@ public class CruiseController {
     public String getAlive() {
         return "";
     }
+
+    public static Logger log = Logger.getLogger(EventService.class.getSimpleName());
 
     // @RequestMapping(method = {RequestMethod.GET}, value = {"cruises"}, produces = {"application/xml; charset=utf-8", "application/json"})
     private CruiseList getCruises(String platformCode) {
@@ -152,8 +155,20 @@ public class CruiseController {
             while ((line = br.readLine()) != null) {
                 boolean headingFound = false;
                 if (line.startsWith("$")) { //EARS datagram
-                    String lon = line.split(",")[3];
-                    String lat = line.split(",")[4];
+                    String lon = null;
+                    String lat = null;
+                    try {
+                        lon = line.split(",", -1)[3];
+                    } catch (ArrayIndexOutOfBoundsException arrayE) {
+                        //it happens from time to time that a lat/lons are measured not as pairs but at 2 different timestamps. They are not combined to form 1 then. This is not logged to not flood the messages.
+
+                        log.log(Level.SEVERE, "ArrayIndexOutOfBoundsException for lon (index 3) of line " + line);
+                    }
+                    try {
+                        lat = line.split(",", -1)[4]; //-1 to ensure that ,,, is split as well
+                    } catch (ArrayIndexOutOfBoundsException arrayE) {
+                        log.log(Level.SEVERE, "ArrayIndexOutOfBoundsException for lon (index 4) of line " + line);
+                    }
                     if (lat != null && !lat.isEmpty() && lon != null && !lon.isEmpty()) {
                         if (coordinates.isEmpty()) { //always add the first coordinate
                             newCoordinate = new Coordinate(Double.valueOf(lon), Double.valueOf(lat));
@@ -175,7 +190,7 @@ public class CruiseController {
                             if (newHeading != null && heading != null) {
                                 if (Math.abs(newHeading - heading) > 0.5) {
                                     //newCoordinate = new Coordinate(Double.valueOf(lon), Double.valueOf(lat));
-                                    if (newCoordinate.isValid()) {
+                                    if (newCoordinate.isValid() && newCoordinate.testSpike(newCoordinate)) {
                                         coordinates.add(newCoordinate);
                                     }
                                 }
@@ -215,7 +230,7 @@ public class CruiseController {
 
             String licenseString = env.getProperty("ears.csr.license");
             License license = License.Licenses.valueOf(licenseString).license;
-            CSRBuilder b = new CSRBuilder(cruise, license,true);
+            CSRBuilder b = new CSRBuilder(cruise, license, true);
             CSRPrinter p = new CSRPrinter(b);
 
             return p.getResult();

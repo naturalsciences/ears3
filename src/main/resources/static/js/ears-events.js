@@ -5,7 +5,7 @@ PREFIX dc: <http://purl.org/dc/elements/1.1/>
 PREFIX skos:<http://www.w3.org/2004/02/skos/core#>
 PREFIX ears2:<http://ontologies.ef-ears.eu/ears2/1#>
 PREFIX xsd:<http://www.w3.org/2001/XMLSchema#>
-SELECT DISTINCT  (str(?e) as ?eid)  (str(?c) as ?cu) (str(?cc) as ?ctu) ?cl (str(?t)  as ?tu) (str(?tc) as ?ttu) ?tl (str(?p) as ?pu) ?pl (str(?a) as ?au) ?al
+SELECT DISTINCT  (replace(replace(str(?e),"http://ontologies.ef-ears.eu/ears2/1/#gev_","ears:gev::","i"),"http://ontologies.ef-ears.eu/ears2/1/#sev_","ears:sev::","i") as ?eid)  (str(?c) as ?cu) (str(?cc) as ?ctu) ?cl (str(?t)  as ?tu) (str(?tc) as ?ttu) ?tl (str(?p) as ?pu) ?pl (str(?a) as ?au) ?al
 WHERE {
 {
 OPTIONAL {
@@ -55,6 +55,7 @@ class EarsEvent {
         }
         this.toolCategory = new Object();
         this.toolCategory.identifier = sparqlResultElement.cu.value;
+        this.toolCategory.transitiveIdentifier = sparqlResultElement.ctu.value;
         this.toolCategory.name = sparqlResultElement.cl.value;
         this.tool = new Object();
         this.tool.tool = new Object();
@@ -185,9 +186,9 @@ function deleteEvent(identifier){
 }
 
 function postEvent(recentEventButton) {
-    recentEventId = recentEventButton.id;
+    recentEventId = {eid:recentEventButton.id,tool:recentEventButton.getAttribute('data-tool')};
     console.log('Pressed button for '+recentEventId);
-    if(recentEventId !== recentlyDeletedEventId){
+    if(recentEventId.eid !== recentlyDeletedEventId){
         postEventByEventDefinition(recentEventId, function() {
             $(recentEventButton).removeClass("btn-warning").addClass("btn-success");
             setTimeout(function() {
@@ -200,13 +201,18 @@ function postEvent(recentEventButton) {
     }
 }
 
+function rdfBindingElementHasEid(element, eventDefinitionId){
+ /*   var eid = "element.eid.value  == " + "'" + eventDefinitionId + "'" + "  && ";
+    var condition = "(".concat(eid, ")").replace(/&&([^'&&']*)$/, '' + '$1');
+    return eval(condition); */
+    return element.eid.value  == eventDefinitionId.eid && element.tu.value  == eventDefinitionId.tool
+}
+
 function postEventByEventDefinition(eventDefinitionId, successFunction, errorFunction) {
-    var eid11 = "element.eid.value  == " + "'" + eventDefinitionId + "'" + "  && ";
-    var condition11 = "(".concat(eid11, ")").replace(/&&([^'&&']*)$/, '' + '$1');
     $.getJSON(jsonVesselRdfLocation,
         function(data) {
             $(data.results.bindings).each(function(index, element) {
-                if (eval(condition11)) {
+                if (rdfBindingElementHasEid(element,eventDefinitionId)) {
                     event = new EarsEvent(element);
                     postEventInner(event, successFunction, errorFunction);
                 }
@@ -239,16 +245,32 @@ function postEventInner(event, successFunction, errorFunction) {
                 success: function(data) {
                     var urls = jsonPath(data, "results.bindings[?(@.eid.value =='"+eid+"')].pru.value");
                     var labels = jsonPath(data, "results.bindings[?(@.eid.value =='"+eid+"')].prl.value");
-                    if(!urls || (urls && !urls.includes("http://ontologies.ef-ears.eu/ears2/1#pry_4"))){
-                        if(!urls){
-                            urls=[];
-                            labels=[];
-                        }
-                        urls.push("http://ontologies.ef-ears.eu/ears2/1#pry_4");
-                        labels.push("label");
+                    
+                    if(!urls){
+                        urls=[];
+                        labels=[];
                     }
-                    urls.push("http://ontologies.ef-ears.eu/ears2/1#pry_station");
-                    labels.push("station");
+                    
+                    if(urls.includes("http://ontologies.ef-ears.eu/ears2/1#pry_4")){ //this because sometimes label is still defined as a property in older trees. We remove and reattach it so it displays in the right order
+                       urls = urls.filter(function(value, index, arr){ 
+                            return value != "http://ontologies.ef-ears.eu/ears2/1#pry_4"
+                       });
+                        
+                       labels = labels.filter(function(value, index, arr){ 
+                            return value != "label"
+                       });
+                    }
+                    
+
+                    urls.unshift("http://ontologies.ef-ears.eu/ears2/1#pry_description");
+                    labels.unshift("description");
+                    
+                    urls.unshift("http://ontologies.ef-ears.eu/ears2/1#pry_4"); //reattach it
+                    labels.unshift("label");
+                    
+                    urls.unshift("http://ontologies.ef-ears.eu/ears2/1#pry_station");
+                    labels.unshift("station");
+                    
                     if(urls){
                         $("#propertyPopup ul").empty();
                         $("#propertyPopup").dialog("open");
@@ -265,7 +287,11 @@ function postEventInner(event, successFunction, errorFunction) {
                                 input.attr('value',$("#labelField").val()); //predefined entry coming from the labelField.
                             }
                             if(item === "http://ontologies.ef-ears.eu/ears2/1#pry_station"){
-                                input.attr('value',$("#stationField").val()); //predefined entry coming from the labelField.
+                                input.attr('value',$("#stationField").val()); //predefined entry coming from the stationField.
+                            }
+                            if(item === "http://ontologies.ef-ears.eu/ears2/1#pry_description"){
+                                input.attr('value',$("#labelField").attr("data-description")); //predefined entry coming from the labelField data-desc attr.
+                                input.type='textarea';
                             }
                             input.attr('data-url',item);
                             var label= $('<label>', {
@@ -273,11 +299,11 @@ function postEventInner(event, successFunction, errorFunction) {
                                 for: 'property_'+index,
                                 html: labels[index]
                             });
-                            var unit= $('<label>', {
+                            /*var unit= $('<label>', {
                                 class: 'txtBox',
                                 for: 'property_'+index,
                                 html: labels[index]+": "
-                            });
+                            });*/
                             var li= $('<li>', {
                                 html: '<div class="form-group"><p>'+input.get(0).outerHTML+label.get(0).outerHTML+'</p></div>'
                             });
@@ -289,13 +315,16 @@ function postEventInner(event, successFunction, errorFunction) {
                 }
         });  
         
+        const fakePropsEnum = {"label":"http://ontologies.ef-ears.eu/ears2/1#pry_4", "station":"http://ontologies.ef-ears.eu/ears2/1#pry_station", "description":"http://ontologies.ef-ears.eu/ears2/1#pry_description"}
+       // const fakeProps = ["http://ontologies.ef-ears.eu/ears2/1#pry_4","http://ontologies.ef-ears.eu/ears2/1#pry_station","http://ontologies.ef-ears.eu/ears2/1#pry_description"]; //label, station and description hide as properties but are not saved as properties
+        
         $(document).on('click','#btnSubmitEventWithProperties',function(){
             $("#propertyPopup input").each(function( index ) {
                 var url = $(this).attr('data-url');
                 var name = $(this).attr('name');
-                if(url !== "http://ontologies.ef-ears.eu/ears2/1#pry_4"){
+                if(!Object.values(fakePropsEnum).includes(url)){ //label, station and description hide as properties but are not saved as properties
                     var key = {
-                        identifier : url, //eg http://ontologies.ef-ears.eu/ears2/1#pry_6546,
+                        identifier : url, //eg http://ontologies.ef-ears.eu/ears2/1#pry_6546
                         name : name //eg label
                     }
                     var property = {
@@ -305,7 +334,9 @@ function postEventInner(event, successFunction, errorFunction) {
                     }
                     event.properties.push(property);
                 }else{                 
-                    event.label = $(this).val();
+                   if(url===fakePropsEnum.label) { event.label = $(this).val();}
+                   if(url===fakePropsEnum.station) { event.station = $(this).val();}
+                   if(url===fakePropsEnum.description) { event.description = $(this).val();}
                 }
             });
             $(document).off('click', '#btnSubmitEventWithProperties'); //clear it else previous events are readded each time

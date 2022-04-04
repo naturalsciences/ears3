@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en"  xmlns="http://www.w3.org/1999/xhtml" 
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" layout:decorate="~{fragments/f}">
+    <head th:replace="fragments/f :: head"></head>
+    <body>
+        <nav th:replace="fragments/f :: header"></nav>
+        <div class="container" layout:fragment="main">
+            <div>
+                <form class="form-group">
+                    <div class="form-group">
+                        <p><input name="firstName" type="text" class="form-control" id="firstNameField" placeholder=" " required>
+                                <label class="txtBox" for="firstName">First name</label></p>
+                    </div>
+                    <div class="form-group">
+                        <p>
+                            <input name="lastName" type="text" class="form-control" id="lastNameField" placeholder=" " required>
+                                <label class="txtBox" for="lastName">Last name</label></p>
+                    </div>
+                    <div class="form-group">
+                        <p>
+                            <input name="email" type="email" class="form-control" id="emailField"
+                                   placeholder=" " required>
+                                <label class="txtBox" for="email">Email</label></p>
+                    </div> 
+                    <div class="form-group">
+                        <p>
+                            <input name="phoneNumber" type="text" class="form-control" id="phoneNumberField"
+                                   placeholder=" ">
+                                <label class="txtBox" for="phoneNumber">Phone number</label></p>
+                    </div> 
+                    <div class="form-group">
+                        <p>
+                            <input name="faxNumber" type="text" class="form-control" id="faxNumberField"
+                                   placeholder=" ">
+                                <label class="txtBox" for="faxNumber">Fax number</label></p>
+                    </div> 
+                    <div class="form-group">
+                        <select name="organisation" id="organisationField"
+                                class="selectpicker target edmo form-control"
+                                data-live-search="true" title="Organisation">
+                        </select>
+                    </div>                            
+                    <button id="id_Submit" type="submit" class="btn btn-primary  btn-block">Save</button>
+                </form>
+            </div>
+            <script type="application/javascript">
+                $(document).ready(function() {
+                $.getJSON("../json/edmo.json",
+                function(data) {
+                $.each(data.vocabulary.citRespParty, function(key, item) {
+                $("#organisationField").append($("<option />").val(item.rpOrgName.SDNIdent).text(item.rpOrgName.text));
+                });
+                $('#organisationField').selectpicker('refresh');
+
+                }
+                );
+                });
+            </script>
+        </div>
+    </body>
+</html>

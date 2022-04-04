@@ -18,6 +18,7 @@ import java.util.List;
 import java.util.StringJoiner;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
@@ -58,6 +59,8 @@ public class Event implements IEvent, Serializable {
     private String identifier;
     private String eventDefinitionId;
     private String label;
+    private String station;
+    private String description;
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ssXXX")
     @XmlJavaTypeAdapter(value = OffsetDateTimeAdapter.class)
     private OffsetDateTime timeStamp;
@@ -89,14 +92,6 @@ public class Event implements IEvent, Serializable {
 
     @ManyToOne(optional = true)
     private Program program;
-
-    public String getLabel() {
-        return label;
-    }
-
-    public void setLabel(String label) {
-        this.label = label;
-    }
 
     @ManyToMany()
     @JoinTable(
@@ -294,6 +289,30 @@ public class Event implements IEvent, Serializable {
 
     public void setWeather(Collection<Weather> weather) {
         this.weather = weather;
+    }
+
+    public String getLabel() {
+        return label;
+    }
+
+    public void setLabel(String label) {
+        this.label = label;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
+    public String getStation() {
+        return station;
+    }
+
+    public void setStation(String station) {
+        this.station = station;
     }
 
     @Override

@@ -73,7 +73,8 @@ public class DatagramUtilities<A extends Acquisition> {
 
     public A findLast() throws IOException {
         try {
-            List<A> r = analyzeDatagram(new URL(baseUrl, "/ears3Nav/" + abbrevs.get(this.cls) + "/getLast/datagram"));
+            URL url = new URL(baseUrl, "/ears3Nav/" + abbrevs.get(this.cls) + "/getLast/datagram");
+            List<A> r = analyzeDatagram(url);
             return r.isEmpty() ? null : r.get(0);
         } catch (MalformedURLException ex) {
             Logger.getLogger(DatagramUtilities.class.getName()).log(Level.SEVERE, null, ex);
@@ -87,7 +88,9 @@ public class DatagramUtilities<A extends Acquisition> {
         }
         String atString = at.withOffsetSameInstant(ZoneOffset.UTC).format(DateTimeFormatter.ISO_DATE_TIME);
         try {
-            List<A> r = analyzeDatagram(new URL(baseUrl, "/ears3Nav/" + abbrevs.get(this.cls) + "/getNearest/datagram?date=" + atString));
+            URL url = new URL(baseUrl, "/ears3Nav/" + abbrevs.get(this.cls) + "/getNearest/datagram?date=" + atString);
+            //log.log(Level.INFO, "Read {0}", url);
+            List<A> r = analyzeDatagram(url);
             return r.isEmpty() ? null : r.get(0);
         } catch (MalformedURLException ex) {
             Logger.getLogger(DatagramUtilities.class.getName()).log(Level.SEVERE, null, ex);
@@ -105,7 +108,8 @@ public class DatagramUtilities<A extends Acquisition> {
         String startString = start.withOffsetSameInstant(ZoneOffset.UTC).format(DateTimeFormatter.ISO_DATE_TIME);
         String endString = stop.withOffsetSameInstant(ZoneOffset.UTC).format(DateTimeFormatter.ISO_DATE_TIME);
         try {
-            return analyzeDatagram(new URL(baseUrl, "/ears3Nav/" + abbrevs.get(this.cls) + "/getBetween/datagram?startDate=" + startString + "&endDate=" + endString));
+            URL url = new URL(baseUrl, "/ears3Nav/" + abbrevs.get(this.cls) + "/getBetween/datagram?startDate=" + startString + "&endDate=" + endString);
+            return analyzeDatagram(url);
         } catch (MalformedURLException ex) {
             Logger.getLogger(DatagramUtilities.class.getName()).log(Level.SEVERE, null, ex);
         }
@@ -120,9 +124,8 @@ public class DatagramUtilities<A extends Acquisition> {
         List<A> result = new ArrayList<>();
         try {
             while ((line = br.readLine()) != null) {
-
                 if (line.startsWith("$")) {
-                    log.log(Level.INFO, "   Read " + line + " from " + endpoint);
+                    //  log.log(Level.INFO, "   Read " + line + " from " + endpoint);
                     line = line.replace(",,", ", ,");
                     line = line.replaceAll(",$", ", ");
                     String[] vals = line.split(",");

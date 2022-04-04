@@ -9,6 +9,9 @@ function populateDropdownBasedOnPrevious(dropdown, entityType, item, listElement
     if (dropdown.attr('disabled') != 'disabled') {
         var url = [entityType + 'u']; //the url field in the SPARQL JSON result, for the right entity
         var label = [entityType + 'l']; //the label field in the SPARQL JSON result, for the right entity
+        listElements.sort(function(a, b) {
+            return a[label].value.localeCompare(b[label].value)
+        });
         var matches = $.grep(listElements, function (e) {
             return item[url].value === e[url].value &&
                     item[label].value === e[label].value;
@@ -22,6 +25,44 @@ function populateDropdownBasedOnPrevious(dropdown, entityType, item, listElement
         }
     }
 }
+
+ function populateDropdownList(rdfBindings, entityName, dropdownId, selectedValue) {
+        var ddmOptions = [];
+        var select_option_data = '';
+        $.each(rdfBindings, function (key, item) {
+            val = getElement(entityName, item);
+            var events = $.grep(ddmOptions, function (e) {
+                return val.url === e.url &&
+                        val.label === e.label;
+            });
+            if (events.length === 0) {
+                ddmOptions.push(val);
+            }
+        });
+        if (/Android|webOS|iPhone|iPad|iPod|BlackBerry/i.test(navigator.userAgent)) {
+            $(dropdownId).selectpicker('mobile');
+        }
+        if (ddmOptions.length <= 6) {
+            $(dropdownId).selectpicker({
+                liveSearch: false
+            }).selectpicker('refresh');
+        }
+        ddmOptions.sort(function(a, b) {
+            return a.label.localeCompare(b.label)
+        });
+        var select_option_data = '';
+        select_option_data += '<option value=1></option>'
+        $.each(ddmOptions, function (key, unique) {
+            select_option_data += '<option value="' + unique.url + '">' + unique.label + '</option>';
+        });
+
+        $(dropdownId).html(select_option_data).selectpicker('refresh');
+        if (selectedValue !== null) {
+            $(dropdownId).selectpicker('val', selectedValue);
+            $(dropdownId).prop('disabled', true);
+            $(dropdownId).selectpicker('refresh');
+        }
+    }
 /**
  * Autoselect a value in the given dropdown when there is only one choice: if there are only two options, one is the defualt 'Select a value', the other a true value.
  * dropdown: the jQuery element for the dropdown
@@ -113,7 +154,7 @@ function initDropdowns(rdfBindings, selectedValues) {
     });
     //if reset tc
     $("#cell_tc_unlock").click(function () {
-        $.getScript("/ears3/js/unlock_tc.js");
+        $.getScript("/ears3/js/unlock_tc.js"); //refactor this crazy approach by YS
     });
 
     $("#cell_t_unlock").click(function () {
@@ -236,29 +277,7 @@ function initDropdowns(rdfBindings, selectedValues) {
             $("#btnSubmitDropdownChoice").removeClass("btn-success").addClass("btn-warning");
         }
     });
-
-    var sortByString = function (a, b)
-    {
-        var one = a.label;
-        var two = b.label;
-        // a and b will here be two objects from the array
-        // thus a[1] and b[1] will equal the names
-
-        // if they are equal, return 0 (no sorting)
-        if (one == two) {
-            return 0;
-        }
-        if (one > two)
-        {
-            // if a should come after b, return 1
-            return 1;
-        } else
-        {
-            // if b should come after a, return -1
-            return -1;
-        }
-    };
-
+}
     function getElement(what, item) {
         switch (what) {
             case 'TC':
@@ -275,42 +294,6 @@ function initDropdowns(rdfBindings, selectedValues) {
                 break;
             default:
                 return null;
-        }
-    }
-
-    function populateDropdownList(rdfBindings, entityName, dropdownId, selectedValue) {
-        var ddmOptions = [];
-        var select_option_data = '';
-        $.each(rdfBindings, function (key, item) {
-            val = getElement(entityName, item);
-            var events = $.grep(ddmOptions, function (e) {
-                return val.url === e.url &&
-                        val.label === e.label;
-            });
-            if (events.length === 0) {
-                ddmOptions.push(val);
-            }
-        });
-        if (/Android|webOS|iPhone|iPad|iPod|BlackBerry/i.test(navigator.userAgent)) {
-            $(dropdownId).selectpicker('mobile');
-        }
-        if (ddmOptions.length <= 6) {
-            $(dropdownId).selectpicker({
-                liveSearch: false
-            }).selectpicker('refresh');
-        }
-        ddmOptions.sort(sortByString);
-        var select_option_data = '';
-        select_option_data += '<option value=1></option>'
-        $.each(ddmOptions, function (key, unique) {
-            select_option_data += '<option value="' + unique.url + '">' + unique.label + '</option>';
-        });
-
-        $(dropdownId).html(select_option_data).selectpicker('refresh');
-        if (selectedValue !== null) {
-            $(dropdownId).selectpicker('val', selectedValue);
-            $(dropdownId).prop('disabled', true);
-            $(dropdownId).selectpicker('refresh');
         }
     }
 
@@ -341,12 +324,4 @@ function initDropdowns(rdfBindings, selectedValues) {
             $('#p_lock').css('visibility', 'hidden');
             $('#a_lock').css('visibility', 'hidden');
         }
-
     }
-
-
-
-
-
-
-}

@@ -5,38 +5,10 @@
     <head th:replace="fragments/f :: head"></head>
     <body>
         <nav th:replace="fragments/f :: header"></nav>
-        <form  layout:fragment="head-form">
-            <div class="form-group">
-                <select name="program" id="programField"
-                        class="selectpicker target form-control"
-                        data-live-search="true" title="Current program" required>
-                </select>
-            </div>
-            <div class="form-group">
-                <p>
-                    <input name="station" id="stationField" placeholder=" " type="text" title="Current station" class="form-control" /><label class="txtBox" for="label">Station</label>
-                </p>
-            </div>
-            <div class="form-group">
-                <p>
-                    <input name="label" id="labelField" placeholder=" " type="text" title="Current event label (event or possibly tool identifier,...)" class="form-control" /><label class="txtBox" for="label">Event label</label>
-                </p>    
-            </div>
-        </form>
+        
         <div class="container" layout:fragment="main">
-            <div>
-                Toggle column: <a href="#" class="toggle-vis" data-column="3">Category</a> - <a href="#" class="toggle-vis" data-column="7">Station</a> - <a href="#" class="toggle-vis" data-column="8">Label</a>
-            </div>
-            <div>
-                <input type="checkbox" id="cbOwnEvents" name="cbOwnEvents" value="My own" checked>
-                    <label for="cbOwnEvents">Display only my own events</label>
-            </div>
-            <div>
-               <a th:href="@{/api/events.csv}">Download all events</a>
-            </div>
-
-            <br />
-            <table id="eventTable" class="display dataTable" style="width:100%" role="grid">
+           
+            <table id="personTable" class="display dataTable" style="width:100%" role="grid">
                 <thead>
                     <tr>
                         <th>identifier</th>
@@ -45,11 +17,6 @@
                         <th>category</th>
                         <th>tool</th>
                         <th>process</th>
-                        <th>action</th>
-                        <th>station</th>
-                        <th>label</th>
-                        <th></th>
-                        <th>actor</th>
                     </tr>
                 </thead>
             </table>
@@ -107,7 +74,7 @@
                                                         'tool': event.tool.term.name,
                                                         'process': event.process.name,
                                                         'action': event.action.name,
-                                                        'station': event.station,//station === undefined ? null : station.value,
+                                                        'station': station === undefined ? null : station.value,
                                                         'label': event.label,
                                                         'actor': event.actor.email
                                                     })

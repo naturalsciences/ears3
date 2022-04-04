@@ -6,8 +6,10 @@ import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlRootElement;
 import eu.eurofleets.ears3.utilities.DatagramOrder;
+import java.util.Collection;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
+import javax.persistence.ManyToMany;
 import javax.persistence.NamedNativeQuery;
 import javax.xml.bind.annotation.XmlTransient;
 
@@ -39,6 +41,9 @@ public class Navigation extends Acquisition {
     private Double cog;
     @DatagramOrder(9)
     private Double sog;
+
+    @ManyToMany(mappedBy = "navigation")
+    private Collection<Event> events;
 
     public Long getId() {
         return this.id;
@@ -106,6 +111,14 @@ public class Navigation extends Acquisition {
 
     public void setSow(Double sow) {
         this.sow = sow;
+    }
+
+    public Collection<Event> getEvents() {
+        return events;
+    }
+
+    public void setEvents(Collection<Event> events) {
+        this.events = events;
     }
 
     public final static String DATAGRAM_SEPARATOR = ",";

@@ -13,31 +13,37 @@ import org.springframework.util.Assert;
 
 @Service
 public class LinkedDataTermService {
-    
+
     private LinkedDataTermRepository ldtRepository;
-    
+
     @Autowired
     public LinkedDataTermService(LinkedDataTermRepository ldtRepository) {
         this.ldtRepository = ldtRepository;
     }
-    
+
     public LinkedDataTerm findByIdentifier(String identifier) {
-        Assert.notNull(identifier, "LinkedDataTerm identifier must not be null");
+        if (identifier == null) {
+            return null;
+        }
         return this.ldtRepository.findByIdentifier(ILinkedDataTerm.cleanUrl(identifier));
     }
-    
+
     public LinkedDataTerm findOrCreate(LinkedDataTerm term) {
         if (term == null) {
             return null;
         }
         LinkedDataTerm existingTerm = findByIdentifier(term.getIdentifier());
         if (existingTerm == null) {
+            existingTerm = findByIdentifier(term.getTransitiveIdentifier());
+        }
+
+        if (existingTerm == null) {
             return ldtRepository.save(term);
         } else {
             return existingTerm;
         }
     }
-    
+
     public LinkedDataTerm findOrCreate(LinkedDataTermDTO term) {
         if (term == null) {
             return null;
@@ -46,11 +52,11 @@ public class LinkedDataTermService {
         LinkedDataTerm linkedDataTerm = new LinkedDataTerm(term.identifier, term.transitiveIdentifier, term.name);
         return findOrCreate(linkedDataTerm);
     }
-    
+
     public Map<String, LinkedDataTerm> findAllByIdentifier(Set<String> identifiers) {
         return ldtRepository.findAllByIdentifier(identifiers).stream().collect(Collectors.toMap(LinkedDataTerm::getIdentifier, v -> v));
     }
-    
+
     public Iterable<LinkedDataTerm> saveAll(Collection<LinkedDataTerm> terms) {
         Set<String> identifiers = terms.stream().map(l -> l.getIdentifier()).collect(Collectors.toSet());
         Map<String, LinkedDataTerm> existingTerms = findAllByIdentifier(identifiers);
@@ -61,8 +67,8 @@ public class LinkedDataTermService {
                 term.setId(id);
             }
         }
-        
+
         return ldtRepository.saveAll(terms);
     }
-    
+
 }

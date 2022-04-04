@@ -30,6 +30,7 @@ public class EventDTO {
     public String eventDefinitionId;
     public String label;
     public String description;
+    public String station;
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ssX")
     @XmlJavaTypeAdapter(value = OffsetDateTimeAdapter.class)
     public OffsetDateTime timeStamp;

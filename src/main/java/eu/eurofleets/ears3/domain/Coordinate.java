@@ -13,6 +13,8 @@ import be.naturalsciences.bmdc.cruise.model.ICoordinate;
  */
 public class Coordinate implements ICoordinate {
 
+    public static double THRESHOLD = 0.5D;
+
     public Double x;
     public Double y;
 
@@ -33,6 +35,16 @@ public class Coordinate implements ICoordinate {
 
     public boolean isValid() {
         return x != null && y != null && x != 0 && y != 0;
+    }
+
+    /**
+     * Test if there is a sudden jump of more than THRESHOLD between 2 other chronologically ordered coordinates. The order is beforeCoordinate, this, afterCoordinate.
+     * @param beforeCoordinate
+     * @return 
+     */
+    public boolean testSpike(Coordinate beforeCoordinate) {
+        return (Math.abs(beforeCoordinate.x - x) > THRESHOLD || Math.abs(beforeCoordinate.y - y) > THRESHOLD);
+              //  && (Math.abs(afterCoordinate.x - x) > THRESHOLD || Math.abs(afterCoordinate.y - y) > THRESHOLD);
     }
 
 }

@@ -31,6 +31,11 @@ public class PersonService {
         Assert.notNull(lastName, "lastName must not be null");
         return this.personRepository.findByName(firstName, lastName);
     }
+    
+        public Person findById(Long id) {
+       
+        return this.personRepository.findById(id).orElse(null);
+    }
 
     /**
      * *
@@ -78,5 +83,13 @@ public class PersonService {
             }
         }
         return personRepository.save(person);
+    }
+
+    public void save(Person person) {
+         personRepository.save(person);
+    }
+
+    public void delete(Person person) {
+         personRepository.delete(person);
     }
 }

@@ -20,6 +20,5 @@ public class PersonController {
     @RequestMapping(method = {RequestMethod.GET}, value = {"person"}, params = {"fullName"}, produces = {"application/xml", "application/json"})
     public PersonList getPersonByFullName(@RequestParam(required = true, value = "fullName") String fullName) {
         return new PersonList(this.personService.findByFullName(fullName));
-
     }
 }

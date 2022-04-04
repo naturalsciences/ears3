@@ -1,5 +1,6 @@
 package eu.eurofleets.ears3.controller.rest;
 
+import be.naturalsciences.bmdc.cruise.model.ILinkedDataTerm;
 import be.naturalsciences.bmdc.cruise.model.IProgram;
 import be.naturalsciences.bmdc.cruise.model.IProperty;
 import com.opencsv.CSVWriter;
@@ -39,6 +40,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.server.ResponseStatusException;
 
 @RestController()
 @RequestMapping(value = "/api")
@@ -75,12 +77,13 @@ public class EventController {
         return (val != null) ? val.toString() : "";
     }
 
+    List<String> fakeProps = new ArrayList<>(Arrays.asList("http://ontologies.ef-ears.eu/ears2/1#pry_4", "http://ontologies.ef-ears.eu/ears2/1#pry_station", "http://ontologies.ef-ears.eu/ears2/1#pry_description")); //label, station and description hide as properties but are not saved as properties
+
     @RequestMapping(method = {RequestMethod.GET}, value = {"events.csv"}, produces = {"text/csv; charset=utf-8"})
     public String getEventsAsCSV(@RequestParam Map<String, String> allParams) throws IOException {
         List<Event> events = this.eventService.advancedFind(allParams);
 
-        List<String> header = new ArrayList<>(Arrays.asList("Time stamp", "Actor", "Program", "Principal Investigator", "Tool category", "Tool category code", "Tool", "Tool code", "Process", "Action",
-                "Acquisition Timestamp", "Latitude", "Longitude", "Depth", "Heading", "Course over Ground", "Speed over Ground"));
+        List<String> header = new ArrayList<>(Arrays.asList("Time stamp", "Actor", "Program", "Principal Investigator", "Tool category", "Tool category code", "Tool", "Tool code", "Process", "Action", "Station", "Label", "Description"));
         Map<String, String> properties = new TreeMap<>();
         for (Event event : events) {
             for (IProperty property : event.getProperties()) {
@@ -97,11 +100,11 @@ public class EventController {
                 "Turbidity H", "OBS L", "OBS H", "Salinity", "Chlorophyll", "Blue Algae",
                 "CDOM", "pH", "Fluorescence", "pCO2", "PAR"));*/
 
-        header.addAll(Arrays.asList("Surface water temperature", "Salinity", "Conductivity", "Sigma T", "Wind speed", "Wind direction",
-                "Air temperature", "Air pressure", "Solar Radiation"));
+        header.addAll(Arrays.asList("Acquisition Timestamp", "Latitude", "Longitude", "Depth", "Heading", "Course over Ground", "Speed over Ground"));
+        header.addAll(Arrays.asList("Surface water temperature", "Salinity", "Conductivity", "Sigma T", "Wind speed", "Wind direction", "Air temperature", "Air pressure", "Solar Radiation"));
 
         String[] entry = new String[header.size()];
-        entry = header.toArray(entry);
+        entry = header.toArray(entry); //convert list to array
 
         Writer writer = new StringBuilderWriter();
         CSVWriter csvWriter = null;
@@ -109,10 +112,9 @@ public class EventController {
         csvWriter = new CSVWriter(writer, ',');
         csvWriter.writeNext(entry, true);
 
+        //   "Time stamp", "Actor", "Program", "Principal Investigator", "Tool category", "Tool category code", "Tool", "Tool code", 
+        //   "Process", "Action", "Station", "Label", "Description"
         for (Event event : events) {
-            Navigation nav = (event.getNavigation().size() > 0 ? event.getNavigation().iterator().next() : null);
-            Thermosal tss = (event.getThermosal().size() > 0 ? event.getThermosal().iterator().next() : null);
-            Weather met = (event.getWeather().size() > 0 ? event.getWeather().iterator().next() : null);
             IProgram program = event.getProgram();
             String niceProgram = null;
             if (program != null) { //can't be null but test anyway
@@ -124,12 +126,28 @@ public class EventController {
                     niceProgram,
                     event.getPrincipalInvestigators(),
                     event.getToolCategory().getName(),
-                    event.getToolCategory().getUrn(),
+                    ILinkedDataTerm.getBodcUrnFromTerm(event.getToolCategory()),
+                    //event.getToolCategory().getTransitiveUrn(),
                     event.getTool().getTerm().getName(),
-                    event.getTool().getTerm().getUrn(),
+                    ILinkedDataTerm.getBodcUrnFromTerm(event.getTool().getTerm()),
                     event.getProcess().getName(),
-                    event.getAction().getName()
+                    event.getAction().getName(),
+                    event.getStation(),
+                    event.getLabel(),
+                    event.getDescription()
             ));
+
+            for (String propertyUrl : properties.keySet()) {
+                List<String> propertyValues = event.getPropertyValues(propertyUrl);
+                if (propertyValues != null) {
+                    elements.add(StringUtils.join(propertyValues, ","));
+                } else {
+                    elements.add("");
+                }
+            }
+            Navigation nav = (event.getNavigation().size() > 0 ? event.getNavigation().iterator().next() : null);
+            Thermosal tss = (event.getThermosal().size() > 0 ? event.getThermosal().iterator().next() : null);
+            Weather met = (event.getWeather().size() > 0 ? event.getWeather().iterator().next() : null);
             if (nav != null) {
                 elements.addAll(Arrays.asList(
                         offsetDateTimeOrNull(nav.getTime()),
@@ -151,14 +169,6 @@ public class EventController {
                         ""));
             }
 
-            for (String propertyUrl : properties.keySet()) {
-                List<String> propertyValues = event.getPropertyValues(propertyUrl);
-                if (propertyValues != null) {
-                    elements.add(StringUtils.join(propertyValues, ","));
-                } else {
-                    elements.add("");
-                }
-            }
             if (tss != null) {
                 elements.addAll(Arrays.asList(
                         doubleOrNull(tss.getTemperature()),
@@ -229,8 +239,12 @@ public class EventController {
             }
         }
         Event event = this.eventService.save(eventDTO);
-        eventDTO = new EventDTO(event);
-        return new ResponseEntity<Message<EventDTO>>(new Message<EventDTO>(HttpStatus.CREATED.value(), event.getIdentifier(), eventDTO), HttpStatus.CREATED);
+        if (event != null) {
+            eventDTO = new EventDTO(event);
+            return new ResponseEntity<Message<EventDTO>>(new Message<EventDTO>(HttpStatus.CREATED.value(), event.getIdentifier(), eventDTO), HttpStatus.CREATED);
+        } else {
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "Could not create Event.");
+        }
         // return new ResponseEntity<Event>(, HttpStatus.CREATED);event
     }
 

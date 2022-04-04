@@ -37,4 +37,11 @@ public class PersonDTO {
         this.email = email;
     }
 
+    public PersonDTO(String firstName, String lastName, String organisation) {
+        this.firstName = firstName;
+        this.lastName = lastName;
+        this.organisation = organisation;
+
+    }
+
 }

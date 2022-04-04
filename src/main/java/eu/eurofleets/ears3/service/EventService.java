@@ -73,14 +73,18 @@ public class EventService {
     private final Environment env;
 
     @Autowired
-    public EventService(EventRepository eventRepository, Environment env) throws MalformedURLException {
+    public EventService(EventRepository eventRepository, Environment env) {
+
         this.eventRepository = eventRepository;
         this.env = env;
         String navigationServer = env.getProperty("ears.navigation.server");
-
-        navUtil = new DatagramUtilities<>(Navigation.class, navigationServer);
-        thermosalUtil = new DatagramUtilities<>(Thermosal.class, navigationServer);
-        weatherUtil = new DatagramUtilities<>(Weather.class, navigationServer);
+        try {
+            navUtil = new DatagramUtilities<>(Navigation.class, navigationServer);
+            thermosalUtil = new DatagramUtilities<>(Thermosal.class, navigationServer);
+            weatherUtil = new DatagramUtilities<>(Weather.class, navigationServer);
+        } catch (MalformedURLException ex) {
+            Logger.getLogger(EventService.class.getName()).log(Level.SEVERE, null, ex);
+        }
     }
 
     public Event findById(Long id) {
@@ -220,14 +224,16 @@ public class EventService {
             Event event = new Event();
             event.setEventDefinitionId(eventDTO.eventDefinitionId);
             String identifier = eventDTO.identifier;
-            
+
             boolean drift = false;
             if (identifier == null) { //it is brand new
                 identifier = UUID.randomUUID().toString();
                 event.setCreationTime(serverTime);
                 OffsetDateTime dtoTime = eventDTO.getTimeStamp();
                 if (dtoTime == null) { //if it has no time, we add the one from the acquisition
-                    Navigation last = navUtil != null ? navUtil.findLast() : null;
+                    Navigation last = null;
+                    // Navigation last = navUtil != null ? navUtil.findLast() : null;
+                    //for now, do not take the acquisition time, always the server time.
                     if (last != null) {
                         OffsetDateTime acquisitionTime = last.getTime();//.atOffset(ZoneOffset.UTC);
                         log.log(Level.INFO, "acquisition time:" + acquisitionTime.toString());
@@ -299,6 +305,8 @@ public class EventService {
 
             Program program = programService.findByIdentifier(eventDTO.program);
             event.setLabel(eventDTO.label != null && eventDTO.label.equals("") ? null : eventDTO.label);
+            event.setStation(eventDTO.station != null && eventDTO.station.equals("") ? null : eventDTO.station);
+            event.setDescription(eventDTO.description != null && eventDTO.description.equals("") ? null : eventDTO.description);
             event.setAction(action);
             event.setActor(actor);
             event.setProcess(process);
@@ -307,20 +315,21 @@ public class EventService {
             event.setSubject(subject);
             event.setTool(tool);
             event.setToolCategory(toolCategory);
-            //enrichEventWithAcquisition(event);
-            new Thread() {
+            this.eventRepository.save(event);
+            enrichEventWithAcquisition(event);
+            /*new Thread() {
                 @Override
                 public void run() {
                     try {
                         enrichEventWithAcquisition(event);
-                        System.out.println("------------------");
+
                     } catch (IOException ex) {
                         Logger.getLogger(EventService.class.getName()).log(Level.SEVERE, null, ex);
                     }
                 }
-            }.start();
+            }.start();*/
+            return event;
 
-            return this.eventRepository.save(event);
         } catch (Exception ex) {
             Logger.getLogger(EventService.class.getName()).log(Level.SEVERE, null, ex);
             return null;
@@ -329,7 +338,7 @@ public class EventService {
 
     public static final int STALE_DATA_THRESHOLD = 15; //15 minutes is too old
 
-    private boolean dataIsTooOldOrUncomparable(Acquisition data, Event event) {
+    private boolean acqDataIsNullTooOldOrUncomparable(Acquisition data, Event event) {
         if (event == null) {
             throw new IllegalArgumentException("Event may not be null");
         }
@@ -345,58 +354,63 @@ public class EventService {
         Collection<Weather> weathers = new ArrayList<>();
         Collection<Thermosal> thermosals = new ArrayList<>();
 
-        boolean tooOld;
-        boolean persistAcquisition = false;
-        Navigation nearestNav = navigationService.findNearest(event.getTimeStamp());
-        if (dataIsTooOldOrUncomparable(nearestNav, event)) {//if we don't find it directly via the database, or if we found it but it is too old, look in the ears3Nav webservice itself
-            nearestNav = navUtil.findNearest(event.getTimeStamp());
-            persistAcquisition = true;
-        }
-        if (nearestNav != null) {
-            tooOld = dataIsTooOldOrUncomparable(nearestNav, event);
-            log.log(Level.INFO, "Enriching " + event.toString() + ": nearest nav" + (tooOld ? " (too old):" : ":") + nearestNav.toString());
-            if (!tooOld) {
-                if (persistAcquisition) {
-                    navigationService.save(nearestNav);
-                }
-                navigations.add(nearestNav);
-                event.setNavigation(navigations);
-            }
-        }
-        persistAcquisition = false;
-        Weather nearestWeather = weatherService.findNearest(event.getTimeStamp());
-        if (dataIsTooOldOrUncomparable(nearestWeather, event)) {//if we don't find it directly via the database, or if we found it but it is too old, look in the ears3Nav webservice itself
-            nearestWeather = weatherUtil.findNearest(event.getTimeStamp()); //find it via the webservices
-            persistAcquisition = true;
-        }
-        if (nearestWeather != null) {
-            tooOld = dataIsTooOldOrUncomparable(nearestWeather, event);
-            log.log(Level.INFO, "Enriching " + event.toString() + ": nearest met" + (tooOld ? " (too old):" : ":") + nearestWeather.toString());
-            if (!tooOld) {
-                if (persistAcquisition) {
-                    weatherService.save(nearestWeather);
-                }
-                weathers.add(nearestWeather);
-                event.setWeather(weathers);
-            }
-        }
-        persistAcquisition = false;
-        Thermosal nearestThermosal = thermosalService.findNearest(event.getTimeStamp());
-        if (dataIsTooOldOrUncomparable(nearestThermosal, event)) {//if we don't find it directly via the database, or if we found it but it is too old, look in the ears3Nav webservice itself
-            nearestThermosal = thermosalUtil.findNearest(event.getTimeStamp());
-            persistAcquisition = true;
-        }
-        if (nearestThermosal != null) {
-            tooOld = dataIsTooOldOrUncomparable(nearestThermosal, event);
-            log.log(Level.INFO, "Enriching " + event.toString() + ": nearest tss" + (tooOld ? " (too old):" : ":") + nearestThermosal.toString());
-            if (!tooOld) {
-                if (persistAcquisition) {
-                    thermosalService.save(nearestThermosal);
-                }
-                thermosals.add(nearestThermosal);
-                event.setThermosal(thermosals);
-            }
-        }
+       /// boolean tooOld;
+       // boolean persistAcquisition = false;
+        //  Navigation nearestNav = navigationService.findNearest(event.getTimeStamp());
+        //  log.log(Level.INFO, "Enriching " + event.toString() + ": nearest nav in db: " + nearestNav);
+        //  if (acqDataIsNullTooOldOrUncomparable(nearestNav, event)) {//if we don't find it directly via the database, or if we found it but it is too old, look in the ears3Nav webservice itself
+        Navigation nearestNav = navUtil.findNearest(event.getTimeStamp());
+        // log.log(Level.INFO, "Enriching " + event.toString() + ": nearest nav in ws: " + nearestNav);
+        // persistAcquisition = true;
+        // }
+        //if (nearestNav != null) {
+        //   tooOld = acqDataIsNullTooOldOrUncomparable(nearestNav, event);
+        //log.log(Level.INFO, "Nearest nav " + (tooOld ? " (too old):" : ":") + nearestNav.toString());
+        //if (!tooOld) {
+        //       if (persistAcquisition) {
+        Collection<Event> events = new ArrayList<>();
+        events.add(event);
+        nearestNav.setEvents(events);
+        navigationService.save(nearestNav);
+        //       }
+        navigations.add(nearestNav);
+        event.setNavigation(navigations);
+        //}
+        // }
+        //persistAcquisition = false;
+        //Weather nearestWeather = weatherService.findNearest(event.getTimeStamp());
+        //if (acqDataIsNullTooOldOrUncomparable(nearestWeather, event)) {//if we don't find it directly via the database, or if we found it but it is too old, look in the ears3Nav webservice itself
+        Weather nearestWeather = weatherUtil.findNearest(event.getTimeStamp()); //find it via the webservices
+        //    persistAcquisition = true;
+        //}
+        //if (nearestWeather != null) {
+        //    tooOld = acqDataIsNullTooOldOrUncomparable(nearestWeather, event);
+        //    log.log(Level.INFO, "Enriching " + event.toString() + ": nearest met" + (tooOld ? " (too old):" : ":") + nearestWeather.toString());
+        //    if (!tooOld) {
+        //        if (persistAcquisition) {
+        weatherService.save(nearestWeather);
+        //}
+        weathers.add(nearestWeather);
+        event.setWeather(weathers);
+        //}
+        //}
+        //persistAcquisition = false;
+        //Thermosal nearestThermosal = thermosalService.findNearest(event.getTimeStamp());
+        //if (acqDataIsNullTooOldOrUncomparable(nearestThermosal, event)) {//if we don't find it directly via the database, or if we found it but it is too old, look in the ears3Nav webservice itself
+        Thermosal nearestThermosal = thermosalUtil.findNearest(event.getTimeStamp());
+        //  persistAcquisition = true;
+        //}
+        //if (nearestThermosal != null) {
+        //  tooOld = acqDataIsNullTooOldOrUncomparable(nearestThermosal, event);
+        //  log.log(Level.INFO, "Enriching " + event.toString() + ": nearest tss" + (tooOld ? " (too old):" : ":") + nearestThermosal.toString());
+        //  if (!tooOld) {
+        //      if (persistAcquisition) {
+        thermosalService.save(nearestThermosal);
+        //      }
+        thermosals.add(nearestThermosal);
+        event.setThermosal(thermosals);
+        //  }
+        //}
         this.eventRepository.save(event);
     }
 

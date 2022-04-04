@@ -36,7 +36,7 @@ public class HtmlProgramController {
     @PostMapping("/create-program")
     public String addProgram(@Valid Program program, BindingResult result, Model model) {
         if (result.hasErrors()) {
-            return "program-create";
+            return "program-new";
         }
         programService.save(program);
         model.addAttribute("programs", programService.findAll());
