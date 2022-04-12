@@ -18,6 +18,7 @@ import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlTransient;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+
 /*
  * To change this license header, choose License Headers in Project Properties.
  * To change this template file, choose Tools | Templates
@@ -49,6 +50,8 @@ public class Person implements IPerson, Serializable {
     private String email;
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @XmlTransient
+    @JsonIgnore
     private Long id;
 
     public Person() {

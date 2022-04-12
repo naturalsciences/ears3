@@ -1,5 +1,6 @@
 package eu.eurofleets.ears3.domain;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.xml.bind.annotation.XmlAccessType;
@@ -26,6 +27,7 @@ public class Navigation extends Acquisition {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @XmlTransient
+    @JsonIgnore
     private Long id;
     @DatagramOrder(3)
     private Double lon;
@@ -43,6 +45,8 @@ public class Navigation extends Acquisition {
     private Double sog;
 
     @ManyToMany(mappedBy = "navigation")
+    @XmlTransient
+    @JsonIgnore
     private Collection<Event> events;
 
     public Long getId() {

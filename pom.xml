@@ -176,7 +176,7 @@
             <version>1.0-SNAPSHOT</version>
             <type>jar</type>
         </dependency>
-        <!--       <dependency>
+        <!-- <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>
             <artifactId>jackson-core</artifactId>
             <version>2.11.3</version>
@@ -199,7 +199,7 @@
         <dependency>
             <groupId>org.apache.httpcomponents</groupId>
             <artifactId>httpmime</artifactId>
-            <version>4.5.2</version>
+            <version>4.5.13</version>
             <type>jar</type>
         </dependency>
         <dependency>
@@ -241,7 +241,7 @@
             <scope>provided</scope>
         </dependency>
         <dependency>
-            <groupId>jaxen</groupId> <!--somehow this is needed now-->
+            <groupId>jaxen</groupId>
             <artifactId>jaxen</artifactId>
             <version>1.1.1</version>
         </dependency>

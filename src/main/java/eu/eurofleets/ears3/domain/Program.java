@@ -37,6 +37,8 @@ public class Program implements IProgram, Serializable, Comparable {
     private String identifier;
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @XmlTransient
+    @JsonIgnore
     private Long id;
     @XmlTransient
     @JsonIgnore

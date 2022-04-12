@@ -248,7 +248,7 @@ public class EventService {
                             eventDTO.setTimeStamp(acquisitionTime);
                         }
                     } else {
-                        log.log(Level.INFO, "acquisition time: null (last=null)");
+                        //log.log(Level.INFO, "acquisition time: null (last=null)");
                         log.log(Level.INFO, "server time: " + serverTime.toString());
                         log.log(Level.INFO, "event timestamp: none given");
                         eventDTO.setTimeStamp(serverTime);
@@ -316,8 +316,8 @@ public class EventService {
             event.setTool(tool);
             event.setToolCategory(toolCategory);
             this.eventRepository.save(event);
-            enrichEventWithAcquisition(event);
-            /*new Thread() {
+            //enrichEventWithAcquisition(event);
+            new Thread() {
                 @Override
                 public void run() {
                     try {
@@ -327,7 +327,7 @@ public class EventService {
                         Logger.getLogger(EventService.class.getName()).log(Level.SEVERE, null, ex);
                     }
                 }
-            }.start();*/
+            }.start();
             return event;
 
         } catch (Exception ex) {
@@ -354,8 +354,8 @@ public class EventService {
         Collection<Weather> weathers = new ArrayList<>();
         Collection<Thermosal> thermosals = new ArrayList<>();
 
-       /// boolean tooOld;
-       // boolean persistAcquisition = false;
+        /// boolean tooOld;
+        // boolean persistAcquisition = false;
         //  Navigation nearestNav = navigationService.findNearest(event.getTimeStamp());
         //  log.log(Level.INFO, "Enriching " + event.toString() + ": nearest nav in db: " + nearestNav);
         //  if (acqDataIsNullTooOldOrUncomparable(nearestNav, event)) {//if we don't find it directly via the database, or if we found it but it is too old, look in the ears3Nav webservice itself
@@ -363,19 +363,19 @@ public class EventService {
         // log.log(Level.INFO, "Enriching " + event.toString() + ": nearest nav in ws: " + nearestNav);
         // persistAcquisition = true;
         // }
-        //if (nearestNav != null) {
-        //   tooOld = acqDataIsNullTooOldOrUncomparable(nearestNav, event);
-        //log.log(Level.INFO, "Nearest nav " + (tooOld ? " (too old):" : ":") + nearestNav.toString());
-        //if (!tooOld) {
-        //       if (persistAcquisition) {
-        Collection<Event> events = new ArrayList<>();
-        events.add(event);
-        nearestNav.setEvents(events);
-        navigationService.save(nearestNav);
-        //       }
-        navigations.add(nearestNav);
-        event.setNavigation(navigations);
-        //}
+        if (nearestNav != null) {
+            //   tooOld = acqDataIsNullTooOldOrUncomparable(nearestNav, event);
+            //log.log(Level.INFO, "Nearest nav " + (tooOld ? " (too old):" : ":") + nearestNav.toString());
+            //if (!tooOld) {
+            //       if (persistAcquisition) {
+            Collection<Event> events = new ArrayList<>();
+            events.add(event);
+            nearestNav.setEvents(events);
+            navigationService.save(nearestNav);
+            //       }
+            navigations.add(nearestNav);
+            event.setNavigation(navigations);
+        }
         // }
         //persistAcquisition = false;
         //Weather nearestWeather = weatherService.findNearest(event.getTimeStamp());
@@ -383,16 +383,16 @@ public class EventService {
         Weather nearestWeather = weatherUtil.findNearest(event.getTimeStamp()); //find it via the webservices
         //    persistAcquisition = true;
         //}
-        //if (nearestWeather != null) {
-        //    tooOld = acqDataIsNullTooOldOrUncomparable(nearestWeather, event);
-        //    log.log(Level.INFO, "Enriching " + event.toString() + ": nearest met" + (tooOld ? " (too old):" : ":") + nearestWeather.toString());
-        //    if (!tooOld) {
-        //        if (persistAcquisition) {
-        weatherService.save(nearestWeather);
-        //}
-        weathers.add(nearestWeather);
-        event.setWeather(weathers);
-        //}
+        if (nearestWeather != null) {
+            //    tooOld = acqDataIsNullTooOldOrUncomparable(nearestWeather, event);
+            //    log.log(Level.INFO, "Enriching " + event.toString() + ": nearest met" + (tooOld ? " (too old):" : ":") + nearestWeather.toString());
+            //    if (!tooOld) {
+            //        if (persistAcquisition) {
+            weatherService.save(nearestWeather);
+            //}
+            weathers.add(nearestWeather);
+            event.setWeather(weathers);
+        }
         //}
         //persistAcquisition = false;
         //Thermosal nearestThermosal = thermosalService.findNearest(event.getTimeStamp());
@@ -400,16 +400,16 @@ public class EventService {
         Thermosal nearestThermosal = thermosalUtil.findNearest(event.getTimeStamp());
         //  persistAcquisition = true;
         //}
-        //if (nearestThermosal != null) {
-        //  tooOld = acqDataIsNullTooOldOrUncomparable(nearestThermosal, event);
-        //  log.log(Level.INFO, "Enriching " + event.toString() + ": nearest tss" + (tooOld ? " (too old):" : ":") + nearestThermosal.toString());
-        //  if (!tooOld) {
-        //      if (persistAcquisition) {
-        thermosalService.save(nearestThermosal);
-        //      }
-        thermosals.add(nearestThermosal);
-        event.setThermosal(thermosals);
-        //  }
+        if (nearestThermosal != null) {
+            //  tooOld = acqDataIsNullTooOldOrUncomparable(nearestThermosal, event);
+            //  log.log(Level.INFO, "Enriching " + event.toString() + ": nearest tss" + (tooOld ? " (too old):" : ":") + nearestThermosal.toString());
+            //  if (!tooOld) {
+            //      if (persistAcquisition) {
+            thermosalService.save(nearestThermosal);
+            //      }
+            thermosals.add(nearestThermosal);
+            event.setThermosal(thermosals);
+        }
         //}
         this.eventRepository.save(event);
     }

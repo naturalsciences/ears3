@@ -30,6 +30,8 @@ public class LinkedDataTerm implements ILinkedDataTerm, Serializable {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @XmlTransient
+    @JsonIgnore
     private Long id;
 
     @Column(unique = true, nullable = false, length = 100)

@@ -28,7 +28,7 @@ import java.time.temporal.ChronoUnit;
 import java.util.concurrent.CompletableFuture;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import org.codehaus.jackson.JsonProcessingException;
+//import org.codehaus.jackson.JsonProcessingException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.env.Environment;
@@ -83,7 +83,7 @@ public class DatabaseSyncScheduler {
     @Operation(hidden = true, summary = "Synchronize the database of events, programs and cruises with an external EARS instance.")
     @RequestMapping(method = {RequestMethod.GET}, path = "database")
     @Async("asyncExecutor")
-    public CompletableFuture<String> syncDatabase() throws JsonProcessingException, MalformedURLException, IOException {
+    public CompletableFuture<String> syncDatabase() throws MalformedURLException, IOException {
         log.log(Level.INFO, "Syncing database");
         String vesselAddress = env.getProperty("ears.vessel-address");
         OffsetDateTime after = Instant.now().minus(1, ChronoUnit.DAYS).atOffset(ZoneOffset.UTC);

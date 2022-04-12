@@ -51,6 +51,8 @@ public class Platform implements IPlatform, Serializable {
     private Collection<Cruise> cruises;
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @XmlTransient
+    @JsonIgnore
     private Long id;
 
     @OneToMany(mappedBy = "platform")
@@ -99,6 +101,8 @@ public class Platform implements IPlatform, Serializable {
     }
 
     @Override
+    @XmlTransient
+    @JsonIgnore
     public Set<? extends ITool> getInstruments() {
         Set<ITool> tools = new HashSet();
         if (events != null) {

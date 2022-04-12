@@ -3,6 +3,7 @@ package eu.eurofleets.ears3.domain;
 import be.naturalsciences.bmdc.cruise.model.ILinkedDataTerm;
 import be.naturalsciences.bmdc.cruise.model.IProperty;
 import be.naturalsciences.bmdc.cruise.model.ITool;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import eu.eurofleets.ears3.dto.ToolDTO;
 import java.io.Serializable;
 import java.time.OffsetDateTime;
@@ -48,6 +49,8 @@ public class Tool implements ITool, Serializable {
     private LinkedDataTerm parentTerm;
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @XmlTransient
+    @JsonIgnore
     private Long id;
 
     /*private OffsetDateTime beginPosition;

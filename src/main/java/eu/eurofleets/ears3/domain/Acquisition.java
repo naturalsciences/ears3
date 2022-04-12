@@ -6,6 +6,7 @@
 package eu.eurofleets.ears3.domain;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import eu.eurofleets.ears3.utilities.InstantAdapter;
 import eu.eurofleets.ears3.utilities.OffsetDateTimeAdapter;
 import java.time.Instant;
@@ -15,6 +16,7 @@ import java.time.ZoneId;
 import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
 import javax.persistence.MappedSuperclass;
+import javax.xml.bind.annotation.XmlTransient;
 import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 
 /**
@@ -47,6 +49,8 @@ public abstract class Acquisition {
         this.instrumentTime = instrumentTime;
     }
 
+    @XmlTransient
+    @JsonIgnore
     public OffsetDateTime getTime() {
         return this.instrumentTime != null ? this.instrumentTime : this.timeStamp;
     }

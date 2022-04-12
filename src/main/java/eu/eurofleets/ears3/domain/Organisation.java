@@ -8,6 +8,7 @@ package eu.eurofleets.ears3.domain;
 import be.naturalsciences.bmdc.cruise.model.ICountry;
 import be.naturalsciences.bmdc.cruise.model.ILinkedDataTerm;
 import be.naturalsciences.bmdc.cruise.model.IOrganisation;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import java.io.Serializable;
 import javax.persistence.Entity;
 import javax.persistence.Id;
@@ -18,6 +19,7 @@ import javax.persistence.OneToOne;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlRootElement;
+import javax.xml.bind.annotation.XmlTransient;
 
 /**
  *
@@ -30,26 +32,41 @@ public class Organisation implements IOrganisation, Serializable {
 
     @OneToOne(optional = false)
     private LinkedDataTerm term;
+    @XmlTransient
+    @JsonIgnore
     private String phoneNumber;
+    @XmlTransient
+    @JsonIgnore
     private String faxNumber;
+    @XmlTransient
+    @JsonIgnore
     private String emailAddress;
+    @XmlTransient
+    @JsonIgnore
     private String website;
+    @XmlTransient
+    @JsonIgnore
     private String deliveryPoint;
+    @XmlTransient
+    @JsonIgnore
     private String city;
+    @XmlTransient
+    @JsonIgnore
     private String postalCode;
     @ManyToOne(optional = true)
     private Country country;
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @XmlTransient
+    @JsonIgnore
     private Long id;
 
     public Organisation() {
     }
-    
+
     /*public Organisation(OrganisationDTO dto){
         this.
     }*/
-
     @Override
     public ILinkedDataTerm getTerm() {
         return term;

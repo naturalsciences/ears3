@@ -1,5 +1,6 @@
 package eu.eurofleets.ears3.domain;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import static eu.eurofleets.ears3.domain.Navigation.DATAGRAM_SEPARATOR;
 import eu.eurofleets.ears3.utilities.DatagramOrder;
 import javax.persistence.Entity;
@@ -25,6 +26,7 @@ public class Thermosal extends Acquisition {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @XmlTransient
+    @JsonIgnore
     private Long id;
     @DatagramOrder(3)
     private Double temperature;
