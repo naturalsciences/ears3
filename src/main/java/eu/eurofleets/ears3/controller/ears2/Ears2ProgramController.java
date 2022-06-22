@@ -7,7 +7,7 @@ import eu.eurofleets.ears3.domain.ears2.ProgramBean;
 import eu.eurofleets.ears3.service.CruiseService;
 import eu.eurofleets.ears3.service.EventService;
 import eu.eurofleets.ears3.service.ProgramService;
-import io.swagger.v3.oas.annotations.Operation;
+//import io.swagger.v3.oas.annotations.Operation;
 import java.time.Instant;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
@@ -36,14 +36,14 @@ public class Ears2ProgramController {
     @Autowired
     private CruiseService cruiseService;
 
-    @Operation(hidden = true, summary = "Get all programs in EARS2 formatted xml.")
+    //@Operation(hidden = true, summary = "Get all programs in EARS2 formatted xml.")
     @RequestMapping(method = {RequestMethod.GET}, value = {"programs"}, produces = {"application/xml; charset=utf-8", "application/json"})
     public ProgramBeanList getPrograms() {
         Set<Program> res = this.programService.findAll();
         return new ProgramBeanList(res, true);
     }
 
-    @Operation(hidden = true, summary = "Get some programs in EARS2 formatted xml.")
+    //@Operation(hidden = true, summary = "Get some programs in EARS2 formatted xml.")
     @RequestMapping(method = {RequestMethod.GET}, value = {"programs"}, params = {"cruiseIdentifier"}, produces = {"application/xml; charset=utf-8", "application/json"})
     public ProgramBeanList getProgramsByCruise(@RequestParam(required = false, defaultValue = "") String cruiseIdentifier) {
         Set<Program> res;
@@ -55,7 +55,7 @@ public class Ears2ProgramController {
         return new ProgramBeanList(res, true);
     }
 
-    @Operation(hidden = true, summary = "Get some programs in EARS2 formatted xml.")
+    //@Operation(hidden = true, summary = "Get some programs in EARS2 formatted xml.")
     @RequestMapping(method = {RequestMethod.GET}, value = {"programs"}, params = {"vesselIdentifier"}, produces = {"application/xml; charset=utf-8", "application/json"})
     public ProgramBeanList getProgramsByVessel(@RequestParam(required = false, defaultValue = "") String vesselIdentifier) {
         Set<Program> res;
@@ -67,7 +67,7 @@ public class Ears2ProgramController {
         return new ProgramBeanList(res, true);
     }
 
-    @Operation(hidden = true, summary = "Get some programs in EARS2 formatted xml.")
+    //@Operation(hidden = true, summary = "Get some programs in EARS2 formatted xml.")
     @RequestMapping(method = {RequestMethod.GET}, value = {"programs"}, params = {"startDate", "endDate"}, produces = {"application/xml; charset=utf-8", "application/json"})
     public ProgramBeanList getPrograms(@RequestParam(required = false, defaultValue = "") String startDate, @RequestParam(required = false, defaultValue = "") String endDate) { //@DateTimeFormat(iso = ISO.DATE_TIME)
         OffsetDateTime start = OffsetDateTime.parse(startDate);
@@ -90,7 +90,7 @@ public class Ears2ProgramController {
         return new ProgramBeanList(res, true);
     }
 
-    @Operation(hidden = true, summary = "Get a program by identifier in EARS2 formatted xml.")
+    //@Operation(hidden = true, summary = "Get a program by identifier in EARS2 formatted xml.")
     @RequestMapping(method = {RequestMethod.GET}, value = {"program/{id}"}, produces = {"application/xml; charset=utf-8", "application/json"})
     public ProgramBean getProgramById(@PathVariable(value = "id") String id) {
         Program program = this.programService.findById(Long.parseLong(id));
@@ -101,7 +101,7 @@ public class Ears2ProgramController {
         }
     }
 
-    @Operation(hidden = true, summary = "Get a program by id in EARS2 formatted xml.")
+    //@Operation(hidden = true, summary = "Get a program by id in EARS2 formatted xml.")
     @RequestMapping(method = {RequestMethod.GET}, value = {"program"}, params = {"identifier"}, produces = {"application/xml; charset=utf-8", "application/json"})
     public ProgramBean getProgramByidentifier(@RequestParam(required = true, value = "identifier") String identifier) {
         Program program = this.programService.findByIdentifier(identifier);

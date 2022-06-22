@@ -1,9 +1,9 @@
 package eu.eurofleets.ears3.dto;
 
-import eu.eurofleets.ears3.domain.*;
 import be.naturalsciences.bmdc.cruise.model.IPerson;
 import be.naturalsciences.bmdc.cruise.model.IProperty;
 import com.fasterxml.jackson.annotation.JsonFormat;
+import eu.eurofleets.ears3.domain.*;
 import eu.eurofleets.ears3.utilities.OffsetDateTimeAdapter;
 import java.time.OffsetDateTime;
 import java.util.Collection;
@@ -90,6 +90,9 @@ public class EventDTO {
         this.action = action;
         this.program = event.getProgram().getIdentifier();
         this.platform = event.getPlatform().getTerm().getIdentifier();
+        this.label = event.getLabel();
+        this.description = event.getDescription();
+        this.station = event.getStation();
     }
 
     public String getIdentifier() {
@@ -204,5 +207,4 @@ public class EventDTO {
         this.description = description;
     }
 
-    
 }

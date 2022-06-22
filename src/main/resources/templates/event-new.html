@@ -218,10 +218,25 @@
                         localStorage.eventDefinitions = JSON.stringify(Array.from(map.entries()));
                     }
                 }
+                
+                /*
+                 * map.delete(object) does not work as intended as the key is an object and the internal method  checks for object equality
+                 */
+                function deleteObjectKeyFromMap(map,objectKey){
+                    
+                    map.forEach((value, key) => {
+                        console.log(value, key);
+                        if(key.eid==objectKey.eid && key.tool==objectKey.tool) {
+                            delete map[key];
+                            map.delete(key);
+                        }
+                    })
+                }
 
                 function removeEVfromLocalStorage(eventDefinitionId) {
                     let map = localStorageEventDefsToMap(); //maps preserve insertion order and have unique entries by default
-                    map.delete(eventDefinitionId);
+                    //map.delete(eventDefinitionId);
+                    deleteObjectKeyFromMap(map,eventDefinitionId);
                     localStorage.eventDefinitions = JSON.stringify(Array.from(map.entries()));
                 }
                 
@@ -241,8 +256,10 @@
                 function forgetButton(recentEventButtonX) {
                     const button = recentEventButtonX.parentNode.parentNode;
                     button.disabled = true;
-                    recentlyDeletedEventId = button.id;
-                    removeEVfromLocalStorage(recentlyDeletedEventId);
+                    //EventIdToBeDeleted = button.id;
+                    EventIdToBeDeleted = {eid:button.id,tool:button.getAttribute('data-tool')};
+                    removeEVfromLocalStorage(EventIdToBeDeleted);
+                    button.removeAttribute("onclick");
                     button.remove();
                     populateAllScenarios();
                 }

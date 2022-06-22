@@ -101,8 +101,8 @@ public class EventController {
                 "CDOM", "pH", "Fluorescence", "pCO2", "PAR"));*/
 
         header.addAll(Arrays.asList("Acquisition Timestamp", "Latitude", "Longitude", "Depth", "Heading", "Course over Ground", "Speed over Ground"));
-        header.addAll(Arrays.asList("Surface water temperature", "Salinity", "Conductivity", "Sigma T", "Wind speed", "Wind direction", "Air temperature", "Air pressure", "Solar Radiation"));
-
+        header.addAll(Arrays.asList("Surface water temperature", "Salinity", "Conductivity", "Sigma T", "Wind speed", "Wind direction", "Air temperature", "Humidity", "Air pressure", "Solar Radiation"));
+                        
         String[] entry = new String[header.size()];
         entry = header.toArray(entry); //convert list to array
 
@@ -165,7 +165,6 @@ public class EventController {
                         "",
                         "",
                         "",
-                        "",
                         ""));
             }
 
@@ -179,6 +178,7 @@ public class EventController {
                 elements.addAll(Arrays.asList(
                         "",
                         "",
+                        "",
                         ""));
             }
             if (met != null) {
@@ -186,10 +186,12 @@ public class EventController {
                         doubleOrNull(met.getWindSpeedAverage()),
                         doubleOrNull(met.getWindDirection()),
                         doubleOrNull(met.getAtmosphericTemperature()),
+                        doubleOrNull(met.getHumidity()),
                         doubleOrNull(met.getAtmosphericPressure()),
                         doubleOrNull(met.getSolarRadiation())));
             } else {
                 elements.addAll(Arrays.asList(
+                        "",
                         "",
                         "",
                         "",

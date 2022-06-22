@@ -4,7 +4,7 @@ import eu.eurofleets.ears3.domain.Cruise;
 import eu.eurofleets.ears3.domain.ears2.CruiseBean;
 import eu.eurofleets.ears3.domain.ears2.CruiseBeanList;
 import eu.eurofleets.ears3.service.CruiseService;
-import io.swagger.v3.oas.annotations.Operation;
+//import io.swagger.v3.oas.annotations.Operation;
 import java.util.Collection;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -23,7 +23,7 @@ public class Ears2CruiseController {
     @Autowired
     private CruiseService cruiseService;
 
-    @Operation(hidden = true, summary = "Get all cruises in EARS2 formatted xml.")
+    //@Operation(hidden = true, summary = "Get all cruises in EARS2 formatted xml.")
     @RequestMapping(method = {RequestMethod.GET}, value = {"cruises"}, produces = {"application/xml; charset=utf-8", "application/json"})
     public CruiseBeanList getCruises(@RequestParam(required = false, defaultValue = "") String platformCode) {
         Collection<Cruise> res;
@@ -36,7 +36,7 @@ public class Ears2CruiseController {
         return new CruiseBeanList(res, true);
     }
 
-        @Operation(hidden = true, summary = "Get a cruise by identifier in EARS2 formatted xml.")
+        //@Operation(hidden = true, summary = "Get a cruise by identifier in EARS2 formatted xml.")
     @RequestMapping(method = {RequestMethod.GET}, value = {"cruise"}, params = {"identifier"}, produces = {"application/xml; charset=utf-8", "application/json"})
     public CruiseBean getCruiseByidentifier(@RequestParam(required = true, value = "identifier") String identifier) {
         Cruise cruise = this.cruiseService.findByIdentifier(identifier);

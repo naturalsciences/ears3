@@ -11,7 +11,7 @@ import eu.eurofleets.ears3.dto.EventDTOList;
 import eu.eurofleets.ears3.service.CruiseService;
 import eu.eurofleets.ears3.service.EventService;
 import eu.eurofleets.ears3.service.ProgramService;
-import io.swagger.v3.oas.annotations.Operation;
+//import io.swagger.v3.oas.annotations.Operation;
 import java.util.List;
 import java.util.Map;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -35,14 +35,14 @@ public class EventDTOController {
     @Autowired
     private EventService eventService;
     
-    @Operation(summary = "Find all events in DTO format")
+    //@Operation(summary = "Find all events in DTO format")
     @RequestMapping(method = {RequestMethod.GET}, value = {"events"}, produces = {"application/xml; charset=utf-8", "application/json"})
     public EventDTOList getEvents(@RequestParam Map<String, String> allParams) {
         List<Event> res = this.eventService.advancedFind(allParams);
         return new EventDTOList(res, true);
     }
 
-    @Operation(summary = "Find a single event by its identifier in DTO format")
+    //@Operation(summary = "Find a single event by its identifier in DTO format")
     @RequestMapping(method = {RequestMethod.GET}, value = {"event"}, params = {"identifier"}, produces = {"application/xml; charset=utf-8", "application/json"})
     public EventDTO getEventByIdentifier(@RequestParam(required = true, value = "identifier") String identifier) {
         return new EventDTO(this.eventService.findByIdentifier(identifier));

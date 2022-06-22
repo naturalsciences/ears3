@@ -70,10 +70,18 @@ table.dataTable thead th, table.dataTable thead td {
 button p.close-btn{
     text-align: right;
     font-weight: bolder;
-    font-size: 130%;
+    font-size: 200%;
     /*cursor: move;*/
-    border-bottom: lightgrey thin solid;
+    border-bottom: lightgrey solid;
 }
+
+button p.close-btn a{
+    display: block; /*as big as the parent p*/
+    padding-right: 1em;
+    cursor: not-allowed;
+}
+
+
 
 .bi-lock {
     cursor: pointer;

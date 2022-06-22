@@ -6,7 +6,7 @@ import eu.eurofleets.ears3.domain.ears2.EventBeanList;
 import eu.eurofleets.ears3.service.CruiseService;
 import eu.eurofleets.ears3.service.EventService;
 import eu.eurofleets.ears3.service.ProgramService;
-import io.swagger.v3.oas.annotations.Operation;
+//import io.swagger.v3.oas.annotations.Operation;
 import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.Map;
@@ -43,7 +43,7 @@ public class Ears2EventController {
         }
     }
 
-    @Operation(hidden = true, summary = "Get the events in EARS2 formatted xml.")
+    //@Operation(hidden = true, summary = "Get the events in EARS2 formatted xml.")
     @RequestMapping(method = {RequestMethod.GET}, value = {"events"}, produces = {"application/xml; charset=utf-8", "application/json"})
     public EventBeanList getEvents(@RequestParam Map<String, String> allParams) {
         String platformIdentifier = sanitizeParam(allParams, "platformIdentifier");
@@ -72,7 +72,7 @@ public class Ears2EventController {
         return new EventBeanList(res, true);
     }
 
-    @Operation(hidden = true, summary = "Get an event by identifier EARS2 formatted xml.")
+    //@Operation(hidden = true, summary = "Get an event by identifier EARS2 formatted xml.")
     @RequestMapping(method = {RequestMethod.GET}, value = {"event"}, params = {"identifier"}, produces = {"application/xml", "application/json"})
     public EventBean getEventByIdentifier(@RequestParam(required = true, value = "identifier") String identifier) {
         return new EventBean(this.eventService.findByIdentifier(identifier));

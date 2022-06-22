@@ -16,7 +16,7 @@ import eu.eurofleets.ears3.service.PlatformService;
 import eu.eurofleets.ears3.service.ProjectService;
 import eu.eurofleets.ears3.service.SeaAreaService;
 import eu.eurofleets.ears3.service.ToolService;
-import io.swagger.v3.oas.annotations.Operation;
+//import io.swagger.v3.oas.annotations.Operation;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -80,7 +80,7 @@ public class DatabaseSyncScheduler {
     @Autowired
     private ObjectMapper objectMapper;
 
-    @Operation(hidden = true, summary = "Synchronize the database of events, programs and cruises with an external EARS instance.")
+    //@Operation(hidden = true, summary = "Synchronize the database of events, programs and cruises with an external EARS instance.")
     @RequestMapping(method = {RequestMethod.GET}, path = "database")
     @Async("asyncExecutor")
     public CompletableFuture<String> syncDatabase() throws MalformedURLException, IOException {
