@@ -59,11 +59,6 @@ import org.springframework.web.util.UriUtils;
 @CrossOrigin(origins = "*", maxAge = 3600)
 public class OntologyController {
 
-    private final StorageService storageService;
-
-    @Autowired
-    private Environment env;
-
     /**
      * The path to the folder where we want to store the uploaded files
      */
@@ -73,13 +68,14 @@ public class OntologyController {
 
     private static final String VESSEL_ONTOLOGY_FILE_LOCATION = ONTOLOGY_DIR + VESSEL_ONTOLOGY_FILE_NAME;
 
-    private static OntModel ONTOLOGY_MODEL;
+    private final StorageService storageService;
 
     @Autowired
-    public OntologyController(StorageService storageService) throws IOException {
+    private Environment env;
+
+    @Autowired
+    public OntologyController(StorageService storageService) {
         this.storageService = storageService;
-        File ontologyFile = new File(VESSEL_ONTOLOGY_FILE_LOCATION);
-        ONTOLOGY_MODEL = getOntModel(ontologyFile);
     }
 
     private String getUsername() {
@@ -268,7 +264,8 @@ public class OntologyController {
         ResultSet rs;
         if (program == null) {
             Query qry = QueryFactory.create(sparqlQuery);
-            QueryExecution qe = QueryExecutionFactory.create(qry, ONTOLOGY_MODEL);
+            File ontologyFile = new File(VESSEL_ONTOLOGY_FILE_LOCATION);
+            QueryExecution qe = QueryExecutionFactory.create(qry, getOntModel(ontologyFile));
             rs = qe.execSelect();
         } else {
             rs = combineOntologyModels(sparqlQuery, program);

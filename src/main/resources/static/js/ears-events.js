@@ -134,12 +134,12 @@ const eventData = {
 };
 
 function isJSON(str) {
-                    try {
-                        return (JSON.parse(str) && !!str);
-                    } catch (e) {
-                        return false;
-                    }
-                }
+    try {
+        return (JSON.parse(str) && !!str);
+    } catch (e) {
+        return false;
+    }
+}
 
 
 var rdfBindings; //global
@@ -205,24 +205,17 @@ function postEvent(recentEventButton) {
 }
 
 function rdfBindingElementHasEid(element, eventDefinitionId){
- /*   var eid = "element.eid.value  == " + "'" + eventDefinitionId + "'" + "  && ";
-    var condition = "(".concat(eid, ")").replace(/&&([^'&&']*)$/, '' + '$1');
-    return eval(condition); */
     return element.eid.value  == eventDefinitionId.eid && element.tu.value  == eventDefinitionId.tool
 }
 
 function postEventByEventDefinition(eventDefinitionId, successFunction, errorFunction) {
-    //$.getJSON(jsonVesselRdfLocation,
-    //    function(data) {
-            var rdfBindings = getBindings(false);
-            $(rdfBindings).each(function(index, element) {
-                if (rdfBindingElementHasEid(element,eventDefinitionId)) {
-                    event = new EarsEvent(element);
-                    postEventInner(event, successFunction, errorFunction);
-                }
-            })
-        //}
-    //);
+    var rdfBindings = getBindings(false);
+    $(rdfBindings).each(function(index, element) {
+        if (rdfBindingElementHasEid(element,eventDefinitionId)) {
+            event = new EarsEvent(element);
+            postEventInner(event, successFunction, errorFunction);
+        }
+    })
 }
 
 /***

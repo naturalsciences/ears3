@@ -111,40 +111,36 @@ function dropdownChanged(dropdown, disableOnceSelected) {
     }
 
     let condition = "(".concat(cu, tu, pu, au, ")").replace(/&&([^'&&']*)$/, '' + '$1');
-    //$.getJSON(jsonVesselRdfLocation,
-    //        function (data) {
-                var tc = [];
-                var t = [];
-                var p = [];
-                var a = [];
-                var select_option_data = '<option value=1></option>';
-                if ($('#idSelect_tc').attr('disabled') != 'disabled') {
-                    $('#idSelect_tc').html(select_option_data);
-                } //clear it when no choice is made
-                if ($('#idSelect_t').attr('disabled') != 'disabled') {
-                    $('#idSelect_t').html(select_option_data);
-                }
-                if ($('#idSelect_p').attr('disabled') != 'disabled') {
-                    $('#idSelect_p').html(select_option_data);
-                }
-                if ($('#idSelect_a').attr('disabled') != 'disabled') {
-                    $('#idSelect_a').html(select_option_data);
-                }
-                var rdfBindings = getBindings(false);
-                $(rdfBindings).each(function (index, element) {
-                    if (eval(condition)) {
-                        populateDropdownBasedOnPrevious($('#idSelect_tc'), 'c', element, tc);
-                        populateDropdownBasedOnPrevious($('#idSelect_t'), 't', element, t);
-                        populateDropdownBasedOnPrevious($('#idSelect_p'), 'p', element, p);
-                        populateDropdownBasedOnPrevious($('#idSelect_a'), 'a', element, a);
-                    }
-                });
-                autoselectDropdownWhenOnlyOneChoice($('#idSelect_tc'), $('#tc_lock'), $('#tc_unlock'), disableOnceSelected);
-                autoselectDropdownWhenOnlyOneChoice($('#idSelect_t'), $('#t_lock'), $('#t_unlock'), disableOnceSelected);
-                autoselectDropdownWhenOnlyOneChoice($('#idSelect_p'), $('#p_lock'), $('#p_unlock'), disableOnceSelected);
-                autoselectDropdownWhenOnlyOneChoice($('#idSelect_a'), $('#a_lock'), $('#a_unlock'), disableOnceSelected);
-           //}
-    //);
+    var tc = [];
+    var t = [];
+    var p = [];
+    var a = [];
+    var select_option_data = '<option value=1></option>';
+    if ($('#idSelect_tc').attr('disabled') != 'disabled') {
+        $('#idSelect_tc').html(select_option_data);
+    } //clear it when no choice is made
+    if ($('#idSelect_t').attr('disabled') != 'disabled') {
+        $('#idSelect_t').html(select_option_data);
+    }
+    if ($('#idSelect_p').attr('disabled') != 'disabled') {
+        $('#idSelect_p').html(select_option_data);
+    }
+    if ($('#idSelect_a').attr('disabled') != 'disabled') {
+        $('#idSelect_a').html(select_option_data);
+    }
+    var rdfBindings = getBindings(false);
+    $(rdfBindings).each(function (index, element) {
+        if (eval(condition)) {
+            populateDropdownBasedOnPrevious($('#idSelect_tc'), 'c', element, tc);
+            populateDropdownBasedOnPrevious($('#idSelect_t'), 't', element, t);
+            populateDropdownBasedOnPrevious($('#idSelect_p'), 'p', element, p);
+            populateDropdownBasedOnPrevious($('#idSelect_a'), 'a', element, a);
+        }
+    });
+    autoselectDropdownWhenOnlyOneChoice($('#idSelect_tc'), $('#tc_lock'), $('#tc_unlock'), disableOnceSelected);
+    autoselectDropdownWhenOnlyOneChoice($('#idSelect_t'), $('#t_lock'), $('#t_unlock'), disableOnceSelected);
+    autoselectDropdownWhenOnlyOneChoice($('#idSelect_p'), $('#p_lock'), $('#p_unlock'), disableOnceSelected);
+    autoselectDropdownWhenOnlyOneChoice($('#idSelect_a'), $('#a_lock'), $('#a_unlock'), disableOnceSelected);
 }
 
 function unlockTc(rdfBindings){
@@ -181,13 +177,12 @@ function initDropdowns(rdfBindings, selectedValues) {
     });
     //if reset tc
     $("#cell_tc_unlock").click(function () {
-        //$.getScript("/ears3/js/unlock_tc.js"); //refactor this crazy approach by YS
         unlockTc(rdfBindings);
     });
 
     $("#cell_t_unlock").click(function () {
         if (($('#idSelect_tc').attr('disabled') != 'disabled') && ($('#idSelect_p').attr('disabled') != 'disabled') && ($('#idSelect_a').attr('disabled') != 'disabled')) {
-            //$.getScript("js/unlock_tc.js"); //if all others are not disabled, ie are selectable, unlock everything.
+            //if all others are not disabled, ie are selectable, unlock everything.
             unlockTc(rdfBindings);
         } else {
             $("#idSelect_t").val("1"); //clear the selection
@@ -213,7 +208,6 @@ function initDropdowns(rdfBindings, selectedValues) {
     });
     $("#cell_p_unlock").click(function () {
         if (($('#idSelect_tc').attr('disabled') != 'disabled') && ($('#idSelect_t').attr('disabled') != 'disabled') && ($('#idSelect_a').attr('disabled') != 'disabled')) {
-            //$.getScript("js/unlock_tc.js");
              unlockTc(rdfBindings);
         } else {
             $("#idSelect_p").val("1"); //clear the selection
@@ -234,7 +228,6 @@ function initDropdowns(rdfBindings, selectedValues) {
     });
     $("#cell_a_unlock").click(function () {
         if (($('#idSelect_tc').attr('disabled') != 'disabled') && ($('#idSelect_t').attr('disabled') != 'disabled') && ($('#idSelect_p').attr('disabled') != 'disabled')) {
-            //$.getScript("js/unlock_tc.js");
              unlockTc(rdfBindings);
         } else {
             $("#idSelect_a").val("1"); //clear the selection
@@ -278,33 +271,28 @@ function initDropdowns(rdfBindings, selectedValues) {
             }
             var endCondition = ")";
             condition = startCondition.concat(cu, tu, pu, au, endCondition).replace(/&&([^'&&']*)$/, '' + '$1');
-          //  $.getJSON(jsonVesselRdfLocation,
-          //          function (data) {
-          //              var rdfBindings = data.results.bindings;
-                        var rdfBindings = getBindings(false);
-                        $(rdfBindings).each(function (index, element) {
-                            if (eval(condition)) {
-                                let event = new EarsEvent(element);
-                                event.identifier = identifier;
-                                event.timeStamp = timeStamp;
-                                postEventInner(event, function () {
-                                    $("#btnSubmitDropdownChoice").removeClass("btn-warning").addClass("btn-success");
-                                    setTimeout(function () {
-                                        $("#btnSubmitDropdownChoice").removeClass("btn-success");
-                                    }, stayGreenForThisPeriod);
-                                    $("#btnSubmitDropdownChoice").removeClass("btn-warning").addClass("btn-success");
-                                    $("#collapseOne").addClass("show");
-                                    addEVtoLocalStorage(event);
-                                    populateAllScenarios(rdfBindings);
-                                },
-                                        function () {
-                                            $("#btnSubmitDropdownChoice").removeClass("btn-success").addClass("btn-warning");
-                                        });
+            var rdfBindings = getBindings(false);
+            $(rdfBindings).each(function (index, element) {
+                if (eval(condition)) {
+                    let event = new EarsEvent(element);
+                    event.identifier = identifier;
+                    event.timeStamp = timeStamp;
+                    postEventInner(event, function () {
+                        $("#btnSubmitDropdownChoice").removeClass("btn-warning").addClass("btn-success");
+                        setTimeout(function () {
+                            $("#btnSubmitDropdownChoice").removeClass("btn-success");
+                        }, stayGreenForThisPeriod);
+                        $("#btnSubmitDropdownChoice").removeClass("btn-warning").addClass("btn-success");
+                        $("#collapseOne").addClass("show");
+                        addEVtoLocalStorage(event);
+                        populateAllScenarios(rdfBindings);
+                    },
+                            function () {
+                                $("#btnSubmitDropdownChoice").removeClass("btn-success").addClass("btn-warning");
+                            });
 
-                            }
-                        });
-                    //}
-            //);
+                }
+            });
         } else {
             $("#btnSubmitDropdownChoice").removeClass("btn-success").addClass("btn-warning");
         }
