@@ -111,8 +111,8 @@ function dropdownChanged(dropdown, disableOnceSelected) {
     }
 
     let condition = "(".concat(cu, tu, pu, au, ")").replace(/&&([^'&&']*)$/, '' + '$1');
-    $.getJSON(jsonVesselRdfLocation,
-            function (data) {
+    //$.getJSON(jsonVesselRdfLocation,
+    //        function (data) {
                 var tc = [];
                 var t = [];
                 var p = [];
@@ -130,7 +130,8 @@ function dropdownChanged(dropdown, disableOnceSelected) {
                 if ($('#idSelect_a').attr('disabled') != 'disabled') {
                     $('#idSelect_a').html(select_option_data);
                 }
-                $(data.results.bindings).each(function (index, element) {
+                var rdfBindings = getBindings(false);
+                $(rdfBindings).each(function (index, element) {
                     if (eval(condition)) {
                         populateDropdownBasedOnPrevious($('#idSelect_tc'), 'c', element, tc);
                         populateDropdownBasedOnPrevious($('#idSelect_t'), 't', element, t);
@@ -142,8 +143,34 @@ function dropdownChanged(dropdown, disableOnceSelected) {
                 autoselectDropdownWhenOnlyOneChoice($('#idSelect_t'), $('#t_lock'), $('#t_unlock'), disableOnceSelected);
                 autoselectDropdownWhenOnlyOneChoice($('#idSelect_p'), $('#p_lock'), $('#p_unlock'), disableOnceSelected);
                 autoselectDropdownWhenOnlyOneChoice($('#idSelect_a'), $('#a_lock'), $('#a_unlock'), disableOnceSelected);
-            }
-    );
+           //}
+    //);
+}
+
+function unlockTc(rdfBindings){
+    populateDropdownList(rdfBindings, "TC", "#idSelect_tc", null);
+    populateDropdownList(rdfBindings, "T", "#idSelect_t", null);
+    populateDropdownList(rdfBindings, "P", "#idSelect_p", null);
+    populateDropdownList(rdfBindings, "A", "#idSelect_a", null);
+    
+    $('#idSelect_tc').prop('disabled', false);
+    $('#idSelect_tc').selectpicker('refresh');
+    $('#idSelect_t').prop('disabled', false);
+    $('#idSelect_t').selectpicker('refresh');
+    $('#idSelect_p').prop('disabled', false);
+    $('#idSelect_p').selectpicker('refresh');
+    $('#idSelect_a').prop('disabled', false);
+    $('#idSelect_a').selectpicker('refresh');
+    $('#id_form_process').hide();
+    $('#id_eid').hide();
+    $('#tc_lock').css('visibility', 'hidden');
+    $('#t_lock').css('visibility', 'hidden');
+    $('#p_lock').css('visibility', 'hidden');
+    $('#a_lock').css('visibility', 'hidden');
+    $('#tc_unlock').css('visibility', 'visible');
+    $('#t_unlock').css('visibility', 'visible');
+    $('#p_unlock').css('visibility', 'visible');
+    $('#a_unlock').css('visibility', 'visible');
 }
 
 function initDropdowns(rdfBindings, selectedValues) {
@@ -154,12 +181,14 @@ function initDropdowns(rdfBindings, selectedValues) {
     });
     //if reset tc
     $("#cell_tc_unlock").click(function () {
-        $.getScript("/ears3/js/unlock_tc.js"); //refactor this crazy approach by YS
+        //$.getScript("/ears3/js/unlock_tc.js"); //refactor this crazy approach by YS
+        unlockTc(rdfBindings);
     });
 
     $("#cell_t_unlock").click(function () {
         if (($('#idSelect_tc').attr('disabled') != 'disabled') && ($('#idSelect_p').attr('disabled') != 'disabled') && ($('#idSelect_a').attr('disabled') != 'disabled')) {
-            $.getScript("js/unlock_tc.js"); //if all others are not disabled, ie are selectable, unlock everything.
+            //$.getScript("js/unlock_tc.js"); //if all others are not disabled, ie are selectable, unlock everything.
+            unlockTc(rdfBindings);
         } else {
             $("#idSelect_t").val("1"); //clear the selection
             dropdownChanged($("#idSelect_t"), false);
@@ -184,7 +213,8 @@ function initDropdowns(rdfBindings, selectedValues) {
     });
     $("#cell_p_unlock").click(function () {
         if (($('#idSelect_tc').attr('disabled') != 'disabled') && ($('#idSelect_t').attr('disabled') != 'disabled') && ($('#idSelect_a').attr('disabled') != 'disabled')) {
-            $.getScript("js/unlock_tc.js");
+            //$.getScript("js/unlock_tc.js");
+             unlockTc(rdfBindings);
         } else {
             $("#idSelect_p").val("1"); //clear the selection
             dropdownChanged($("#idSelect_p"), false);
@@ -204,7 +234,8 @@ function initDropdowns(rdfBindings, selectedValues) {
     });
     $("#cell_a_unlock").click(function () {
         if (($('#idSelect_tc').attr('disabled') != 'disabled') && ($('#idSelect_t').attr('disabled') != 'disabled') && ($('#idSelect_p').attr('disabled') != 'disabled')) {
-            $.getScript("js/unlock_tc.js");
+            //$.getScript("js/unlock_tc.js");
+             unlockTc(rdfBindings);
         } else {
             $("#idSelect_a").val("1"); //clear the selection
             dropdownChanged($("#idSelect_a"), false);
@@ -247,9 +278,10 @@ function initDropdowns(rdfBindings, selectedValues) {
             }
             var endCondition = ")";
             condition = startCondition.concat(cu, tu, pu, au, endCondition).replace(/&&([^'&&']*)$/, '' + '$1');
-            $.getJSON(jsonVesselRdfLocation,
-                    function (data) {
-                        var rdfBindings = data.results.bindings;
+          //  $.getJSON(jsonVesselRdfLocation,
+          //          function (data) {
+          //              var rdfBindings = data.results.bindings;
+                        var rdfBindings = getBindings(false);
                         $(rdfBindings).each(function (index, element) {
                             if (eval(condition)) {
                                 let event = new EarsEvent(element);
@@ -271,8 +303,8 @@ function initDropdowns(rdfBindings, selectedValues) {
 
                             }
                         });
-                    }
-            );
+                    //}
+            //);
         } else {
             $("#btnSubmitDropdownChoice").removeClass("btn-success").addClass("btn-warning");
         }

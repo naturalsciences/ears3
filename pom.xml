@@ -7,7 +7,7 @@
     <artifactId>ears3</artifactId>
     <version>1.0.0-SNAPSHOT</version>
     <name>ears3</name>
-    <description>ears3 persistence library</description>
+    <description>ears3 project</description>
 
     <repositories>
         <repository>

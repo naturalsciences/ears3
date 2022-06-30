@@ -141,32 +141,35 @@ function isJSON(str) {
                     }
                 }
 
-function getBindings(async) {
-    var rdfBindings;
-    if (async) {
 
-    } else {
-        $.ajax({//asynchronous because synchronous messes up the order of the buttons
-            type: "GET",
-            dataType: "json",
-            async: false,
-            url: jsonVesselRdfLocation,
-            success: function (data) {
-                rdfBindings = data.results.bindings;
-            }
-        });
-        /*let programFieldVal = $("#programField").val() === "" ? null : $("#programField").val();
-        if (programFieldVal !== null) {
+var rdfBindings; //global
+function getBindings(async) {
+    if(rdfBindings == null){
+        if (async) {
+
+        } else {
             $.ajax({//asynchronous because synchronous messes up the order of the buttons
                 type: "GET",
                 dataType: "json",
                 async: false,
-                url: jsonProgramRdfLocation + "&programIdentifier=" + programFieldVal,
+                url: jsonVesselRdfLocation,
                 success: function (data) {
-                    rdfBindings = rdfBindings.concat(data.results.bindings);
+                    rdfBindings = data.results.bindings;
                 }
             });
-        }*/
+            /*let programFieldVal = $("#programField").val() === "" ? null : $("#programField").val();
+            if (programFieldVal !== null) {
+                $.ajax({//asynchronous because synchronous messes up the order of the buttons
+                    type: "GET",
+                    dataType: "json",
+                    async: false,
+                    url: jsonProgramRdfLocation + "&programIdentifier=" + programFieldVal,
+                    success: function (data) {
+                        rdfBindings = rdfBindings.concat(data.results.bindings);
+                    }
+                });
+            }*/
+        }
     }
     return rdfBindings;
 }
@@ -209,16 +212,17 @@ function rdfBindingElementHasEid(element, eventDefinitionId){
 }
 
 function postEventByEventDefinition(eventDefinitionId, successFunction, errorFunction) {
-    $.getJSON(jsonVesselRdfLocation,
-        function(data) {
-            $(data.results.bindings).each(function(index, element) {
+    //$.getJSON(jsonVesselRdfLocation,
+    //    function(data) {
+            var rdfBindings = getBindings(false);
+            $(rdfBindings).each(function(index, element) {
                 if (rdfBindingElementHasEid(element,eventDefinitionId)) {
                     event = new EarsEvent(element);
                     postEventInner(event, successFunction, errorFunction);
                 }
             })
-        }
-    );
+        //}
+    //);
 }
 
 /***

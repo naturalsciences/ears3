@@ -265,7 +265,7 @@ public class SyncScheduler {
         }
     }
 
-    @Scheduled(cron = "0 15 15 * * MON-FRI")
+    @Scheduled(cron = "0 0 15 * * WED")
     @Transactional() //used to be Propagation.REQUIRED
     public void synchronizeExternal() throws Exception {
         syncShips();

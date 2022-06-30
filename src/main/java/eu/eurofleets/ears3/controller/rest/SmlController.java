@@ -58,13 +58,13 @@ public class SmlController {
         return path;
     }
 
-    @RequestMapping(method = {RequestMethod.GET}, value = {"sml"}, params = {"platformUrn"}, produces = {"application/xml"})
+    @RequestMapping(method = {RequestMethod.GET}, value = {"instrument/{platformUrn}"}, produces = {"application/xml"})
     public String getPhysicalSystem(HttpServletRequest request, @RequestParam(required = true, value = "platformUrn") String platformUrn) throws JAXBException {
         Platform p = this.platformService.findByIdentifier(platformUrn);
         if (p != null) {
 
             SensorMLBuilder builder = new SensorMLBuilder(p, getUrl(request), bmdc);
-            PhysicalSystemType physicalSystem = builder.getPhysicalSystem();
+            PhysicalSystemType physicalSystem = builder.getPhysicalSystem(p,p.getInstruments());
             SensorMLPrinter instance = new SensorMLPrinter(physicalSystem, physicalSystem.getClass());
             String result = instance.getResult();
 
@@ -73,7 +73,7 @@ public class SmlController {
         return "<WebErrorResponse><message>Platform with identifier " + platformUrn + " not found</message></WebErrorResponse>";
     }
 
-    @RequestMapping(method = {RequestMethod.GET}, value = {"sml"}, params = {"deviceUrn", "platformUrn"}, produces = {"application/xml"})
+    @RequestMapping(method = {RequestMethod.GET}, value = {"instrument/{platformUrn}/{deviceUrn}"}, produces = {"application/xml"})
     public String getPhysicalComponent(HttpServletRequest request, @RequestParam(required = true, value = "deviceUrn") String deviceUrn, @RequestParam(required = true, value = "platformUrn") String platformUrn) throws JAXBException {
         Tool tool = this.toolService.findByIdentifier(deviceUrn);
         if (tool != null) {

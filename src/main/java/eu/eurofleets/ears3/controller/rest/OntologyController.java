@@ -62,12 +62,25 @@ public class OntologyController {
     private final StorageService storageService;
 
     @Autowired
-    public OntologyController(StorageService storageService) {
-        this.storageService = storageService;
-    }
+    private Environment env;
+
+    /**
+     * The path to the folder where we want to store the uploaded files
+     */
+    private static final String ONTOLOGY_DIR = "/var/www/ears2/";
+
+    private static final String VESSEL_ONTOLOGY_FILE_NAME = "earsv2-onto-vessel.rdf";
+
+    private static final String VESSEL_ONTOLOGY_FILE_LOCATION = ONTOLOGY_DIR + VESSEL_ONTOLOGY_FILE_NAME;
+
+    private static OntModel ONTOLOGY_MODEL;
 
     @Autowired
-    private Environment env;
+    public OntologyController(StorageService storageService) throws IOException {
+        this.storageService = storageService;
+        File ontologyFile = new File(VESSEL_ONTOLOGY_FILE_LOCATION);
+        ONTOLOGY_MODEL = getOntModel(ontologyFile);
+    }
 
     private String getUsername() {
         return env.getProperty("ears.ontology.username");
@@ -80,15 +93,6 @@ public class OntologyController {
     public boolean authenticate(String username, String password) {
         return username.equals(getUsername()) && password.equals(getPassword());
     }
-
-    /**
-     * The path to the folder where we want to store the uploaded files
-     */
-    private static final String ONTOLOGY_DIR = "/var/www/ears2/";
-
-    private static final String VESSEL_ONTOLOGY_FILE_NAME = "earsv2-onto-vessel.rdf";
-
-    private static final String VESSEL_ONTOLOGY_FILE_LOCATION = ONTOLOGY_DIR + VESSEL_ONTOLOGY_FILE_NAME;
 
     @PostMapping(value = {"vessel/upload"}/*, consumes = MediaType.MULTIPART_FORM_DATA_VALUE, produces = {"application/xml", "application/json"}*/)
     @ResponseStatus(HttpStatus.ACCEPTED)
@@ -264,8 +268,7 @@ public class OntologyController {
         ResultSet rs;
         if (program == null) {
             Query qry = QueryFactory.create(sparqlQuery);
-            File ontologyFile = new File(VESSEL_ONTOLOGY_FILE_LOCATION);
-            QueryExecution qe = QueryExecutionFactory.create(qry, getOntModel(ontologyFile));
+            QueryExecution qe = QueryExecutionFactory.create(qry, ONTOLOGY_MODEL);
             rs = qe.execSelect();
         } else {
             rs = combineOntologyModels(sparqlQuery, program);
