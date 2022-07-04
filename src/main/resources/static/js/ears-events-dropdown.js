@@ -9,7 +9,7 @@ function populateDropdownBasedOnPrevious(dropdown, entityType, item, listElement
     if (dropdown.attr('disabled') != 'disabled') {
         var url = [entityType + 'u']; //the url field in the SPARQL JSON result, for the right entity
         var label = [entityType + 'l']; //the label field in the SPARQL JSON result, for the right entity
-        listElements.sort(function(a, b) {
+        listElements.sort(function (a, b) {
             return a[label].value.localeCompare(b[label].value)
         });
         var matches = $.grep(listElements, function (e) {
@@ -26,43 +26,58 @@ function populateDropdownBasedOnPrevious(dropdown, entityType, item, listElement
     }
 }
 
- function populateDropdownList(rdfBindings, entityName, dropdownId, selectedValue) {
-        var ddmOptions = [];
-        var select_option_data = '';
-        $.each(rdfBindings, function (key, item) {
-            val = getElement(entityName, item);
-            var events = $.grep(ddmOptions, function (e) {
-                return val.url === e.url &&
-                        val.label === e.label;
-            });
-            if (events.length === 0) {
-                ddmOptions.push(val);
-            }
-        });
-        if (/Android|webOS|iPhone|iPad|iPod|BlackBerry/i.test(navigator.userAgent)) {
-            $(dropdownId).selectpicker('mobile');
-        }
-        if (ddmOptions.length <= 6) {
-            $(dropdownId).selectpicker({
-                liveSearch: false
-            }).selectpicker('refresh');
-        }
-        ddmOptions.sort(function(a, b) {
-            return a.label.localeCompare(b.label)
-        });
-        var select_option_data = '';
-        select_option_data += '<option value=1></option>'
-        $.each(ddmOptions, function (key, unique) {
-            select_option_data += '<option value="' + unique.url + '">' + unique.label + '</option>';
-        });
-
-        $(dropdownId).html(select_option_data).selectpicker('refresh');
-        if (selectedValue !== null) {
-            $(dropdownId).selectpicker('val', selectedValue);
-            $(dropdownId).prop('disabled', true);
-            $(dropdownId).selectpicker('refresh');
-        }
+function stripSlash(url) {
+    if (url === null) {
+        return null;
     }
+    return url.endsWith('/') ?
+            url.slice(0, -1) :
+            url;
+}
+
+function populateDropdownList(rdfBindings, entityName, dropdownId, selectedValue) {
+    selectedValue = stripSlash(selectedValue);
+    var ddmOptions = [];
+    var select_option_data = '';
+    $.each(rdfBindings, function (key, item) {
+        val = getElement(entityName, item);
+        var events = $.grep(ddmOptions, function (e) {
+            return (val.url === e.url && val.label === e.label) || (val.transitiveUrl === e.url && val.label === e.label);
+        });
+        if (events.length === 0) {
+            ddmOptions.push(val);
+        }
+    });
+    if (/Android|webOS|iPhone|iPad|iPod|BlackBerry/i.test(navigator.userAgent)) {
+        $(dropdownId).selectpicker('mobile');
+    }
+    if (ddmOptions.length <= 6) {
+        $(dropdownId).selectpicker({
+            liveSearch: false
+        }).selectpicker('refresh');
+    }
+    ddmOptions.sort(function (a, b) {
+        return a.label.localeCompare(b.label)
+    });
+    var select_option_data = '';
+    select_option_data += '<option value=1></option>'
+    $.each(ddmOptions, function (key, unique) {
+        if (unique.url === selectedValue) {
+            select_option_data += '<option value="' + unique.url + '">' + unique.label + '</option>';
+        } else if (unique.transitiveUrl === selectedValue) {
+            select_option_data += '<option value="' + unique.transitiveUrl + '">' + unique.label + '</option>';
+        } else {
+            select_option_data += '<option value="' + unique.url + '">' + unique.label + '</option>';
+        }
+    });
+
+    $(dropdownId).html(select_option_data).selectpicker('refresh');
+    if (selectedValue !== null) {
+        $(dropdownId).selectpicker('val', selectedValue);
+        $(dropdownId).prop('disabled', true);
+        $(dropdownId).selectpicker('refresh');
+    }
+}
 /**
  * Autoselect a value in the given dropdown when there is only one choice: if there are only two options, one is the defualt 'Select a value', the other a true value.
  * dropdown: the jQuery element for the dropdown
@@ -143,12 +158,12 @@ function dropdownChanged(dropdown, disableOnceSelected) {
     autoselectDropdownWhenOnlyOneChoice($('#idSelect_a'), $('#a_lock'), $('#a_unlock'), disableOnceSelected);
 }
 
-function unlockTc(rdfBindings){
+function unlockTc(rdfBindings) {
     populateDropdownList(rdfBindings, "TC", "#idSelect_tc", null);
     populateDropdownList(rdfBindings, "T", "#idSelect_t", null);
     populateDropdownList(rdfBindings, "P", "#idSelect_p", null);
     populateDropdownList(rdfBindings, "A", "#idSelect_a", null);
-    
+
     $('#idSelect_tc').prop('disabled', false);
     $('#idSelect_tc').selectpicker('refresh');
     $('#idSelect_t').prop('disabled', false);
@@ -208,7 +223,7 @@ function initDropdowns(rdfBindings, selectedValues) {
     });
     $("#cell_p_unlock").click(function () {
         if (($('#idSelect_tc').attr('disabled') != 'disabled') && ($('#idSelect_t').attr('disabled') != 'disabled') && ($('#idSelect_a').attr('disabled') != 'disabled')) {
-             unlockTc(rdfBindings);
+            unlockTc(rdfBindings);
         } else {
             $("#idSelect_p").val("1"); //clear the selection
             dropdownChanged($("#idSelect_p"), false);
@@ -228,7 +243,7 @@ function initDropdowns(rdfBindings, selectedValues) {
     });
     $("#cell_a_unlock").click(function () {
         if (($('#idSelect_tc').attr('disabled') != 'disabled') && ($('#idSelect_t').attr('disabled') != 'disabled') && ($('#idSelect_p').attr('disabled') != 'disabled')) {
-             unlockTc(rdfBindings);
+            unlockTc(rdfBindings);
         } else {
             $("#idSelect_a").val("1"); //clear the selection
             dropdownChanged($("#idSelect_a"), false);
@@ -248,11 +263,10 @@ function initDropdowns(rdfBindings, selectedValues) {
         var date = $('#dateField').val(); //in case of editing an event, this is set
         var time = $('#timeField').val(); //in case of editing an event, this is set
         var timeZone = $('#timeZoneField').val(); //in case of editing an event, this is set
-        if(date !== undefined && time !== undefined){
-            var timeStamp=date+'T'+time+timeZone;
-        }
-        else{
-            var timeStamp=null;
+        if (date !== undefined && time !== undefined) {
+            var timeStamp = date + 'T' + time + timeZone;
+        } else {
+            var timeStamp = null;
         }
         if (($("#idSelect_tc").val() != 1) && ($("#idSelect_t").val() != 1) && ($("#idSelect_p").val() != 1) && ($("#idSelect_a").val() != 1)) {
             var condition = '';
@@ -298,50 +312,57 @@ function initDropdowns(rdfBindings, selectedValues) {
         }
     });
 }
-    function getElement(what, item) {
-        switch (what) {
-            case 'TC':
-                return {url: item.cu.value, label: item.cl.value};
-                break;
-            case 'T':
-                return {url: item.tu.value, label: item.tl.value};
-                break;
-            case 'P':
-                return {url: item.pu.value, label: item.pl.value};
-                break;
-            case 'A':
-                return {url: item.au.value, label: item.al.value};
-                break;
-            default:
-                return null;
-        }
+
+/***
+ * Given one row of a JSON RDF SPARQL response binding, provide the right values, based on whether it is a TC, T, P or A. Return it as an array of value, url pairs.
+ * @param {type} what
+ * @param {type} item
+ * @returns {getElement.ears-events-dropdownAnonym$2|getElement.ears-events-dropdownAnonym$3|getElement.ears-events-dropdownAnonym$1|getElement.ears-events-dropdownAnonym$4}
+ */
+function getElement(what, item) {
+    switch (what) {
+        case 'TC':
+            return {url: stripSlash(item.cu.value), transitiveUrl: stripSlash(item.ctu.value), label: item.cl.value};
+            break;
+        case 'T':
+            return {url: stripSlash(item.tu.value), transitiveUrl: stripSlash(item.ttu.value), label: item.tl.value};
+            break;
+        case 'P':
+            return {url: stripSlash(item.pu.value), transitiveUrl: null, label: item.pl.value};
+            break;
+        case 'A':
+            return {url: stripSlash(item.au.value), transitiveUrl: null, label: item.al.value};
+            break;
+        default:
+            return null;
     }
+}
 
-    function populateDropdownLists(rdfBindings, selectedValues) {
-        if (selectedValues !== undefined && selectedValues !== null) {
-            populateDropdownList(rdfBindings, "TC", "#idSelect_tc", selectedValues.tc);
-            populateDropdownList(rdfBindings, "T", "#idSelect_t", selectedValues.t);
-            populateDropdownList(rdfBindings, "P", "#idSelect_p", selectedValues.p);
-            populateDropdownList(rdfBindings, "A", "#idSelect_a", selectedValues.a);
+function populateDropdownLists(rdfBindings, selectedValues) {
+    if (selectedValues !== undefined && selectedValues !== null) {
+        populateDropdownList(rdfBindings, "TC", "#idSelect_tc", selectedValues.tc);
+        populateDropdownList(rdfBindings, "T", "#idSelect_t", selectedValues.t);
+        populateDropdownList(rdfBindings, "P", "#idSelect_p", selectedValues.p);
+        populateDropdownList(rdfBindings, "A", "#idSelect_a", selectedValues.a);
 
-            $('#tc_unlock').css('visibility', 'hidden');
-            $('#t_unlock').css('visibility', 'hidden');
-            $('#p_unlock').css('visibility', 'hidden');
-            $('#a_unlock').css('visibility', 'hidden');
+        $('#tc_unlock').css('visibility', 'hidden');
+        $('#t_unlock').css('visibility', 'hidden');
+        $('#p_unlock').css('visibility', 'hidden');
+        $('#a_unlock').css('visibility', 'hidden');
 
-            $('#tc_lock').css('visibility', 'visible');
-            $('#t_lock').css('visibility', 'visible');
-            $('#p_lock').css('visibility', 'visible');
-            $('#a_lock').css('visibility', 'visible');
-        } else {
-            populateDropdownList(rdfBindings, "TC", "#idSelect_tc", null);
-            populateDropdownList(rdfBindings, "T", "#idSelect_t", null);
-            populateDropdownList(rdfBindings, "P", "#idSelect_p", null);
-            populateDropdownList(rdfBindings, "A", "#idSelect_a", null);
+        $('#tc_lock').css('visibility', 'visible');
+        $('#t_lock').css('visibility', 'visible');
+        $('#p_lock').css('visibility', 'visible');
+        $('#a_lock').css('visibility', 'visible');
+    } else {
+        populateDropdownList(rdfBindings, "TC", "#idSelect_tc", null);
+        populateDropdownList(rdfBindings, "T", "#idSelect_t", null);
+        populateDropdownList(rdfBindings, "P", "#idSelect_p", null);
+        populateDropdownList(rdfBindings, "A", "#idSelect_a", null);
 
-            $('#tc_lock').css('visibility', 'hidden');
-            $('#t_lock').css('visibility', 'hidden');
-            $('#p_lock').css('visibility', 'hidden');
-            $('#a_lock').css('visibility', 'hidden');
-        }
+        $('#tc_lock').css('visibility', 'hidden');
+        $('#t_lock').css('visibility', 'hidden');
+        $('#p_lock').css('visibility', 'hidden');
+        $('#a_lock').css('visibility', 'hidden');
     }
+}
