@@ -53,7 +53,9 @@ public class PlatformCopyAssistant implements ICopyAssistant {
                 || definitionEn.contains("United Kingdom")
                 || definitionEn.contains("New Zealand")
                 || definitionEn.contains("Canada")
-                || definitionEn.contains("Greenland")) {
+                || definitionEn.contains("Greenland")
+                || definitionEn.contains("Bermuda Biological Station")
+                || definitionEn.contains("Turkey")) {
             excluded = false;
         }
         return excluded;

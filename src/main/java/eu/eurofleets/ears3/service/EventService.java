@@ -415,6 +415,9 @@ public class EventService {
     }
 
     public void deleteById(Long id) {
+        if (env.getProperty("ears.read-only") == null || !env.getProperty("ears.read-only").equals("false")) {
+            throw new IllegalArgumentException("Cannot create/modify entities on a read-only system.");
+        }
         Event event = this.eventRepository.findById(id).orElse(null);
         if (event != null) {
             this.eventRepository.deleteById(id);
@@ -424,6 +427,9 @@ public class EventService {
     }
 
     public void deleteByIdentifier(String identifier) {
+        if (env.getProperty("ears.read-only") == null || !env.getProperty("ears.read-only").equals("false")) {
+            throw new IllegalArgumentException("Cannot create/modify entities on a read-only system.");
+        }
         Event event = this.eventRepository.findByIdentifier(identifier);
         if (event != null) {
             this.eventRepository.deleteByIdentifier(identifier);
@@ -434,6 +440,9 @@ public class EventService {
     }
 
     public void deleteByTimeStampBetween(Date startDate, Date endDate) {
+        if (env.getProperty("ears.read-only") == null || !env.getProperty("ears.read-only").equals("false")) {
+            throw new IllegalArgumentException("Cannot create/modify entities on a read-only system.");
+        }
         this.eventRepository.deleteByTimeStampBetween(startDate, endDate);
     }
 

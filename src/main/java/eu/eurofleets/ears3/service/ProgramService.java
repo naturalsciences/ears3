@@ -66,10 +66,16 @@ public class ProgramService {
     }
 
     public void delete(Program program) {
+        if (env.getProperty("ears.read-only") == null || !env.getProperty("ears.read-only").equals("false")) {
+            throw new IllegalArgumentException("Cannot create/modify entities on a read-only system.");
+        }
         this.programRepository.delete(program);
     }
 
     public Program save(ProgramDTO dto) {
+        if (env.getProperty("ears.read-only") == null || !env.getProperty("ears.read-only").equals("false")) {
+            throw new IllegalArgumentException("Cannot create/modify entities on a read-only system.");
+        }
         try {
             Program program = new Program();
             program.setDescription(dto.description);
@@ -109,37 +115,17 @@ public class ProgramService {
         }
     }
 
-    /*
-    public void setProgram(String programId, Program program)
-            throws DuplicateIdException {
-        Program newProgram = new Program();
-        newProgram.setProgramId(program.getProgramId());
-        newProgram.setCruiseId(program.getCruiseId());
-        newProgram.setOriginatorcode(program.getOriginatorCode());
-        newProgram.setPIName(program.getPIName());
-        newProgram.setDescription(program.getDescription());
-
-        Set<Project> projectsSet = new HashSet();
-
-        for (Project project : program.getProjects()) {
-            projectsSet.add(getProject(project.getProjectId()));
-        }
-        newProgram.setProjects(projectsSet);
-        try {
-            this.programRepository.save(newProgram);
-        } catch (DataIntegrityViolationException e) {
-            throw new DuplicateIdException("This register already exists in DataBase. Try another ;-)");
-        } catch (ConstraintViolationException e) {
-            throw new DuplicateIdException("This register already exists in DataBase. Try another ;-)");
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }*/
     public void deleteById(long id) {
+        if (env.getProperty("ears.read-only") == null || !env.getProperty("ears.read-only").equals("false")) {
+            throw new IllegalArgumentException("Cannot create/modify entities on a read-only system.");
+        }
         this.programRepository.deleteById(id);
     }
 
     public void deleteByIdentifier(String identifier) {
+        if (env.getProperty("ears.read-only") == null || !env.getProperty("ears.read-only").equals("false")) {
+            throw new IllegalArgumentException("Cannot create/modify entities on a read-only system.");
+        }
         this.programRepository.deleteByIdentifier(identifier);
     }
 

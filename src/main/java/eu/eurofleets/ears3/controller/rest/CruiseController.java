@@ -1,14 +1,13 @@
 package eu.eurofleets.ears3.controller.rest;
 
-import be.naturalsciences.bmdc.cruise.comparator.CoordinateComparator;
 import be.naturalsciences.bmdc.cruise.csr.CSRBuilder;
 import be.naturalsciences.bmdc.cruise.csr.CSRPrinter;
 import be.naturalsciences.bmdc.cruise.csr.IllegalCSRArgumentException;
-import be.naturalsciences.bmdc.cruise.model.ICoordinate;
 import be.naturalsciences.bmdc.cruise.model.ISeaArea;
 import eu.eurofleets.ears3.domain.Coordinate;
 import eu.eurofleets.ears3.domain.Cruise;
 import eu.eurofleets.ears3.domain.CruiseList;
+import eu.eurofleets.ears3.domain.Event;
 import eu.eurofleets.ears3.domain.License;
 import eu.eurofleets.ears3.domain.Message;
 import eu.eurofleets.ears3.domain.SeaArea;
@@ -28,7 +27,6 @@ import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -55,21 +53,24 @@ import org.springframework.web.server.ResponseStatusException;
 @RequestMapping(value = "/api")
 @CrossOrigin(origins = "*", maxAge = 3600)
 public class CruiseController {
-
+    
     @Autowired
     private CruiseService cruiseService;
-
+    
     @Autowired
     private SeaAreaService seaAreaService;
-
+    
+    @Autowired
+    private EventService eventService;
+    
     @Autowired
     private Environment env;
-
+    
     @RequestMapping(method = {RequestMethod.GET}, value = {"alive"}, produces = {"text/plain"})
     public String getAlive() {
         return "";
     }
-
+    
     public static Logger log = Logger.getLogger(EventService.class.getSimpleName());
 
     // @RequestMapping(method = {RequestMethod.GET}, value = {"cruises"}, produces = {"application/xml; charset=utf-8", "application/json"})
@@ -80,10 +81,10 @@ public class CruiseController {
         } else {
             res = this.cruiseService.findAllByPlatformIdentifier(platformCode);
         }
-
+        
         return new CruiseList(res);
     }
-
+    
     @RequestMapping(method = {RequestMethod.GET}, value = {"cruises"}, produces = {"application/xml; charset=utf-8", "application/json"})
     public CruiseList getCruisesAt(@RequestParam(required = false, defaultValue = "") String platformIdentifier, @RequestParam(required = false) OffsetDateTime startDate, @RequestParam(required = false) OffsetDateTime endDate, @RequestParam(required = false) OffsetDateTime atDate) {
         if (startDate == null && endDate == null && atDate == null) {
@@ -95,17 +96,17 @@ public class CruiseController {
         if (startDate == null && endDate != null) {
             startDate = OffsetDateTime.parse("1900-01-01", DateTimeFormatter.ISO_DATE);
         }
-
+        
         Set<Cruise> res;
         if (atDate == null) {
             res = this.cruiseService.findAllBetweenDate(startDate, endDate, platformIdentifier);
         } else {
             res = this.cruiseService.findAtDate(atDate, platformIdentifier);
         }
-
+        
         return new CruiseList(res);
     }
-
+    
     @RequestMapping(method = {RequestMethod.GET}, value = {"cruise/{id}"}, produces = {"application/xml; charset=utf-8", "application/json"})
     public Cruise getCruiseById(@PathVariable(value = "id") String id) {
         Cruise cruise = this.cruiseService.findById(Long.parseLong(id));
@@ -115,7 +116,7 @@ public class CruiseController {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "There is no cruise with id " + id);
         }
     }
-
+    
     @RequestMapping(method = {RequestMethod.GET}, value = {"cruise"}, params = {"identifier"}, produces = {"application/xml; charset=utf-8", "application/json"})
     public Cruise getCruiseByidentifier(@RequestParam(required = true, value = "identifier") String identifier) {
         Cruise cruise = this.cruiseService.findByIdentifier(identifier);
@@ -125,24 +126,33 @@ public class CruiseController {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "There is no cruise with identifier " + identifier);
         }
     }
-
+    
     @RequestMapping(method = {RequestMethod.GET}, value = {"cruise/current"}, produces = {"application/xml; charset=utf-8", "application/json"})
     public CruiseList getCurrent() {
         return new CruiseList(this.cruiseService.findCurrent());
     }
-
+    
     @RequestMapping(method = {RequestMethod.GET}, value = {"cruise/csr"}, params = {"identifier"}, produces = {"application/xml; charset=utf-8"})
     public String getCSRByName(@RequestParam(required = true, value = "identifier") String identifier) throws JAXBException, IOException, IllegalCSRArgumentException {
         Cruise cruise = this.cruiseService.findByIdentifier(identifier);
         if (cruise != null) {
+            if (cruise.getStartDate().isAfter(OffsetDateTime.now())) {
+                //we can't produce a CSR for a future cruise
+                throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Unable to provide CSR for cruise " + identifier + " as it lies in the future.");
+            }
+            if (cruise.getIsCancelled()) {
+                //we can't produce a CSR for a cancelled cruise
+                throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Unable to provide CSR for cruise " + identifier + " as it was canceled.");
+            }
             List<Coordinate> coordinates = new ArrayList();
-
+            
             String startDate = cruise.getStartDate().withOffsetSameInstant(ZoneOffset.UTC).format(DateTimeFormatter.ISO_DATE_TIME);
             String endDate = cruise.getEndDate().withOffsetSameInstant(ZoneOffset.UTC).format(DateTimeFormatter.ISO_DATE_TIME);
 
             /*DatagramUtilities<Navigation> navUtil = new DatagramUtilities<>(Navigation.class, env.getProperty("ears.navigation.server"));
             List<Navigation> between = navUtil.between(cruise.getStartDate(), cruise.getEndDate());*/
             URL website = new URL(env.getProperty("ears.navigation.server") + "/ears3Nav/nav/getBetween/datagram?startDate=" + startDate + "&endDate=" + endDate);
+            //URL website = new URL("https://ears.bmdc.be/ears3Nav/nav/getBetween/datagram?startDate=2014-07-07T08:00:00Z&endDate=2014-07-11T18:00:00Z");
             URLConnection connection = website.openConnection();
             InputStreamReader ipsr = new InputStreamReader(connection.getInputStream());
             BufferedReader br = new BufferedReader(ipsr);
@@ -170,28 +180,19 @@ public class CruiseController {
                         log.log(Level.SEVERE, "ArrayIndexOutOfBoundsException for lon (index 4) of line " + line);
                     }
                     if (lat != null && !lat.isEmpty() && lon != null && !lon.isEmpty()) {
+                        newCoordinate = new Coordinate(Double.valueOf(lon), Double.valueOf(lat));
                         if (coordinates.isEmpty()) { //always add the first coordinate
-                            newCoordinate = new Coordinate(Double.valueOf(lon), Double.valueOf(lat));
                             coordinates.add(newCoordinate);
                         } else {
-                            String[] split = line.split(",");
-                            /*if (split.length >= 6) { //only check legal datagrams, having heading
-                                headingString = split[5];
-                                if (headingString != null && !headingString.isEmpty()) {
-                                    newHeading = Double.valueOf(headingString);
-                                    headingFound = true;
-                                }
-                            }
-                            if (!headingFound) {*/
-                            newCoordinate = new Coordinate(Double.valueOf(lon), Double.valueOf(lat));
                             newHeading = SpatialUtil.bearingByCoord(coordinate, newCoordinate);
                             headingFound = true;
                             //}
                             if (newHeading != null && heading != null) {
                                 if (Math.abs(newHeading - heading) > 0.5) {
-                                    //newCoordinate = new Coordinate(Double.valueOf(lon), Double.valueOf(lat));
-                                    if (newCoordinate.isValid() && newCoordinate.testSpike(newCoordinate)) {
+                                    if (newCoordinate.isValid() && !newCoordinate.testSpike(coordinate)) {
                                         coordinates.add(newCoordinate);
+                                    } else {
+                                        System.out.println(coordinate + "->" + newCoordinate + " IS INVALID OR A SPIKE");
                                     }
                                 }
                             }
@@ -202,18 +203,34 @@ public class CruiseController {
                 }
             }
             br.close();
-
+            
             if (coordinates.size() > 0) {
                 cruise.setTrack(coordinates);
-                ICoordinate max = Collections.max(cruise.getTrack(), new CoordinateComparator());
-                ICoordinate min = Collections.min(cruise.getTrack(), new CoordinateComparator());
-
-                cruise.setSouthBoundLatitude(min.getY());
-                cruise.setNorthBoundLatitude(max.getY());
-                cruise.setWestBoundLongitude(min.getX());
-                cruise.setEastBoundLongitude(max.getX());
+                double miny = 90;
+                double minx = 180;
+                double maxy = -90;
+                double maxx = -180;
+                for (Coordinate c : coordinates) {
+                    if (c.x > maxx) {
+                        maxx = c.x;
+                    }
+                    if (c.x < minx) {
+                        minx = c.x;
+                    }
+                    if (c.y > maxy) {
+                        maxy = c.y;
+                    }
+                    if (c.y < miny) {
+                        miny = c.y;
+                    }
+                }
+                
+                cruise.setSouthBoundLatitude(miny);
+                cruise.setNorthBoundLatitude(maxy);
+                cruise.setWestBoundLongitude(minx);
+                cruise.setEastBoundLongitude(maxx);
             }
-
+            
             List<SeaArea> allAreas = seaAreaService.findAll();
             Set<SeaArea> set = new HashSet();
             for (ISeaArea seaArea : cruise.getSeaAreas()) {
@@ -227,18 +244,19 @@ public class CruiseController {
                 }
             }
             cruise.setSeaAreas(set);
-
+            
             String licenseString = env.getProperty("ears.csr.license");
             License license = License.Licenses.valueOf(licenseString).license;
             CSRBuilder b = new CSRBuilder(cruise, license, true);
             CSRPrinter p = new CSRPrinter(b);
-
+            List<Event> events = eventService.findByTimeStampBetween(cruise.getStartDate(), cruise.getEndDate());
+            cruise.setEvents(events);
             return p.getResult();
         } else {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "There is no cruise with identifier " + identifier);
         }
     }
-
+    
     @PostMapping(value = {"cruise"}, produces = {"application/xml; charset=utf-8", "application/json"})
     @ResponseStatus(HttpStatus.CREATED)
     public ResponseEntity<Message<CruiseDTO>> createCruise(@RequestBody CruiseDTO cruiseDTO) {
@@ -253,7 +271,7 @@ public class CruiseController {
         Cruise cruise = this.cruiseService.save(cruiseDTO);
         return new ResponseEntity<Message<CruiseDTO>>(new Message<CruiseDTO>(HttpStatus.CREATED.value(), cruise.getIdentifier(), cruiseDTO), HttpStatus.CREATED);
     }
-
+    
     @DeleteMapping(value = {"cruise"}, params = {"identifier"}, produces = {"application/xml; charset=utf-8", "application/json"})
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public String removeCruiseByIdentifier(@RequestParam(required = true) String identifier) {

@@ -8,14 +8,10 @@ package eu.eurofleets.ears3.controller.rest;
 import eu.eurofleets.ears3.domain.Event;
 import eu.eurofleets.ears3.dto.EventDTO;
 import eu.eurofleets.ears3.dto.EventDTOList;
-import eu.eurofleets.ears3.service.CruiseService;
 import eu.eurofleets.ears3.service.EventService;
-import eu.eurofleets.ears3.service.ProgramService;
-//import io.swagger.v3.oas.annotations.Operation;
 import java.util.List;
 import java.util.Map;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.core.env.Environment;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -34,7 +30,7 @@ public class EventDTOController {
     public static final String DEFAULT_VALUE = "_";
     @Autowired
     private EventService eventService;
-    
+
     //@Operation(summary = "Find all events in DTO format")
     @RequestMapping(method = {RequestMethod.GET}, value = {"events"}, produces = {"application/xml; charset=utf-8", "application/json"})
     public EventDTOList getEvents(@RequestParam Map<String, String> allParams) {

@@ -19,7 +19,10 @@ import javax.xml.bind.annotation.XmlRootElement;
  */
 @XmlRootElement(name = "events")
 @XmlAccessorType(XmlAccessType.FIELD)
-public class EventDTOList extends ArrayList<EventDTO> {
+public class EventDTOList {
+
+    @XmlElement(name = "event")
+    private List<EventDTO> events;
 
     public EventDTOList() {
     }
@@ -36,11 +39,11 @@ public class EventDTOList extends ArrayList<EventDTO> {
             this.events.add(new EventDTO(event));
         }
     }
-    
-    @XmlElement(name = "event")
-    private List<EventDTO> events;
 
     public List<EventDTO> getEvents() {
+        if (this.events == null) {
+            this.events = new ArrayList<>();
+        }
         return this.events;
     }
 

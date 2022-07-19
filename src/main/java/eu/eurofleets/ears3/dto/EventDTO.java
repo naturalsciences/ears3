@@ -88,7 +88,7 @@ public class EventDTO {
         this.toolCategory = toolCategory;
         this.process = process;
         this.action = action;
-        this.program = event.getProgram().getIdentifier();
+        this.program = event.getProgram() != null ? event.getProgram().getIdentifier() : null;
         this.platform = event.getPlatform().getTerm().getIdentifier();
         this.label = event.getLabel();
         this.description = event.getDescription();

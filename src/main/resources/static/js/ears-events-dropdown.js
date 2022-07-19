@@ -1,3 +1,12 @@
+function stripSlash(url) {
+    if (url === null) {
+        return null;
+    }
+    return url.endsWith('/') ?
+            url.slice(0, -1) :
+            url;
+}
+
 /**
  * Appends to the provided dropdown one provided row item  of a SPARQL JSON result of provided type entityType, if it is not yet added.
  * dropdown: the jQuery element for the dropdown
@@ -24,15 +33,6 @@ function populateDropdownBasedOnPrevious(dropdown, entityType, item, listElement
             //console.log("Adding "+item[url].value+" to dropdown "+dropdown.attr('id')+" with value: "+ dropdown.val());
         }
     }
-}
-
-function stripSlash(url) {
-    if (url === null) {
-        return null;
-    }
-    return url.endsWith('/') ?
-            url.slice(0, -1) :
-            url;
 }
 
 function populateDropdownList(rdfBindings, entityName, dropdownId, selectedValue) {
@@ -78,6 +78,7 @@ function populateDropdownList(rdfBindings, entityName, dropdownId, selectedValue
         $(dropdownId).selectpicker('refresh');
     }
 }
+
 /**
  * Autoselect a value in the given dropdown when there is only one choice: if there are only two options, one is the defualt 'Select a value', the other a true value.
  * dropdown: the jQuery element for the dropdown
@@ -111,18 +112,23 @@ function dropdownChanged(dropdown, disableOnceSelected) {
     var tu = '';
     var pu = '';
     var au = '';
+        
+    var selected_tc=$("#idSelect_tc").val();
+    var selected_t=$("#idSelect_t").val();
+    var selected_p=$("#idSelect_p").val();
+    var selected_a=$("#idSelect_a").val();
 
-    if ($("#idSelect_tc").val() != 1 && $("#idSelect_tc").val() != null) { //if an actual value is selected here others need to be constrained by it and the condition changes
-        cu = "element.cu.value  == " + "'" + $("#idSelect_tc").val() + "'" + "  && ";
+    if (selected_tc != 1 && selected_tc != null) { //if an actual value is selected here others need to be constrained by it and the condition changes
+        cu = "(binding_tc.url == '" + selected_tc + "' || binding_tc.transitiveUrl == '" + selected_tc + "') && ";
     }
-    if ($("#idSelect_t").val() != 1 && $("#idSelect_t").val() != null) {
-        tu = "element.tu.value  == " + "'" + $("#idSelect_t").val() + "'" + "  && ";
+    if (selected_t != 1 && selected_t != null) {
+        tu = "(binding_t.url == '" + selected_t + "' || binding_t.transitiveUrl == '" + selected_t + "') && ";
     }
-    if ($("#idSelect_p").val() != 1 && $("#idSelect_p").val() != null) {
-        pu = "element.pu.value  == " + "'" + $("#idSelect_p").val() + "'" + "  && ";
+    if (selected_p != 1 && selected_p != null) {
+        pu = "(binding_p.url == '" + selected_p + "' || binding_p.transitiveUrl == '" + selected_p + "') && ";
     }
-    if ($("#idSelect_a").val() != 1 && $("#idSelect_a").val() != null) {
-        au = "element.au.value  == " + "'" + $("#idSelect_a").val() + "'" + "  && ";
+    if (selected_a != 1 && selected_a != null) {
+        au = "(binding_a.url == '" + selected_a + "' || binding_a.transitiveUrl == '" + selected_a + "') && ";
     }
 
     let condition = "(".concat(cu, tu, pu, au, ")").replace(/&&([^'&&']*)$/, '' + '$1');
@@ -142,14 +148,18 @@ function dropdownChanged(dropdown, disableOnceSelected) {
     }
     if ($('#idSelect_a').attr('disabled') != 'disabled') {
         $('#idSelect_a').html(select_option_data);
-    }
+    } 
     var rdfBindings = getBindings(false);
     $(rdfBindings).each(function (index, element) {
-        if (eval(condition)) {
-            populateDropdownBasedOnPrevious($('#idSelect_tc'), 'c', element, tc);
-            populateDropdownBasedOnPrevious($('#idSelect_t'), 't', element, t);
-            populateDropdownBasedOnPrevious($('#idSelect_p'), 'p', element, p);
-            populateDropdownBasedOnPrevious($('#idSelect_a'), 'a', element, a);
+        var binding_tc = getElement('TC', element);
+        var binding_t = getElement('T', element);
+        var binding_p = getElement('P', element);
+        var binding_a = getElement('A', element);
+        if (eval(condition)){
+              populateDropdownBasedOnPrevious($('#idSelect_tc'), 'c', element, tc); 
+              populateDropdownBasedOnPrevious($('#idSelect_t'), 't', element, t); 
+              populateDropdownBasedOnPrevious($('#idSelect_p'), 'p', element, p); 
+              populateDropdownBasedOnPrevious($('#idSelect_a'), 'a', element, a); 
         }
     });
     autoselectDropdownWhenOnlyOneChoice($('#idSelect_tc'), $('#tc_lock'), $('#tc_unlock'), disableOnceSelected);
@@ -201,11 +211,11 @@ function initDropdowns(rdfBindings, selectedValues) {
             unlockTc(rdfBindings);
         } else {
             $("#idSelect_t").val("1"); //clear the selection
+            $('#idSelect_t').prop('disabled', false);
             dropdownChanged($("#idSelect_t"), false);
 
-            $('#idSelect_t').prop('disabled', false);
             $('#idSelect_t').selectpicker('refresh');
-            $('#t_lock').css('vissibility', 'hidden');
+            $('#t_lock').css('visibility', 'hidden');
             $('#t_unlock').css('visibility', 'visible');
 
             $('#idSelect_p').prop('disabled', false);
@@ -219,6 +229,8 @@ function initDropdowns(rdfBindings, selectedValues) {
             $('#a_unlock').css('visibility', 'visible');
 
             $('#id_eid').hide();
+            
+          //  dropdownChanged($("#idSelect_tc"), false);
         }
     });
     $("#cell_p_unlock").click(function () {
@@ -226,9 +238,9 @@ function initDropdowns(rdfBindings, selectedValues) {
             unlockTc(rdfBindings);
         } else {
             $("#idSelect_p").val("1"); //clear the selection
-            dropdownChanged($("#idSelect_p"), false);
-
             $('#idSelect_p').prop('disabled', false);
+            dropdownChanged($("#idSelect_p"), false);
+            
             $('#idSelect_p').selectpicker('refresh');
             $('#p_lock').css('visibility', 'hidden');
             $('#p_unlock').css('visibility', 'visible');
@@ -238,7 +250,9 @@ function initDropdowns(rdfBindings, selectedValues) {
             $('#a_lock').css('visibility', 'hidden');
             $('#a_unlock').css('visibility', 'visible');
 
-            $('#id_eid').hide();
+            $('#id_eid').hide();    
+            
+           // dropdownChanged($("#idSelect_p"), false);
         }
     });
     $("#cell_a_unlock").click(function () {
@@ -246,14 +260,16 @@ function initDropdowns(rdfBindings, selectedValues) {
             unlockTc(rdfBindings);
         } else {
             $("#idSelect_a").val("1"); //clear the selection
-            dropdownChanged($("#idSelect_a"), false);
-
             $('#idSelect_a').prop('disabled', false);
+            dropdownChanged($("#idSelect_a"), false);
+            
             $('#idSelect_a').selectpicker('refresh');
             $('#a_lock').css('visibility', 'hidden');
             $('#a_unlock').css('visibility', 'visible');
 
             $('#id_eid').hide();
+            
+           // dropdownChanged($("#idSelect_a"), false);
         }
     });
     $('#dropdownForm').submit(function (e) {
@@ -269,25 +285,29 @@ function initDropdowns(rdfBindings, selectedValues) {
             var timeStamp = null;
         }
         if (($("#idSelect_tc").val() != 1) && ($("#idSelect_t").val() != 1) && ($("#idSelect_p").val() != 1) && ($("#idSelect_a").val() != 1)) {
-            var condition = '';
+            /*var condition = '';
             var startCondition = "(";
-            if ($("#idSelect_tc").val() != 1) {
-                cu = "element.cu.value  == " + "'" + $("#idSelect_tc").val() + "'" + "  && ";
-            }
-            if ($("#idSelect_t").val() != 1) {
-                tu = "element.tu.value  == " + "'" + $("#idSelect_t").val() + "'" + "  && ";
-            }
-            if ($("#idSelect_p").val() != 1) {
-                pu = "element.pu.value  == " + "'" + $("#idSelect_p").val() + "'" + "  && ";
-            }
-            if ($("#idSelect_a").val() != 1) {
-                au = "element.au.value  == " + "'" + $("#idSelect_a").val() + "'" + "  && ";
-            }
+            cu = "element.cu.value  == " + "'" + $("#idSelect_tc").val() + "'" + "  && ";
+            tu = "element.tu.value  == " + "'" + $("#idSelect_t").val() + "'" + "  && ";
+            pu = "element.pu.value  == " + "'" + $("#idSelect_p").val() + "'" + "  && ";
+            au = "element.au.value  == " + "'" + $("#idSelect_a").val() + "'" + "  && ";
             var endCondition = ")";
-            condition = startCondition.concat(cu, tu, pu, au, endCondition).replace(/&&([^'&&']*)$/, '' + '$1');
+            condition = startCondition.concat(cu, tu, pu, au, endCondition).replace(/&&([^'&&']*)$/, '' + '$1');*/
+            
+            var selected_tc=$("#idSelect_tc").val();
+            var selected_t=$("#idSelect_t").val();
+            var selected_p=$("#idSelect_p").val();
+            var selected_a=$("#idSelect_a").val();
+          
             var rdfBindings = getBindings(false);
             $(rdfBindings).each(function (index, element) {
-                if (eval(condition)) {
+                var binding_tc = getElement('TC', element);
+                var binding_t = getElement('T', element);
+                var binding_p = getElement('P', element);
+                var binding_a = getElement('A', element);
+                
+                if ((binding_tc.url === selected_tc || binding_tc.transitiveUrl === selected_tc) && (binding_t.url === selected_t || binding_t.transitiveUrl === selected_t) && (binding_p.url === selected_p || binding_p.transitiveUrl === selected_p) && (binding_a.url === selected_a || binding_a.transitiveUrl === selected_a)){
+                //if (selected_tc) {
                     let event = new EarsEvent(element);
                     event.identifier = identifier;
                     event.timeStamp = timeStamp;

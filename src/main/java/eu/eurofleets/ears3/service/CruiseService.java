@@ -105,11 +105,11 @@ public class CruiseService {
         if (env.getProperty("ears.read-only") == null || !env.getProperty("ears.read-only").equals("false")) {
             throw new IllegalArgumentException("Cannot create/modify entities on a read-only system.");
         }
-        String json;
+        String json = null;
         try {
             json = objectMapper.writeValueAsString(dto);
         } catch (JsonProcessingException ex) {
-            Logger.getLogger(CruiseService.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(CruiseService.class.getName()).log(Level.SEVERE, "Problem reading JSON:" + json, ex);
         }
 
         if (dto.identifier == null) {
@@ -165,6 +165,7 @@ public class CruiseService {
             cruise.setPlanningUrl(dto.planningUrl);
             cruise.setTrackImageUrl(dto.trackImageUrl);
             cruise.setTrackGmlUrl(dto.trackGmlUrl);
+            cruise.setIsCancelled(dto.isCancelled);
             Cruise foundCruise = cruiseRepository.findByIdentifier(dto.identifier);
             if (foundCruise != null) {
                 cruise.setId(foundCruise.getId());
@@ -259,14 +260,23 @@ public class CruiseService {
         }
     }*/
     public void deleteById(String id) {
+        if (env.getProperty("ears.read-only") == null || !env.getProperty("ears.read-only").equals("false")) {
+            throw new IllegalArgumentException("Cannot create/modify entities on a read-only system.");
+        }
         this.cruiseRepository.deleteById(Long.valueOf(id));
     }
 
     public void deleteByDate(Date startDate, Date endDate) {
+        if (env.getProperty("ears.read-only") == null || !env.getProperty("ears.read-only").equals("false")) {
+            throw new IllegalArgumentException("Cannot create/modify entities on a read-only system.");
+        }
         this.cruiseRepository.deleteByDate(startDate, endDate);
     }
 
     public void deleteByIdentifier(String identifier) {
+        if (env.getProperty("ears.read-only") == null || !env.getProperty("ears.read-only").equals("false")) {
+            throw new IllegalArgumentException("Cannot create/modify entities on a read-only system.");
+        }
         this.cruiseRepository.deleteByIdentifier(identifier);
     }
 

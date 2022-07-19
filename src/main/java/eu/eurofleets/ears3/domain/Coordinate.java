@@ -38,13 +38,20 @@ public class Coordinate implements ICoordinate {
     }
 
     /**
-     * Test if there is a sudden jump of more than THRESHOLD between 2 other chronologically ordered coordinates. The order is beforeCoordinate, this, afterCoordinate.
+     * Test if there is a sudden jump of more than THRESHOLD between 2 other
+     * chronologically ordered coordinates. The order is beforeCoordinate, this.
+     *
      * @param beforeCoordinate
-     * @return 
+     * @return true if there is a sudden jump, false if there is none.
      */
     public boolean testSpike(Coordinate beforeCoordinate) {
         return (Math.abs(beforeCoordinate.x - x) > THRESHOLD || Math.abs(beforeCoordinate.y - y) > THRESHOLD);
-              //  && (Math.abs(afterCoordinate.x - x) > THRESHOLD || Math.abs(afterCoordinate.y - y) > THRESHOLD);
+        //  && (Math.abs(afterCoordinate.x - x) > THRESHOLD || Math.abs(afterCoordinate.y - y) > THRESHOLD);
+    }
+
+    @Override
+    public String toString() {
+        return "Coordinate{" + "x=" + x + ", y=" + y + '}';
     }
 
 }
