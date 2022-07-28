@@ -1,5 +1,6 @@
 package eu.eurofleets.ears3.service;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import eu.eurofleets.ears3.domain.Acquisition;
 import eu.eurofleets.ears3.domain.Cruise;
 import eu.eurofleets.ears3.domain.Event;
@@ -31,6 +32,12 @@ import java.util.UUID;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.apache.commons.collections4.IterableUtils;
+import org.apache.http.HttpResponse;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.entity.StringEntity;
+import org.apache.http.impl.client.HttpClientBuilder;
+import org.apache.http.util.EntityUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.Environment;
 import org.springframework.http.HttpStatus;
@@ -63,6 +70,9 @@ public class EventService {
     private ThermosalService thermosalService;
     @Autowired
     private WeatherService weatherService;
+
+    @Autowired
+    private ObjectMapper objectMapper;
 
     private DatagramUtilities<Navigation> navUtil;
     private DatagramUtilities<Thermosal> thermosalUtil;
@@ -196,7 +206,7 @@ public class EventService {
         if (eventDTO.actor.email == null) {
             throw new IllegalArgumentException("Actor must have an email adress.");
         }
-        if (eventDTO.eventDefinitionId == null) {
+        if (eventDTO.eventDefinitionId == null || eventDTO.eventDefinitionId.equals("")) {
             throw new IllegalArgumentException("Event must have an eventDefinitionId.");
         }
         if (eventDTO.toolCategory == null) {
@@ -214,10 +224,10 @@ public class EventService {
         if (eventDTO.identifier != null && eventDTO.timeStamp == null) {
             throw new IllegalArgumentException("An event that will be modified must have a timeStamp.");
         }
-        if (eventDTO.platform == null) {
+        if (eventDTO.platform == null || eventDTO.platform.equals("")) {
             throw new IllegalArgumentException("Event must have a platform.");
         }
-        if (eventDTO.program == null) {
+        if (eventDTO.program == null || eventDTO.program.equals("")) {
             throw new IllegalArgumentException("Event must have a program.");
         }
         try {
@@ -254,13 +264,13 @@ public class EventService {
                         eventDTO.setTimeStamp(serverTime);
                     }
                 }
-            } else { //it might already exist, and is a modification
-                Event existingEvent = eventRepository.findByIdentifier(identifier);
+            } else { //it has an identifier, so it might be a modification OR come from another EARS instqace.
+                Event existingEvent = eventRepository.findByIdentifier(identifier); //it's an existing event, so a modification
                 if (existingEvent != null) {
                     event.setId(existingEvent.getId());
                     event.setModificationTime(Instant.now().atOffset(ZoneOffset.UTC));
                 } else {
-                    throw new ResponseStatusException(HttpStatus.NOT_FOUND, "You tried modifying an event with identifier " + identifier + " but no such event exists.");
+                    // throw new ResponseStatusException(HttpStatus.NOT_FOUND, "You tried modifying an event with identifier " + identifier + " but no such event exists.");
                 }
             }
             event.setTimeStamp(eventDTO.getTimeStamp());
@@ -284,6 +294,9 @@ public class EventService {
             tool = toolService.findOrCreate(tool); //replace it with a managed entity, either by finding it or creating it.
 
             Platform platform = platformService.findByIdentifier(eventDTO.platform);
+            if (platform == null) {
+                throw new IllegalArgumentException("Provided platform " + eventDTO.platform + " not found in EARS. Please use the appropriate identifier from the C17 vocabulary, eg. SDN:C17::11BU");
+            }
             event.setPlatform(platform);
             Person actor = null;
             if (eventDTO.actor != null) {
@@ -304,6 +317,9 @@ public class EventService {
             }
 
             Program program = programService.findByIdentifier(eventDTO.program);
+            if (program == null) {
+                throw new IllegalArgumentException("Provided program " + eventDTO.program + " not found in EARS. Please create it first.");
+            }
             event.setLabel(eventDTO.label != null && eventDTO.label.equals("") ? null : eventDTO.label);
             event.setStation(eventDTO.station != null && eventDTO.station.equals("") ? null : eventDTO.station);
             event.setDescription(eventDTO.description != null && eventDTO.description.equals("") ? null : eventDTO.description);
@@ -322,7 +338,7 @@ public class EventService {
                 public void run() {
                     try {
                         enrichEventWithAcquisition(event);
-
+                        //sendToRemoteServer(event); //TODO: add this to program automated vessel to shore sending automation
                     } catch (IOException ex) {
                         Logger.getLogger(EventService.class.getName()).log(Level.SEVERE, null, ex);
                     }
@@ -334,6 +350,31 @@ public class EventService {
             Logger.getLogger(EventService.class.getName()).log(Level.SEVERE, null, ex);
             return null;
         }
+    }
+
+    private void sendToRemoteServer(Event event) {
+        String remoteServer = env.getProperty("ears.send-events-to") + "/ears3/api/event";
+        if (remoteServer != null && !remoteServer.equals("")) {
+            try {
+                String json = objectMapper.writeValueAsString(new EventDTO(event));
+                HttpClient httpClient = HttpClientBuilder.create().build();
+
+                HttpPost request = new HttpPost(remoteServer);
+                StringEntity postingString = new StringEntity(json, "UTF-8");//gson.tojson() converts your pojo to json
+                request.setHeader("Content-type", "application/json");
+                request.setEntity(postingString);
+                HttpResponse response = httpClient.execute(request);
+                String body = EntityUtils.toString(response.getEntity(), "UTF-8");
+                int status = response.getStatusLine().getStatusCode();
+                if (status != 201) {
+                    System.out.println("Failure:" + body);
+                }
+
+            } catch (IOException ex) {
+                Logger.getLogger(EventService.class.getName()).log(Level.SEVERE, null, ex);
+            }
+        }
+
     }
 
     public static final int STALE_DATA_THRESHOLD = 15; //15 minutes is too old

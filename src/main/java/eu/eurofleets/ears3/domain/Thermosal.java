@@ -29,15 +29,15 @@ public class Thermosal extends Acquisition {
     @JsonIgnore
     private Long id;
     @DatagramOrder(3)
-    private Double temperature;
-    @DatagramOrder(4)
     private Double salinity;
+    @DatagramOrder(4)
+    private Double temperature;
     @DatagramOrder(5)
-    private Double sigmat;
+    private Double rawFluorometry;
     @DatagramOrder(6)
     private Double conductivity;
     @DatagramOrder(7)
-    private Double rawFluorometry;
+    private Double sigmat;
 
     public Double getSalinity() {
         return this.salinity;

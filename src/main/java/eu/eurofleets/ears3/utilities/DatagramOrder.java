@@ -11,7 +11,7 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- *
+ * A ZERO-based index to link a physical parameter to its index in the EARS datagram
  * @author thomas
  */
 @Retention(RetentionPolicy.RUNTIME)
