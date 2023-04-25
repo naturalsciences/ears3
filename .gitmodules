@@ -1,0 +1,21 @@
+[submodule "bmdc-utils"]
+	path = bmdc-utils
+	url = https://github.com/naturalsciences/bmdc-utils.git
+[submodule "cruise-api"]
+	path = cruise-api
+	url = https://github.com/naturalsciences/cruise-api.git
+[submodule "metadata-generator"]
+	path = metadata-generator
+	url = https://github.com/naturalsciences/metadata-generator.git
+[submodule "csr-generator"]
+	path = csr-generator
+	url = https://github.com/naturalsciences/csr-generator.git
+[submodule "ears3-ontology-base"]
+	path = ears3-ontology-base
+	url = https://github.com/naturalsciences/ears3-ontology-base.git
+[submodule "ears3-ontology-ext"]
+	path = ears3-ontology-ext
+	url = https://github.com/naturalsciences/ears3-ontology-ext.git
+[submodule "sensorml-generator"]
+	path = sensorml-generator
+	url = https://github.com/naturalsciences/sensorml-generator.git
