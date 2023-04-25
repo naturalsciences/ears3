@@ -39,6 +39,7 @@ target/
 
 # NetBeans specific
 nbproject/
+nb-configuration.xml
 
 # OS
 .DS_Store
