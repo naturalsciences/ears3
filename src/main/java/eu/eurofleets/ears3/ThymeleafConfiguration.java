@@ -15,7 +15,7 @@ import org.thymeleaf.spring5.templateresolver.SpringResourceTemplateResolver;
 
 /**
  *
- * @author thomas
+ * @author Thomas Vandenberghe
  */
 @Configuration
 @EnableWebMvc

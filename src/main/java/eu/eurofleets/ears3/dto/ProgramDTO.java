@@ -16,7 +16,7 @@ import javax.xml.bind.annotation.XmlRootElement;
 
 /**
  *
- * @author thomas
+ * @author Thomas Vandenberghe
  */
 @XmlRootElement(name = "program")
 @XmlAccessorType(XmlAccessType.FIELD) //ignore all the getters

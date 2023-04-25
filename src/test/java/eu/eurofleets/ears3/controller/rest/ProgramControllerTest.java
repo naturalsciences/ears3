@@ -48,7 +48,7 @@ import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandl
 
 /**
  *
- * @author thomas
+ * @author Thomas Vandenberghe
  */
 @RunWith(SpringRunner.class)
 @SpringBootTest(classes = {Application.class}, properties = "spring.main.allow-bean-definition-overriding=true")

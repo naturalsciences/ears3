@@ -7,7 +7,7 @@ package eu.eurofleets.ears3.dto;
 
 /**
  *
- * @author thomas
+ * @author Thomas Vandenberghe
  */
 public class OrganisationDTO {
 

@@ -16,7 +16,7 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 /**
  *
- * @author thomas
+ * @author Thomas Vandenberghe
  */
 @Configuration
 @EnableWebMvc

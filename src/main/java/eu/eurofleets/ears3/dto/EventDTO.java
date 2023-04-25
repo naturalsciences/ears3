@@ -20,7 +20,7 @@ import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
  */
 /**
  *
- * @author thomas
+ * @author Thomas Vandenberghe
  */
 @XmlRootElement(name = "event")
 @XmlAccessorType(XmlAccessType.FIELD) //ignore all the getters

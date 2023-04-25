@@ -21,7 +21,7 @@ import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 
 /**
  *
- * @author thomas
+ * @author Thomas Vandenberghe
  */
 @MappedSuperclass
 public abstract class Acquisition {

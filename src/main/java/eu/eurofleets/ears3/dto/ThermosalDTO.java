@@ -9,7 +9,7 @@ import java.time.Instant;
 
 /**
  *
- * @author thomas
+ * @author Thomas Vandenberghe
  */
 public class ThermosalDTO {
 

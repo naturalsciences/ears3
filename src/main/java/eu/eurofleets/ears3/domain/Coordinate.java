@@ -9,7 +9,7 @@ import be.naturalsciences.bmdc.cruise.model.ICoordinate;
 
 /**
  *
- * @author thomas
+ * @author Thomas Vandenberghe
  */
 public class Coordinate implements ICoordinate {
 

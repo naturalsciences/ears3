@@ -34,7 +34,7 @@ import org.springframework.test.context.web.WebAppConfiguration;
 
 /**
  *
- * @author thomas
+ * @author Thomas Vandenberghe
  */
 @RunWith(SpringRunner.class)
 @SpringBootTest(classes = {Application.class}, properties = "spring.main.allow-bean-definition-overriding=true")

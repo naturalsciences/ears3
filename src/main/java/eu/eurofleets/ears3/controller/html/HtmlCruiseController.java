@@ -18,7 +18,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 
 /**
  *
- * @author thomas
+ * @author Thomas Vandenberghe
  */
 @Controller
 @RequestMapping(value = "cruises")

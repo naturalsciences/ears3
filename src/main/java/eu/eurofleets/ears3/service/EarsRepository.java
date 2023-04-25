@@ -11,7 +11,7 @@ import org.springframework.data.repository.NoRepositoryBean;
 
 /**
  *
- * @author thomas
+ * @author Thomas Vandenberghe
  */
 @NoRepositoryBean
 public interface EarsRepository<T, ID extends Serializable>

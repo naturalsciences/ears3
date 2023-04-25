@@ -11,7 +11,7 @@ import javax.persistence.Entity;
 
 /**
  *
- * @author thomas
+ * @author Thomas Vandenberghe
  */
 @Entity
 public class Deployment extends Event implements IDeployment, Serializable {

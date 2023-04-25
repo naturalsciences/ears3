@@ -11,7 +11,7 @@ import javax.xml.bind.annotation.XmlAccessorType;
  */
 /**
  *
- * @author thomas
+ * @author Thomas Vandenberghe
  */
 @XmlAccessorType(XmlAccessType.FIELD) //ignore all the getters
 public class LinkedDataTermDTO {

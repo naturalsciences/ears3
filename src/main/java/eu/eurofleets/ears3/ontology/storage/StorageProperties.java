@@ -7,7 +7,7 @@ package eu.eurofleets.ears3.ontology.storage;
 
 /**
  *
- * @author thomas
+ * @author Thomas Vandenberghe
  */
 import org.springframework.boot.context.properties.ConfigurationProperties;
 

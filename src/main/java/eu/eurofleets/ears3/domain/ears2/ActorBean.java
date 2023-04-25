@@ -10,7 +10,7 @@ import javax.xml.bind.annotation.XmlElement;
 
 /**
  *
- * @author thomas
+ * @author Thomas Vandenberghe
  */
 class ActorBean {
 

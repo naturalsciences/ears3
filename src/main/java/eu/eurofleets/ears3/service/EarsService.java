@@ -13,7 +13,7 @@ import java.util.Set;
 
 /**
  *
- * @author thomas
+ * @author Thomas Vandenberghe
  */
 public interface EarsService<S extends IConcept> {
 

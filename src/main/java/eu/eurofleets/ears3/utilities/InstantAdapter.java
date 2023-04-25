@@ -10,7 +10,7 @@ import javax.xml.bind.annotation.adapters.XmlAdapter;
 
 /**
  *
- * @author thomas
+ * @author Thomas Vandenberghe
  */
 public class InstantAdapter  extends XmlAdapter<String, Instant> {
 

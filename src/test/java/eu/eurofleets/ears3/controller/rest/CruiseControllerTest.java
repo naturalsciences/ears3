@@ -49,7 +49,7 @@ import org.springframework.web.context.WebApplicationContext;
 
 /**
  *
- * @author thomas
+ * @author Thomas Vandenberghe
  */
 @RunWith(SpringRunner.class)
 @SpringBootTest(classes = {Application.class}, properties = {"spring.main.allow-bean-definition-overriding=true"})
@@ -66,11 +66,6 @@ public class CruiseControllerTest {
     @Before
     public void setup() throws Exception {
         this.mockMvc = MockMvcBuilders.webAppContextSetup(this.wac).build();
-
-        /*   MvcResult mvcResult = this.mockMvc.perform(MockMvcRequestBuilders.post("/sync/all")) //first we need all the harbours, countries etc in the system
-                .andDo(print())
-                .andExpect(status().isOk())
-                .andReturn();*/
     }
 
     @Autowired
@@ -290,7 +285,7 @@ public class CruiseControllerTest {
 
         File file = new File("~/Desktop/test.xml");
 
-        FileUtils.write(file, content().toString(), StandardCharsets.UTF_8);
+        FileUtils.write(file, content().toString(), StandardCharsets.UTF_8.name());
 
     }
 

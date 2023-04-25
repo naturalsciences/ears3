@@ -32,7 +32,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 /**
  *
- * @author thomas
+ * @author Thomas Vandenberghe
  */
 @RestController
 @CrossOrigin(origins = "*", maxAge = 3600)
@@ -64,7 +64,7 @@ public class SmlController {
         if (p != null) {
 
             SensorMLBuilder builder = new SensorMLBuilder(p, getUrl(request), bmdc);
-            PhysicalSystemType physicalSystem = builder.getPhysicalSystem(p,p.getInstruments());
+            PhysicalSystemType physicalSystem = builder.getPhysicalSystem();
             SensorMLPrinter instance = new SensorMLPrinter(physicalSystem, physicalSystem.getClass());
             String result = instance.getResult();
 

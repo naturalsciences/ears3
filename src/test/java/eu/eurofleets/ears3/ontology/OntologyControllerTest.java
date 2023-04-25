@@ -41,7 +41,7 @@ import org.springframework.web.util.UriUtils;
 
 /**
  *
- * @author thomas
+ * @author Thomas Vandenberghe
  */
 @RunWith(SpringRunner.class)
 @SpringBootTest(classes = {Application.class}, properties = "spring.main.allow-bean-definition-overriding=true")

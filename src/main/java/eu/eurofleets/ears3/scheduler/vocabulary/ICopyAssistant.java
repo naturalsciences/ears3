@@ -10,7 +10,7 @@ import eu.eurofleets.ears3.AbstractConcept;
 
 /**
  *
- * @author thomas
+ * @author Thomas Vandenberghe
  */
 interface ICopyAssistant {
 

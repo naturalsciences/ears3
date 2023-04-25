@@ -11,7 +11,7 @@ import org.springframework.stereotype.Service;
 
 /**
  *
- * @author thomas
+ * @author Thomas Vandenberghe
  */
 @Service
 public class PropertyService {

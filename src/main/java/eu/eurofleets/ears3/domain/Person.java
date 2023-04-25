@@ -26,7 +26,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
  */
 /**
  *
- * @author thomas
+ * @author Thomas Vandenberghe
  */
 @Entity
 @Table(

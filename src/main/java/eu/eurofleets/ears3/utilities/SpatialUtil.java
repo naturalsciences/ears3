@@ -9,7 +9,7 @@ import eu.eurofleets.ears3.domain.Coordinate;
 
 /**
  *
- * @author thomas
+ * @author Thomas Vandenberghe
  */
 public class SpatialUtil {
     

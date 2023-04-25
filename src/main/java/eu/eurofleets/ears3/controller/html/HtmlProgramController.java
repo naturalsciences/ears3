@@ -19,7 +19,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 
 /**
  *
- * @author thomas
+ * @author Thomas Vandenberghe
  */
 @Controller
 @RequestMapping(value = "program")

@@ -13,7 +13,7 @@ import javax.xml.bind.annotation.XmlRootElement;
 
 /**
  *
- * @author thomas
+ * @author Thomas Vandenberghe
  */
 @XmlRootElement(name = "persons")
 @XmlAccessorType(XmlAccessType.FIELD)

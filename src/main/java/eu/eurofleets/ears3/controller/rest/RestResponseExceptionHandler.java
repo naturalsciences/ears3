@@ -25,7 +25,7 @@ import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExcep
 
 /**
  *
- * @author thomas
+ * @author Thomas Vandenberghe
  */
 @ControllerAdvice
 public class RestResponseExceptionHandler

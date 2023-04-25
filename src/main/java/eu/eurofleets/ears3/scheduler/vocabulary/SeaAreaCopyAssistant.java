@@ -14,7 +14,7 @@ import java.util.Map;
 
 /**
  *
- * @author thomas
+ * @author Thomas Vandenberghe
  */
 public class SeaAreaCopyAssistant implements ICopyAssistant {
 

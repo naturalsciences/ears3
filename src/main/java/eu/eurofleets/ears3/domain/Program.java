@@ -26,7 +26,7 @@ import java.util.Objects;
  */
 /**
  *
- * @author thomas
+ * @author Thomas Vandenberghe
  */
 @Entity
 @XmlRootElement

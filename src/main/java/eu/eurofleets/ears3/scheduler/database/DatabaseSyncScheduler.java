@@ -43,7 +43,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 /**
  *
- * @author thomas
+ * @author Thomas Vandenberghe
  */
 @Service(value = "databaseSyncScheduler")
 @Configuration

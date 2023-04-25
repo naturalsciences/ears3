@@ -11,7 +11,7 @@ import javax.persistence.Entity;
 
 /**
  *
- * @author thomas
+ * @author Thomas Vandenberghe
  */
 @Entity
 public class SamplingEvent extends Event implements ISamplingEvent, Serializable {

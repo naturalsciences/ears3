@@ -10,7 +10,7 @@ import java.util.Map;
 
 /**
  *
- * @author thomas
+ * @author Thomas Vandenberghe
  */
 interface IExternalHelper<C extends IConcept> {
 

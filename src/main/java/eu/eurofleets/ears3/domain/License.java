@@ -16,7 +16,7 @@ import javax.persistence.ManyToOne;
 
 /**
  *
- * @author thomas
+ * @author Thomas Vandenberghe
  */
 @Entity
 public class License implements ILicense, Serializable {

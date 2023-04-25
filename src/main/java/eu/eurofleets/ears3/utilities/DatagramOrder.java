@@ -12,7 +12,7 @@ import java.lang.annotation.Target;
 
 /**
  * A ZERO-based index to link a physical parameter to its index in the EARS datagram
- * @author thomas
+ * @author Thomas Vandenberghe
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.FIELD)

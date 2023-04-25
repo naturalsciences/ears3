@@ -9,7 +9,7 @@ import be.naturalsciences.bmdc.cruise.model.ILinkedDataTerm;
 
 /**
  *
- * @author thomas
+ * @author Thomas Vandenberghe
  */
 public class ToolDTO {
 

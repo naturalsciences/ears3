@@ -26,7 +26,7 @@ import org.springframework.test.context.web.WebAppConfiguration;
 
 /**
  *
- * @author thomas
+ * @author Thomas Vandenberghe
  */
 @RunWith(MockitoJUnitRunner.class)
 @ComponentScan(basePackages = {"eu.eurofleets.ears3.domain", " eu.eurofleets.ears3.service"})

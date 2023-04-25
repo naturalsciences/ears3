@@ -49,7 +49,7 @@ import org.hibernate.annotations.Formula;
  */
 /**
  *
- * @author thomas
+ * @author Thomas Vandenberghe
  */
 @Entity
 @XmlRootElement

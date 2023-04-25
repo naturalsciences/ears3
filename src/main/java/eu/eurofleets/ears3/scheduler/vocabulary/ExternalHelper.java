@@ -23,9 +23,10 @@ import wsimport.uk.ac.nerc.vocab.types.CollectionMembers;
 import wsimport.uk.ac.nerc.vocab.types.Concept;
 import wsimport.uk.ac.nerc.vocab.types.ConceptCollection;
 
+
 /**
  *
- * @author thomas
+ * @author Thomas Vandenberghe
  */
 public class ExternalHelper<C extends IConcept> implements IExternalHelper {
 

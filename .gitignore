@@ -1,12 +1,12 @@
-#
-# Project specific excludes
-#
+# Project-specific excludes
+*.sh
+node_modules
 
-tomcat
+# Compiled class file
+*.class
 
-#
-# Default excludes
-#
+# Log file
+*.log
 
 # Binaries
 *.7z
@@ -14,18 +14,19 @@ tomcat
 *.gz
 *.iso
 *.jar
-*.rar
-*.tar
-*.zip
 *.war
+*.rar
+*.nar
 *.ear
+*.tar
+*.tar.gz
+*.zip
 *.sar
-*.class
 
-# Maven 
+# Maven
 target/
 
-# IntelliJ project files 
+# IntelliJ project files
 *.iml
 *.iws
 *.ipr
@@ -37,22 +38,20 @@ target/
 .project
 
 # NetBeans specific
-nbproject/private/
-build/
-nbbuild/
-dist/
-nbdist/
-nbactions.xml
-nb-configuration.xml
-
+nbproject/
 
 # OS
 .DS_Store
+
+# BlueJ files
+*.ctxt
+
+# Mobile Tools for Java (J2ME)
+.mtj.tmp/
 
 # Misc
 *.swp
 release.properties
 pom.xml.releaseBackup
 pom.xml.tag
-.sh
-node_modues
+hs_err_pid*

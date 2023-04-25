@@ -20,7 +20,7 @@ import javax.xml.bind.annotation.XmlRootElement;
  */
 /**
  *
- * @author thomas
+ * @author Thomas Vandenberghe
  */
 @Entity
 @XmlRootElement

@@ -7,7 +7,7 @@ package eu.eurofleets.ears3.ontology.storage;
 
 /**
  *
- * @author thomas
+ * @author Thomas Vandenberghe
  */
 import java.io.IOException;
 import org.springframework.core.io.Resource;

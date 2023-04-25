@@ -17,7 +17,7 @@ import java.util.regex.Pattern;
 
 /**
  *
- * @author thomas
+ * @author Thomas Vandenberghe
  */
 public class HarbourCopyAssistant implements ICopyAssistant {
 

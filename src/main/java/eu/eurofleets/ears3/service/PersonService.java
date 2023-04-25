@@ -14,7 +14,7 @@ import org.springframework.util.Assert;
 
 /**
  *
- * @author thomas
+ * @author Thomas Vandenberghe
  */
 @Service
 public class PersonService {

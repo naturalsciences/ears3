@@ -20,7 +20,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 /**
  *
- * @author thomas
+ * @author Thomas Vandenberghe
  */
 @RestController()
 @RequestMapping(value = "/api/dto")

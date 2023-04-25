@@ -7,7 +7,7 @@ package eu.eurofleets.ears3.ontology;
 
 /**
  *
- * @author thomas
+ * @author Thomas Vandenberghe
  */
 import java.io.File;
 import java.io.FileInputStream;

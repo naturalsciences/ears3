@@ -27,7 +27,7 @@ import org.springframework.web.server.ResponseStatusException;
 
 /**
  *
- * @author thomas
+ * @author Thomas Vandenberghe
  */
 @RestController()
 @RequestMapping(value = "/api/dto")

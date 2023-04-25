@@ -12,7 +12,7 @@ import org.springframework.data.jpa.repository.support.SimpleJpaRepository;
 
 /**
  *
- * @author thomas
+ * @author Thomas Vandenberghe
  */
 public class SimpleJpaRepositoryImpl<T, ID extends Serializable>
         extends SimpleJpaRepository<T, ID> implements EarsRepository<T, ID>{
