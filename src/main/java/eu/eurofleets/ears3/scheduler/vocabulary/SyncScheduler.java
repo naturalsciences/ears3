@@ -17,7 +17,6 @@ import eu.eurofleets.ears3.domain.Tool;
 import eu.eurofleets.ears3.service.CountryService;
 import eu.eurofleets.ears3.service.EarsService;
 import eu.eurofleets.ears3.service.HarbourService;
-import eu.eurofleets.ears3.service.LinkedDataTermRepository;
 import eu.eurofleets.ears3.service.LinkedDataTermService;
 import eu.eurofleets.ears3.service.OrganisationService;
 import eu.eurofleets.ears3.service.PlatformService;
@@ -73,8 +72,6 @@ public class SyncScheduler {
     private OrganisationService organisationService;
     @Autowired
     private ProjectService projectService;
-    @Autowired
-    private LinkedDataTermRepository linkedDataTermRepo;
 
     private Map<Class, EarsService> REPOS = new HashMap<>();
 
@@ -126,7 +123,7 @@ public class SyncScheduler {
     public CompletableFuture<String> syncShips() {
         log.log(Level.INFO, "Syncing ships");
         try {
-            ExternalHelper sujParPlatformClassLoader = new ExternalHelper(LinkedDataTerm.class, null);
+            ExternalHelper<LinkedDataTerm> sujParPlatformClassLoader = new ExternalHelper<>(LinkedDataTerm.class, null);
 
             Map<String, LinkedDataTerm> sujParPlatforms = sujParPlatformClassLoader.retrieve();
             List<LinkedDataTerm> ldts = new ArrayList<>();
@@ -135,7 +132,7 @@ public class SyncScheduler {
                 ldts.add(term);
             }
 
-            ExternalHelper shipLoader = new ExternalHelper(Platform.class, new PlatformCopyAssistant(linkedDataTermService));
+            ExternalHelper<Platform> shipLoader = new ExternalHelper<>(Platform.class, new PlatformCopyAssistant(linkedDataTermService));
 
             Map<String, Platform> platforms = shipLoader.retrieve();
             for (Map.Entry<String, Platform> entry : platforms.entrySet()) {
@@ -192,13 +189,13 @@ public class SyncScheduler {
     public CompletableFuture<String> syncHarbours() {
         log.log(Level.INFO, "Syncing harbours");
         try {
-            ExternalHelper loader = new ExternalHelper(Harbour.class, new HarbourCopyAssistant(countryService));
+            ExternalHelper<Harbour> loader = new ExternalHelper<>(Harbour.class, new HarbourCopyAssistant(countryService));
             Map<String, Harbour> harbours = loader.retrieve();
             List<LinkedDataTerm> ldts = new ArrayList<>();
             for (Map.Entry<String, Harbour> entry : harbours.entrySet()) {
                 Harbour harbour = entry.getValue();
                 ldts.add((LinkedDataTerm) harbour.getTerm());
-                Country country = null;
+                //Country country = null;
                 /*if (harbour._getCountry() != null) {
                     country = countryService.findByIdentifier(country.getTerm().getIdentifier()); //replace the country with a managed entity
                     harbour._setCountry(country);
@@ -216,21 +213,21 @@ public class SyncScheduler {
     @RequestMapping(method = {RequestMethod.GET}, path = "seas")
     @Async("asyncExecutor")
     public CompletableFuture<String> syncSeas() {
-        sync(SeaArea.class, new ExternalHelper(SeaArea.class, new SeaAreaCopyAssistant()));
+        sync(SeaArea.class, new ExternalHelper<>(SeaArea.class, new SeaAreaCopyAssistant()));
         return CompletableFuture.completedFuture("Finished syncing sea areas");
     }
 
     @RequestMapping(method = {RequestMethod.GET}, path = "countries")
     @Async("asyncExecutor")
     public CompletableFuture<String> syncCountries() {
-        sync(Country.class, new ExternalHelper(Country.class, null));
+        sync(Country.class, new ExternalHelper<>(Country.class, null));
         return CompletableFuture.completedFuture("Finished syncing countries");
     }
 
     @RequestMapping(method = {RequestMethod.GET}, path = "tools")
     @Async("asyncExecutor")
     public CompletableFuture<String> syncTools() {
-        sync(Tool.class, new ExternalHelper(Tool.class, null));
+        sync(Tool.class, new ExternalHelper<>(Tool.class, null));
         return CompletableFuture.completedFuture("Finished syncing tools");
     }
 
@@ -248,7 +245,7 @@ public class SyncScheduler {
         return CompletableFuture.completedFuture("Finished syncing all external vocabularies");
     }
 
-    private <C extends IConcept> void sync(Class<C> cls, IExternalHelper loader) {
+    private <C extends IConcept> void sync(Class<C> cls, IExternalHelper<C> loader) {
         log.log(Level.INFO, "Syncing " + cls.getSimpleName());
         try {
             Map<String, C> things = loader.retrieve();

@@ -28,9 +28,9 @@ import wsimport.uk.ac.nerc.vocab.types.ConceptCollection;
  *
  * @author Thomas Vandenberghe
  */
-public class ExternalHelper<C extends IConcept> implements IExternalHelper {
+public class ExternalHelper<C extends IConcept> implements IExternalHelper<C> {
 
-    static final Map<Class, String[]> CLS = new HashMap();
+    static final Map<Class, String[]> CLS = new HashMap<>();
 
     static {
         CLS.put(Country.class, new String[]{"http://vocab.nerc.ac.uk/collection/C32/current/"});
@@ -69,7 +69,7 @@ public class ExternalHelper<C extends IConcept> implements IExternalHelper {
     }
 
     private Map<String, C> bodcConceptToEARS(ConceptCollection thisColl) {
-        Map<String, C> results = new HashMap();
+        Map<String, C> results = new HashMap<>();
         if (thisColl.getMembers() != null) {
             for (Concept concept : thisColl.getMembers().getConcept()) {
                 if (copyAssistant == null || (copyAssistant != null && !copyAssistant.isExcluded(concept))) {

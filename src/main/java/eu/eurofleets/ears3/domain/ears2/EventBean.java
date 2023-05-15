@@ -15,7 +15,6 @@ import javax.xml.bind.annotation.XmlRootElement;
 public class EventBean implements Serializable {
 
     private Event event;
-    private ToolBean tool;
 
     public EventBean() {
     }

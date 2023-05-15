@@ -15,7 +15,6 @@ import be.naturalsciences.bmdc.cruise.model.ITool;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import java.io.Serializable;
 import java.time.OffsetDateTime;
-import java.time.ZoneId;
 import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
@@ -363,7 +362,7 @@ public class Cruise implements ICruise, Serializable {
 
     @Override
     public Set<ILinkedDataTerm> getInstrumentTypes() {
-        Set<ILinkedDataTerm> toolCategories = new HashSet();
+        Set<ILinkedDataTerm> toolCategories = new HashSet<>();
         if (events != null) {
             for (IEvent event : events) {
                 toolCategories.add(event.getToolCategory());
@@ -374,7 +373,7 @@ public class Cruise implements ICruise, Serializable {
 
     @Override
     public Set<? extends ITool> getInstruments() {
-        Set<ITool> tools = new HashSet();
+        Set<ITool> tools = new HashSet<>();
         if (events != null) {
             for (IEvent event : events) {
                 tools.add(event.getTool());

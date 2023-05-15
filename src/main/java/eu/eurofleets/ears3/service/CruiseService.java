@@ -16,6 +16,7 @@ import eu.eurofleets.ears3.dto.PersonDTO;
 import java.time.Instant;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
@@ -51,7 +52,9 @@ public class CruiseService {
     public static Logger log = Logger.getLogger(CruiseService.class.getSimpleName());
 
     @Autowired
-    public CruiseService(CruiseRepository cruiseRepository, SeaAreaRepository seaAreaRepository, HarbourRepository harbourRepository, OrganisationRepository organisationRepository, PlatformRepository platformRepository) {
+    public CruiseService(CruiseRepository cruiseRepository, SeaAreaRepository seaAreaRepository,
+            HarbourRepository harbourRepository, OrganisationRepository organisationRepository,
+            PlatformRepository platformRepository) {
         this.cruiseRepository = cruiseRepository;
         this.harbourRepository = harbourRepository;
         this.seaAreaRepository = seaAreaRepository;
@@ -79,9 +82,11 @@ public class CruiseService {
     }
 
     public Set<Cruise> findAllBetweenDate(OffsetDateTime startDate, OffsetDateTime endDate, String platformIdentifier) {
-        if (startDate == null) {
-            throw new IllegalArgumentException("startDate cannot be null");
+        if (startDate == null || endDate == null) {
+            throw new IllegalArgumentException("startDate and endDate cannot be null");
         }
+        startDate = startDate.truncatedTo(ChronoUnit.SECONDS); // simplify timekeeping
+        endDate = endDate.truncatedTo(ChronoUnit.SECONDS);
         if (platformIdentifier == null) {
             return this.cruiseRepository.findBetweenDate(startDate, endDate);
         } else {
@@ -152,6 +157,9 @@ public class CruiseService {
             log.log(Level.SEVERE, "Can't further process cruise " + dto.identifier + ". chiefScientists is missing.");
             throw new IllegalArgumentException("Cruise must have at least one Chief Scientist.");
         }
+        dto.startDate = dto.startDate.truncatedTo(ChronoUnit.SECONDS); // simplify timekeeping
+        dto.endDate = dto.endDate.truncatedTo(ChronoUnit.SECONDS);
+
         try {
             Cruise cruise = new Cruise();
             cruise.setIdentifier(dto.identifier);
@@ -171,18 +179,21 @@ public class CruiseService {
                 cruise.setId(foundCruise.getId());
             }
             Harbour arrivalHarbour = harbourRepository.findByIdentifier(ILinkedDataTerm.cleanUrl(dto.arrivalHarbour));
-            Harbour departureHarbour = harbourRepository.findByIdentifier(ILinkedDataTerm.cleanUrl(dto.departureHarbour));
+            Harbour departureHarbour = harbourRepository
+                    .findByIdentifier(ILinkedDataTerm.cleanUrl(dto.departureHarbour));
             Collection<Person> chiefScientists = new ArrayList<>();
             if (dto.chiefScientists != null) {
                 for (PersonDTO chiefScientistDTO : dto.chiefScientists) {
                     Person p = new Person(chiefScientistDTO);
-                    Organisation organisation = organisationRepository.findByIdentifier(ILinkedDataTerm.cleanUrl(chiefScientistDTO.organisation));
+                    Organisation organisation = organisationRepository
+                            .findByIdentifier(ILinkedDataTerm.cleanUrl(chiefScientistDTO.getOrganisation()));
                     p.setOrganisation(organisation);
                     p = personService.findOrCreate(p);
                     chiefScientists.add(p);
                 }
             }
-            Organisation collateCentre = organisationRepository.findByIdentifier(ILinkedDataTerm.cleanUrl(dto.collateCentre));
+            Organisation collateCentre = organisationRepository
+                    .findByIdentifier(ILinkedDataTerm.cleanUrl(dto.collateCentre));
             Platform platform = platformRepository.findByIdentifier(ILinkedDataTerm.cleanUrl(dto.platform));
 
             Collection<Program> programs = new ArrayList<>();
@@ -191,8 +202,8 @@ public class CruiseService {
                     if (program != null) {
                         Program p = programService.findByIdentifier(program);
                         programs.add(p);
-                        //p.addCruise(cruise);
-                        //this.programService.save(p);
+                        // p.addCruise(cruise);
+                        // this.programService.save(p);
                     }
                 }
             }
@@ -222,43 +233,51 @@ public class CruiseService {
             cruise.addPrograms(programs);
             cruise.addSeaAreas(seaAreas);
             cruise.addP02(PO2s);
-            return this.cruiseRepository.save(cruise); //.getId(); } catch (Exception e) {
+            return this.cruiseRepository.save(cruise); // .getId(); } catch (Exception e) {
         } catch (Exception e) {
             log.log(Level.SEVERE, "exception!", e);
             throw e;
         }
     }
 
-    /* public void setCruise(String cruiseId, Cruise cruise) throws DuplicateIdException {
-        Cruise newCruise = new Cruise();
-        newCruise.setCruiseId(cruiseId);
-        newCruise.setCruiseName(cruise.getCruiseName());
-        newCruise.setStartDate(cruise.getStartDate());
-        newCruise.setEndDate(cruise.getEndDate());
-        newCruise.setChiefScientist(cruise.getChiefScientist());
-        newCruise.setChiefScientistOrganisation(cruise.getChiefScientistOrganisation());
-        newCruise.setPlatformCode(cruise.getPlatformCode());
-        newCruise.setPlatformClass(cruise.getPlatformClass());
-        newCruise.setStartingHarbor(cruise.getStartingHarbor());
-        newCruise.setArrivalHarbor(cruise.getArrivalHarbor());
-        newCruise.setObjectives(cruise.getObjectives());
-        newCruise.setCollateCenter(cruise.getCollateCenter());
-
-        Set<SeaArea> seaAreasSet = new HashSet();
-        for (SeaArea seaArea : cruise.getSeaAreas()) {
-            seaAreasSet.add(getSeaArea(seaArea.getSeaAreaId()));
-        }
-        newCruise.setSeaAreas(seaAreasSet);
-        try {
-            this.cruiseRepository.save(newCruise);
-        } catch (DataIntegrityViolationException e) {
-            throw new DuplicateIdException("This register already exists in DataBase. Try another ;-)");
-        } catch (ConstraintViolationException e) {
-            throw new DuplicateIdException("This register already exists in DataBase. Try another ;-)");
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }*/
+    /*
+     * public void setCruise(String cruiseId, Cruise cruise) throws
+     * DuplicateIdException {
+     * Cruise newCruise = new Cruise();
+     * newCruise.setCruiseId(cruiseId);
+     * newCruise.setCruiseName(cruise.getCruiseName());
+     * newCruise.setStartDate(cruise.getStartDate());
+     * newCruise.setEndDate(cruise.getEndDate());
+     * newCruise.setChiefScientist(cruise.getChiefScientist());
+     * newCruise.setChiefScientistOrganisation(cruise.getChiefScientistOrganisation(
+     * ));
+     * newCruise.setPlatformCode(cruise.getPlatformCode());
+     * newCruise.setPlatformClass(cruise.getPlatformClass());
+     * newCruise.setStartingHarbor(cruise.getStartingHarbor());
+     * newCruise.setArrivalHarbor(cruise.getArrivalHarbor());
+     * newCruise.setObjectives(cruise.getObjectives());
+     * newCruise.setCollateCenter(cruise.getCollateCenter());
+     * 
+     * Set<SeaArea> seaAreasSet = new HashSet();
+     * for (SeaArea seaArea : cruise.getSeaAreas()) {
+     * seaAreasSet.add(getSeaArea(seaArea.getSeaAreaId()));
+     * }
+     * newCruise.setSeaAreas(seaAreasSet);
+     * try {
+     * this.cruiseRepository.save(newCruise);
+     * } catch (DataIntegrityViolationException e) {
+     * throw new
+     * DuplicateIdException("This register already exists in DataBase. Try another ;-)"
+     * );
+     * } catch (ConstraintViolationException e) {
+     * throw new
+     * DuplicateIdException("This register already exists in DataBase. Try another ;-)"
+     * );
+     * } catch (Exception e) {
+     * e.printStackTrace();
+     * }
+     * }
+     */
     public void deleteById(String id) {
         if (env.getProperty("ears.read-only") == null || !env.getProperty("ears.read-only").equals("false")) {
             throw new IllegalArgumentException("Cannot create/modify entities on a read-only system.");

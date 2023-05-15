@@ -20,5 +20,4 @@ public class StorageProperties {
 
     public static final String VESSEL_ONTOLOGY_FILE_LOCATION = ONTOLOGY_DIR + VESSEL_ONTOLOGY_FILE_NAME;
 
-
 }

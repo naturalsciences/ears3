@@ -39,7 +39,7 @@ public class SeaAreaCopyAssistant implements ICopyAssistant {
     }
 
     public void copy(AbstractConcept concept, SeaArea seaArea) {
-        Map<String, String> keyVal = new THashMap();
+        Map<String, String> keyVal = new THashMap<>();
         String definitionEn = concept.getDefinitionEn();
         if (definitionEn != null) {
             keyVal.put("Southernmost_latitude", "");

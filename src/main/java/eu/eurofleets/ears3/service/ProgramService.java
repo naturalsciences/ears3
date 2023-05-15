@@ -38,7 +38,8 @@ public class ProgramService {
     private Environment env;
 
     @Autowired
-    public ProgramService(ProgramRepository programRepository, ProjectRepository projectRepository, OrganisationRepository organisationRepository) {
+    public ProgramService(ProgramRepository programRepository, ProjectRepository projectRepository,
+            OrganisationRepository organisationRepository) {
         this.programRepository = programRepository;
         this.projectRepository = projectRepository;
         this.organisationRepository = organisationRepository;
@@ -65,13 +66,6 @@ public class ProgramService {
         return this.programRepository.save(program);
     }
 
-    public void delete(Program program) {
-        if (env.getProperty("ears.read-only") == null || !env.getProperty("ears.read-only").equals("false")) {
-            throw new IllegalArgumentException("Cannot create/modify entities on a read-only system.");
-        }
-        this.programRepository.delete(program);
-    }
-
     public Program save(ProgramDTO dto) {
         if (env.getProperty("ears.read-only") == null || !env.getProperty("ears.read-only").equals("false")) {
             throw new IllegalArgumentException("Cannot create/modify entities on a read-only system.");
@@ -92,7 +86,8 @@ public class ProgramService {
             if (dto.principalInvestigators != null) {
                 for (PersonDTO principalInvestigatorDTO : dto.principalInvestigators) {
                     Person p = new Person(principalInvestigatorDTO);
-                    Organisation organisation = organisationRepository.findByIdentifier(ILinkedDataTerm.cleanUrl(principalInvestigatorDTO.organisation));
+                    Organisation organisation = organisationRepository
+                            .findByIdentifier(ILinkedDataTerm.cleanUrl(principalInvestigatorDTO.getOrganisation()));
                     p.setOrganisation(organisation);
                     p = personService.findOrCreate(p);
                     principalInvestigators.add(p);
@@ -113,6 +108,13 @@ public class ProgramService {
             log.log(Level.SEVERE, "exception!", e);
             throw e;
         }
+    }
+
+    public void delete(Program program) {
+        if (env.getProperty("ears.read-only") == null || !env.getProperty("ears.read-only").equals("false")) {
+            throw new IllegalArgumentException("Cannot create/modify entities on a read-only system.");
+        }
+        this.programRepository.delete(program);
     }
 
     public void deleteById(long id) {

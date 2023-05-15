@@ -25,6 +25,7 @@ import net.opengis.sensorml.PhysicalComponentType;
 import net.opengis.sensorml.PhysicalSystemType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -36,6 +37,7 @@ import org.springframework.web.bind.annotation.RestController;
  */
 @RestController
 @CrossOrigin(origins = "*", maxAge = 3600)
+@RequestMapping(value = "/instrument")
 public class SmlController {
 
     Country belgium = new Country(new LinkedDataTerm("http://vocab.nerc.ac.uk/collection/C32/current/BE", null, "Belgium"));
@@ -58,14 +60,19 @@ public class SmlController {
         return path;
     }
 
-    @RequestMapping(method = {RequestMethod.GET}, value = {"instrument/{platformUrn}"}, produces = {"application/xml"})
-    public String getPhysicalSystem(HttpServletRequest request, @RequestParam(required = true, value = "platformUrn") String platformUrn) throws JAXBException {
+    @RequestMapping(method = {RequestMethod.GET}, value = "")
+    public String getIndex(HttpServletRequest request)  {
+        return "/instrument/{platformUrn} & /instrument/{platformUrn}/{deviceUrn}";
+    }
+
+    @RequestMapping(method = {RequestMethod.GET}, value = {"{platformUrn}"}, produces = {"application/xml"})
+    public String getPhysicalSystem(HttpServletRequest request, @PathVariable(required = true, value = "platformUrn") String platformUrn) throws JAXBException {
         Platform p = this.platformService.findByIdentifier(platformUrn);
         if (p != null) {
 
             SensorMLBuilder builder = new SensorMLBuilder(p, getUrl(request), bmdc);
             PhysicalSystemType physicalSystem = builder.getPhysicalSystem();
-            SensorMLPrinter instance = new SensorMLPrinter(physicalSystem, physicalSystem.getClass());
+            SensorMLPrinter<PhysicalSystemType> instance = new SensorMLPrinter(physicalSystem, physicalSystem.getClass());
             String result = instance.getResult();
 
             return result;
@@ -73,8 +80,8 @@ public class SmlController {
         return "<WebErrorResponse><message>Platform with identifier " + platformUrn + " not found</message></WebErrorResponse>";
     }
 
-    @RequestMapping(method = {RequestMethod.GET}, value = {"instrument/{platformUrn}/{deviceUrn}"}, produces = {"application/xml"})
-    public String getPhysicalComponent(HttpServletRequest request, @RequestParam(required = true, value = "deviceUrn") String deviceUrn, @RequestParam(required = true, value = "platformUrn") String platformUrn) throws JAXBException {
+    @RequestMapping(method = {RequestMethod.GET}, value = {"{platformUrn}/{deviceUrn}"}, produces = {"application/xml"})
+    public String getPhysicalComponent(HttpServletRequest request, @PathVariable(required = true, value = "deviceUrn") String deviceUrn, @PathVariable(required = true, value = "platformUrn") String platformUrn) throws JAXBException {
         Tool tool = this.toolService.findByIdentifier(deviceUrn);
         if (tool != null) {
             List<Event> events = this.eventService.findByTool(tool);
@@ -86,7 +93,7 @@ public class SmlController {
             }
             SensorMLBuilder builder = new SensorMLBuilder(null, getUrl(request), bmdc);
             PhysicalComponentType physicalComponent = builder.getPhysicalComponent(tool, newEvents);
-            SensorMLPrinter instance = new SensorMLPrinter(physicalComponent, physicalComponent.getClass());
+            SensorMLPrinter<PhysicalComponentType> instance = new SensorMLPrinter(physicalComponent, physicalComponent.getClass());
             return instance.getResult();
         }
         return "<WebErrorResponse><message>Tool with identifier " + deviceUrn + " not found</message></WebErrorResponse>";

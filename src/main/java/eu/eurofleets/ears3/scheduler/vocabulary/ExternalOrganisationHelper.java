@@ -43,7 +43,7 @@ public class ExternalOrganisationHelper implements IExternalHelper<Organisation>
         if (this.retrieved != null) {
             return this.retrieved;
         } else {
-            Map<String, Organisation> map = new THashMap();//new ArrayList();
+            Map<String, Organisation> map = new THashMap<>();//new ArrayList();
             DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
             DocumentBuilder dBuilder;
             NodeList nList = null;

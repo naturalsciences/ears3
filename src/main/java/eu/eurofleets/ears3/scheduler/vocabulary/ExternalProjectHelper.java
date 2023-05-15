@@ -50,7 +50,7 @@ import org.apache.http.util.EntityUtils;
  *
  * @author Thomas Vandenberghe
  */
-public class ExternalProjectHelper implements IExternalHelper {
+public class ExternalProjectHelper implements IExternalHelper<Project> {
 
     static DateFormat YYYY_MM_DD = new SimpleDateFormat("yyyy-MM-dd");
     static DateFormat YYYY_MM_DDT_HH_SS_MM = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
@@ -96,7 +96,7 @@ public class ExternalProjectHelper implements IExternalHelper {
     }
 
     public Map<String, Project> retrieve() {
-        Map<String, Project> result = new THashMap();
+        Map<String, Project> result = new THashMap<>();
 
         if (retrieved != null) {
             return this.retrieved;
@@ -125,21 +125,21 @@ public class ExternalProjectHelper implements IExternalHelper {
                     if (xsr.isStartElement() && "Metadata".equals(xsr.getLocalName())) {
                         JAXBElement<Metadata> metadataElement = (JAXBElement<Metadata>) jaxbUnmarshaller.unmarshal(xsr);
                         Metadata metadata = metadataElement.getValue();
-                        String name = null;//
-                        String language = null;//
-                        String acronym = null;//
-                        String urn = null; //
-                        String begin = null; //
-                        Date startDate = null; //
-                        String end = null; //
-                        Date endDate = null; //
-                        String country = null;//
-                        String mdAuthor = null; //
-                        String originator = null;//
-                        String pointOfContact = null;//
-                        String abs = null;//
-                        String mdCreation = null;//
-                        Date mdCreationDate = null;//
+                        String name = null;
+                        String language = null;
+                        String acronym = null;
+                        String urn = null;
+                        String begin = null;
+                        Date startDate = null;
+                        String end = null;
+                        Date endDate = null;
+                        String country = null;
+                        String mdAuthor = null;
+                        String originator = null;
+                        String pointOfContact = null;
+                        String abs = null;
+                        String mdCreation = null;
+                        Date mdCreationDate = null;
                         Date mdModificationDate = null;
 
                         urn = metadata.getMdFileID();

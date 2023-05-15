@@ -10,8 +10,6 @@ import eu.eurofleets.ears3.AbstractConcept;
 import eu.eurofleets.ears3.domain.LinkedDataTerm;
 import eu.eurofleets.ears3.domain.Platform;
 import eu.eurofleets.ears3.service.LinkedDataTermService;
-import gnu.trove.map.hash.THashMap;
-import java.util.Map;
 
 /**
  *
@@ -71,7 +69,6 @@ public class PlatformCopyAssistant implements ICopyAssistant {
     }
 
     public void copy(AbstractConcept concept, Platform platform) {
-        Map<String, String> keyVal = new THashMap();
         if (concept.broadMatch() != null && concept.broadMatch().size() > 0) {
             String platformClassUrl = getPlatformClass(concept);
             if (platformClassUrl != null) {

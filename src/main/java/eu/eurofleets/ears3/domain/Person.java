@@ -58,8 +58,8 @@ public class Person implements IPerson, Serializable {
     }
 
     public Person(PersonDTO dto) {
-        this.firstName = dto.firstName;
-        this.lastName = dto.lastName;
+        this.firstName = dto.getFirstName();
+        this.lastName = dto.getLastName();
     }
 
     public Person(String firstName, String lastName, IOrganisation organisation, String phoneNumber, String faxNumber, String email) {

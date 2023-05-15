@@ -144,7 +144,7 @@ public class CruiseController {
                 //we can't produce a CSR for a cancelled cruise
                 throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Unable to provide CSR for cruise " + identifier + " as it was canceled.");
             }
-            List<Coordinate> coordinates = new ArrayList();
+            List<Coordinate> coordinates = new ArrayList<>();
             
             String startDate = cruise.getStartDate().withOffsetSameInstant(ZoneOffset.UTC).format(DateTimeFormatter.ISO_DATE_TIME);
             String endDate = cruise.getEndDate().withOffsetSameInstant(ZoneOffset.UTC).format(DateTimeFormatter.ISO_DATE_TIME);
@@ -157,7 +157,6 @@ public class CruiseController {
             InputStreamReader ipsr = new InputStreamReader(connection.getInputStream());
             BufferedReader br = new BufferedReader(ipsr);
             String line;
-            String headingString = null;
             Double heading = null;
             Double newHeading = null;
             Coordinate coordinate = null;
@@ -232,7 +231,7 @@ public class CruiseController {
             }
             
             List<SeaArea> allAreas = seaAreaService.findAll();
-            Set<SeaArea> set = new HashSet();
+            Set<SeaArea> set = new HashSet<>();
             for (ISeaArea seaArea : cruise.getSeaAreas()) {
                 set.add((SeaArea) seaArea);
             }

@@ -7,7 +7,6 @@ package eu.eurofleets.ears3.controller.html;
 
 import eu.eurofleets.ears3.domain.Cruise;
 import eu.eurofleets.ears3.service.CruiseService;
-import java.util.ArrayList;
 import java.util.Set;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.Environment;

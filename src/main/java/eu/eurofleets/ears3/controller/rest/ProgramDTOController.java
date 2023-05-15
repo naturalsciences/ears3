@@ -39,9 +39,9 @@ public class ProgramDTOController {
     public ProgramDTOList getPrograms() {
         Set<Program> res = this.programService.findAll();
         Set<Program> currents = this.programService.findCurrent();
-        List r = new ArrayList<>(res);
+        List<Program> r = new ArrayList<>(res);
         r.addAll(0, currents);
-        res = new LinkedHashSet(r);
+        res = new LinkedHashSet<>(r);
         return new ProgramDTOList(res);
     }
 
@@ -57,7 +57,7 @@ public class ProgramDTOController {
         Set<Program> currents = this.programService.findCurrent();
         List<Program> r = new ArrayList<>(res);
         r.addAll(0, currents);
-        res = new LinkedHashSet(r);
+        res = new LinkedHashSet<>(r);
         return new ProgramDTOList(res);
     }
 

@@ -1,8 +1,6 @@
 package eu.eurofleets.ears3.service;
 
 import eu.eurofleets.ears3.domain.Navigation;
-import eu.eurofleets.ears3.domain.Thermosal;
-import java.time.Instant;
 import java.time.OffsetDateTime;
 import java.util.Collection;
 import java.util.List;
@@ -10,9 +8,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 import javax.persistence.EntityManager;
-import javax.persistence.NamedNativeQuery;
 import javax.persistence.Query;
-import org.apache.catalina.User;
 import org.apache.commons.collections4.IterableUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;

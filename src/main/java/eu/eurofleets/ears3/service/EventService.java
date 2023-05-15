@@ -21,8 +21,12 @@ import java.io.IOException;
 import java.net.MalformedURLException;
 import java.time.Duration;
 import java.time.Instant;
+import java.time.LocalDate;
 import java.time.OffsetDateTime;
+import java.time.OffsetTime;
+import java.time.ZoneId;
 import java.time.ZoneOffset;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
@@ -133,21 +137,36 @@ public class EventService {
         String endDate = sanitizeParam(allParams, "endDate");
         OffsetDateTime start = null;
         OffsetDateTime end = null;
+
+        DateTimeFormatter parser = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+        OffsetDateTime early = LocalDate.parse("1900-01-01", parser).atTime(OffsetTime.now());
+        OffsetDateTime late = LocalDate.parse("2100-01-01", parser).atTime(OffsetTime.now());
+        //OffsetDateTime.MAX  and OffsetDateTime.MIN lead to exceptions.
+
         if (startDate != null) {
             start = OffsetDateTime.parse(startDate);
+            if (endDate == null) {
+                end = late;
+            }
         }
         if (endDate != null) {
             end = OffsetDateTime.parse(endDate);
+            if (startDate == null) {
+                start = early;
+            }
         }
 
         List<Event> res = null;
-        if (platformIdentifier == null && programIdentifier == null && actorEmail == null && start == null && end == null && cruiseIdentifier == null) {
+        if (platformIdentifier == null && programIdentifier == null && actorEmail == null && start == null
+                && end == null && cruiseIdentifier == null) {
             res = this.findAll();
-        } else if (programIdentifier == null && actorEmail == null && start == null && end == null && cruiseIdentifier == null) {
+        } else if (programIdentifier == null && actorEmail == null && start == null && end == null
+                && cruiseIdentifier == null) {
             res = this.findAllByPlatformCode(platformIdentifier);
         } else if (cruiseIdentifier == null) {
             if (start != null && end != null) {
-                res = this.findAllByPlatformActorProgramAndDates(platformIdentifier, actorEmail, programIdentifier, start, end);
+                res = this.findAllByPlatformActorProgramAndDates(platformIdentifier, actorEmail, programIdentifier,
+                        start, end);
             } else {
                 res = this.findAllByPlatformActorAndProgram(platformIdentifier, actorEmail, programIdentifier);
             }
@@ -183,12 +202,16 @@ public class EventService {
         return this.eventRepository.findByCruise(cruiseIdentifier);
     }
 
-    public List<Event> findAllByPlatformActorAndProgram(String platformIdentifier, String personEmail, String programIdentifier) {
-        return this.eventRepository.findAllByPlatformActorAndProgram(platformIdentifier, personEmail, programIdentifier);
+    public List<Event> findAllByPlatformActorAndProgram(String platformIdentifier, String personEmail,
+            String programIdentifier) {
+        return this.eventRepository.findAllByPlatformActorAndProgram(platformIdentifier, personEmail,
+                programIdentifier);
     }
 
-    public List<Event> findAllByPlatformActorProgramAndDates(String platformIdentifier, String personEmail, String programIdentifier, OffsetDateTime start, OffsetDateTime end) {
-        return this.eventRepository.findAllByPlatformActorProgramAndDates(platformIdentifier, personEmail, programIdentifier, start, end);
+    public List<Event> findAllByPlatformActorProgramAndDates(String platformIdentifier, String personEmail,
+            String programIdentifier, OffsetDateTime start, OffsetDateTime end) {
+        return this.eventRepository.findAllByPlatformActorProgramAndDates(platformIdentifier, personEmail,
+                programIdentifier, start, end);
     }
 
     public List<Event> findCreatedOrModifiedAfter(OffsetDateTime after) {
@@ -200,129 +223,147 @@ public class EventService {
         if (env.getProperty("ears.read-only") == null || !env.getProperty("ears.read-only").equals("false")) {
             throw new IllegalArgumentException("Cannot create/modify entities on a read-only system.");
         }
-        if (eventDTO.actor == null) {
+        if (eventDTO.getActor() == null) {
             throw new IllegalArgumentException("Event must have an actor.");
         }
-        if (eventDTO.actor.email == null) {
+        if (eventDTO.getActor().getEmail() == null) {
             throw new IllegalArgumentException("Actor must have an email adress.");
         }
-        if (eventDTO.eventDefinitionId == null || eventDTO.eventDefinitionId.equals("")) {
+        if (eventDTO.getEventDefinitionId() == null || eventDTO.getEventDefinitionId().equals("")) {
             throw new IllegalArgumentException("Event must have an eventDefinitionId.");
         }
-        if (eventDTO.toolCategory == null) {
+        if (eventDTO.getToolCategory() == null) {
             throw new IllegalArgumentException("Event must have a toolCategory.");
         }
-        if (eventDTO.tool == null) {
+        if (eventDTO.getTool() == null) {
             throw new IllegalArgumentException("Event must have a tool.");
         }
-        if (eventDTO.action == null) {
+        if (eventDTO.getAction() == null) {
             throw new IllegalArgumentException("Event must have an action.");
         }
-        if (eventDTO.process == null) {
+        if (eventDTO.getProcess() == null) {
             throw new IllegalArgumentException("Event must have a process.");
         }
-        if (eventDTO.identifier != null && eventDTO.timeStamp == null) {
+        if (eventDTO.getIdentifier() != null && eventDTO.getTimeStamp() == null) {
             throw new IllegalArgumentException("An event that will be modified must have a timeStamp.");
         }
-        if (eventDTO.platform == null || eventDTO.platform.equals("")) {
+        if (eventDTO.getPlatform() == null || eventDTO.getPlatform().equals("")) {
             throw new IllegalArgumentException("Event must have a platform.");
         }
-        if (eventDTO.program == null || eventDTO.program.equals("")) {
+        if (eventDTO.getProgram() == null || eventDTO.getProgram().equals("")) {
             throw new IllegalArgumentException("Event must have a program.");
         }
         try {
             Event event = new Event();
-            event.setEventDefinitionId(eventDTO.eventDefinitionId);
-            String identifier = eventDTO.identifier;
+            event.setEventDefinitionId(eventDTO.getEventDefinitionId());
+            String identifier = eventDTO.getIdentifier();
 
             boolean drift = false;
-            if (identifier == null) { //it is brand new
+            if (identifier == null) { // it is brand new
                 identifier = UUID.randomUUID().toString();
                 event.setCreationTime(serverTime);
                 OffsetDateTime dtoTime = eventDTO.getTimeStamp();
-                if (dtoTime == null) { //if it has no time, we add the one from the acquisition
+                if (dtoTime == null) { // if it has no time, we add the one from the acquisition
                     Navigation last = null;
                     // Navigation last = navUtil != null ? navUtil.findLast() : null;
-                    //for now, do not take the acquisition time, always the server time.
+                    // for now, do not take the acquisition time, always the server time.
                     if (last != null) {
-                        OffsetDateTime acquisitionTime = last.getTime();//.atOffset(ZoneOffset.UTC);
+                        OffsetDateTime acquisitionTime = last.getTime();// .atOffset(ZoneOffset.UTC);
                         log.log(Level.INFO, "acquisition time:" + acquisitionTime.toString());
                         log.log(Level.INFO, "server time: " + serverTime.toString());
                         log.log(Level.INFO, "event timestamp: none given");
-                        Duration acquisitiondrift = Duration.between(acquisitionTime, serverTime); //positive if server ahead of acquisition, negative if acquisition ahead of server
+                        Duration acquisitiondrift = Duration.between(acquisitionTime, serverTime); // positive if server
+                                                                                                   // ahead of
+                                                                                                   // acquisition,
+                                                                                                   // negative if
+                                                                                                   // acquisition ahead
+                                                                                                   // of server
                         long acquisitionDiff = acquisitiondrift.toMinutes();
-                        if (acquisitionTime == null || acquisitionDiff > 2) { //if the acquisition is null or lagging behind server for more than 2 minutes, take the server time
+                        if (acquisitionTime == null || acquisitionDiff > 2) { // if the acquisition is null or lagging
+                                                                              // behind server for more than 2 minutes,
+                                                                              // take the server time
                             eventDTO.setTimeStamp(serverTime);
                             drift = true;
-                        } else {//if the server is lagging behind acquisition, or equal, take the acquisition
+                        } else {// if the server is lagging behind acquisition, or equal, take the acquisition
                             eventDTO.setTimeStamp(acquisitionTime);
                         }
                     } else {
-                        //log.log(Level.INFO, "acquisition time: null (last=null)");
+                        // log.log(Level.INFO, "acquisition time: null (last=null)");
                         log.log(Level.INFO, "server time: " + serverTime.toString());
                         log.log(Level.INFO, "event timestamp: none given");
                         eventDTO.setTimeStamp(serverTime);
                     }
                 }
-            } else { //it has an identifier, so it might be a modification OR come from another EARS instqace.
-                Event existingEvent = eventRepository.findByIdentifier(identifier); //it's an existing event, so a modification
+            } else { // it has an identifier, so it might be a modification OR come from another EARS
+                     // instqace.
+                Event existingEvent = eventRepository.findByIdentifier(identifier); // it's an existing event, so a
+                                                                                    // modification
                 if (existingEvent != null) {
                     event.setId(existingEvent.getId());
                     event.setModificationTime(Instant.now().atOffset(ZoneOffset.UTC));
                 } else {
-                    // throw new ResponseStatusException(HttpStatus.NOT_FOUND, "You tried modifying an event with identifier " + identifier + " but no such event exists.");
+                    // throw new ResponseStatusException(HttpStatus.NOT_FOUND, "You tried modifying
+                    // an event with identifier " + identifier + " but no such event exists.");
                 }
             }
             event.setTimeStamp(eventDTO.getTimeStamp());
             event.setIdentifier(identifier);
 
-            //Navigation last = navigationService.findLast();
+            // Navigation last = navigationService.findLast();
             // last.getTimeStamp()
-            LinkedDataTerm action = ldtService.findOrCreate(eventDTO.action);
-            LinkedDataTerm process = ldtService.findOrCreate(eventDTO.process);
-            LinkedDataTerm subject = ldtService.findOrCreate(eventDTO.subject);
-            LinkedDataTerm toolCategory = ldtService.findOrCreate(eventDTO.toolCategory);
-            LinkedDataTerm toolLdTerm = ldtService.findOrCreate(eventDTO.tool.tool);
-            LinkedDataTerm parentToolLdTerm = ldtService.findOrCreate(eventDTO.tool.parentTool);
-            Tool tool = new Tool(eventDTO.tool); //create a tool from the DTO
-            toolLdTerm.setTransitiveIdentifier(eventDTO.tool.tool.transitiveIdentifier);
-            if (parentToolLdTerm != null && eventDTO.tool.parentTool != null) {
-                parentToolLdTerm.setTransitiveIdentifier(eventDTO.tool.parentTool.transitiveIdentifier);
+            LinkedDataTerm action = ldtService.findOrCreate(eventDTO.getAction());
+            LinkedDataTerm process = ldtService.findOrCreate(eventDTO.getProcess());
+            LinkedDataTerm subject = ldtService.findOrCreate(eventDTO.getSubject());
+            LinkedDataTerm toolCategory = ldtService.findOrCreate(eventDTO.getToolCategory());
+            LinkedDataTerm toolLdTerm = ldtService.findOrCreate(eventDTO.getTool().tool);
+            LinkedDataTerm parentToolLdTerm = ldtService.findOrCreate(eventDTO.getTool().parentTool);
+            Tool tool = new Tool(eventDTO.getTool()); // create a tool from the DTO
+            toolLdTerm.setTransitiveIdentifier(eventDTO.getTool().tool.transitiveIdentifier);
+            if (parentToolLdTerm != null && eventDTO.getTool().parentTool != null) {
+                parentToolLdTerm.setTransitiveIdentifier(eventDTO.getTool().parentTool.transitiveIdentifier);
             }
-            tool.setTerm(toolLdTerm); //add the linkeddataterm to it
-            tool.setParentTool(parentToolLdTerm); //add the parent linkeddataterm to it
-            tool = toolService.findOrCreate(tool); //replace it with a managed entity, either by finding it or creating it.
+            tool.setTerm(toolLdTerm); // add the linkeddataterm to it
+            tool.setParentTool(parentToolLdTerm); // add the parent linkeddataterm to it
+            tool = toolService.findOrCreate(tool); // replace it with a managed entity, either by finding it or creating
+                                                   // it.
 
-            Platform platform = platformService.findByIdentifier(eventDTO.platform);
+            Platform platform = platformService.findByIdentifier(eventDTO.getPlatform());
             if (platform == null) {
-                throw new IllegalArgumentException("Provided platform " + eventDTO.platform + " not found in EARS. Please use the appropriate identifier from the C17 vocabulary, eg. SDN:C17::11BU");
+                throw new IllegalArgumentException("Provided platform " + eventDTO.getPlatform()
+                        + " not found in EARS. Please use the appropriate identifier from the C17 vocabulary, eg. SDN:C17::11BU");
             }
             event.setPlatform(platform);
             Person actor = null;
-            if (eventDTO.actor != null) {
-                Organisation organisation = organisationService.findByIdentifier(eventDTO.actor.organisation);
-                actor = new Person(eventDTO.actor.firstName, eventDTO.actor.lastName, organisation, null, null, eventDTO.actor.email);
+            if (eventDTO.getActor() != null) {
+                Organisation organisation = organisationService.findByIdentifier(eventDTO.getActor().getOrganisation());
+                actor = new Person(eventDTO.getActor().getFirstName(), eventDTO.getActor().getLastName(), organisation,
+                        null, null, eventDTO.getActor().getEmail());
                 actor = personService.findOrCreate(actor);
             }
 
             Collection<Property> properties = new ArrayList<>();
-            if (eventDTO.properties != null) {
-                for (PropertyDTO propertyDTO : eventDTO.properties) {
-                    LinkedDataTerm propertyLdTerm = new LinkedDataTerm(propertyDTO.key.identifier, propertyDTO.key.transitiveIdentifier, propertyDTO.key.name);
-                    propertyLdTerm = ldtService.findOrCreate(propertyLdTerm); //replace it with a managed one, either new or selected.
+            if (eventDTO.getProperties() != null) {
+                for (PropertyDTO propertyDTO : eventDTO.getProperties()) {
+                    LinkedDataTerm propertyLdTerm = new LinkedDataTerm(propertyDTO.key.identifier,
+                            propertyDTO.key.transitiveIdentifier, propertyDTO.key.name);
+                    propertyLdTerm = ldtService.findOrCreate(propertyLdTerm); // replace it with a managed one, either
+                                                                              // new or selected.
                     Property property = new Property(propertyLdTerm, propertyDTO.value, propertyDTO.uom);
                     propertyService.save(property);
                     properties.add(property);
                 }
             }
 
-            Program program = programService.findByIdentifier(eventDTO.program);
+            Program program = programService.findByIdentifier(eventDTO.getProgram());
             if (program == null) {
-                throw new IllegalArgumentException("Provided program " + eventDTO.program + " not found in EARS. Please create it first.");
+                throw new IllegalArgumentException(
+                        "Provided program " + eventDTO.getProgram() + " not found in EARS. Please create it first.");
             }
-            event.setLabel(eventDTO.label != null && eventDTO.label.equals("") ? null : eventDTO.label);
-            event.setStation(eventDTO.station != null && eventDTO.station.equals("") ? null : eventDTO.station);
-            event.setDescription(eventDTO.description != null && eventDTO.description.equals("") ? null : eventDTO.description);
+            event.setLabel(eventDTO.getLabel() != null && eventDTO.getLabel().equals("") ? null : eventDTO.getLabel());
+            event.setStation(
+                    eventDTO.getStation() != null && eventDTO.getStation().equals("") ? null : eventDTO.getStation());
+            event.setDescription(eventDTO.getDescription() != null && eventDTO.getDescription().equals("") ? null
+                    : eventDTO.getDescription());
             event.setAction(action);
             event.setActor(actor);
             event.setProcess(process);
@@ -332,13 +373,14 @@ public class EventService {
             event.setTool(tool);
             event.setToolCategory(toolCategory);
             this.eventRepository.save(event);
-            //enrichEventWithAcquisition(event);
+            // enrichEventWithAcquisition(event);
             new Thread() {
                 @Override
                 public void run() {
                     try {
                         enrichEventWithAcquisition(event);
-                        //sendToRemoteServer(event); //TODO: add this to program automated vessel to shore sending automation
+                        // sendToRemoteServer(event); //TODO: add this to program automated vessel to
+                        // shore sending automation
                     } catch (IOException ex) {
                         Logger.getLogger(EventService.class.getName()).log(Level.SEVERE, null, ex);
                     }
@@ -360,7 +402,7 @@ public class EventService {
                 HttpClient httpClient = HttpClientBuilder.create().build();
 
                 HttpPost request = new HttpPost(remoteServer);
-                StringEntity postingString = new StringEntity(json, "UTF-8");//gson.tojson() converts your pojo to json
+                StringEntity postingString = new StringEntity(json, "UTF-8");// gson.tojson() converts your pojo to json
                 request.setHeader("Content-type", "application/json");
                 request.setEntity(postingString);
                 HttpResponse response = httpClient.execute(request);
@@ -377,7 +419,7 @@ public class EventService {
 
     }
 
-    public static final int STALE_DATA_THRESHOLD = 15; //15 minutes is too old
+    public static final int STALE_DATA_THRESHOLD = 15; // 15 minutes is too old
 
     private boolean acqDataIsNullTooOldOrUncomparable(Acquisition data, Event event) {
         if (event == null) {
@@ -397,61 +439,73 @@ public class EventService {
 
         /// boolean tooOld;
         // boolean persistAcquisition = false;
-        //  Navigation nearestNav = navigationService.findNearest(event.getTimeStamp());
-        //  log.log(Level.INFO, "Enriching " + event.toString() + ": nearest nav in db: " + nearestNav);
-        //  if (acqDataIsNullTooOldOrUncomparable(nearestNav, event)) {//if we don't find it directly via the database, or if we found it but it is too old, look in the ears3Nav webservice itself
+        // Navigation nearestNav = navigationService.findNearest(event.getTimeStamp());
+        // log.log(Level.INFO, "Enriching " + event.toString() + ": nearest nav in db: "
+        /// + nearestNav);
+        // if (acqDataIsNullTooOldOrUncomparable(nearestNav, event)) {//if we don't find
+        /// it directly via the database, or if we found it but it is too old, look in
+        /// the ears3Nav webservice itself
         Navigation nearestNav = navUtil.findNearest(event.getTimeStamp());
-        // log.log(Level.INFO, "Enriching " + event.toString() + ": nearest nav in ws: " + nearestNav);
+        // log.log(Level.INFO, "Enriching " + event.toString() + ": nearest nav in ws: "
+        // + nearestNav);
         // persistAcquisition = true;
         // }
         if (nearestNav != null) {
-            //   tooOld = acqDataIsNullTooOldOrUncomparable(nearestNav, event);
-            //log.log(Level.INFO, "Nearest nav " + (tooOld ? " (too old):" : ":") + nearestNav.toString());
-            //if (!tooOld) {
-            //       if (persistAcquisition) {
+            // tooOld = acqDataIsNullTooOldOrUncomparable(nearestNav, event);
+            // log.log(Level.INFO, "Nearest nav " + (tooOld ? " (too old):" : ":") +
+            // nearestNav.toString());
+            // if (!tooOld) {
+            // if (persistAcquisition) {
             Collection<Event> events = new ArrayList<>();
             events.add(event);
             nearestNav.setEvents(events);
             navigationService.save(nearestNav);
-            //       }
+            // }
             navigations.add(nearestNav);
             event.setNavigation(navigations);
         }
         // }
-        //persistAcquisition = false;
-        //Weather nearestWeather = weatherService.findNearest(event.getTimeStamp());
-        //if (acqDataIsNullTooOldOrUncomparable(nearestWeather, event)) {//if we don't find it directly via the database, or if we found it but it is too old, look in the ears3Nav webservice itself
-        Weather nearestWeather = weatherUtil.findNearest(event.getTimeStamp()); //find it via the webservices
-        //    persistAcquisition = true;
-        //}
+        // persistAcquisition = false;
+        // Weather nearestWeather = weatherService.findNearest(event.getTimeStamp());
+        // if (acqDataIsNullTooOldOrUncomparable(nearestWeather, event)) {//if we don't
+        // find it directly via the database, or if we found it but it is too old, look
+        // in the ears3Nav webservice itself
+        Weather nearestWeather = weatherUtil.findNearest(event.getTimeStamp()); // find it via the webservices
+        // persistAcquisition = true;
+        // }
         if (nearestWeather != null) {
-            //    tooOld = acqDataIsNullTooOldOrUncomparable(nearestWeather, event);
-            //    log.log(Level.INFO, "Enriching " + event.toString() + ": nearest met" + (tooOld ? " (too old):" : ":") + nearestWeather.toString());
-            //    if (!tooOld) {
-            //        if (persistAcquisition) {
+            // tooOld = acqDataIsNullTooOldOrUncomparable(nearestWeather, event);
+            // log.log(Level.INFO, "Enriching " + event.toString() + ": nearest met" +
+            // (tooOld ? " (too old):" : ":") + nearestWeather.toString());
+            // if (!tooOld) {
+            // if (persistAcquisition) {
             weatherService.save(nearestWeather);
-            //}
+            // }
             weathers.add(nearestWeather);
             event.setWeather(weathers);
         }
-        //}
-        //persistAcquisition = false;
-        //Thermosal nearestThermosal = thermosalService.findNearest(event.getTimeStamp());
-        //if (acqDataIsNullTooOldOrUncomparable(nearestThermosal, event)) {//if we don't find it directly via the database, or if we found it but it is too old, look in the ears3Nav webservice itself
+        // }
+        // persistAcquisition = false;
+        // Thermosal nearestThermosal =
+        // thermosalService.findNearest(event.getTimeStamp());
+        // if (acqDataIsNullTooOldOrUncomparable(nearestThermosal, event)) {//if we
+        // don't find it directly via the database, or if we found it but it is too old,
+        // look in the ears3Nav webservice itself
         Thermosal nearestThermosal = thermosalUtil.findNearest(event.getTimeStamp());
-        //  persistAcquisition = true;
-        //}
+        // persistAcquisition = true;
+        // }
         if (nearestThermosal != null) {
-            //  tooOld = acqDataIsNullTooOldOrUncomparable(nearestThermosal, event);
-            //  log.log(Level.INFO, "Enriching " + event.toString() + ": nearest tss" + (tooOld ? " (too old):" : ":") + nearestThermosal.toString());
-            //  if (!tooOld) {
-            //      if (persistAcquisition) {
+            // tooOld = acqDataIsNullTooOldOrUncomparable(nearestThermosal, event);
+            // log.log(Level.INFO, "Enriching " + event.toString() + ": nearest tss" +
+            // (tooOld ? " (too old):" : ":") + nearestThermosal.toString());
+            // if (!tooOld) {
+            // if (persistAcquisition) {
             thermosalService.save(nearestThermosal);
-            //      }
+            // }
             thermosals.add(nearestThermosal);
             event.setThermosal(thermosals);
         }
-        //}
+        // }
         this.eventRepository.save(event);
     }
 
@@ -487,7 +541,8 @@ public class EventService {
         this.eventRepository.deleteByTimeStampBetween(startDate, endDate);
     }
 
-    public List<Event> findAllByCruiseProgramAndActor(String cruiseIdentifier, String programIdentifier, String actorEmail) {
+    public List<Event> findAllByCruiseProgramAndActor(String cruiseIdentifier, String programIdentifier,
+            String actorEmail) {
         return this.eventRepository.findAllByCruiseProgramAndActor(cruiseIdentifier, programIdentifier, actorEmail);
     }
 }

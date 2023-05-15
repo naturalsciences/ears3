@@ -10,6 +10,9 @@ import be.naturalsciences.bmdc.cruise.model.IProperty;
 import be.naturalsciences.bmdc.cruise.model.ITool;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonIgnoreType;
+
 import java.io.Serializable;
 import java.time.OffsetDateTime;
 import java.time.format.DateTimeFormatter;
@@ -19,7 +22,6 @@ import java.util.List;
 import java.util.StringJoiner;
 import javax.persistence.Column;
 import javax.persistence.Entity;
-import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
@@ -50,7 +52,7 @@ import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 @Entity
 @Inheritance(strategy = InheritanceType.SINGLE_TABLE)
 @XmlRootElement
-@XmlAccessorType(XmlAccessType.FIELD) //ignore all the getters
+@XmlAccessorType(XmlAccessType.FIELD) // ignore all the getters
 public class Event implements IEvent, Serializable {
 
     @Id
@@ -59,7 +61,7 @@ public class Event implements IEvent, Serializable {
     @JsonIgnore
     private long id;
 
-    @Column(unique = true, nullable = false, length = 36) //uuid length
+    @Column(unique = true, nullable = false, length = 36) // uuid length
     private String identifier;
     private String eventDefinitionId;
     private String label;
@@ -98,33 +100,21 @@ public class Event implements IEvent, Serializable {
     private Program program;
 
     @ManyToMany()
-    @JoinTable(
-            name = "event_navigation",
-            joinColumns = {
-                @JoinColumn(name = "event_id")},
-            inverseJoinColumns = {
-                @JoinColumn(name = "navigation_id")}
-    )
+    @JoinTable(name = "event_navigation", joinColumns = {
+            @JoinColumn(name = "event_id") }, inverseJoinColumns = {
+                    @JoinColumn(name = "navigation_id") })
     private Collection<Navigation> navigation;
 
     @ManyToMany()
-    @JoinTable(
-            name = "event_thermosal",
-            joinColumns = {
-                @JoinColumn(name = "event_id")},
-            inverseJoinColumns = {
-                @JoinColumn(name = "thermosal_id")}
-    )
+    @JoinTable(name = "event_thermosal", joinColumns = {
+            @JoinColumn(name = "event_id") }, inverseJoinColumns = {
+                    @JoinColumn(name = "thermosal_id") })
     private Collection<Thermosal> thermosal;
 
     @ManyToMany()
-    @JoinTable(
-            name = "event_weather",
-            joinColumns = {
-                @JoinColumn(name = "event_id")},
-            inverseJoinColumns = {
-                @JoinColumn(name = "weather_id")}
-    )
+    @JoinTable(name = "event_weather", joinColumns = {
+            @JoinColumn(name = "event_id") }, inverseJoinColumns = {
+                    @JoinColumn(name = "weather_id") })
     private Collection<Weather> weather;
 
     @Override
@@ -163,6 +153,7 @@ public class Event implements IEvent, Serializable {
     }
 
     @Override
+    @JsonIgnore
     public void setActor(IPerson actor) {
         this.actor = (Person) actor;
     }
@@ -173,6 +164,7 @@ public class Event implements IEvent, Serializable {
     }
 
     @Override
+    @JsonIgnore
     public void setSubject(ILinkedDataTerm subject) {
         this.subject = (LinkedDataTerm) subject;
     }
@@ -183,6 +175,7 @@ public class Event implements IEvent, Serializable {
     }
 
     @Override
+    @JsonIgnore
     public void setTool(ITool tool) {
         this.tool = (Tool) tool;
     }
@@ -193,6 +186,7 @@ public class Event implements IEvent, Serializable {
     }
 
     @Override
+    @JsonIgnore
     public void setToolCategory(ILinkedDataTerm toolCategory) {
         this.toolCategory = (LinkedDataTerm) toolCategory;
     }
@@ -203,6 +197,7 @@ public class Event implements IEvent, Serializable {
     }
 
     @Override
+    @JsonIgnore
     public void setProcess(ILinkedDataTerm process) {
         this.process = (LinkedDataTerm) process;
     }
@@ -213,6 +208,7 @@ public class Event implements IEvent, Serializable {
     }
 
     @Override
+    @JsonIgnore
     public void setAction(ILinkedDataTerm action) {
         this.action = (LinkedDataTerm) action;
     }
@@ -223,6 +219,7 @@ public class Event implements IEvent, Serializable {
     }
 
     @Override
+    @JsonIgnore
     public void setProperties(Collection<? extends IProperty> properties) {
         this.properties = (Collection<Property>) properties;
     }
@@ -233,6 +230,7 @@ public class Event implements IEvent, Serializable {
     }
 
     @Override
+    @JsonIgnore
     public void setProgram(IProgram program) {
         this.program = (Program) program;
     }
@@ -251,6 +249,7 @@ public class Event implements IEvent, Serializable {
     }
 
     @Override
+    @JsonIgnore
     public void setPlatform(IPlatform platform) {
         this.platform = (Platform) platform;
     }
@@ -321,7 +320,8 @@ public class Event implements IEvent, Serializable {
 
     @Override
     public String toString() {
-        return tool.getTerm().getName() + " " + process.getName() + " " + action.getName() + " at " + timeStamp.format(DateTimeFormatter.ISO_INSTANT);
+        return tool.getTerm().getName() + " " + process.getName() + " " + action.getName() + " at "
+                + timeStamp.format(DateTimeFormatter.ISO_INSTANT);
     }
 
     /**
@@ -347,6 +347,7 @@ public class Event implements IEvent, Serializable {
         return r;
     }
 
+    @JsonIgnore
     public String getPrincipalInvestigators() {
         StringJoiner sj = new StringJoiner(", ");
         if (this.getProgram() != null) {

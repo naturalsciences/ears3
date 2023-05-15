@@ -104,7 +104,7 @@ public class Platform implements IPlatform, Serializable {
     @XmlTransient
     @JsonIgnore
     public Set<? extends ITool> getInstruments() {
-        Set<ITool> tools = new HashSet();
+        Set<ITool> tools = new HashSet<>();
         if (events != null) {
             for (IEvent event : events) {
                 tools.add(event.getTool());

@@ -48,7 +48,7 @@ public class FileSystemStorageService implements StorageService {
             throw new IOException(
                     "Cannot store file outside current directory.");
         }
-        try ( InputStream inputStream = file.getInputStream()) {
+        try (InputStream inputStream = file.getInputStream()) {
             Files.copy(inputStream, destinationFile,
                     StandardCopyOption.REPLACE_EXISTING);
         }
@@ -77,7 +77,6 @@ public class FileSystemStorageService implements StorageService {
             } else {
                 throw new IOException(
                         "Could not read file: " + filename);
-
             }
         } catch (MalformedURLException e) {
             throw new IOException("Could not read file: " + filename, e);
@@ -94,6 +93,5 @@ public class FileSystemStorageService implements StorageService {
         if (!Files.exists(rootLocation)) {
             Files.createDirectories(rootLocation);
         }
-
     }
 }

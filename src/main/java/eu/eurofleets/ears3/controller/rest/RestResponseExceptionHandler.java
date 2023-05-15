@@ -6,7 +6,8 @@
 package eu.eurofleets.ears3.controller.rest;
 
 import be.naturalsciences.bmdc.cruise.csr.IllegalCSRArgumentException;
-import eu.eurofleets.ears3.domain.Message;
+import eu.eurofleets.ears3.domain.StringMessage;
+
 import java.time.format.DateTimeParseException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -31,7 +32,10 @@ import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExcep
 public class RestResponseExceptionHandler
         extends ResponseEntityExceptionHandler {
 
-    @ExceptionHandler(value = {IllegalCSRArgumentException.class, IllegalArgumentException.class, IllegalStateException.class, ResponseStatusException.class, ArrayIndexOutOfBoundsException.class, PSQLException.class, DataIntegrityViolationException.class, ConstraintViolationException.class, ClassNotFoundException.class, DateTimeParseException.class})
+    @ExceptionHandler(value = { IllegalCSRArgumentException.class, IllegalArgumentException.class,
+            IllegalStateException.class, ResponseStatusException.class, ArrayIndexOutOfBoundsException.class,
+            PSQLException.class, DataIntegrityViolationException.class, ConstraintViolationException.class,
+            ClassNotFoundException.class, DateTimeParseException.class })
     protected ResponseEntity<Object> handleConflict(
             RuntimeException ex, WebRequest request) throws Exception {
         HttpStatus status = null;
@@ -46,11 +50,9 @@ public class RestResponseExceptionHandler
         headers.setContentType(getContentType(request));
 
         // build response body
-        Message response = new Message();
+        StringMessage response = new StringMessage(ex.getMessage(), status.value(), null,
+                ex.getClass().getSimpleName());
 
-        response.exceptionType = ex.getClass().getSimpleName();
-        response.message = ex.getMessage();
-        response.code = status.value();
         if (ex instanceof IllegalCSRArgumentException) {
             IllegalCSRArgumentException CSRex = (IllegalCSRArgumentException) ex;
             response.messages = CSRex.getInvalidArguments();
@@ -69,7 +71,7 @@ public class RestResponseExceptionHandler
                 return MediaType.APPLICATION_XML;
             } // JSON
             else if (accepts.contains(MediaType.APPLICATION_JSON_VALUE)) {
-                return MediaType.APPLICATION_JSON_UTF8;
+                return MediaType.APPLICATION_JSON;
             } // other
             else {
                 return MediaType.APPLICATION_XML;

@@ -33,7 +33,6 @@ public class CruiseBean implements Serializable, Cloneable, Comparable<CruiseBea
     private static final long serialVersionUID = 1L;
 
     private Cruise cruise;
-    private List<ProgramBean> programs;
 
     public CruiseBean() {
     }

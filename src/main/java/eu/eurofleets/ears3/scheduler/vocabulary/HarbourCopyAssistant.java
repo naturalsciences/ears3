@@ -32,7 +32,7 @@ public class HarbourCopyAssistant implements ICopyAssistant {
         return false;
     }
 
-    public static Map getJsonKeyVals(Map<String, String> keyVals, String json) {
+    public static Map<String, String> getJsonKeyVals(Map<String, String> keyVals, String json) {
         for (String key : keyVals.keySet()) {
             String pattern = "(\"" + key + "\"): *\"(.*?)\""; //json style
             Pattern p = Pattern.compile(pattern);
@@ -52,7 +52,7 @@ public class HarbourCopyAssistant implements ICopyAssistant {
     }
 
     public void copy(AbstractConcept concept, Harbour harbour) {
-        Map<String, String> keyVal = new THashMap();
+        Map<String, String> keyVal = new THashMap<>();
         String definitionEn = concept.getDefinitionEn();
         if (definitionEn != null) {
             keyVal.put("country", "");

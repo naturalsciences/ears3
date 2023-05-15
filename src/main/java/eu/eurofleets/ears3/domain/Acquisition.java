@@ -7,13 +7,9 @@ package eu.eurofleets.ears3.domain;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import eu.eurofleets.ears3.utilities.InstantAdapter;
 import eu.eurofleets.ears3.utilities.OffsetDateTimeAdapter;
-import java.time.Instant;
-import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
 import java.time.ZoneId;
-import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
 import javax.persistence.MappedSuperclass;
 import javax.xml.bind.annotation.XmlTransient;

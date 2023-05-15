@@ -6,6 +6,7 @@
 package eu.eurofleets.ears3.dto;
 
 import be.naturalsciences.bmdc.cruise.model.IPerson;
+import be.naturalsciences.bmdc.cruise.model.IProgram;
 import be.naturalsciences.bmdc.cruise.model.IProject;
 import eu.eurofleets.ears3.domain.Program;
 import java.util.ArrayList;
@@ -19,7 +20,7 @@ import javax.xml.bind.annotation.XmlRootElement;
  * @author Thomas Vandenberghe
  */
 @XmlRootElement(name = "program")
-@XmlAccessorType(XmlAccessType.FIELD) //ignore all the getters
+@XmlAccessorType(XmlAccessType.FIELD) // ignore all the getters
 public class ProgramDTO {
 
     public String identifier;
@@ -32,7 +33,8 @@ public class ProgramDTO {
     public ProgramDTO() {
     }
 
-    public ProgramDTO(String identifier, List<PersonDTO> principalInvestigators, String description, List<String> projects, String name, String sampling) {
+    public ProgramDTO(String identifier, List<PersonDTO> principalInvestigators, String description,
+            List<String> projects, String name, String sampling) {
         this.identifier = identifier;
         this.principalInvestigators = principalInvestigators;
         this.description = description;
@@ -41,14 +43,19 @@ public class ProgramDTO {
         this.sampling = sampling;
     }
 
+    public ProgramDTO(IProgram program) {
+        this((Program) program);
+    }
+
     public ProgramDTO(Program program) {
         this.identifier = program.getIdentifier();
         for (IPerson pi : program.getPrincipalInvestigators()) {
-            PersonDTO piDTO = new PersonDTO(pi.getFirstName(), pi.getLastName(), pi.getOrganisation() != null ? pi.getOrganisation().getTerm().getIdentifier() : null, pi._getPhoneNumber(), pi._getFaxNumber(), pi.getEmail());
+            PersonDTO piDTO = new PersonDTO(pi.getFirstName(), pi.getLastName(),
+                    pi.getOrganisation() != null ? pi.getOrganisation().getTerm().getIdentifier() : null,
+                    pi._getPhoneNumber(), pi._getFaxNumber(), pi.getEmail());
             this.principalInvestigators.add(piDTO);
         }
         this.description = program.getDescription();
-        this.projects = projects;
         for (IProject project : program.getProjects()) {
             this.projects.add(project.getTerm().getIdentifier());
         }

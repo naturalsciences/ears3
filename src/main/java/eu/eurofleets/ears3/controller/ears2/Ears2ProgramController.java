@@ -5,7 +5,6 @@ import eu.eurofleets.ears3.domain.Cruise;
 import eu.eurofleets.ears3.domain.Program;
 import eu.eurofleets.ears3.domain.ears2.ProgramBean;
 import eu.eurofleets.ears3.service.CruiseService;
-import eu.eurofleets.ears3.service.EventService;
 import eu.eurofleets.ears3.service.ProgramService;
 //import io.swagger.v3.oas.annotations.Operation;
 import java.time.Instant;
@@ -29,8 +28,6 @@ import org.springframework.web.server.ResponseStatusException;
 public class Ears2ProgramController {
 
     public static final String DEFAULT_VALUE = "_";
-    @Autowired
-    private EventService eventService;
     @Autowired
     private ProgramService programService;
     @Autowired

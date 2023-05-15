@@ -3,15 +3,12 @@ package eu.eurofleets.ears3.controller.ears2;
 import eu.eurofleets.ears3.domain.Event;
 import eu.eurofleets.ears3.domain.ears2.EventBean;
 import eu.eurofleets.ears3.domain.ears2.EventBeanList;
-import eu.eurofleets.ears3.service.CruiseService;
 import eu.eurofleets.ears3.service.EventService;
-import eu.eurofleets.ears3.service.ProgramService;
 //import io.swagger.v3.oas.annotations.Operation;
 import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.Map;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.core.env.Environment;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -26,13 +23,6 @@ public class Ears2EventController {
     public static final String DEFAULT_VALUE = "_";
     @Autowired
     private EventService eventService;
-    @Autowired
-    private ProgramService programService;
-    @Autowired
-    private CruiseService cruiseService;
-
-    @Autowired
-    private Environment env;
 
     private static String sanitizeParam(Map<String, String> allParams, String name) {
         String get = allParams.get(name);
@@ -72,7 +62,6 @@ public class Ears2EventController {
         return new EventBeanList(res, true);
     }
 
-    //@Operation(hidden = true, summary = "Get an event by identifier EARS2 formatted xml.")
     @RequestMapping(method = {RequestMethod.GET}, value = {"event"}, params = {"identifier"}, produces = {"application/xml", "application/json"})
     public EventBean getEventByIdentifier(@RequestParam(required = true, value = "identifier") String identifier) {
         return new EventBean(this.eventService.findByIdentifier(identifier));

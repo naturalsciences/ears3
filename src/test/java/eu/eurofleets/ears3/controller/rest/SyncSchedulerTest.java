@@ -17,9 +17,7 @@ import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.context.web.WebAppConfiguration;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
-import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
@@ -48,8 +46,8 @@ public class SyncSchedulerTest {
     @Test
     @Ignore
     public void testSyncDatabase() throws Exception {
-        MvcResult mvcResult = this.mockMvc.perform(MockMvcRequestBuilders.get("/api/sync/database"))
-                .andDo(print())
+        this.mockMvc.perform(MockMvcRequestBuilders.get("/api/sync/database"))
+                //.andDo(print())
                 .andExpect(status().is(200))
                 .andReturn();
     }
@@ -57,8 +55,8 @@ public class SyncSchedulerTest {
     @Test
     @Ignore
     public void testSyncSeaAreas() throws Exception {
-        MvcResult mvcResult = this.mockMvc.perform(MockMvcRequestBuilders.get("/api/sync/seas"))
-                .andDo(print())
+        this.mockMvc.perform(MockMvcRequestBuilders.get("/api/sync/seas"))
+                //.andDo(print())
                 .andExpect(status().is(200))
                 .andReturn();
     }
@@ -66,8 +64,8 @@ public class SyncSchedulerTest {
     @Test
     @Ignore
     public void testSyncShips() throws Exception {
-        MvcResult mvcResult = this.mockMvc.perform(MockMvcRequestBuilders.get("/api/sync/ships"))
-                .andDo(print())
+        this.mockMvc.perform(MockMvcRequestBuilders.get("/api/sync/ships"))
+                //.andDo(print())
                 .andExpect(status().is(200))
                 .andReturn();
     }
@@ -75,8 +73,8 @@ public class SyncSchedulerTest {
     @Test
     @Ignore
     public void testSyncHarbours() throws Exception {
-        MvcResult mvcResult = this.mockMvc.perform(MockMvcRequestBuilders.get("/api/sync/harbours"))
-                .andDo(print())
+        this.mockMvc.perform(MockMvcRequestBuilders.get("/api/sync/harbours"))
+                //.andDo(print())
                 .andExpect(status().is(200))
                 .andReturn();
     }
@@ -84,8 +82,8 @@ public class SyncSchedulerTest {
     @Test
     @Ignore
     public void testSyncAll() throws Exception {
-        MvcResult mvcResult = this.mockMvc.perform(MockMvcRequestBuilders.get("/api/sync/all"))
-                .andDo(print())
+        this.mockMvc.perform(MockMvcRequestBuilders.get("/api/sync/all"))
+                //.andDo(print())
                 .andExpect(status().isOk())
                 .andReturn();
     }

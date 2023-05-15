@@ -19,13 +19,10 @@ public class ToolService implements EarsService<Tool> {
 
     private final ToolRepository toolRepository;
 
-    @Autowired
-    private LinkedDataTermService ldtService;
 
     @Autowired
     public ToolService(ToolRepository toolRepository, LinkedDataTermRepository linkedDataTermRepository) {
         this.toolRepository = toolRepository;
-
     }
 
     public List<Tool> findAll() {

@@ -13,7 +13,7 @@ import com.hp.hpl.jena.query.ResultSetFormatter;
 import com.hp.hpl.jena.rdf.model.Model;
 import com.hp.hpl.jena.rdf.model.ModelFactory;
 import com.hp.hpl.jena.util.FileManager;
-import eu.eurofleets.ears3.domain.Message;
+import eu.eurofleets.ears3.domain.StringMessage;
 import eu.eurofleets.ears3.ontology.storage.StorageService;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -92,39 +92,39 @@ public class OntologyController {
 
     @PostMapping(value = {"vessel/upload"}/*, consumes = MediaType.MULTIPART_FORM_DATA_VALUE, produces = {"application/xml", "application/json"}*/)
     @ResponseStatus(HttpStatus.ACCEPTED)
-    public ResponseEntity<Message> uploadVesselOntology(@RequestHeader("authorization") String authorization, @RequestParam("file") MultipartFile file) throws IOException {
+    public ResponseEntity<StringMessage> uploadVesselOntology(@RequestHeader("authorization") String authorization, @RequestParam("file") MultipartFile file) throws IOException {
         return uploadOntology(file, authorization, true, ScopeMap.Scope.VESSEL, VESSEL_ONTOLOGY_FILE_NAME);
     }
 
     @PostMapping(value = {"program/upload"}, consumes = MediaType.MULTIPART_FORM_DATA_VALUE, produces = {"application/xml; charset=utf-8", "application/json"})
     @ResponseStatus(HttpStatus.ACCEPTED)
-    public ResponseEntity<Message> uploadProgramOntology(@RequestParam("file") MultipartFile file) throws IOException {
+    public ResponseEntity<StringMessage> uploadProgramOntology(@RequestParam("file") MultipartFile file) throws IOException {
         return uploadOntology(file, null, false, ScopeMap.Scope.PROGRAM, file.getOriginalFilename());
     }
 
-    private ResponseEntity<Message> uploadOntology(MultipartFile file, String authorization, boolean authenticate, ScopeMap.Scope matchScope, String overwriteWithFileName) throws IOException {
+    private ResponseEntity<StringMessage> uploadOntology(MultipartFile file, String authorization, boolean authenticate, ScopeMap.Scope matchScope, String overwriteWithFileName) throws IOException {
         if (authenticate) {
             if (authorization != null && authorization.startsWith("Basic")) {
                 String encodedString = authorization.replaceAll("Basic ", "");
                 Map<String, String> decode = decodeBase64(encodedString);
                 if (!authenticate(decode.get("username"), decode.get("password"))) {
-                    Message m = new Message("Authentication failed: wrong credentials", 500, null, null, null);
+                    StringMessage m = new StringMessage("Authentication failed: wrong credentials", 500, null, null);
                     return ResponseEntity.status(500).contentType(MediaType.APPLICATION_XML).body(m);//.build();
                 }
             } else {
-                Message m = new Message("Cannot authenticate", 500, null, null, null);
+                StringMessage m = new StringMessage("Cannot authenticate", 500, null, null);
                 return ResponseEntity.status(500).contentType(MediaType.APPLICATION_XML).body(m);//.build();
             }
         }
         Map<String, String> staticStuff = IOntologyModel.getStaticStuff(file.getInputStream());
         if (staticStuff == null || (staticStuff.get(IOntologyModel.SCOPE) != null && !staticStuff.get(IOntologyModel.SCOPE).equals(matchScope.name()))) {
-            Message m = new Message("Cannot save file: not recognized as a " + matchScope.name() + " ontology", 500, null, null, null);
+            StringMessage m = new StringMessage("Cannot save file: not recognized as a " + matchScope.name() + " ontology", 500, null, null);
             return ResponseEntity.status(500).contentType(MediaType.APPLICATION_XML).body(m);//.build();
         }
         storageService.store(file, overwriteWithFileName);
-        Message m = new Message("File correctly saved", 202, overwriteWithFileName, null, null);
+        StringMessage m = new StringMessage("File correctly saved", 202, overwriteWithFileName, null);
         //  return ResponseEntity.status(202).contentType(MediaType.APPLICATION_XML).body(m);
-        return new ResponseEntity<Message>(m, HttpStatus.ACCEPTED);
+        return new ResponseEntity<StringMessage>(m, HttpStatus.ACCEPTED);
 
     }
 
@@ -136,16 +136,16 @@ public class OntologyController {
                 return ResponseEntity.ok().header(HttpHeaders.CONTENT_DISPOSITION,
                         "attachment; filename=\"" + file.getFilename() + "\"").body(file);
             } else {
-                Message m = new Message("Cannot return the " + type + " ontology file because it can't be found on the server.", 500, null, null, null);
+                StringMessage m = new StringMessage("Cannot return the " + type + " ontology file because it can't be found on the server.", 500, null, null);
                 return ResponseEntity.status(500).contentType(MediaType.APPLICATION_XML).body(m);
             }
         } catch (IOException ex) {
-            Message m = new Message("Cannot return the " + type + " ontology file because it can't be found on the server.", 500, null, null, null);
+            StringMessage m = new StringMessage("Cannot return the " + type + " ontology file because it can't be found on the server.", 500, null, null);
             return ResponseEntity.status(500).contentType(MediaType.APPLICATION_XML).body(m);
         }
     }
 
-    private ResponseEntity<Message> getFileDate(String fileName, String type) {
+    private ResponseEntity<StringMessage> getFileDate(String fileName, String type) {
         Resource file;
         try {
             file = storageService.loadAsResource(fileName);
@@ -163,15 +163,15 @@ public class OntologyController {
                     return response;
                 } catch (FileNotFoundException ex) {
                     Logger.getLogger(OntologyController.class.getName()).log(Level.SEVERE, null, ex);
-                    Message m = new Message("Cannot return the " + type + " ontology date because the file can't be found on the server.", 500, null, null, null);
+                    StringMessage m = new StringMessage("Cannot return the " + type + " ontology date because the file can't be found on the server.", 500, null, null);
                     return ResponseEntity.status(500).contentType(MediaType.APPLICATION_XML).body(m);
                 }
             } else {
-                Message m = new Message("Cannot return the " + type + " ontology date because the file can't be found on the server.", 500, null, null, null);
+                StringMessage m = new StringMessage("Cannot return the " + type + " ontology date because the file can't be found on the server.", 500, null, null);
                 return ResponseEntity.status(500).contentType(MediaType.APPLICATION_XML).body(m);
             }
         } catch (IOException ex) {
-            Message m = new Message("Cannot return the " + type + " ontology date because the file can't be found on the server.", 500, null, null, null);
+            StringMessage m = new StringMessage("Cannot return the " + type + " ontology date because the file can't be found on the server.", 500, null, null);
             return ResponseEntity.status(500).contentType(MediaType.APPLICATION_XML).body(m);
         }
 
@@ -183,14 +183,14 @@ public class OntologyController {
     }
 
     @RequestMapping(method = {RequestMethod.GET}, value = {"vessel/date"}, produces = {MediaType.TEXT_PLAIN_VALUE})
-    public ResponseEntity<Message> getVesselOntologyDate() {
+    public ResponseEntity<StringMessage> getVesselOntologyDate() {
         return getFileDate(VESSEL_ONTOLOGY_FILE_LOCATION, "vessel");
     }
 
     @RequestMapping(method = {RequestMethod.GET}, value = {"program"})
     public ResponseEntity getProgramOntology(@RequestParam("programIdentifier") String programIdentifier) {
         if (programIdentifier == null) {
-            Message m = new Message("Cannot return reponse as the get parameter 'name' is not provided.", 500, null, null, null);
+            StringMessage m = new StringMessage("Cannot return reponse as the get parameter 'name' is not provided.", 500, null, null);
             return ResponseEntity.status(500).contentType(MediaType.APPLICATION_XML).body(m);
         } else {
             String fileName = null;
@@ -204,9 +204,9 @@ public class OntologyController {
     }
 
     @RequestMapping(method = {RequestMethod.GET}, value = {"program/date"}, produces = {MediaType.TEXT_PLAIN_VALUE})
-    public ResponseEntity<Message> getProgramOntologyDate(@RequestParam("programIdentifier") String programIdentifier) {
+    public ResponseEntity<StringMessage> getProgramOntologyDate(@RequestParam("programIdentifier") String programIdentifier) {
         if (programIdentifier == null) {
-            Message m = new Message("Cannot return date as the get parameter 'name' is not provided.", 500, null, null, null);
+            StringMessage m = new StringMessage("Cannot return date as the get parameter 'name' is not provided.", 500, null, null);
             return ResponseEntity.status(500).contentType(MediaType.APPLICATION_XML).body(m);
         } else {
             String fileName = null;
@@ -365,11 +365,11 @@ public class OntologyController {
      * @param encodedString
      * @return
      */
-    private static Map decodeBase64(final String encodedString) {
+    private static Map<String, String> decodeBase64(final String encodedString) {
         final byte[] decodedBytes = Base64.decodeBase64(encodedString.getBytes());
         final String pair = new String(decodedBytes);
         final String[] userDetails = pair.split(":", 2);
-        Map<String, String> map = new HashMap();
+        Map<String, String> map = new HashMap<>();
         if (userDetails.length == 2) {
             map.put("username", userDetails[0]);
             map.put("password", userDetails[1]);

@@ -9,7 +9,6 @@ import eu.eurofleets.ears3.domain.Acquisition;
 import eu.eurofleets.ears3.domain.Navigation;
 import eu.eurofleets.ears3.domain.Thermosal;
 import eu.eurofleets.ears3.domain.Weather;
-import eu.eurofleets.ears3.utilities.DatagramOrder;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -56,19 +55,6 @@ public class DatagramUtilities<A extends Acquisition> {
 
     public URL getBaseUrl() {
         return this.baseUrl;
-    }
-
-    private URL getEndpointUrl(String endpoint) {
-        try {
-            if (this.baseUrl == null) {
-                return new URL("http://" + endpoint);
-            } else {
-                return new URL(baseUrl, endpoint);
-            }
-        } catch (MalformedURLException ex) {
-            Logger.getLogger(DatagramUtilities.class.getName()).log(Level.SEVERE, null, ex);
-            return null;
-        }
     }
 
     public A findLast() throws IOException {

@@ -29,7 +29,6 @@ public class DateUtilities {
      */
     public static OffsetDateTime toOffsetDate(String date) {
         ZoneId zoneId = ZoneId.of("UTC");  
-        ZoneId defaultZone = ZoneId.systemDefault();
 
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
         LocalDateTime dateTime = LocalDateTime.parse(date, formatter);

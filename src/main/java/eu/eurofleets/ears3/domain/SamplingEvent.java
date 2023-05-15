@@ -6,7 +6,6 @@
 package eu.eurofleets.ears3.domain;
 
 import be.naturalsciences.bmdc.cruise.model.ISamplingEvent;
-import java.io.Serializable;
 import javax.persistence.Entity;
 
 /**
@@ -14,6 +13,6 @@ import javax.persistence.Entity;
  * @author Thomas Vandenberghe
  */
 @Entity
-public class SamplingEvent extends Event implements ISamplingEvent, Serializable {
+public class SamplingEvent extends Event implements ISamplingEvent {
 
 }

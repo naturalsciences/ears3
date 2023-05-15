@@ -3,6 +3,9 @@ package eu.eurofleets.ears3.dto;
 import be.naturalsciences.bmdc.cruise.model.IPerson;
 import be.naturalsciences.bmdc.cruise.model.IProperty;
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
 import eu.eurofleets.ears3.domain.*;
 import eu.eurofleets.ears3.utilities.OffsetDateTimeAdapter;
 import java.time.OffsetDateTime;
@@ -23,34 +26,36 @@ import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
  * @author Thomas Vandenberghe
  */
 @XmlRootElement(name = "event")
-@XmlAccessorType(XmlAccessType.FIELD) //ignore all the getters
+@XmlAccessorType(XmlAccessType.FIELD) // ignore all the getters
 public class EventDTO {
 
-    public String identifier;
-    public String eventDefinitionId;
-    public String label;
-    public String description;
-    public String station;
+    private String identifier;
+    private String eventDefinitionId;
+    private String label;
+    private String description;
+    private String station;
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ssX")
     @XmlJavaTypeAdapter(value = OffsetDateTimeAdapter.class)
-    public OffsetDateTime timeStamp;
-    public PersonDTO actor;
-    public LinkedDataTermDTO subject;
-    public ToolDTO tool;
-    public LinkedDataTermDTO toolCategory;
-    public LinkedDataTermDTO process;
-    public LinkedDataTermDTO action;
-    public Collection<PropertyDTO> properties;
-    public String program;
-    public String platform;
-    public Collection<NavigationDTO> navigation;
-    public Collection<ThermosalDTO> thermosal;
-    public Collection<WeatherDTO> weather;
+    private OffsetDateTime timeStamp;
+    private PersonDTO actor;
+    private LinkedDataTermDTO subject;
+    private ToolDTO tool;
+    private LinkedDataTermDTO toolCategory;
+    private LinkedDataTermDTO process;
+    private LinkedDataTermDTO action;
+    private Collection<PropertyDTO> properties;
+    private String program;
+    private String platform;
+    private Collection<NavigationDTO> navigation;
+    private Collection<ThermosalDTO> thermosal;
+    private Collection<WeatherDTO> weather;
 
     public EventDTO() {
     }
 
-    public EventDTO(String identifier, String eventDefinitionId, OffsetDateTime timeStamp, PersonDTO actor, LinkedDataTermDTO subject, ToolDTO tool, LinkedDataTermDTO toolCategory, LinkedDataTermDTO process, LinkedDataTermDTO action, Collection<PropertyDTO> properties, String program, String platform) {
+    public EventDTO(String identifier, String eventDefinitionId, OffsetDateTime timeStamp, PersonDTO actor,
+            LinkedDataTermDTO subject, ToolDTO tool, LinkedDataTermDTO toolCategory, LinkedDataTermDTO process,
+            LinkedDataTermDTO action, Collection<PropertyDTO> properties, String program, String platform) {
         this.identifier = identifier;
         this.eventDefinitionId = eventDefinitionId;
         this.timeStamp = timeStamp;
@@ -67,7 +72,9 @@ public class EventDTO {
 
     public EventDTO(Event event) {
         IPerson actor = event.getActor();
-        PersonDTO actorDTO = new PersonDTO(actor.getFirstName(), actor.getLastName(), actor.getOrganisation() != null ? actor.getOrganisation().getTerm().getIdentifier() : null, actor._getPhoneNumber(), actor._getFaxNumber(), actor.getEmail());
+        PersonDTO actorDTO = new PersonDTO(actor.getFirstName(), actor.getLastName(),
+                actor.getOrganisation() != null ? actor.getOrganisation().getTerm().getIdentifier() : null,
+                actor._getPhoneNumber(), actor._getFaxNumber(), actor.getEmail());
         LinkedDataTermDTO subject = new LinkedDataTermDTO(event.getSubject());
         LinkedDataTermDTO toolCategory = new LinkedDataTermDTO(event.getToolCategory());
         ToolDTO tool = new ToolDTO(event.getTool().getTerm(), event.getTool().getParentTool());
@@ -76,7 +83,8 @@ public class EventDTO {
 
         this.properties = new HashSet<>();
         for (IProperty property : event.getProperties()) {
-            PropertyDTO prop = new PropertyDTO(new LinkedDataTermDTO(property.getKey()), property.getValue(), property.getUom());
+            PropertyDTO prop = new PropertyDTO(new LinkedDataTermDTO(property.getKey()), property.getValue(),
+                    property.getUom());
             properties.add(prop);
         }
         this.identifier = event.getIdentifier();
@@ -205,6 +213,38 @@ public class EventDTO {
 
     public void setDescription(String description) {
         this.description = description;
+    }
+
+    public Collection<WeatherDTO> getWeather() {
+        return weather;
+    }
+
+    public void setWeather(Collection<WeatherDTO> weather) {
+        this.weather = weather;
+    }
+
+    public Collection<NavigationDTO> getNavigation() {
+        return navigation;
+    }
+
+    public void setNavigation(Collection<NavigationDTO> navigation) {
+        this.navigation = navigation;
+    }
+
+    public Collection<ThermosalDTO> getThermosal() {
+        return thermosal;
+    }
+
+    public void setThermosal(Collection<ThermosalDTO> thermosal) {
+        this.thermosal = thermosal;
+    }
+
+    public String getStation() {
+        return station;
+    }
+
+    public void setStation(String station) {
+        this.station = station;
     }
 
 }

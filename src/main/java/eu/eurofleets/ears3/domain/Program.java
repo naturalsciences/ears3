@@ -31,7 +31,7 @@ import java.util.Objects;
 @Entity
 @XmlRootElement
 @XmlAccessorType(XmlAccessType.FIELD) //ignore all the getters
-public class Program implements IProgram, Serializable, Comparable {
+public class Program implements IProgram, Serializable, Comparable<Program> {
 
     @Column(unique = true, nullable = false)
     private String identifier;
@@ -176,7 +176,7 @@ public class Program implements IProgram, Serializable, Comparable {
     }
 
     @Override
-    public int compareTo(Object obj) {
+    public int compareTo(Program obj) {
         if (this == obj) {
             return 0;
         }

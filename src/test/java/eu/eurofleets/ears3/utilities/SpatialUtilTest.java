@@ -15,14 +15,11 @@ import java.net.URLConnection;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
-import java.util.List;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import static org.junit.Assert.*;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -70,10 +67,6 @@ public class SpatialUtilTest {
      */
     @Test
     public void testHeadingByCoord() throws IOException {
-        System.out.println("headingByCoord");
-
-        List<Coordinate> coordinates = new ArrayList();
-
         OffsetDateTime startDate = OffsetDateTime.now().minusDays(5);
         OffsetDateTime endDate = OffsetDateTime.now().plusDays(5);
         String startDateS = startDate.withOffsetSameInstant(ZoneOffset.UTC).format(DateTimeFormatter.ISO_DATE_TIME);

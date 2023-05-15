@@ -1,9 +1,6 @@
 package eu.eurofleets.ears3.service;
 
-import eu.eurofleets.ears3.domain.Navigation;
 import eu.eurofleets.ears3.domain.Thermosal;
-import eu.eurofleets.ears3.domain.Weather;
-import java.time.Instant;
 import java.time.OffsetDateTime;
 import java.util.Collection;
 import java.util.List;

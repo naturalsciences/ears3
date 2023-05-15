@@ -5,7 +5,6 @@
  */
 package eu.eurofleets.ears3.ontology;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import eu.eurofleets.ears3.Application;
 import java.io.IOException;
 import java.io.InputStream;
@@ -18,7 +17,6 @@ import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.ComponentScan;
-import org.springframework.core.env.Environment;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockMultipartFile;
@@ -26,7 +24,6 @@ import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.context.web.WebAppConfiguration;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
-import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
@@ -59,20 +56,12 @@ public class OntologyControllerTest {
         this.mockMvc = MockMvcBuilders.webAppContextSetup(this.wac).build();
     }
 
-    @Autowired
-    private ObjectMapper objectMapper;
-
-    @Autowired
-    private Environment env;
-
     /**
      * Test of uploadVesselOntology method, of class OntologyController.
      */
     @Test
     @Ignore
     public void testUploadVesselOntology() throws Exception {
-        System.out.println("uploadVesselOntology");
-
         MockMultipartFile multipartFile = getMultiPartFile("earsv2-onto-vessel.rdf");
         MockMultipartFile fakeMultipartFile = getMultiPartFile("fake.rdf");
         uploadVesselFile(multipartFile, "ears", "REPLACEME", 202).andExpect(content().string(containsString("File correctly saved")));
@@ -90,13 +79,13 @@ public class OntologyControllerTest {
     private ResultActions uploadVesselFile(MockMultipartFile multipartFile, String user, String pass, int status) throws Exception {
         return this.mockMvc.perform(multipart("/ontology/vessel/upload").file(multipartFile).header(HttpHeaders.AUTHORIZATION,
                 "Basic " + Base64Utils.encodeToString((user + ":" + pass).getBytes())))
-                .andDo(print())
+                //.andDo(print())
                 .andExpect(status().is(status));
     }
 
     private ResultActions uploadProgramFile(MockMultipartFile multipartFile, int status) throws Exception {
         return this.mockMvc.perform(multipart("/ontology/program/upload").file(multipartFile))
-                .andDo(print())
+                //.andDo(print())
                 .andExpect(status().is(status));
     }
 
@@ -106,7 +95,6 @@ public class OntologyControllerTest {
     @Test
     @Ignore
     public void testUploadProgramOntology() throws Exception {
-        System.out.println("uploadProgramOntology");
         String fileName = "program-abc.rdf";
         MockMultipartFile multipartFile = getMultiPartFile(fileName);
         multipartFile.getOriginalFilename();
@@ -123,9 +111,8 @@ public class OntologyControllerTest {
     @Test
     @Ignore
     public void testGetVesselOntology() throws Exception {
-        System.out.println("getVesselOntology");
         this.mockMvc.perform(get("/ontology/vessel"))
-                //.andDo(print())
+                ////.andDo(print())
                 .andExpect(status().isOk())
                 .andExpect(header().string(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"earsv2-onto-vessel.rdf\""))
                 .andExpect(content().string(containsString("<scope rdf:datatype=\"http://www.w3.org/2001/XMLSchema#string\">VESSEL</scope>")));
@@ -137,12 +124,10 @@ public class OntologyControllerTest {
     @Test
     @Ignore
     public void testGetVesselOntologyDate() throws Exception {
-        System.out.println("getVesselOntologyDate");
-
         HttpHeaders httpHeaders = new HttpHeaders();
         httpHeaders.add("Accept", "text/plain");
         this.mockMvc.perform(get("/ontology/vessel/date").headers(httpHeaders))
-                .andDo(print())
+                //.andDo(print())
                 .andExpect(status().isOk())
                 .andExpect(content().string(matchesPattern("\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}.*")));
 
@@ -154,21 +139,20 @@ public class OntologyControllerTest {
     @Test
     @Ignore
     public void testGetProgramOntology() throws Exception {
-        System.out.println("getProgramOntology");
         this.mockMvc.perform(get("/ontology/program?programIdentifier=program-abc"))
-                //.andDo(print())
+                ////.andDo(print())
                 .andExpect(status().isOk())
                 .andExpect(header().string(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"program-abc.rdf\""))
                 .andExpect(content().string(containsString("<scope rdf:datatype=\"http://www.w3.org/2001/XMLSchema#string\">PROGRAM</scope>")));
 
         this.mockMvc.perform(get("/ontology/program?programIdentifier=program-abc.rdf"))
-                //.andDo(print())
+                ////.andDo(print())
                 .andExpect(status().isOk())
                 .andExpect(header().string(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"program-abc.rdf\""))
                 .andExpect(content().string(containsString("<scope rdf:datatype=\"http://www.w3.org/2001/XMLSchema#string\">PROGRAM</scope>")));
 
         this.mockMvc.perform(get("/ontology/program?programIdentifier=program-ABC"))
-                //.andDo(print())
+                ////.andDo(print())
                 .andExpect(status().isOk())
                 .andExpect(content().string(containsString("<scope rdf:datatype=\"http://www.w3.org/2001/XMLSchema#string\">PROGRAM</scope>")));
 
@@ -180,11 +164,10 @@ public class OntologyControllerTest {
     @Test
     @Ignore
     public void testGetProgramOntologyDate() throws Exception {
-        System.out.println("getProgramOntologyDate");
         HttpHeaders httpHeaders = new HttpHeaders();
         httpHeaders.add("Accept", "text/plain");
         this.mockMvc.perform(get("/ontology/program/date?programIdentifier=program-ABC").headers(httpHeaders))
-                .andDo(print())
+                //.andDo(print())
                 .andExpect(status().isOk())
                 .andExpect(content().string(matchesPattern("\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}.*")));
     }
@@ -195,16 +178,14 @@ public class OntologyControllerTest {
     @Test
     @Ignore
     public void testCanAuthenticate() throws Exception {
-        System.out.println("canAuthenticate");
         HttpHeaders httpHeaders = new HttpHeaders();
-
         String user = "ears";
         String pass = "REPLACEME";
         httpHeaders.add("Accept", "text/plain");
         httpHeaders.add(HttpHeaders.AUTHORIZATION,
                 "Basic " + Base64Utils.encodeToString((user + ":" + pass).getBytes()));
         this.mockMvc.perform(get("/ontology/authenticate").headers(httpHeaders))
-                .andDo(print())
+                //.andDo(print())
                 .andExpect(status().isOk())
                 .andExpect(content().string(containsString("true")));
 
@@ -214,7 +195,7 @@ public class OntologyControllerTest {
         httpHeaders.add(HttpHeaders.AUTHORIZATION,
                 "Basic " + Base64Utils.encodeToString((user + ":" + pass).getBytes()));
         this.mockMvc.perform(get("/ontology/authenticate").headers(httpHeaders))
-                .andDo(print())
+                //.andDo(print())
                 .andExpect(status().isOk())
                 .andExpect(content().string(containsString("false")));
     }
@@ -225,8 +206,6 @@ public class OntologyControllerTest {
     @Test
     @Ignore
     public void testSparqlEndpoint() throws Exception {
-        System.out.println("sparqlEndpoint");
-
         HttpHeaders httpHeaders = new HttpHeaders();
         httpHeaders.add("Accept", "application/json");
 
@@ -259,7 +238,7 @@ public class OntologyControllerTest {
                 + "\n"
                 + "}";
         this.mockMvc.perform(get("/ontology/vessel/sparql?q=" + UriUtils.encode(q, "UTF8")).headers(httpHeaders))
-                .andDo(print())
+                //.andDo(print())
                 .andExpect(status().isOk());
 
     }
@@ -267,8 +246,6 @@ public class OntologyControllerTest {
     @Test
     @Ignore
     public void testSparqlEndpointProgram() throws Exception {
-        System.out.println("sparqlEndpoint");
-
         HttpHeaders httpHeaders = new HttpHeaders();
         httpHeaders.add("Accept", "application/json");
 
