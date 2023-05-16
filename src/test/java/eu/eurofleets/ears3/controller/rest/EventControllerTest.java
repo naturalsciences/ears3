@@ -7,6 +7,13 @@ package eu.eurofleets.ears3.controller.rest;
 
 import eu.eurofleets.ears3.Application;
 import eu.eurofleets.ears3.domain.EventList;
+import eu.eurofleets.ears3.domain.LinkedDataTerm;
+import eu.eurofleets.ears3.domain.Organisation;
+import eu.eurofleets.ears3.domain.Person;
+import eu.eurofleets.ears3.domain.Platform;
+import eu.eurofleets.ears3.domain.Program;
+import eu.eurofleets.ears3.domain.Property;
+import eu.eurofleets.ears3.domain.Tool;
 import eu.eurofleets.ears3.dto.EventDTO;
 import eu.eurofleets.ears3.dto.EventDTOList;
 import eu.eurofleets.ears3.dto.LinkedDataTermDTO;
@@ -15,9 +22,22 @@ import eu.eurofleets.ears3.dto.ProgramDTO;
 import eu.eurofleets.ears3.dto.PropertyDTO;
 import eu.eurofleets.ears3.dto.ToolDTO;
 
+import com.fasterxml.jackson.core.JacksonException;
+import com.fasterxml.jackson.core.JsonParser;
+import com.fasterxml.jackson.databind.DeserializationContext;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import com.fasterxml.jackson.databind.deser.std.StdDeserializer;
+import com.fasterxml.jackson.databind.module.SimpleModule;
 
+import be.naturalsciences.bmdc.cruise.model.ILinkedDataTerm;
+import be.naturalsciences.bmdc.cruise.model.IOrganisation;
+import be.naturalsciences.bmdc.cruise.model.IPerson;
+import be.naturalsciences.bmdc.cruise.model.IPlatform;
+import be.naturalsciences.bmdc.cruise.model.IProgram;
+import be.naturalsciences.bmdc.cruise.model.IProperty;
+import be.naturalsciences.bmdc.cruise.model.ITool;
+
+import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
@@ -46,6 +66,7 @@ import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.util.StringUtils;
 import org.springframework.web.context.WebApplicationContext;
@@ -72,13 +93,137 @@ public class EventControllerTest {
         @Before
         public void setup() throws Exception {
                 this.mockMvc = MockMvcBuilders.webAppContextSetup(this.wac).build();
+                objectMapper.registerModule(new PersonModule());
+                objectMapper.registerModule(new LinkedDataModule());
+                objectMapper.registerModule(new ToolModule());
+                objectMapper.registerModule(new PlatformModule());
+                objectMapper.registerModule(new OrganisationModule());
+                objectMapper.registerModule(new PropertyModule());
+                objectMapper.registerModule(new ProgramModule());
+                
         }
 
-        @After
-        public void after() throws Exception {
-                // delete all previous events, programs and cruises
-                EventControllerTest.deleteAllEvents(this.mockMvc);
-                ProgramControllerTest.deleteAllPrograms(this.mockMvc);
+        /*
+         * All this just to deserialise from json for the objectmapper which i just used
+         * in the tests
+         */
+        class PersonDeserializer extends StdDeserializer<IPerson> {
+                public PersonDeserializer() {
+                        super(IPerson.class);
+                }
+
+                public IPerson deserialize(JsonParser jsonParser, DeserializationContext context)
+                                throws IOException, JacksonException {
+                        return jsonParser.readValueAs(Person.class);
+                }
+        }
+
+        class PersonModule extends SimpleModule {
+                {
+                        addDeserializer(IPerson.class, new PersonDeserializer());
+                }
+        }
+
+        class LinkedDataDeserializer extends StdDeserializer<ILinkedDataTerm> {
+                public LinkedDataDeserializer() {
+                        super(ILinkedDataTerm.class);
+                }
+
+                public ILinkedDataTerm deserialize(JsonParser jsonParser, DeserializationContext context)
+                                throws IOException, JacksonException {
+                        return jsonParser.readValueAs(LinkedDataTerm.class);
+                }
+        }
+
+        class LinkedDataModule extends SimpleModule {
+                {
+                        addDeserializer(ILinkedDataTerm.class, new LinkedDataDeserializer());
+                }
+        }
+
+        class ToolDeserializer extends StdDeserializer<ITool> {
+                public ToolDeserializer() {
+                        super(ITool.class);
+                }
+
+                public ITool deserialize(JsonParser jsonParser, DeserializationContext context)
+                                throws IOException, JacksonException {
+                        return jsonParser.readValueAs(Tool.class);
+                }
+        }
+
+        class ToolModule extends SimpleModule {
+                {
+                        addDeserializer(ITool.class, new ToolDeserializer());
+                }
+        }
+
+        class PlatformDeserializer extends StdDeserializer<IPlatform> {
+                public PlatformDeserializer() {
+                        super(IPlatform.class);
+                }
+
+                public IPlatform deserialize(JsonParser jsonParser, DeserializationContext context)
+                                throws IOException, JacksonException {
+                        return jsonParser.readValueAs(Platform.class);
+                }
+        }
+
+        class PlatformModule extends SimpleModule {
+                {
+                        addDeserializer(IPlatform.class, new PlatformDeserializer());
+                }
+        }
+
+        class OrganisationDeserializer extends StdDeserializer<IOrganisation> {
+                public OrganisationDeserializer() {
+                        super(IOrganisation.class);
+                }
+
+                public IOrganisation deserialize(JsonParser jsonParser, DeserializationContext context)
+                                throws IOException, JacksonException {
+                        return jsonParser.readValueAs(Organisation.class);
+                }
+        }
+
+        class OrganisationModule extends SimpleModule {
+                {
+                        addDeserializer(IOrganisation.class, new OrganisationDeserializer());
+                }
+        }
+
+        class PropertyDeserializer extends StdDeserializer<IProperty> {
+                public PropertyDeserializer() {
+                        super(IProperty.class);
+                }
+
+                public IProperty deserialize(JsonParser jsonParser, DeserializationContext context)
+                                throws IOException, JacksonException {
+                        return jsonParser.readValueAs(Property.class);
+                }
+        }
+
+        class PropertyModule extends SimpleModule {
+                {
+                        addDeserializer(IProperty.class, new PropertyDeserializer());
+                }
+        }
+
+        class ProgramDeserializer extends StdDeserializer<IProgram> {
+                public ProgramDeserializer() {
+                        super(IProgram.class);
+                }
+
+                public IProgram deserialize(JsonParser jsonParser, DeserializationContext context)
+                                throws IOException, JacksonException {
+                        return jsonParser.readValueAs(Program.class);
+                }
+        }
+
+        class ProgramModule extends SimpleModule {
+                {
+                        addDeserializer(IProgram.class, new ProgramDeserializer());
+                }
         }
 
         // Mock events
@@ -219,6 +364,7 @@ public class EventControllerTest {
 
                 String json = mvcResult.getResponse().getContentAsString();
                 EventList events = objectMapper.readValue(json, EventList.class);
+                // Gson gson = new Gson();
                 int count = events.getEvents().size();
                 assertEquals(expected, count);
         }
@@ -286,6 +432,9 @@ public class EventControllerTest {
 
         @Test
         public void testPostAndDeleteEvent() throws Exception {
+                // delete all previous events and programs
+                deleteAllEvents(this.mockMvc);
+                ProgramControllerTest.deleteAllPrograms(this.mockMvc);
                 EventDTO e = getTestEvent();
                 e.setTimeStamp(OffsetDateTime.now());
                 e.setProgram("2020-MF");
@@ -333,26 +482,106 @@ public class EventControllerTest {
                 // assertTrue(StringUtils.countOccurrencesOf(contentAsString, "<properties>") ==
                 // 4);
 
-                mvcResult = this.mockMvc.perform(MockMvcRequestBuilders.get("/api/events"))// .andDo(print())
+                // Assert that the XML is correctly rendered
+                mvcResult = this.mockMvc.perform(MockMvcRequestBuilders.get("/api/events"))
                                 .andExpect(status().is(200))
                                 .andExpect(content().string(
                                                 containsString("<identifier>" + eventIdentifier + "</identifier>")))
+                                .andExpect(content().string(containsString("</key><value>20190506_12</value>")))
+                                .andExpect(content().string(containsString("</key><value>3</value>")))
+                                .andExpect(content().string(containsString("</key><value>89</value>")))
+                                .andExpect(content().string(containsString("</key><value>W04</value>")))
+                                .andExpect(content().string(containsString(
+                                                "</property><property><key><identifier>http://ontologies.ef-ears.eu/ears2/1#pry_16</identifier>")))
+                                .andExpect(content().string(containsString(
+                                                "</property><property><key><identifier>http://ontologies.ef-ears.eu/ears2/1#pry_21</identifier>")))
+                                .andExpect(content().string(containsString(
+                                                "</property><property><key><identifier>http://ontologies.ef-ears.eu/ears2/1#pry_4</identifier>")))
+                                .andExpect(content().string(containsString(
+                                                "<action><identifier>http://ontologies.ef-ears.eu/ears2/1#act_2</identifier>")))
+                                .andExpect(content().string(containsString(
+                                                "<description>validating the modeling efforts of the last 2 years using the COHERENS model. Rubber ducks will be released. </description>")))
+                                .andExpect(content().string(containsString(
+                                                "<identifier>http://vocab.nerc.ac.uk/collection/C32/current/BE</identifier>")))
+                                .andExpect(content().string(containsString("<lastName>Baetens</lastName>")))
+                                .andExpect(content().string(containsString("<lastName>Dulière</lastName>")))
+                                .andExpect(content().string(containsString("<name>Belgica</name>")))
+                                .andExpect(content().string(containsString("<name>Belgium</name>")))
+                                .andExpect(content().string(containsString("<name>depth_m</name>")))
+                                .andExpect(content().string(containsString("<name>End</name>")))
+                                .andExpect(content().string(containsString("<name>fish_count</name>")))
+                                .andExpect(content().string(containsString(
+                                                "<name>In-situ seafloor measurement/sampling</name>")))
+                                .andExpect(content().string(containsString("<name>label</name>")))
+                                .andExpect(content().string(containsString("<name>research vessel</name>")))
+                                .andExpect(content().string(containsString(
+                                                "<name>Royal Belgian Institute of Natural Sciences, Operational Directorate Natural Environment, Belgian Marine Data Centre</name>")))
+                                .andExpect(content().string(containsString(
+                                                "<name>Royal Belgian Institute of Natural Sciences, Operational Directorate Natural Environment</name>")))
+                                .andExpect(content().string(containsString("<name>RUBBER-DUCK</name>")))
+                                .andExpect(content().string(containsString("<name>sampleId</name>")))
+                                .andExpect(content().string(containsString("<name>Sampling</name>")))
+                                .andExpect(content().string(containsString("<name>sediment grabs</name>")))
+                                .andExpect(content().string(containsString("<name>Van Veen grab</name>")))
+                                .andExpect(content().string(containsString(
+                                                "<organisation><term><identifier>https://edmo.seadatanet.org/report/3330</identifier>")))
+                                .andExpect(content().string(containsString(
+                                                "<organisation><term><identifier>https://edmo.seadatanet.org/report/3330</identifier>")))
+                                .andExpect(content().string(containsString(
+                                                "<platform><term><identifier>http://vocab.nerc.ac.uk/collection/C17/current/11BE</identifier>")))
+                                .andExpect(content().string(containsString(
+                                                "<platformClass><identifier>http://vocab.nerc.ac.uk/collection/L06/current/31</identifier>")))
+                                .andExpect(content().string(containsString(
+                                                "<principalInvestigators><firstName>Katrijn</firstName>")))
+                                .andExpect(content().string(containsString(
+                                                "<principalInvestigators><firstName>Valérie</firstName>")))
+                                .andExpect(content().string(containsString(
+                                                "<process><identifier>http://ontologies.ef-ears.eu/ears2/1#pro_1</identifier>")))
+                                .andExpect(content().string(
+                                                containsString("<program><identifier>2020-MF</identifier>")))
+                                .andExpect(content().string(containsString(
+                                                "<properties><property><key><identifier>http://ontologies.orr.org/fish_count</identifier>")))
+                                .andExpect(content().string(containsString("<sampling>No sampling</sampling>")))
+                                .andExpect(content().string(containsString(
+                                                "<subject><identifier>http://vocab.nerc.ac.uk/collection/C77/current/G71</identifier>")))
+                                .andExpect(content().string(containsString(
+                                                "<tool><term><identifier>http://vocab.nerc.ac.uk/collection/L22/current/TOOL0653</identifier>")))
+                                .andExpect(content().string(containsString(
+                                                "<toolCategory><identifier>http://vocab.nerc.ac.uk/collection/L05/current/50</identifier>")))
+                                .andExpect(content().string(containsString("<uom>m</uom>")))
+                                .andExpect(content().string(containsString("<urn>ears:act::2</urn>")))
+                                .andExpect(content().string(containsString("<urn>ears:pro::1</urn>")))
+                                .andExpect(content().string(containsString("<urn>ears:pry::16</urn>")))
+                                .andExpect(content().string(containsString("<urn>ears:pry::21</urn>")))
+                                .andExpect(content().string(containsString("<urn>ears:pry::4</urn>")))
+                                .andExpect(content().string(containsString("<urn>SDN:C17::11BE</urn>")))
+                                .andExpect(content().string(containsString("<urn>SDN:C32::BE</urn>")))
+                                .andExpect(content().string(containsString("<urn>SDN:C32::BE</urn>")))
+                                .andExpect(content().string(containsString("<urn>SDN:C32::BE</urn>")))
+                                .andExpect(content().string(containsString("<urn>SDN:C77::G71</urn>")))
+                                .andExpect(content().string(containsString("<urn>SDN:EDMO::3327</urn>")))
+                                .andExpect(content().string(containsString("<urn>SDN:EDMO::3330</urn>")))
+                                .andExpect(content().string(containsString("<urn>SDN:EDMO::3330</urn>")))
+                                .andExpect(content().string(containsString("<urn>SDN:L05::50</urn>")))
+                                .andExpect(content().string(containsString("<urn>SDN:L06::31</urn>")))
+                                .andExpect(content().string(containsString("<urn>SDN:L22::TOOL0653</urn>")))
+                                .andExpect(content().string(containsString(
+                                                "<vesselOperator><term><identifier>https://edmo.seadatanet.org/report/3327</identifier>")))
                                 .andReturn();
 
-                /*
-                 * mvcResult =
-                 * this.mockMvc.perform(MockMvcRequestBuilders.delete("/event?identifier=" +
-                 * eventIdentifier))
-                 * //.andDo(print())
-                 * .andExpect(status().is(204)).andReturn();
-                 * 
-                 * mvcResult =
-                 * this.mockMvc.perform(MockMvcRequestBuilders.get("/event?identifier=" +
-                 * eventIdentifier))
-                 * //.andDo(print())
-                 * .andExpect(status().is(404))
-                 * .andReturn();
-                 */
+                // Assert that the JSON is correctly rendered
+                mvcResult = this.mockMvc
+                                .perform(MockMvcRequestBuilders.get("/api/event?identifier=" + eventIdentifier)
+                                                .accept(MediaType.APPLICATION_JSON))
+                                .andDo(print())
+                                .andExpect(status().is(200))
+                                .andExpect(content().string(containsString("\"identifier\":\"" + eventIdentifier)))
+                                .andExpect(content().string(containsString("actor")))
+                                .andReturn();
+
+                // delete all previous events and programs
+                deleteAllEvents(this.mockMvc);
+                ProgramControllerTest.deleteAllPrograms(this.mockMvc);
         }
 
         @Test
@@ -369,7 +598,6 @@ public class EventControllerTest {
                 // delete all previous events and programs
                 deleteAllEvents(this.mockMvc);
                 ProgramControllerTest.deleteAllPrograms(this.mockMvc);
-                
 
                 // create a program and an event for it. The event has Joan as an actor
                 EventDTO e = getTestEvent();
@@ -426,7 +654,7 @@ public class EventControllerTest {
                 // delete all previous events and programs
                 deleteAllEvents(this.mockMvc);
                 ProgramControllerTest.deleteAllPrograms(this.mockMvc);
-                
+
         }
 
         @Test
@@ -434,7 +662,6 @@ public class EventControllerTest {
                 // delete all previous events and programs
                 deleteAllEvents(this.mockMvc);
                 ProgramControllerTest.deleteAllPrograms(this.mockMvc);
-                
 
                 // create a program and an event for it.
                 EventDTO e = getTestEvent();

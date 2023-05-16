@@ -64,236 +64,253 @@ import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.
 @TestPropertySource(locations = "classpath:test.properties")
 public class ProgramControllerTest {
 
-    @Autowired
-    private WebApplicationContext wac;
+        @Autowired
+        private WebApplicationContext wac;
 
-    private MockMvc mockMvc;
+        private MockMvc mockMvc;
 
-    @Before
-    public void setup() throws Exception {
-        this.mockMvc = MockMvcBuilders.webAppContextSetup(this.wac).build();
-    }
-
-    @After
-    public void after() throws Exception {
-            // delete all previous events, programs and cruises
-            EventControllerTest.deleteAllEvents(this.mockMvc);
-            ProgramControllerTest.deleteAllPrograms(this.mockMvc);
-    }
-
-    @Autowired
-    private ObjectMapper objectMapper;
-
-    // Methods to get mock objects
-
-    public static ProgramDTO getTestProgram1(String identifier) {
-        List<PersonDTO> principalInvestigators1 = Arrays.asList(new PersonDTO[] {
-                new PersonDTO("Katrijn", "Baetens", "SDN:EDMO::3330", "02/2209091", "02/2208081",
-                        "kbaetens@naturalsciences.be"),
-                new PersonDTO("Valérie", "Dulière", "SDN:EDMO::3330", "02/2209090", "02/2208080",
-                        "vduliere@naturalsciences.be") });
-        return new ProgramDTO(identifier, principalInvestigators1,
-                "validating the modeling efforts of the last 2 years using the COHERENS model. Rubber ducks will be released. ",
-                null, "RUBBER-DUCK", "No sampling");
-    }
-
-    public static ProgramDTO getTestProgram2(String identifier) {
-        List<PersonDTO> principalInvestigators2 = Arrays.asList(new PersonDTO[] {
-                new PersonDTO("Kris", "Hostens", "SDN:EDMO::ILVO", "057/2209091", "057/2208081", "khostens@ilvo.be") });
-        return new ProgramDTO("KH1", principalInvestigators2, "Fisheries monitoring", null, "Fisheries monitoring",
-                "Beam trawl 4 and 8m");
-    }
-
-    // Utility Methods
-
-    public static MvcResult postProgram(MockMvc mockMvc, ProgramDTO pr, ObjectMapper objectMapper) throws Exception {
-        String json = objectMapper.writeValueAsString(pr);
-        return mockMvc
-                .perform(MockMvcRequestBuilders.post("/api/program").contentType(MediaType.APPLICATION_JSON)
-                        .content(json))
-                .andExpect(status().isCreated())
-                .andReturn();
-    }
-
-    public static void deleteProgram(String identifier, MockMvc mockMvc) throws Exception {
-        mockMvc.perform(MockMvcRequestBuilders.delete("/api/program?identifier=" + identifier))
-                // .andDo(print())
-                .andExpect(status().is(204)).andReturn();
-    }
-
-    public static void deleteAllPrograms(MockMvc mockMvc) throws Exception {
-
-        MvcResult mvcResult = mockMvc
-                .perform(MockMvcRequestBuilders.get("/api/programs").accept(MediaType.APPLICATION_JSON))
-                .andReturn();
-
-        for (String identifier : getIdentifiersFromJson(mvcResult)) { // delete all previous events
-            mvcResult = mockMvc
-                    .perform(MockMvcRequestBuilders
-                            .delete(String.format("/api/program?identifier=%s", identifier)))
-                    .andExpect(status().is(204)).andReturn();
+        @Before
+        public void setup() throws Exception {
+                this.mockMvc = MockMvcBuilders.webAppContextSetup(this.wac).build();
         }
-    }
 
-    private static Set<String> getIdentifiersFromJson(MvcResult mvcResult) throws UnsupportedEncodingException {
-        String contentAsString = mvcResult.getResponse().getContentAsString();
-        Pattern p = Pattern.compile("\\{\"identifier\":\"(.*?)\"");
-        Matcher m = p.matcher(contentAsString);
-        Set<String> allMatches = new HashSet<String>();
+        @After
+        public void after() throws Exception {
 
-        while (m.find()) {
-            allMatches.add(m.group(1));
         }
-        return allMatches;
-    }
 
-    /**
-     * Test of getPrograms method, of class ProgramController.
-     */
-    @Test
-    public void testGetPrograms() throws Exception {
-        ProgramDTO pr = getTestProgram1("2020-MF");
-        postProgram(this.mockMvc, pr, objectMapper);
+        @Autowired
+        private ObjectMapper objectMapper;
 
-        MvcResult mvcResult = this.mockMvc.perform(MockMvcRequestBuilders.get("/api/programs"))
-                // .andDo(print())
-                .andExpect(status().is(200))
-                .andExpect(content().string(containsString("<identifier>2020-MF</identifier>")))
-                .andExpect(content().string(not(containsString("ValÃ©rie")))).andReturn();
-    }
+        // Methods to get mock objects
 
-    @Autowired
-    private RequestMappingHandlerMapping requestMappingHandlerMapping;
+        public static ProgramDTO getTestProgram1(String identifier) {
+                List<PersonDTO> principalInvestigators1 = Arrays.asList(new PersonDTO[] {
+                                new PersonDTO("Katrijn", "Baetens", "SDN:EDMO::3330", "02/2209091", "02/2208081",
+                                                "kbaetens@naturalsciences.be"),
+                                new PersonDTO("Valérie", "Dulière", "SDN:EDMO::3330", "02/2209090", "02/2208080",
+                                                "vduliere@naturalsciences.be") });
+                return new ProgramDTO(identifier, principalInvestigators1,
+                                "validating the modeling efforts of the last 2 years using the COHERENS model. Rubber ducks will be released. ",
+                                null, "RUBBER-DUCK", "No sampling");
+        }
 
-    @Test
-    public void testGetProgramsByDate() throws Exception {
-        // delete all previous events and programs
-        EventControllerTest.deleteAllEvents(this.mockMvc);
-        deleteAllPrograms(this.mockMvc);
+        public static ProgramDTO getTestProgram2(String identifier) {
+                List<PersonDTO> principalInvestigators2 = Arrays.asList(new PersonDTO[] {
+                                new PersonDTO("Kris", "Hostens", "SDN:EDMO::ILVO", "057/2209091", "057/2208081",
+                                                "khostens@ilvo.be") });
+                return new ProgramDTO("KH1", principalInvestigators2, "Fisheries monitoring", null,
+                                "Fisheries monitoring",
+                                "Beam trawl 4 and 8m");
+        }
 
-        requestMappingHandlerMapping.getHandlerMethods().keySet();
+        // Utility Methods
 
-        CruiseDTO testCruise = CruiseControllerTest.getTestCruise1("SEASHELL-23");
-        OffsetDateTime start = Instant.now().minus(20, ChronoUnit.DAYS).atOffset(ZoneOffset.UTC);
-        OffsetDateTime end = Instant.now().atOffset(ZoneOffset.UTC);
-        OffsetDateTime lateStart = start;
-        testCruise.startDate = start;
-        testCruise.endDate = end;
-        testCruise.programs = new ArrayList<>();
-        testCruise.programs.add("PR-SEASHELL-20");
-        ProgramDTO pr = getTestProgram1("PR-SEASHELL-20");
-        postProgram(this.mockMvc, pr, objectMapper);
-        CruiseControllerTest.postCruise(this.mockMvc, testCruise, this.objectMapper);
+        public static MvcResult postProgram(MockMvc mockMvc, ProgramDTO pr, ObjectMapper objectMapper)
+                        throws Exception {
+                String json = objectMapper.writeValueAsString(pr);
+                return mockMvc
+                                .perform(MockMvcRequestBuilders.post("/api/program")
+                                                .contentType(MediaType.APPLICATION_JSON)
+                                                .content(json))
+                                .andExpect(status().isCreated())
+                                .andReturn();
+        }
 
-        testCruise = CruiseControllerTest.getTestCruise1("SEASHELL-19");
-        start = OffsetDateTime.parse("2019-04-25T11:08:00Z");
-        end = OffsetDateTime.parse("2019-04-29T11:08:00Z");
-        OffsetDateTime earlyStart = start;
-        testCruise.startDate = start;
-        testCruise.endDate = end;
-        testCruise.programs = new ArrayList<>();
-        testCruise.programs.add("2019-ILVO-FISHY");
-        pr = getTestProgram1("2019-ILVO-FISHY");
-        postProgram(this.mockMvc, pr, objectMapper);
-        CruiseControllerTest.postCruise(this.mockMvc, testCruise, this.objectMapper);
+        public static void deleteProgram(String identifier, MockMvc mockMvc) throws Exception {
+                mockMvc.perform(MockMvcRequestBuilders.delete("/api/program?identifier=" + identifier))
+                                // .andDo(print())
+                                .andExpect(status().is(204)).andReturn();
+        }
 
-        /*
-         * this.mockMvc.perform(MockMvcRequestBuilders.get(
-         * "/api/programs?cruiseIdentifier=SEASHELL-20"))
-         * // .andDo(print())
-         * .andExpect(status().is(200))
-         * .andExpect(content().string(containsString(
-         * "<identifier>PR-SEASHELL-20</identifier>")))
-         * .andExpect(content().string(not(containsString(
-         * "<identifier>2019-ILVO-FISHY</identifier>")))).andReturn();
+        public static void deleteAllPrograms(MockMvc mockMvc) throws Exception {
+
+                MvcResult mvcResult = mockMvc
+                                .perform(MockMvcRequestBuilders.get("/api/programs").accept(MediaType.APPLICATION_JSON))
+                                .andReturn();
+
+                for (String identifier : getIdentifiersFromJson(mvcResult)) { // delete all previous events
+                        mvcResult = mockMvc
+                                        .perform(MockMvcRequestBuilders
+                                                        .delete(String.format("/api/program?identifier=%s",
+                                                                        identifier)))
+                                        .andExpect(status().is(204)).andReturn();
+                }
+        }
+
+        private static Set<String> getIdentifiersFromJson(MvcResult mvcResult) throws UnsupportedEncodingException {
+                String contentAsString = mvcResult.getResponse().getContentAsString();
+                Pattern p = Pattern.compile("\\{\"identifier\":\"(.*?)\"");
+                Matcher m = p.matcher(contentAsString);
+                Set<String> allMatches = new HashSet<String>();
+
+                while (m.find()) {
+                        allMatches.add(m.group(1));
+                }
+                return allMatches;
+        }
+
+        /**
+         * Test of getPrograms method, of class ProgramController.
          */
-        this.mockMvc
-                .perform(MockMvcRequestBuilders
-                        .get("/api/programs?startDate=" + lateStart.format(DateTimeFormatter.ISO_DATE_TIME))
-                        .contentType(MediaType.APPLICATION_JSON)) // + "&endDate=" +
-                                                                  // end.format(DateTimeFormatter.ISO_DATE_TIME)
-                .andDo(print())
-                .andExpect(status().is(200))
-                .andExpect(content().string(containsString("<identifier>PR-SEASHELL-20</identifier>")))
-                .andExpect(content().string(not(containsString("<identifier>2019-ILVO-FISHY</identifier>"))))
-                .andReturn();
-        CruiseControllerTest.deleteCruise(testCruise.identifier, mockMvc);
+        @Test
+        public void testGetPrograms() throws Exception {
+                ProgramDTO pr = getTestProgram1("2020-MF");
+                postProgram(this.mockMvc, pr, objectMapper);
 
-        // delete all previous events and programs
-        EventControllerTest.deleteAllEvents(this.mockMvc);
-        deleteAllPrograms(this.mockMvc);
+                MvcResult mvcResult = this.mockMvc.perform(MockMvcRequestBuilders.get("/api/programs"))
+                                // .andDo(print())
+                                .andExpect(status().is(200))
+                                .andExpect(content().string(containsString("<identifier>2020-MF</identifier>")))
+                                .andExpect(content().string(not(containsString("ValÃ©rie")))).andReturn();
+        }
 
-    }
+        @Autowired
+        private RequestMappingHandlerMapping requestMappingHandlerMapping;
 
-    /**
-     * Test of getProgramById method, of class ProgramController.
-     */
-    @Test
-    public void testGetProgramById() throws Exception {
-        ProgramDTO pr = getTestProgram1("2020-MF");
-        postProgram(this.mockMvc, pr, objectMapper);
-        ProgramControllerTest.postProgram(this.mockMvc, pr, objectMapper);
+        @Test
+        public void testGetProgramsByDate() throws Exception {
+                // delete all previous events and programs
+                EventControllerTest.deleteAllEvents(this.mockMvc);
+                deleteAllPrograms(this.mockMvc);
 
-        this.mockMvc.perform(MockMvcRequestBuilders.get("/api/program?identifier=2020-MF"))
-                // .andDo(print())
-                .andExpect(status().is(200))
-                .andExpect(content().string(containsString("<identifier>2020-MF</identifier>"))).andReturn();
-    }
+                requestMappingHandlerMapping.getHandlerMethods().keySet();
 
-    private static UUID programUUID;
-    private static String programId;
+                CruiseDTO testCruise = CruiseControllerTest.getTestCruise1("SEASHELL-23");
+                OffsetDateTime start = Instant.now().minus(20, ChronoUnit.DAYS).atOffset(ZoneOffset.UTC);
+                OffsetDateTime end = Instant.now().atOffset(ZoneOffset.UTC);
+                OffsetDateTime lateStart = start;
+                testCruise.startDate = start;
+                testCruise.endDate = end;
+                testCruise.programs = new ArrayList<>();
+                testCruise.programs.add("PR-SEASHELL-20");
+                ProgramDTO pr = getTestProgram1("PR-SEASHELL-20");
+                postProgram(this.mockMvc, pr, objectMapper);
+                CruiseControllerTest.postCruise(this.mockMvc, testCruise, this.objectMapper);
 
-    @Test
-    public void testPostProgram() throws Exception {
-        programUUID = UUID.randomUUID();
-        ProgramDTO program = getTestProgram1("KB_" + programUUID);
-        String json = objectMapper.writeValueAsString(program);
+                testCruise = CruiseControllerTest.getTestCruise1("SEASHELL-19");
+                start = OffsetDateTime.parse("2019-04-25T11:08:00Z");
+                end = OffsetDateTime.parse("2019-04-29T11:08:00Z");
+                OffsetDateTime earlyStart = start;
+                testCruise.startDate = start;
+                testCruise.endDate = end;
+                testCruise.programs = new ArrayList<>();
+                testCruise.programs.add("2019-ILVO-FISHY");
+                pr = getTestProgram1("2019-ILVO-FISHY");
+                postProgram(this.mockMvc, pr, objectMapper);
+                CruiseControllerTest.postCruise(this.mockMvc, testCruise, this.objectMapper);
 
-        this.mockMvc
-                .perform(MockMvcRequestBuilders.post("/api/program").contentType(MediaType.APPLICATION_JSON)
-                        .content(json))
-                // .andDo(print())
-                .andExpect(status().isCreated())
-                .andExpect(content().string(containsString("<identifier>KB_" + programUUID + "</identifier>")))
-                .andExpect(content().string(containsString("<description>" + program.description + "</description>")))
-                .andReturn();
+                /*
+                 * this.mockMvc.perform(MockMvcRequestBuilders.get(
+                 * "/api/programs?cruiseIdentifier=SEASHELL-20"))
+                 * // .andDo(print())
+                 * .andExpect(status().is(200))
+                 * .andExpect(content().string(containsString(
+                 * "<identifier>PR-SEASHELL-20</identifier>")))
+                 * .andExpect(content().string(not(containsString(
+                 * "<identifier>2019-ILVO-FISHY</identifier>")))).andReturn();
+                 */
+                this.mockMvc
+                                .perform(MockMvcRequestBuilders
+                                                .get("/api/programs?startDate="
+                                                                + lateStart.format(DateTimeFormatter.ISO_DATE_TIME))
+                                                .contentType(MediaType.APPLICATION_JSON)) // + "&endDate=" +
+                                                                                          // end.format(DateTimeFormatter.ISO_DATE_TIME)
+                                .andDo(print())
+                                .andExpect(status().is(200))
+                                .andExpect(content().string(containsString("<identifier>PR-SEASHELL-20</identifier>")))
+                                .andExpect(content().string(
+                                                not(containsString("<identifier>2019-ILVO-FISHY</identifier>"))))
+                                .andReturn();
+                CruiseControllerTest.deleteCruise(testCruise.identifier, mockMvc);
 
-    }
+                // delete all previous events and programs
+                EventControllerTest.deleteAllEvents(this.mockMvc);
+                deleteAllPrograms(this.mockMvc);
 
-    @Test
-    @Ignore
-    public void testGetProgramByidentifier() {
-        String identifier = "";
-        ProgramController instance = new ProgramController();
-        Program expResult = null;
-        Program result = instance.getProgramByidentifier(identifier);
-        assertEquals(expResult, result);
-        // TODO review the generated test code and remove the default call to fail.
-        // fail("The test case is a prototype.");
-    }
+        }
 
-    @Test
-    @Ignore
-    public void testRemoveProgramByIdentifier() {
-        String identifier = "";
-        ProgramController instance = new ProgramController();
-        String expResult = "";
-        String result = instance.removeProgramByIdentifier(identifier);
-        assertEquals(expResult, result);
-        // TODO review the generated test code and remove the default call to fail.
-        // fail("The test case is a prototype.");
-    }
+        /**
+         * Test of getProgramById method, of class ProgramController.
+         */
+        @Test
+        public void testGetProgramById() throws Exception {
+                ProgramDTO pr = getTestProgram1("2020-MF");
+                postProgram(this.mockMvc, pr, objectMapper);
+                ProgramControllerTest.postProgram(this.mockMvc, pr, objectMapper);
 
-    @Test
-    @Ignore
-    public void testRemoveProgramById() {
-        String id = "";
-        ProgramController instance = new ProgramController();
-        String expResult = "";
-        String result = instance.removeProgramById(id);
-        assertEquals(expResult, result);
-        // TODO review the generated test code and remove the default call to fail.
-        // fail("The test case is a prototype.");
-    }
+                this.mockMvc.perform(MockMvcRequestBuilders.get("/api/program?identifier=2020-MF"))
+                                // .andDo(print())
+                                .andExpect(status().is(200))
+                                .andExpect(content().string(containsString("<identifier>2020-MF</identifier>")))
+                                .andReturn();
+        }
+
+        private static UUID programUUID;
+        private static String programId;
+
+        @Test
+        public void testPostProgram() throws Exception {
+                // delete all previous events and programs
+                EventControllerTest.deleteAllEvents(this.mockMvc);
+                deleteAllPrograms(this.mockMvc);
+
+                programUUID = UUID.randomUUID();
+                ProgramDTO program = getTestProgram1("KB_" + programUUID);
+                String json = objectMapper.writeValueAsString(program);
+
+                this.mockMvc
+                                .perform(MockMvcRequestBuilders.post("/api/program")
+                                                .contentType(MediaType.APPLICATION_JSON)
+                                                .content(json))
+                                // .andDo(print())
+                                .andExpect(status().isCreated())
+                                .andExpect(content().string(
+                                                containsString("<identifier>KB_" + programUUID + "</identifier>")))
+                                .andExpect(content().string(containsString(
+                                                "<description>" + program.description + "</description>")))
+                                .andReturn();
+
+                // delete all previous events and programs
+                EventControllerTest.deleteAllEvents(this.mockMvc);
+                deleteAllPrograms(this.mockMvc);
+
+        }
+
+        @Test
+        @Ignore
+        public void testGetProgramByidentifier() {
+                String identifier = "";
+                ProgramController instance = new ProgramController();
+                Program expResult = null;
+                Program result = instance.getProgramByidentifier(identifier);
+                assertEquals(expResult, result);
+                // TODO review the generated test code and remove the default call to fail.
+                // fail("The test case is a prototype.");
+        }
+
+        @Test
+        @Ignore
+        public void testRemoveProgramByIdentifier() {
+                String identifier = "";
+                ProgramController instance = new ProgramController();
+                String expResult = "";
+                String result = instance.removeProgramByIdentifier(identifier);
+                assertEquals(expResult, result);
+                // TODO review the generated test code and remove the default call to fail.
+                // fail("The test case is a prototype.");
+        }
+
+        @Test
+        @Ignore
+        public void testRemoveProgramById() {
+                String id = "";
+                ProgramController instance = new ProgramController();
+                String expResult = "";
+                String result = instance.removeProgramById(id);
+                assertEquals(expResult, result);
+                // TODO review the generated test code and remove the default call to fail.
+                // fail("The test case is a prototype.");
+        }
 
 }

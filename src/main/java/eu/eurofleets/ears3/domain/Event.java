@@ -11,7 +11,6 @@ import be.naturalsciences.bmdc.cruise.model.ITool;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.fasterxml.jackson.annotation.JsonIgnoreType;
 
 import java.io.Serializable;
 import java.time.OffsetDateTime;
@@ -153,7 +152,6 @@ public class Event implements IEvent, Serializable {
     }
 
     @Override
-    @JsonIgnore
     public void setActor(IPerson actor) {
         this.actor = (Person) actor;
     }
@@ -164,7 +162,6 @@ public class Event implements IEvent, Serializable {
     }
 
     @Override
-    @JsonIgnore
     public void setSubject(ILinkedDataTerm subject) {
         this.subject = (LinkedDataTerm) subject;
     }
@@ -175,7 +172,6 @@ public class Event implements IEvent, Serializable {
     }
 
     @Override
-    @JsonIgnore
     public void setTool(ITool tool) {
         this.tool = (Tool) tool;
     }
@@ -186,7 +182,6 @@ public class Event implements IEvent, Serializable {
     }
 
     @Override
-    @JsonIgnore
     public void setToolCategory(ILinkedDataTerm toolCategory) {
         this.toolCategory = (LinkedDataTerm) toolCategory;
     }
@@ -197,7 +192,6 @@ public class Event implements IEvent, Serializable {
     }
 
     @Override
-    @JsonIgnore
     public void setProcess(ILinkedDataTerm process) {
         this.process = (LinkedDataTerm) process;
     }
@@ -208,7 +202,6 @@ public class Event implements IEvent, Serializable {
     }
 
     @Override
-    @JsonIgnore
     public void setAction(ILinkedDataTerm action) {
         this.action = (LinkedDataTerm) action;
     }
@@ -219,7 +212,6 @@ public class Event implements IEvent, Serializable {
     }
 
     @Override
-    @JsonIgnore
     public void setProperties(Collection<? extends IProperty> properties) {
         this.properties = (Collection<Property>) properties;
     }
@@ -230,7 +222,6 @@ public class Event implements IEvent, Serializable {
     }
 
     @Override
-    @JsonIgnore
     public void setProgram(IProgram program) {
         this.program = (Program) program;
     }
@@ -249,7 +240,6 @@ public class Event implements IEvent, Serializable {
     }
 
     @Override
-    @JsonIgnore
     public void setPlatform(IPlatform platform) {
         this.platform = (Platform) platform;
     }
@@ -347,7 +337,6 @@ public class Event implements IEvent, Serializable {
         return r;
     }
 
-    @JsonIgnore
     public String getPrincipalInvestigators() {
         StringJoiner sj = new StringJoiner(", ");
         if (this.getProgram() != null) {
