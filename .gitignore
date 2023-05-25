@@ -37,6 +37,9 @@ target/
 .classpath
 .project
 
+# vscode 
+.vscode
+
 # NetBeans specific
 nbproject/
 nb-configuration.xml

@@ -75,7 +75,7 @@ public class NavigationService {
     private Navigation findByApproximateDate(OffsetDateTime date) {
         Query q = entityManager.createNamedQuery("findNavigationByApproximateDate", Navigation.class);
         q.setParameter(1, date);
-        List resultList = q.getResultList();
+        List<Navigation> resultList = q.getResultList();
         if (resultList.isEmpty()) {
             return null;
         } else {
