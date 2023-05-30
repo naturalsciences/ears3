@@ -297,10 +297,11 @@ function postEventInner(event, successFunction, errorFunction) {
                 //But both libraries do not return zero or one hit element, but always all elements of the match
 
                 //solution
-                //jsonpath regexes do work as described in https://support.smartbear.com/alertsite/docs/monitors/api/endpoint/jsonpath.html do not work, and should be written like this: /cat.*$/i.test(@.eid.value), see https://stackoverflow.com/a/59661213
+                //jsonpath regexes do work as described in https://support.smartbear.com/alertsite/docs/monitors/api/endpoint/jsonpath.html, and should be written like this: /cat.*$/i.test(@.eid.value), see https://stackoverflow.com/a/59661213
 
-                //ie remove  <script src="/ears3/js/index-browser-umd.cjs" type="text/javascript"></script>
-                //and go back to simplest library https://goessner.net/articles/JsonPath/ ie <script src="/ears3/js/jsonpath-0.8.0.js" type="text/javascript"></script>
+                //and keep  <script src="/ears3/js/index-browser-umd.cjs" type="text/javascript"></script>
+                //best should be to keep simplest library https://goessner.net/articles/JsonPath/ ie <script src="/ears3/js/jsonpath-0.8.0.js" type="text/javascript"></script>
+                //but this does not work with this regex syntax.
 
                 if (window.location.href.includes("event/new")) {
                     $("input#fixed_property_2").val(""); //description should not be kept the same over each scenario button press. 
