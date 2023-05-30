@@ -30,12 +30,53 @@ OPTIONAL {
  }
 FILTER (!REGEX( ?al, "^New Action" ) && str(?as) != 'Deprecated' )
 }
-
 ORDER BY ?pl ?al`;
+
+const eventPropertySPARQL = `PREFIX owl: <http://www.w3.org/2002/07/owl#> 
+PREFIX dc: <http://purl.org/dc/elements/1.1/> 
+PREFIX skos:<http://www.w3.org/2004/02/skos/core#> 
+PREFIX ears2:<http://ontologies.ef-ears.eu/ears2/1#> 
+PREFIX xsd:<http://www.w3.org/2001/XMLSchema#> 
+SELECT DISTINCT ?eid (str(?pr) as ?pru) ?prl ?mult ?unit 
+WHERE { 
+    { 
+        OPTIONAL { 
+            ?e ears2:hasProperty ?pr. 
+            ?e ears2:hasProcess ?p. 
+            ?e ears2:hasAction ?a. 
+            ?e ears2:withTool ?t. 
+            ?t ears2:isMemberOf ?c. 
+            ?e ears2:asConcept ?ec. 
+            ?ec dc:identifier ?eid. 
+            ?pr ears2:asConcept ?prc. 
+            ?prc skos:prefLabel ?prl. 
+            ?pr ears2:multiple ?mult }
+        } 
+    } 
+ORDER BY ?eid `
+
+const eventPropertyIncludeGEVSPARQL = `PREFIX owl: <http://www.w3.org/2002/07/owl#> 
+PREFIX dc: <http://purl.org/dc/elements/1.1/> 
+PREFIX skos:<http://www.w3.org/2004/02/skos/core#> 
+PREFIX ears2:<http://ontologies.ef-ears.eu/ears2/1#> 
+PREFIX xsd:<http://www.w3.org/2001/XMLSchema#> 
+SELECT DISTINCT ?eid (str(?pr) as ?pru) ?prl ?mult ?unit 
+WHERE { 
+    { 
+        OPTIONAL { 
+            {?e a ears2:GenericEventDefinition} UNION {?e a ears2:SpecificEventDefinition}
+            ?e ears2:asConcept ?ec. 
+            ?ec dc:identifier ?eid. 
+            ?pr ears2:asConcept ?prc. 
+            ?prc skos:prefLabel ?prl. 
+            ?pr ears2:multiple ?mult }
+        } 
+    } 
+ORDER BY ?eid`
 const jsonVesselRdfLocation = "/ears3/ontology/vessel/sparql?q=" + encodeURIComponent(conceptHierarchySPARQL);
 const jsonProgramRdfLocation = "/ears3/ontology/program/sparql?q=" + encodeURIComponent(conceptHierarchySPARQL);
-
-const eventPropertyRdfLocation = "/ears3/ontology/vessel/sparql?q=PREFIX%20owl%3A%20%3Chttp%3A%2F%2Fwww.w3.org%2F2002%2F07%2Fowl%23%3E%20PREFIX%20dc%3A%20%3Chttp%3A%2F%2Fpurl.org%2Fdc%2Felements%2F1.1%2F%3E%20PREFIX%20skos%3A%3Chttp%3A%2F%2Fwww.w3.org%2F2004%2F02%2Fskos%2Fcore%23%3E%20PREFIX%20ears2%3A%3Chttp%3A%2F%2Fontologies.ef-ears.eu%2Fears2%2F1%23%3E%20PREFIX%20xsd%3A%3Chttp%3A%2F%2Fwww.w3.org%2F2001%2FXMLSchema%23%3E%20SELECT%20DISTINCT%20%3Feid%20(str(%3Fpr)%20as%20%3Fpru)%20%3Fprl%20%3Fmult%20%3Funit%20WHERE%20%7B%20%7B%20OPTIONAL%20%7B%20%3Fe%20ears2%3AhasProperty%20%3Fpr.%20%3Fe%20ears2%3AhasProcess%20%3Fp.%20%3Fe%20ears2%3AhasAction%20%3Fa.%20%3Fe%20ears2%3AwithTool%20%3Ft.%20%3Ft%20ears2%3AisMemberOf%20%3Fc.%20%3Fe%20ears2%3AasConcept%20%3Fec.%20%3Fec%20dc%3Aidentifier%20%3Feid.%20%3Fpr%20ears2%3AasConcept%20%3Fprc.%20%3Fprc%20skos%3AprefLabel%20%3Fprl.%20%3Fpr%20ears2%3Amultiple%20%3Fmult%20%7D%7D%20%7D%20ORDER%20BY%20%3Feid%20";
+ 
+const eventPropertyRdfLocation = "/ears3/ontology/vessel/sparql?q=" + encodeURIComponent(eventPropertySPARQL); //TODO modify to use eventPropertyIncludeGEVSPARQL
 
 const stayGreenForThisPeriod = 5000;
 class EarsEvent {
@@ -274,29 +315,16 @@ function postEventInner(event, successFunction, errorFunction) {
                     });
                 }
 
-                /*    $("input#property_0").attr('value', $("#labelField").val()); //predefined entry coming from the labelField.
-                   $("input#property_1").attr('value', $("#stationField").val()); //predefined entry coming from the stationField.
-                   $("input#property_2").attr('value', $("#labelField").attr("data-description")); //predefined entry coming from the labelField data-desc attr.
-    */
-                $("input#property_0").val($("#stationField").val()); //predefined entry coming from the labelField.
-                $("input#property_1").val($("#labelField").val()); //predefined entry coming from the stationField.
-               // $("input#property_2").val($("#labelField").attr("data-description")); //predefined entry coming from the labelField data-desc attr.
+                //fixed properties, ie. station and field, get prefilled
+                // $("input#property_0").val($("#stationField").val()); //predefined entry coming from the labelField.
+                // $("input#property_1").val($("#labelField").val()); //predefined entry coming from the stationField.
 
-
-                /*    urls.unshift("http://ontologies.ef-ears.eu/ears2/1#pry_description");
-                    labels.unshift("description");
-                    
-                    urls.unshift("http://ontologies.ef-ears.eu/ears2/1#pry_4"); //reattach it
-                    labels.unshift("label");
-                    
-                    urls.unshift("http://ontologies.ef-ears.eu/ears2/1#pry_station");
-                    labels.unshift("station");*/
-
-                if (eventPropertyUrls) {
-                    // $("#propertyPopup ul").empty();
+                $("input#property_0").attr('value', $("#stationField").val()); //predefined entry coming from the labelField.
+                $("input#property_0").attr('value', $("#stationField").val()); //predefined entry coming from the stationField.
+                if (eventPropertyUrls) { //we found matches
+                    $("#propertyPopup ul.non-fixed-properties").empty(); //clear all true properties, ie. those non-fixed 
                     $("#propertyPopup").dialog("open");
                     eventPropertyUrls.forEach(function (eventPropertyUrl, index) {
-                        //console.log(item, labels[index]);
                         if ($("input[data-url='" + eventPropertyUrl + "']").length == 0) { //only add if the same one was not yet added
                             var input = $('<input>', {
                                 type: 'text',
@@ -305,16 +333,7 @@ function postEventInner(event, successFunction, errorFunction) {
                                 class: 'form-control',
                                 value: null
                             });
-                            /*if(item === "http://ontologies.ef-ears.eu/ears2/1#pry_4"){
-                                input.attr('value',$("#labelField").val()); //predefined entry coming from the labelField.
-                            }
-                            if(item === "http://ontologies.ef-ears.eu/ears2/1#pry_station"){
-                                input.attr('value',$("#stationField").val()); //predefined entry coming from the stationField.
-                            }
-                            if(item === "http://ontologies.ef-ears.eu/ears2/1#pry_description"){
-                                input.attr('value',$("#labelField").attr("data-description")); //predefined entry coming from the labelField data-desc attr.
-                                input.type='textarea';
-                            }*/
+
                             input.attr('data-url', eventPropertyUrl);
                             var label = $('<label>', {
                                 class: 'txtBox',
@@ -329,7 +348,7 @@ function postEventInner(event, successFunction, errorFunction) {
                             var li = $('<li>', {
                                 html: '<div class="form-group"><p>' + input.get(0).outerHTML + label.get(0).outerHTML + '</p></div>'
                             });
-                            $("#propertyPopup ul").append(li);
+                            $("#propertyPopup ul.non-fixed-properties").append(li);
                         }
                     });
                 } else { //eventPropertyRdfLocation was reached but yielded no url results, so we have no props

@@ -152,10 +152,10 @@
                 </div>
             </div>
             <div id="propertyPopup" title="Enter properties">
-                <ul>
+                <ul class="fixed-properties">
                     <li>
                         <div class="form-group">
-                            <p><input type="text" id="property_0" name="station" class="form-control"
+                            <p><input type="text" id="fixed_property_0" name="station" class="form-control"
                                     th:value="${event.station}"
                                     data-url="http://ontologies.ef-ears.eu/ears2/1#pry_station"><label class="txtBox"
                                     for="property_0">station</label></p>
@@ -163,7 +163,7 @@
                     </li>
                     <li>
                         <div class="form-group">
-                            <p><input type="text" id="property_1" name="label" class="form-control"
+                            <p><input type="text" id="fixed_property_1" name="label" class="form-control"
                                     th:value="${event.label}"
                                     data-url="http://ontologies.ef-ears.eu/ears2/1#pry_4"><label class="txtBox"
                                     for="property_1">label</label></p>
@@ -171,18 +171,21 @@
                     </li>
                     <li>
                         <div class="form-group">
-                            <p><input type="textarea" id="property_2" name="description" class="form-control"
+                            <p><input type="textarea" id="fixed_property_2" name="description" class="form-control"
                                     th:value="${event.description}"
                                     data-url="http://ontologies.ef-ears.eu/ears2/1#pry_description"><label
                                     class="txtBox" for="property_2">description</label></p>
                         </div>
                     </li>
+                </ul>
+                <ul class="non-fixed-properties">
                     <li th:each="property, i: ${event.properties}">
-                        <div class="form-group" th:if= "${property.key.identifier != 'http://ontologies.ef-ears.eu/ears2/1#pry_4'}">
-                            <p><input type="text" th:id="'property_' + ${(i.index)+3}" th:name="${property.key.name}" class="form-control"
-                                    th:value="${property.value}"
-                                    th:attr="data-url=${property.key.identifier}"><label
-                                    class="txtBox" th:for="'property_' + ${(i.index)+3}" th:text="${property.key.name}"></label></p>
+                        <div class="form-group"
+                            th:if="${property.key.identifier != 'http://ontologies.ef-ears.eu/ears2/1#pry_4'}">
+                            <p><input type="text" th:id="'property_' + ${(i.index)+3}" th:name="${property.key.name}"
+                                    class="form-control" th:value="${property.value}"
+                                    th:attr="data-url=${property.key.identifier}"><label class="txtBox"
+                                    th:for="'property_' + ${(i.index)+3}" th:text="${property.key.name}"></label></p>
                         </div>
                     </li>
                 </ul>
