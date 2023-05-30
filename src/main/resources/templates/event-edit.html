@@ -179,7 +179,7 @@
                     </li>
                 </ul>
                 <ul class="non-fixed-properties">
-                    <li th:each="property, i: ${event.properties}">
+                    <li th:each="property, i: ${properties}">
                         <div class="form-group"
                             th:if="${property.key.identifier != 'http://ontologies.ef-ears.eu/ears2/1#pry_4'}">
                             <p><input type="text" th:id="'property_' + ${(i.index)+3}" th:name="${property.key.name}"

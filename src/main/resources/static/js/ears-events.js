@@ -75,7 +75,7 @@ WHERE {
 ORDER BY ?eid`
 const jsonVesselRdfLocation = "/ears3/ontology/vessel/sparql?q=" + encodeURIComponent(conceptHierarchySPARQL);
 const jsonProgramRdfLocation = "/ears3/ontology/program/sparql?q=" + encodeURIComponent(conceptHierarchySPARQL);
- 
+
 const eventPropertyRdfLocation = "/ears3/ontology/vessel/sparql?q=" + encodeURIComponent(eventPropertySPARQL); //TODO modify to use eventPropertyIncludeGEVSPARQL
 
 const stayGreenForThisPeriod = 5000;
@@ -281,21 +281,32 @@ function postEventInner(event, successFunction, errorFunction) {
             async: false,
             url: eventPropertyRdfLocation,
             success: function (data) {
-                var eid2 = eid.substring(eid.lastIndexOf('_') + 1); //needed as what we get is an url but we need to compare to an url
-                //original, used the original library, https://goessner.net/articles/JsonPath/
+                var eid2 = eid.substring(eid.lastIndexOf('_') + 1); //needed as what we get is an url but we need to compare to an uuid
+                //original used the original library, https://goessner.net/articles/JsonPath/
+                //uses exact matches, wouldn't work for the above reason
+                //doesn't work with contains
                 //var urls = jsonPath(data, "results.bindings[?(@.eid.value =='"+eid2+"')].pru.value");
                 //var labels = jsonPath(data, "results.bindings[?(@.eid.value =='"+eid2+"')].prl.value");
 
-                //contains doesn't work with a more advanced jsonpath library
+                //use a more advanced jsonpath library, https://jsonpath-plus.github.io/JSONPath/docs/ts/
+                //contains doesn't work with this either
                 //var urls = JSONPath.JSONPath("results.bindings[?(@.eid.value contains '"+eid2+"')].pru.value",data);
                 //var labels = JSONPath.JSONPath("results.bindings[?(@.eid.value contains '"+eid2+"')].prl.value",data); 
-                //ie remove  <script src="/ears3/js/index-browser-umd.cjs" type="text/javascript"></script>
-                //so go back to https://goessner.net/articles/JsonPath/ 
-                //only keep <script src="/ears3/js/jsonpath-0.8.0.js" type="text/javascript"></script>
 
-                //both libraries do not return zero or one hit element, but always all elements
+                //regexp matching does work with both libraries
+                //But both libraries do not return zero or one hit element, but always all elements of the match
+
                 //solution
                 //jsonpath regexes do work as described in https://support.smartbear.com/alertsite/docs/monitors/api/endpoint/jsonpath.html do not work, and should be written like this: /cat.*$/i.test(@.eid.value), see https://stackoverflow.com/a/59661213
+
+                //ie remove  <script src="/ears3/js/index-browser-umd.cjs" type="text/javascript"></script>
+                //and go back to simplest library https://goessner.net/articles/JsonPath/ ie <script src="/ears3/js/jsonpath-0.8.0.js" type="text/javascript"></script>
+
+                if (window.location.href.includes("event/new")) {
+                    $("input#fixed_property_2").val(""); //description should not be kept the same over each scenario button press. 
+                    $("input#fixed_property_2").attr('value', ""); //description should not be kept the same over each scenario button press. 
+                    $("#propertyPopup ul.non-fixed-properties").empty(); //clear all true properties, ie. those non-fixed. Otherwise they repeat each time again for each scenario button press. However, when editing an existing event, it needs to stay. 
+                }
 
                 var eventPropertyUrls = JSONPath.JSONPath("results.bindings[?(/" + eid2 + "/i.test(@.eid.value))].pru.value", data);
                 var eventPropertyLabels = JSONPath.JSONPath("results.bindings[?(/" + eid2 + "/i.test(@.eid.value))].prl.value", data);
@@ -316,16 +327,17 @@ function postEventInner(event, successFunction, errorFunction) {
                 }
 
                 //fixed properties, ie. station and field, get prefilled
-                // $("input#property_0").val($("#stationField").val()); //predefined entry coming from the labelField.
-                // $("input#property_1").val($("#labelField").val()); //predefined entry coming from the stationField.
+                // $("input#fixed_property_0").val($("#stationField").val()); //predefined entry coming from the stationField.
+                // $("input#fixed_property_1").val($("#labelField").val()); //predefined entry coming from the labelField.
 
-                $("input#property_0").attr('value', $("#stationField").val()); //predefined entry coming from the labelField.
-                $("input#property_0").attr('value', $("#stationField").val()); //predefined entry coming from the stationField.
-                if (eventPropertyUrls) { //we found matches
-                    $("#propertyPopup ul.non-fixed-properties").empty(); //clear all true properties, ie. those non-fixed 
+                $("input#fixed_property_0").attr('value', $("#stationField").val()); //predefined entry coming from the stationField.
+                $("input#fixed_property_1").attr('value', $("#labelField").val()); //predefined entry coming from the labelField.
+                if (eventPropertyUrls) { //we found matches                    
                     $("#propertyPopup").dialog("open");
                     eventPropertyUrls.forEach(function (eventPropertyUrl, index) {
-                        if ($("input[data-url='" + eventPropertyUrl + "']").length == 0) { //only add if the same one was not yet added
+                        eventPropertyUrl = eventPropertyUrl.replace('/#', '#') //needed as searches in th rdf return ie. http://ontologies.ef-ears.eu/ears2/1/#pry_18 whereas they could be stored as http://ontologies.ef-ears.eu/ears2/1#pry_18 
+                        var eid2 = eid.substring(eid.lastIndexOf('_') + 1); //needed as what we get is an url but we need to compare to an uuid
+                        if ($("input[data-url='" + eventPropertyUrl + "']").length == 0) { //only add if the same one was not yet added. We need this if we create new events. When editing existing events, we have the value from the back end via the thymeleaf template.
                             var input = $('<input>', {
                                 type: 'text',
                                 id: 'property_' + index + 3,
@@ -382,7 +394,6 @@ function postEventInner(event, successFunction, errorFunction) {
                 }
             });
             $(document).off('click', '#btnSubmitEventWithProperties'); //clear it else previous events are readded each time
-            // console.log(event);
             postEventInnerMost(event, successFunction, errorFunction);
             $("#propertyPopup").dialog("close");
         });

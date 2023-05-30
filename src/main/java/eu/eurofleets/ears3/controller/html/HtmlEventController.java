@@ -34,9 +34,7 @@ public class HtmlEventController {
     public String eventEdit(@PathVariable("id") String id, Model model) {
         Event event = eventService.findByIdentifier(id);
         model.addAttribute("event", event);
-        IProperty station = event.getProperties().stream().filter(p -> p.getKey().getName().equals("station")).findFirst().orElse(null);
-        String stationS = station == null ? null : station.getValue();
-        model.addAttribute("station", stationS);
+        model.addAttribute("properties", event.getProperties()); 
         return "event-edit";
     }
 
