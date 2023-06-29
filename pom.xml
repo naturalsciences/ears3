@@ -29,6 +29,12 @@
         <!-- lookup parent from repository -->
     </parent>
     <dependencies>
+
+            <dependency>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-starter-actuator</artifactId>
+            </dependency>
+
         <dependency>
             <!--https://github.com/naturalsciences/ears3-ontology-ext-->
             <groupId>eu.eurofleets</groupId>
