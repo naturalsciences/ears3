@@ -1,17 +1,54 @@
 const eventPostLocation = "/ears3/api/event";
 
-const conceptHierarchySPARQL = `PREFIX owl: <http://www.w3.org/2002/07/owl#>
+const conceptHierarchySPARQL=`PREFIX owl: <http://www.w3.org/2002/07/owl#>
 PREFIX dc: <http://purl.org/dc/elements/1.1/>
 PREFIX skos:<http://www.w3.org/2004/02/skos/core#>
 PREFIX ears2:<http://ontologies.ef-ears.eu/ears2/1#>
 PREFIX xsd:<http://www.w3.org/2001/XMLSchema#>
-SELECT DISTINCT  (replace(replace(str(?e),"http://ontologies.ef-ears.eu/ears2/1/#gev_","ears:gev::","i"),"http://ontologies.ef-ears.eu/ears2/1/#sev_","ears:sev::","i") as ?eid)  (str(?c) as ?cu) (str(?cc) as ?ctu) ?cl (str(?t)  as ?tu) (str(?tc) as ?ttu) ?tl (str(?p) as ?pu) ?pl (str(?a) as ?au) ?al
+SELECT DISTINCT  (replace(replace(str(?e),".+?(gev?_)","ears:gev::","i"),".+?(sev?_)","ears:sev::","i") as ?eid)  (str(?c) as ?cu) (str(?cc) as ?ctu) ?cl (str(?t)  as ?tu) (str(?tc) as ?ttu) ?tl (str(?p) as ?pu) ?pl (str(?a) as ?au) ?al
 WHERE {
 {
 OPTIONAL {
 ?c a ears2:ToolCategory.
 ?t a ears2:Tool.
+?t ears2:isMemberOf ?c.
 ?e ears2:hasProcess ?p.
+?e ears2:hasAction ?a. 
+{?e ears2:withTool ?t.} UNION {?e ears2:withTool ?c.}
+# ?t ears2:isMemberOf ?c.
+#?e ears2:asConcept ?ec.
+#?ec dc:identifier ?eid.
+?c ears2:asConcept ?cc.
+?cc skos:prefLabel ?cl .
+?t ears2:asConcept ?tc.
+?tc skos:prefLabel ?tl .
+?p ears2:asConcept ?pc.
+?pc skos:prefLabel ?pl .
+?a ears2:asConcept ?ac.
+?ac skos:prefLabel ?al.
+?ac ears2:status ?as  
+}
+ }
+FILTER (!REGEX( ?al, "^New Action" ) && str(?as) != 'Deprecated' )
+}
+
+ORDER BY DESC(?eid) ?pl ?al`;
+
+/*
+const conceptHierarchySPARQL = `PREFIX owl: <http://www.w3.org/2002/07/owl#>
+PREFIX dc: <http://purl.org/dc/elements/1.1/>
+PREFIX skos:<http://www.w3.org/2004/02/skos/core#>
+PREFIX ears2:<http://ontologies.ef-ears.eu/ears2/1#>
+PREFIX xsd:<http://www.w3.org/2001/XMLSchema#>
+#SELECT DISTINCT  (replace(replace(str(?e),"http://ontologies.ef-ears.eu/ears2/1/#gev_","ears:gev::","i"),"http://ontologies.ef-ears.eu/ears2/1/#sev_","ears:sev::","i") as ?eid)  (str(?c) as ?cu) (str(?cc) as ?ctu) ?cl (str(?t)  as ?tu) (str(?tc) as ?ttu) ?tl (str(?p) as ?pu) ?pl (str(?a) as ?au) ?al
+SELECT DISTINCT  (replace(replace(replace(str(?e),"http://ontologies.ef-ears.eu/ears2/1/","ears:gev::","i"),"http://ontologies.ef-ears.eu/ears2/1/#sev_","ears:sev::","i"), "#", "") as ?eid)  (str(?c) as ?cu) (str(?cc) as ?ctu) ?cl (str(?t)  as ?tu) (str(?tc) as ?ttu) ?tl (str(?p) as ?pu) ?pl (str(?a) as ?au) ?al
+WHERE {
+{
+OPTIONAL {
+?c a ears2:ToolCategory.
+?t a ears2:Tool.
+#?t ears2:isMemberOf ?c.
+      ?e ears2:hasProcess ?p.
 ?e ears2:hasAction ?a. 
 {?e ears2:withTool ?t.} UNION {?e ears2:withTool ?c.}
 ?t ears2:isMemberOf ?c.
@@ -28,51 +65,109 @@ OPTIONAL {
 ?ac ears2:status ?as  
 }
  }
-FILTER (!REGEX( ?al, "^New Action" ) && str(?as) != 'Deprecated' )
+  FILTER (!REGEX( ?al, "^New Action" ) && str(?as) != 'Deprecated' && contains(?cl, "beam trawl") )
 }
-ORDER BY ?pl ?al`;
+ORDER BY ?pl ?al`
+// const conceptHierarchySPARQL = `PREFIX owl: <http://www.w3.org/2002/07/owl#>
+// PREFIX dc: <http://purl.org/dc/elements/1.1/> 
+// PREFIX skos:<http://www.w3.org/2004/02/skos/core#>
+// PREFIX ears2:<http://ontologies.ef-ears.eu/ears2/1#>
+// PREFIX xsd:<http://www.w3.org/2001/XMLSchema#>
+// SELECT DISTINCT  (replace(replace(str(?e),"http://ontologies.ef-ears.eu/ears2/1/#gev_","ears:gev::","i"),"http://ontologies.ef-ears.eu/ears2/1/#sev_","ears:sev::","i") as ?eid)  (str(?c) as ?cu) (str(?cc) as ?ctu) ?cl (str(?t)  as ?tu) (str(?tc) as ?ttu) ?tl (str(?p) as ?pu) ?pl (str(?a) as ?au) ?al
+// WHERE {
+// {
+// OPTIONAL {
+// {?e a ears2:GenericEventDefinition } UNION {?e a ears2:SpecificEventDefinition}
+// ?c a ears2:ToolCategory.
+// ?t a ears2:Tool.
+// ?t ears2:isMemberOf ?c.
+// ?e ears2:hasProcess ?p.
+// ?e ears2:hasAction ?a. 
+// {?e ears2:withTool ?t.} UNION {?e ears2:withTool ?c.}
+// #?t ears2:isMemberOf ?c.
+// #?e ears2:asConcept ?ec.
+// #?ec dc:identifier ?eid.
+// ?c ears2:asConcept ?cc.
+// ?cc skos:prefLabel ?cl .
+// ?t ears2:asConcept ?tc.
+// ?tc skos:prefLabel ?tl .
+// ?p ears2:asConcept ?pc.
+// ?pc skos:prefLabel ?pl .
+// ?a ears2:asConcept ?ac.
+// ?ac skos:prefLabel ?al.
+// ?ac ears2:status ?as  
+// }
+//  }
+// FILTER (!REGEX( ?al, "^New Action" ) && str(?as) != 'Deprecated' )
+// }
+// ORDER BY ?pl ?al`;
+
+*/
 
 const eventPropertySPARQL = `PREFIX owl: <http://www.w3.org/2002/07/owl#> 
 PREFIX dc: <http://purl.org/dc/elements/1.1/> 
 PREFIX skos:<http://www.w3.org/2004/02/skos/core#> 
 PREFIX ears2:<http://ontologies.ef-ears.eu/ears2/1#> 
 PREFIX xsd:<http://www.w3.org/2001/XMLSchema#> 
-SELECT DISTINCT ?eid (str(?pr) as ?pru) ?prl ?mult ?unit 
+SELECT DISTINCT (replace(replace(str(?e),".+?(gev?_)","ears:gev::","i"),".+?(sev?_)","ears:sev::","i") as ?eid) (str(?pr) as ?pru) ?prl ?mult
 WHERE { 
-    { 
-        OPTIONAL { 
-            ?e ears2:hasProperty ?pr. 
-            ?e ears2:hasProcess ?p. 
-            ?e ears2:hasAction ?a. 
-            ?e ears2:withTool ?t. 
-            ?t ears2:isMemberOf ?c. 
-            ?e ears2:asConcept ?ec. 
-            ?ec dc:identifier ?eid. 
-            ?pr ears2:asConcept ?prc. 
-            ?prc skos:prefLabel ?prl. 
-            ?pr ears2:multiple ?mult }
-        } 
-    } 
-ORDER BY ?eid `
+  { 
+    OPTIONAL { 
+      ?e ears2:hasProperty ?pr .
+      ?c a ears2:ToolCategory.
+      ?t a ears2:Tool.
+      ?t ears2:isMemberOf ?c.
+      ?e ears2:hasProcess ?p.
+      ?e ears2:hasAction ?a. 
+      {?e ears2:withTool ?t.} UNION {?e ears2:withTool ?c.}
 
-const eventPropertyIncludeGEVSPARQL = `PREFIX owl: <http://www.w3.org/2002/07/owl#> 
-PREFIX dc: <http://purl.org/dc/elements/1.1/> 
-PREFIX skos:<http://www.w3.org/2004/02/skos/core#> 
-PREFIX ears2:<http://ontologies.ef-ears.eu/ears2/1#> 
-PREFIX xsd:<http://www.w3.org/2001/XMLSchema#> 
-SELECT DISTINCT ?eid (str(?pr) as ?pru) ?prl ?mult ?unit 
-WHERE { 
-    { 
-        OPTIONAL { 
-            {?e a ears2:GenericEventDefinition} UNION {?e a ears2:SpecificEventDefinition}
-            ?e ears2:asConcept ?ec. 
-            ?ec dc:identifier ?eid. 
-            ?pr ears2:asConcept ?prc. 
-            ?prc skos:prefLabel ?prl. 
-            ?pr ears2:multiple ?mult }
-        } 
-    } 
-ORDER BY ?eid`
+      ?pr ears2:asConcept ?prc. 
+      ?prc skos:prefLabel ?prl. 
+      ?pr ears2:multiple ?mult }
+  }
+} 
+ORDER BY DESC(?eid)`
+// const eventPropertySPARQL = `PREFIX owl: <http://www.w3.org/2002/07/owl#> 
+// PREFIX dc: <http://purl.org/dc/elements/1.1/> 
+// PREFIX skos:<http://www.w3.org/2004/02/skos/core#> 
+// PREFIX ears2:<http://ontologies.ef-ears.eu/ears2/1#> 
+// PREFIX xsd:<http://www.w3.org/2001/XMLSchema#> 
+// SELECT DISTINCT ?eid (str(?pr) as ?pru) ?prl ?mult ?unit 
+// WHERE { 
+//     { 
+//         OPTIONAL { 
+//             ?e ears2:hasProperty ?pr. 
+//             ?e ears2:hasProcess ?p. 
+//             ?e ears2:hasAction ?a. 
+//             ?e ears2:withTool ?t. 
+//             ?t ears2:isMemberOf ?c. 
+//             ?e ears2:asConcept ?ec. 
+//             ?ec dc:identifier ?eid. 
+//             ?pr ears2:asConcept ?prc. 
+//             ?prc skos:prefLabel ?prl. 
+//             ?pr ears2:multiple ?mult }
+//         } 
+//     } 
+// ORDER BY ?eid `
+
+// const eventPropertyIncludeGEVSPARQL = `PREFIX owl: <http://www.w3.org/2002/07/owl#> 
+// PREFIX dc: <http://purl.org/dc/elements/1.1/> 
+// PREFIX skos:<http://www.w3.org/2004/02/skos/core#> 
+// PREFIX ears2:<http://ontologies.ef-ears.eu/ears2/1#> 
+// PREFIX xsd:<http://www.w3.org/2001/XMLSchema#> 
+// SELECT DISTINCT ?eid (str(?pr) as ?pru) ?prl ?mult ?unit 
+// WHERE { 
+//     { 
+//         OPTIONAL { 
+//             {?e a ears2:GenericEventDefinition} UNION {?e a ears2:SpecificEventDefinition}
+//             ?e ears2:asConcept ?ec. 
+//             ?ec dc:identifier ?eid. 
+//             ?pr ears2:asConcept ?prc. 
+//             ?prc skos:prefLabel ?prl. 
+//             ?pr ears2:multiple ?mult }
+//         } 
+//     } 
+// ORDER BY ?eid`
 const jsonVesselRdfLocation = "/ears3/ontology/vessel/sparql?q=" + encodeURIComponent(conceptHierarchySPARQL);
 const jsonProgramRdfLocation = "/ears3/ontology/program/sparql?q=" + encodeURIComponent(conceptHierarchySPARQL);
 
@@ -230,15 +325,18 @@ function deleteEvent(identifier) {
 }
 
 function postEvent(recentEventButton) {
-    recentEventId = { eid: recentEventButton.id, tool: recentEventButton.getAttribute('data-tool') };
+    // recentEventId = { eid: recentEventButton.id, tool: recentEventButton.getAttribute('data-tool') };
+    recentEventId = recentEventButton.id;
     console.log('Pressed button for ' + recentEventId);
-    if (recentEventId.eid !== recentlyDeletedEventId) {
+    // if (recentEventId.eid !== recentlyDeletedEventId) {
+    if (recentEventId !== recentlyDeletedEventId) {
         postEventByEventDefinition(recentEventId, function () {
             $(recentEventButton).removeClass("btn-warning").addClass("btn-success");
             setTimeout(function () {
                 $(recentEventButton).removeClass("btn-success");
             }, stayGreenForThisPeriod);
             $("#collapseOne").addClass("show");
+        return false;
         }, function () {
             $(recentEventButton).removeClass("btn-success").addClass("btn-warning");
         });
@@ -246,7 +344,8 @@ function postEvent(recentEventButton) {
 }
 
 function rdfBindingElementHasEid(element, eventDefinitionId) {
-    return element.eid.value == eventDefinitionId.eid && element.tu.value == eventDefinitionId.tool
+    // return element.eid.value == eventDefinitionId.eid && element.tu.value == eventDefinitionId.tool
+    return element.eid.value == eventDefinitionId
 }
 
 function postEventByEventDefinition(eventDefinitionId, successFunction, errorFunction) {

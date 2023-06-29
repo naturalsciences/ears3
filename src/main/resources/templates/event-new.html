@@ -236,7 +236,7 @@
             function addEVtoLocalStorage(event) {
                 let map = localStorageEventDefsToMap(); //maps preserve insertion order and have unique entries by default
                 size = map.size;
-                map.set({ eid: event.eventDefinitionId, tool: event.tool.tool.identifier }, event);
+                map.set(event.eventDefinitionId, event);
                 if (map.size != size) { //addition happened, meaning it is new
                     localStorage.eventDefinitions = JSON.stringify(Array.from(map.entries()));
                 }
@@ -249,7 +249,8 @@
 
                 map.forEach((value, key) => {
                     console.log(value, key);
-                    if (key.eid == objectKey.eid && key.tool == objectKey.tool) {
+                    // if (key.eid == objectKey.eid && key.tool == objectKey.tool) {
+                    if (key == objectKey) {
                         delete map[key];
                         map.delete(key);
                     }
@@ -280,7 +281,8 @@
                 const button = recentEventButtonX.parentNode.parentNode;
                 button.disabled = true;
                 //EventIdToBeDeleted = button.id;
-                EventIdToBeDeleted = { eid: button.id, tool: button.getAttribute('data-tool') };
+                //EventIdToBeDeleted = { eid: button.id, tool: button.getAttribute('data-tool') };
+                EventIdToBeDeleted = button.id;
                 removeEVfromLocalStorage(EventIdToBeDeleted);
                 button.removeAttribute("onclick");
                 button.remove();

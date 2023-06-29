@@ -324,7 +324,7 @@ function initDropdowns(rdfBindings, selectedValues) {
                             function () {
                                 $("#btnSubmitDropdownChoice").removeClass("btn-success").addClass("btn-warning");
                             });
-
+                return false;
                 }
             });
         } else {
