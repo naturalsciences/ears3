@@ -53,7 +53,6 @@ function deleteObjectKeyFromMap(map, objectKey) {
 
     map.forEach((value, key) => {
         console.log(value, key);
-        // if (key.eid == objectKey.eid && key.tool == objectKey.tool) {
         if (key == objectKey) {
             delete map[key];
             map.delete(key);
@@ -63,7 +62,6 @@ function deleteObjectKeyFromMap(map, objectKey) {
 
 function removeEVfromLocalStorage(objectKey) {
     let map = localStorageEventDefsToMap(); //maps preserve insertion order and have unique entries by default
-    //map.delete(eventDefinitionId);
     deleteObjectKeyFromMap(map, objectKey);
     localStorage.eventDefinitions = JSON.stringify(Array.from(map.entries()));
 }
@@ -84,9 +82,7 @@ var recentlyDeletedEventId;
 function forgetButton(recentEventButtonX) {
     const button = recentEventButtonX.parentNode.parentNode;
     button.disabled = true;
-    //EventIdToBeDeleted = button.id;
     EventKeyToBeDeleted = objectKeyFromButton(button);
-    //EventIdToBeDeleted = { eid: button.id, tool: button.getAttribute('data-tool') };
     removeEVfromLocalStorage(EventKeyToBeDeleted);
     button.removeAttribute("onclick");
     button.remove();
