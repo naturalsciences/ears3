@@ -8,6 +8,35 @@ function objectKeyFromEvent(event) {
     return JSON.stringify(key)
 }
 
+function objectKeyFromButton(button) {
+    let key = {
+        eid: button.id, 
+        tool: button.getAttribute('data-tool'),
+        process: button.getAttribute('data-process'),
+        action: button.getAttribute('data-action'),
+    }
+    return JSON.stringify(key)
+}
+
+function objectKeyFromElement(element) {
+    let key = {
+        eid: element.eid.value, 
+        tool: element.tu.value,
+        process: element.pu.value,
+        action: element.au.value,
+    }
+    return JSON.stringify(key)
+}
+
+function compareObjectKeyWithElement(objectKey, element) {
+    let objectKeyJson = JSON.parse(objectKey)
+    if (objectKeyJson.id == element.id) {
+        return objectKey == objectKeyFromElement(element)
+    } else {
+        return false
+    }
+}
+
 function addEVtoLocalStorage(event) {
     let map = localStorageEventDefsToMap(); //maps preserve insertion order and have unique entries by default
     size = map.size;
@@ -56,16 +85,9 @@ function forgetButton(recentEventButtonX) {
     const button = recentEventButtonX.parentNode.parentNode;
     button.disabled = true;
     //EventIdToBeDeleted = button.id;
-    EventKeyToBeDeleted = {
-        eid: button.id,
-        tool: button.getAttribute('data-tool'),
-        process: button.getAttribute('data-process'),
-        action: "End",
-     };
+    EventKeyToBeDeleted = objectKeyFromButton(button);
     //EventIdToBeDeleted = { eid: button.id, tool: button.getAttribute('data-tool') };
-    EventKeyToBeDeleted = objectKeyFromEvent()
-    EventIdToBeDeleted = button.id;
-    removeEVfromLocalStorage(EventIdToBeDeleted);
+    removeEVfromLocalStorage(EventKeyToBeDeleted);
     button.removeAttribute("onclick");
     button.remove();
     populateAllScenarios();
@@ -76,7 +98,7 @@ function populateScenarioButton(eventDefinitionId, rdfBindings) {
     $(rdfBindings).each(function (index, element) {
         if (rdfBindingElementHasEid(element, eventDefinitionId)) {
             var lastButtonCell = $("#recentEventDefinitionTable td#cell" + $('#recentEventDefinitionTable button').length);
-            lastButtonCell.append("<button data-tool=" + element.tu.value + " id=" + element.eid.value + " data-process=" + element.pu.value + " type='button' onclick='postEvent(this);' class='btn btn-default text-left'>" +
+            lastButtonCell.append("<button data-tool=" + element.tu.value + " id=" + element.eid.value + " data-process=" + element.pu.value + " data-action=" + element.au.value  + " type='button' onclick='postEvent(this);' class='btn btn-default text-left'>" +
                 "<p class='close-btn'><a href='#' onclick='forgetButton(this);'>x</a></p><p>" + element.cl.value + "</p><p><strong>" + element.tl.value + "</strong></p><p>" + element.pl.value + "<br>" + element.al.value + "</p></button>");
         }
     });

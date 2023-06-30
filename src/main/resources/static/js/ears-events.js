@@ -5,7 +5,7 @@ PREFIX dc: <http://purl.org/dc/elements/1.1/>
 PREFIX skos:<http://www.w3.org/2004/02/skos/core#>
 PREFIX ears2:<http://ontologies.ef-ears.eu/ears2/1#>
 PREFIX xsd:<http://www.w3.org/2001/XMLSchema#>
-SELECT DISTINCT  (replace(replace(str(?e),".+?(gev?_)","ears:gev::","i"),".+?(sev?_)","ears:sev::","i") as ?eid)  (str(?c) as ?cu) (str(?cc) as ?ctu) ?cl (str(?t)  as ?tu) (str(?tc) as ?ttu) ?tl (str(?p) as ?pu) ?pl (str(?a) as ?au) ?al
+SELECT DISTINCT (replace(replace(str(?e),".+?(gev?_)","ears:gev::","i"),".+?(sev?_)","ears:sev::","i") as ?eid)  (str(?c) as ?cu) (str(?cc) as ?ctu) ?cl (str(?t)  as ?tu) (str(?tc) as ?ttu) ?tl (str(?p) as ?pu) ?pl (str(?a) as ?au) ?al
 WHERE {
 {
 OPTIONAL {
@@ -326,7 +326,7 @@ function deleteEvent(identifier) {
 
 function postEvent(recentEventButton) {
     // recentEventId = { eid: recentEventButton.id, tool: recentEventButton.getAttribute('data-tool') };
-    recentEventId = recentEventButton.id;
+    recentEventId = objectKeyFromButton(recentEventButton);
     console.log('Pressed button for ' + recentEventId);
     // if (recentEventId.eid !== recentlyDeletedEventId) {
     if (recentEventId !== recentlyDeletedEventId) {
@@ -345,7 +345,7 @@ function postEvent(recentEventButton) {
 
 function rdfBindingElementHasEid(element, eventDefinitionId) {
     // return element.eid.value == eventDefinitionId.eid && element.tu.value == eventDefinitionId.tool
-    return element.eid.value == eventDefinitionId
+    return compareObjectKeyWithElement(eventDefinitionId, element)
 }
 
 function postEventByEventDefinition(eventDefinitionId, successFunction, errorFunction) {
