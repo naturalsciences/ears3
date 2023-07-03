@@ -7,31 +7,37 @@ PREFIX ears2:<http://ontologies.ef-ears.eu/ears2/1#>
 PREFIX xsd:<http://www.w3.org/2001/XMLSchema#>
 SELECT DISTINCT (replace(replace(str(?e),".+?(gev?_)","ears:gev::","i"),".+?(sev?_)","ears:sev::","i") as ?eid)  (str(?c) as ?cu) (str(?cc) as ?ctu) ?cl (str(?t)  as ?tu) (str(?tc) as ?ttu) ?tl (str(?p) as ?pu) ?pl (str(?a) as ?au) ?al
 WHERE {
-{
-OPTIONAL {
-?c a ears2:ToolCategory.
-?t a ears2:Tool.
-?t ears2:isMemberOf ?c.
-?e ears2:hasProcess ?p.
-?e ears2:hasAction ?a. 
-{?e ears2:withTool ?t.} UNION {?e ears2:withTool ?c.}
-# ?t ears2:isMemberOf ?c.
-#?e ears2:asConcept ?ec.
-#?ec dc:identifier ?eid.
-?c ears2:asConcept ?cc.
-?cc skos:prefLabel ?cl .
-?t ears2:asConcept ?tc.
-?tc skos:prefLabel ?tl .
-?p ears2:asConcept ?pc.
-?pc skos:prefLabel ?pl .
-?a ears2:asConcept ?ac.
-?ac skos:prefLabel ?al.
-?ac ears2:status ?as  
-}
- }
-FILTER (!REGEX( ?al, "^New Action" ) && str(?as) != 'Deprecated' )
-}
+  {
+    OPTIONAL {
+      ?c a ears2:ToolCategory.
+      ?t a ears2:Tool.
+      ?t ears2:isMemberOf ?c.
+      ?e ears2:hasProcess ?p.
+      ?e ears2:hasAction ?a. 
+      {?e ears2:withTool ?t.} UNION {?e ears2:withTool ?c.}
 
+      ?c ears2:asConcept ?cc.
+      ?cc skos:prefLabel ?cl .
+      
+      ?t ears2:asConcept ?tc.
+      ?tc skos:prefLabel ?tl_ .
+      
+      OPTIONAL {
+        ?t ears2:toolIdentifier ?ti .
+        BIND(CONCAT(": ", ?ti) AS ?ti_) .
+      }
+      ?p ears2:asConcept ?pc.
+      ?pc skos:prefLabel ?pl .
+      ?a ears2:asConcept ?ac.
+      ?ac skos:prefLabel ?al.
+      ?ac ears2:status ?as .
+      
+      BIND(COALESCE(?ti_, "") AS ?ti__) .
+      BIND(CONCAT(?tl_, ?ti__) AS ?tl) .
+    }
+  }
+  FILTER (!REGEX( ?al, "^New Action" ) && str(?as) != 'Deprecated' )
+}
 ORDER BY DESC(?eid) ?pl ?al`;
 
 const eventPropertySPARQL = `PREFIX owl: <http://www.w3.org/2002/07/owl#> 
@@ -56,7 +62,7 @@ WHERE {
       ?pr ears2:multiple ?mult }
   }
 } 
-ORDER BY DESC(?eid)`
+ORDER BY DESC(?eid)`;
 
 const jsonVesselRdfLocation = "/ears3/ontology/vessel/sparql?q=" + encodeURIComponent(conceptHierarchySPARQL);
 const jsonProgramRdfLocation = "/ears3/ontology/program/sparql?q=" + encodeURIComponent(conceptHierarchySPARQL);
