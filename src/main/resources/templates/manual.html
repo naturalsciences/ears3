@@ -1,12 +1,73 @@
 <!DOCTYPE html>
-<html lang="en"  xmlns="http://www.w3.org/1999/xhtml" 
-      xmlns:th="http://www.thymeleaf.org"
-      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" layout:decorate="~{fragments/f}">
-    <head th:replace="fragments/f :: head"></head>
-    <body>
-        <!-- <nav th:replace="fragments/f :: header"></nav> -->
-        <div class="container" layout:fragment="main">
+<html lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org"
+    xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" layout:decorate="~{fragments/f}">
 
+<head th:replace="fragments/f :: head"></head>
+
+<body>
+    <!-- <nav th:replace="fragments/f :: header"></nav> -->
+    <nav th:replace="fragments/f :: header">
+    </nav>
+    <!--<form layout:fragment="head-form">
+        <div class="form-group">
+            <select name="program" id="programField" class="selectpicker target form-control" data-live-search="true"
+                title="Current program" required>
+            </select>
+        </div>
+        <div class="form-group">
+            <p>
+                <input name="station" id="stationField" placeholder=" " type="text" title="Current station"
+                    class="form-control" /><label class="txtBox" for="station">Station</label>
+            </p>
+        </div>
+        <div class="form-group">
+            <p>
+                <input name="label" id="labelField" placeholder=" " type="text"
+                    title="Current event label (event identifier, station,...)" class="form-control" /><label
+                    class="txtBox" for="label">Event label</label>
+            </p>
+        </div>
+    </form>-->
+
+    <div class="container" layout:fragment="main">
+        <ul>
+        <li><a href="#ears-web-app-users-guide"
+        id="toc-ears-web-app-users-guide">EARS Web App User's Guide</a>
+        <ul>
+        <li><a href="#what-is-ears" id="toc-what-is-ears">What is
+        EARS</a>
+        <ul>
+        <li><a href="#terminology"
+        id="toc-terminology">Terminology</a></li>
+        </ul></li>
+        <li><a href="#access-to-ears" id="toc-access-to-ears">Access to
+        EARS</a></li>
+        <li><a href="#using-ears" id="toc-using-ears">Using EARS</a>
+        <ul>
+        <li><a href="#general-1" id="toc-general-1">General</a></li>
+        <li><a href="#event-creation" id="toc-event-creation">Event
+        creation</a></li>
+        <li><a href="#accessing-the-logged-events"
+        id="toc-accessing-the-logged-events">Accessing the logged
+        events</a></li>
+        <li><a href="#show-current-navigation-information"
+        id="toc-show-current-navigation-information">Show current
+        navigation information</a></li>
+        <li><a href="#export" id="toc-export">Export</a></li>
+        <li><a href="#all-events" id="toc-all-events">ALL
+        events</a></li>
+        <li><a href="#events-linked-to-a-cruise"
+        id="toc-events-linked-to-a-cruise">Events linked to a
+        cruise</a></li>
+        <li><a href="#points-of-attention-and-tips"
+        id="toc-points-of-attention-and-tips">Points of attention and
+        tips</a></li>
+        </ul></li>
+        <li><a href="#example-of-logged-parameters-and-units"
+        id="toc-example-of-logged-parameters-and-units">Example of
+        logged parameters and units</a></li>
+        </ul></li>
+        </ul>
         <h1 id="ears-web-app-users-guide">EARS Web App User's Guide</h1>
         <p><img src="/ears3/images/manual/image1.png" /></p>
         <!-- |                      |                                                                                                                                      | -->
@@ -209,10 +270,10 @@
         <h2 id="access-to-ears">Access to EARS</h2>
         <p>The application is only accessible onboard the vessel from a
         local IP address.</p>
-        <p>The url at any RV is as follows:
-        http://&lt;IP-ADDRESS&gt;:&lt;PORT&gt;/ears3 and is specific to
-        each EF+ Research Vessel. Ask your local electronician for the
-        correct location.</p>
+        <p>The url at any RV is as follows: <a
+        href="/ears3">http://&lt;IP-ADDRESS&gt;:&lt;PORT&gt;/ears3</a>
+        and is specific to each EF+ Research Vessel. Ask your local
+        electronician for the correct location.</p>
         <p>The EARS web application can be used with any internet
         browser. At the moment, the application does not work properly
         with the Chrome browser.</p>
@@ -221,9 +282,10 @@
         address will not be the same on another vessel.</p>
         <h2 id="using-ears">Using EARS</h2>
         <h3 id="general-1">General</h3>
-        <p>To use EARS, a user needs to be authenticated. On first use,
-        if the user does not yet exist, you are led to a page where you
-        can provide your first and last name as well as a valid email
+        <p>To use EARS, a user needs to be <a
+        href="/ears3/settings">authenticated</a>. On first use, if the
+        user does not yet exist, you are led to a page where you can
+        provide your first and last name as well as a valid email
         address and organization name. The list of organizations is
         extensive and (for now) unsorted. Start typing the name of the
         organization. If the organization does not appear, try searching
@@ -231,9 +293,10 @@
         <p><img src="/ears3/images/manual/image3.png" /></p>
         <p><img src="/ears3/images/manual/image4.png" /></p>
         <h3 id="event-creation">Event creation</h3>
-        <p>Once logged in EARS, the user needs to select the
-        <strong>Current program</strong>. If you try to create an event
-        without program, an error is shown.</p>
+        <p>Before the user can start submitting a <a
+        href="/ears3/event/new">new event</a>, the <strong>Current
+        program</strong> needs to be selected. If you try to create an
+        event without program, an error is shown.</p>
         <p><img src="/ears3/images/manual/image5.png" /></p>
         <p>Drop-down lists show the available tool categories, tools,
         processes and actions. A combination of these selections
@@ -280,7 +343,7 @@
         selected terms. This scenario button can be used as shortcut to
         log events with the same terms (tool category, tool, process and
         action). The actor, time stamp, station, label and description
-        may be different of course. To log an event from the 'Common
+        may be different of course. To log an event from the ‘Common
         scenarios’, click the desired scenario, define the station,
         label and description if needed and click on the ‘Submit’
         button.</p>
@@ -290,8 +353,9 @@
         <p><img src="/ears3/images/manual/image10.png" /></p>
         <h3 id="accessing-the-logged-events">Accessing the logged
         events</h3>
-        <p>The ‘Events’ tab of the web application allows to access the
-        list of logged events. The user can:</p>
+        <p>The <a href="/ears3/events">‘Events’</a> tab of the web
+        application allows to access the list of logged events. The user
+        can:</p>
         <ul>
         <li>Select and display the events details</li>
         <li>Edit the event</li>
@@ -336,24 +400,29 @@
         <li>Course over ground (cog)</li>
         <li>Speed over ground (sog).</li>
         </ul>
-        <p>On http://
-        &lt;IP-ADRESS&gt;:&lt;PORT&gt;/ears3Nav/nav/getLast/xml, the
+        <p>On <a href="/ears3Nav/nav/getLast/xml">http://
+        &lt;IP-ADRESS&gt;:&lt;PORT&gt;/ears3Nav/nav/getLast/xml</a>, the
         latest navigational information is shown in xml format as
-        illustrated below. You can also use the
-        /ears3Nav/nav/getLast/json or /ears3Nav/nav/getLast/datagram
+        illustrated below. You can also use the <a
+        href="/ears3Nav/nav/getLast/json">/ears3Nav/nav/getLast/json</a>
+        or <a
+        href="/ears3Nav/nav/getLast/datagram">/ears3Nav/nav/getLast/datagram</a>
         endpoints to view the data as json and csv respectively.</p>
         <p><img src="/ears3/images/manual/image13.png" /></p>
         <h3 id="export">Export</h3>
         <h3 id="all-events">ALL events</h3>
-        <p>To export logged events, go to “Events” and click on
-        “Download all events”. All events created so far in EARS are
-        exported in a csv file. After opening the csv file (with excel
-        for instance), you may select events of your cruise by filtering
-        by the cruise’s period.</p>
+        <p>To export logged events, go to <a
+        href="/ears3/events">“Events”</a> and click on “Download all
+        events”. All events created so far in EARS are exported in a csv
+        file. After opening the csv file (with excel for instance), you
+        may select events of your cruise by filtering by the cruise’s
+        period.</p>
         <h3 id="events-linked-to-a-cruise">Events linked to a
         cruise</h3>
-        <p>When you select the <em>Cruises</em> tab, you can export all
-        events from the selected cruise.</p>
+        <p>When you select the <a
+        href="/ears3/cruises"><em>Cruises</em></a> tab, you can export
+        all events from the selected cruise. Please verify after
+        exporting the data, that the export was successful!</p>
         <p><img src="/ears3/images/manual/image14.png" /></p>
         <h3 id="points-of-attention-and-tips">Points of attention and
         tips</h3>
@@ -377,8 +446,7 @@
         tool to BMDC for next time.</li>
         </ul>
         <p>A more complete manual can be found on: <a
-        href="https://github.com/naturalsciences/ears/releases/download/v3.0.3/Eurofleets+_D3.9_manual_ears3_client_webapp.pdf"
-        class="uri">https://github.com/naturalsciences/ears/releases/download/v3.0.3/Eurofleets+_D3.9_manual_ears3_client_webapp.pdf</a></p>
+        href="https://github.com/naturalsciences/ears/releases/download/v3.0.3/Eurofleets+_D3.9_manual_ears3_client_webapp.pdf">https://github.com/naturalsciences/ears/releases/download/v3.0.3/Eurofleets+_D3.9_manual_ears3_client_webapp.pdf</a></p>
         <h2 id="example-of-logged-parameters-and-units">Example of
         logged parameters and units</h2>
         <table>
@@ -511,6 +579,9 @@
         </tr>
         </tbody>
         </table>
-        </div>
-    </body>
+
+        <script src="/ears3/js/settings-in-menu.js" type="application/javascript"></script>
+    </div>
+</body>
+
 </html>
