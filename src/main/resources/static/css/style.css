@@ -163,3 +163,51 @@ select#idSelect_tc+button, select#idSelect_t+button,select#idSelect_p+button,sel
     padding-left:0;
     padding-right:2px;
 }
+
+.manual {
+    text-align:justify;
+    width: 98%;
+    align-content: center;
+    align-items: center;
+}
+
+.manual p{
+    padding-left: 1%;
+    text-align: justify;
+    align-items: center;
+    align-content: center;
+    justify-content: center;
+    justify-self: center;
+}
+
+.manual img{
+    width: 95%;
+    padding-left: 2.5%;
+}
+
+.manualTable {
+    display: flex;
+    align-content: center;
+    align-items: center;
+    justify-content: center;
+    justify-self: center;
+}
+.manualTable table {
+    width: 80%;
+    border: 1px solid;
+    border-color: lightgray;
+}
+
+.manualTable th, .manualTable tr, .manualTable td{
+    width: 50%;
+    border: 1px solid;
+    border-color: lightgray;
+}
+
+.manualTable th{
+    font-size: larger;
+}
+
+.manualTable td{
+    padding-left: 15px;
+}

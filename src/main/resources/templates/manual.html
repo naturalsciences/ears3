@@ -37,8 +37,11 @@
         <li><a href="#what-is-ears" id="toc-what-is-ears">What is
         EARS</a>
         <ul>
-        <li><a href="#terminology"
-        id="toc-terminology">Terminology</a></li>
+        <li><a href="#terminology" id="toc-terminology">Terminology</a>
+        <ul>
+        <li><a href="#general" id="toc-general">General</a></li>
+        <li><a href="#event" id="toc-event">Event</a></li>
+        </ul></li>
         </ul></li>
         <li><a href="#access-to-ears" id="toc-access-to-ears">Access to
         EARS</a></li>
@@ -68,517 +71,391 @@
         logged parameters and units</a></li>
         </ul></li>
         </ul>
-        <h1 id="ears-web-app-users-guide">EARS Web App User's Guide</h1>
-        <p><img src="/ears3/images/manual/image1.png" /></p>
-        <!-- |                      |                                                                                                                                      | -->
-        <!-- | -------------------- | ------------------------------------------------------------------------------------------------------------------------------------ | -->
-        <!-- | Topic**              | H2020 -- INFRAIA-2018-2020                                                                                                           | -->
-        <!-- | Short Title          | EurofleetsPlus                                                                                                                       | -->
-        <!-- | Title**              | An alliance of European marine research infrastructures to meet the evolving requirements of the research and industrial communities | -->
-        <!-- | Project Number       | 824077                                                                                                                               | -->
-        <!-- | Delivery Date        |                                                                                                                                      | -->
-        <!-- | Deliverable  No      | Document in support of D3.3                                                                                                          | -->
-        <!-- | Lead  Beneficiary    | CSIC/MARIS                                                                                                                           | -->
-        <!-- | Dissemination  level | Public                                                                                                                               | -->
-        <p><img src="/ears3/images/manual/image2.png"
-        alt="A group of logos on a white background Description automatically generated with medium confidence" /> </p>
-        <table>
-        <colgroup>
-        <col style="width: 52%" />
-        <col style="width: 47%" />
-        </colgroup>
-        <thead>
-        <tr class="header">
-        <th>Document information </th>
-        <th></th>
-        </tr>
-        </thead>
-        <tbody>
-        <tr class="odd">
-        <td>Document Name</td>
-        <td>EARS Web App User's Guide</td>
-        </tr>
-        <tr class="even">
-        <td>Document ID</td>
-        <td>EARS Web App User's Guide</td>
-        </tr>
-        <tr class="odd">
-        <td>Revision</td>
-        <td></td>
-        </tr>
-        <tr class="even">
-        <td>Revision Date</td>
-        <td>26-06-2023</td>
-        </tr>
-        <tr class="odd">
-        <td>Author</td>
-        <td>Hong Minh Le, Nils Van den Steen</td>
-        </tr>
-        <tr class="even">
-        <td>Security</td>
-        <td>Public</td>
-        </tr>
-        </tbody>
-        </table>
-        <table>
-        <thead>
-        <tr class="header">
-        <th>Approvals</th>
-        <th></th>
-        <th></th>
-        <th></th>
-        </tr>
-        </thead>
-        <tbody>
-        <tr class="odd">
-        <td></td>
-        <td>Name</td>
-        <td>Organisation</td>
-        <td>Date</td>
-        </tr>
-        <tr class="even">
-        <td>Coordinator</td>
-        <td>Aodhán Fitzgerald</td>
-        <td>MI</td>
-        <td></td>
-        </tr>
-        <tr class="odd">
-        <td>Activity Coordinator</td>
-        <td>Dick M.A. Schapp</td>
-        <td>MARIS</td>
-        <td></td>
-        </tr>
-        <tr class="even">
-        <td>WP Leader</td>
-        <td>Arturo Castellón</td>
-        <td>CSIC</td>
-        <td></td>
-        </tr>
-        </tbody>
-        </table>
-        <p> </p>
-        <table>
-        <colgroup>
-        <col style="width: 9%" />
-        <col style="width: 11%" />
-        <col style="width: 42%" />
-        <col style="width: 36%" />
-        </colgroup>
-        <thead>
-        <tr class="header">
-        <th>History</th>
-        <th></th>
-        <th></th>
-        <th></th>
-        </tr>
-        </thead>
-        <tbody>
-        <tr class="odd">
-        <td>Revision</td>
-        <td>Date</td>
-        <td>Modification</td>
-        <td>Author</td>
-        </tr>
-        <tr class="even">
-        <td>v 0.1</td>
-        <td>18/10/2022</td>
-        <td>First creation</td>
-        <td>Hong Minh Le</td>
-        </tr>
-        <tr class="odd">
-        <td>v 0.6</td>
-        <td>11/05/2023</td>
-        <td>Final version tailored for RV/Belgica</td>
-        <td>Hong Minh Le, Nils Van den Steen</td>
-        </tr>
-        <tr class="even">
-        <td>v 0.7</td>
-        <td>26/06/2023</td>
-        <td>Update for generic use on EF+ RVs</td>
-        <td>Hong Minh Le, Nils Van den Steen</td>
-        </tr>
-        <tr class="odd">
-        <td>v 1.0</td>
-        <td>17/10/2023</td>
-        <td>Review for release as embedded help page</td>
-        <td>Thomas Vandenberghe, Nils Van den Steen</td>
-        </tr>
-        </tbody>
-        </table>
-        <p>This document contains information, which is proprietary to
-        the EUROFLEETS+ consortium. Neither this document nor the
-        information contained herein shall be used, duplicated or
-        communicated by any means to any third party, in whole or in
-        parts, except with prior written consent of the EUROFLEETS+
-        Coordinator. </p>
-        <p>The information in this document is provided as is and no
-        guarantee or warranty is given that the information is fit for
-        any particular purpose. The user thereof uses the information at
-        its sole risk and liability. </p>
-        <h2 id="what-is-ears">What is EARS</h2>
-        <p>EARS stands for “Eurofleets Automatic Reporting System” and
-        is a tool allowing to log events such as sampling events, gear
-        deployments or instrument manipulations and to couple the events
-        with the underway data (i.e. navigation, thermosalinometry and
-        meteorology parameters). The concept is as follows: the user
-        defines the event e.g. <em>start of sampling with Niskin
-        bottles</em> and <em>submits</em> the event while the sampling
-        takes place. The event is logged with its exact date and time
-        and coupled with the acquisition data of the same time
-        (e.g. latitude and longitude, depth, surface water temperature,
-        salinity, conductivity, solar radiation,…) which are
-        continuously recorded by the vessel equipment, by finding the
-        nearest value for each. In addition, events can be edited
-        afterwards, including time, or missed events can be added and
-        edited retroactively at the end of the cruise.</p>
-        <p>The software has been developed mainly by RBINS-BMDC in the
-        framework of the Eurofleets projects 2 and +.</p>
-        <h3 id="terminology">Terminology</h3>
-        <h4 id="general">General</h4>
-        <ul>
-        <li><strong>Cruise</strong> or <strong>campaign</strong>: a
-        scientific journey of a research vessel, with a start and end
-        harbour, led by a chief scientist.</li>
-        <li><strong>Program</strong>: a specific scientific research
-        project performed during a cruise, led by a principal
-        investigator. This can be a repeated activity across many
-        campaigns (even for many years), or specific to a single cruise.
-        In this case you can use the same name for both cruise and
-        program.</li>
-        </ul>
-        <h4 id="event">Event</h4>
-        <p>An event is some action that happens at specific time with a
-        scientific device. The person executing it and the research
-        program are also taken into account.</p>
-        <p>Events are composed of the following terms:</p>
-        <ul>
-        <li><strong>Tool category</strong>: groups of sensors,
-        instruments or sampling devices (e.g. sediment profile imagers,
-        beam trawls)</li>
-        <li><strong>Tool</strong>: the specific equipment performing the
-        event (e.g. sampling gear, instrument, sensor, observational
-        device, research vessel). Tools can belong to one or more tool
-        categories (e.g. Kongsberg (Simrad) TOPAS PS018 sub-bottom
-        profiler is both a sub-bottom profilers and a chirper)</li>
-        <li><strong>Process</strong>: a general activity a tool can do
-        and consists of a sequence of punctuated actions (including
-        malfunctions and deliberate actions) (e.g. Track)</li>
-        <li><strong>Action</strong>: a step in an ongoing process, and
-        can be deliberate (e.g. Start) or incidentally
-        (e.g. Failure)</li>
-        </ul>
-        <h2 id="access-to-ears">Access to EARS</h2>
-        <p>The application is only accessible onboard the vessel from a
-        local IP address.</p>
-        <p>The url at any RV is as follows: <a
-        href="/ears3">http://&lt;IP-ADDRESS&gt;:&lt;PORT&gt;/ears3</a>
-        and is specific to each EF+ Research Vessel. Ask your local
-        electronician for the correct location.</p>
-        <p>The EARS web application can be used with any internet
-        browser. At the moment, the application does not work properly
-        with the Chrome browser.</p>
-        <p>Note that the figures included in this document are taken
-        from the instance running on the RV Belgica and the shown ip
-        address will not be the same on another vessel.</p>
-        <h2 id="using-ears">Using EARS</h2>
-        <h3 id="general-1">General</h3>
-        <p>To use EARS, a user needs to be <a
-        href="/ears3/settings">authenticated</a>. On first use, if the
-        user does not yet exist, you are led to a page where you can
-        provide your first and last name as well as a valid email
-        address and organization name. The list of organizations is
-        extensive and (for now) unsorted. Start typing the name of the
-        organization. If the organization does not appear, try searching
-        for the full/abbreviated name.</p>
-        <p><img src="/ears3/images/manual/image3.png" /></p>
-        <p><img src="/ears3/images/manual/image4.png" /></p>
-        <h3 id="event-creation">Event creation</h3>
-        <p>Before the user can start submitting a <a
-        href="/ears3/event/new">new event</a>, the <strong>Current
-        program</strong> needs to be selected. If you try to create an
-        event without program, an error is shown.</p>
-        <p><img src="/ears3/images/manual/image5.png" /></p>
-        <p>Drop-down lists show the available tool categories, tools,
-        processes and actions. A combination of these selections
-        describes an event. The contents of the drop-down lists are
-        pre-defined in EARS. In case the equipment is not available in
-        the selection list, it has to be requested beforehand to a data
-        manager who can pre-define it before the cruise and make it
-        available on the vessel EARS server.</p>
-        <figure>
-        <img src="/ears3/images/manual/image6.png"
-        alt="Graphical user interface, text, email Description automatically generated" />
-        <figcaption aria-hidden="true">Graphical user interface, text,
-        email Description automatically generated</figcaption>
-        </figure>
-        <p>To create a new event, define first the station name (ex:
-        MOW1) as well as a label for the event (ex: st1 bodem). Both are
-        optional but are strongly recommended. In a next step both are
-        copied to the event’s text boxes, where they can be further
-        edited if needed. This way you don’t have to repeatedly type
-        them for each event.</p>
-        <p>To create the event, four terms need to be selected. They can
-        be selected in any order.</p>
-        <ul>
-        <li>Select the Category: e.g. discrete water sampler, sediment
-        grabs</li>
-        <li>Select the Tool: e.g. Niskin bottle, Van Veen grab</li>
-        <li>Select the Process: e.g. Sampling</li>
-        <li>Select the Action: e.g. Start</li>
-        </ul>
-        <p>Once you select a term, the other terms available become more
-        limited. For instance, if you first select ‘Sampling’, only
-        devices capable of sampling become available.</p>
-        <p><img src="/ears3/images/manual/image7.png" /></p>
-        <p>When the four terms are selected, click on the ‘Submit’
-        button. A pop-up window will appear confirming the station name
-        and the event label. A ‘Description’ can be added as well from
-        the pop-up window. Click again on ‘Submit’ when done. When the
-        submit button turns to green, the event is created and logged in
-        the vessel database of EARS.</p>
-        <p><img src="/ears3/images/manual/image8.png" /></p>
-        <p><img src="/ears3/images/manual/image9.png" /></p>
-        <p>When a new event is created, a shortcut scenario button is
-        automatically created in the ‘Common scenarios’ panel with the
-        selected terms. This scenario button can be used as shortcut to
-        log events with the same terms (tool category, tool, process and
-        action). The actor, time stamp, station, label and description
-        may be different of course. To log an event from the ‘Common
-        scenarios’, click the desired scenario, define the station,
-        label and description if needed and click on the ‘Submit’
-        button.</p>
-        <p>It is possible to discard a scenario by clicking ‘x’ on the
-        scenario button. This does not delete the events generated from
-        it.</p>
-        <p><img src="/ears3/images/manual/image10.png" /></p>
-        <h3 id="accessing-the-logged-events">Accessing the logged
-        events</h3>
-        <p>The <a href="/ears3/events">‘Events’</a> tab of the web
-        application allows to access the list of logged events. The user
-        can:</p>
-        <ul>
-        <li>Select and display the events details</li>
-        <li>Edit the event</li>
-        <li>Delete an event</li>
-        </ul>
-        <p>The logged times are in UTC.</p>
-        <p><img src="/ears3/images/manual/image11.png" /></p>
-        <p>To display the event details, click on the desired event. The
-        event description will open, displaying the station, label,
-        date, time and its features. You can immediately modify the
-        event if needed.</p>
-        <p>The ‘Current program’ needs first to be re-defined. Then, the
-        event station, label, date and time fields can be updated
-        directly. To update the terms (tool, tool category, process or
-        action), first unlock the corresponding red lock. When ready,
-        click on ‘Submit’.</p>
-        <p><img src="/ears3/images/manual/image12.png" /></p>
-        <p>Events can be edited or created at any time during the
-        cruise. However, it is strongly recommended to log the events
-        while the action is actually performed. Missed events can still
-        be added or updated retroactively during the cruise but beware,
-        the EARS application and database are only accessible on board
-        of the vessel. This means that it is not possible to make any
-        updates when you have left the vessel after the cruise.</p>
-        <h3 id="show-current-navigation-information">Show current
-        navigation information</h3>
-        <p>This function is not directly related to the EARS web
-        application, but can be useful.</p>
-        <p>For complementary information on the vessel navigation, it is
-        possible to get access to the near real-time en-route data that
-        gives information on:</p>
-        <ul>
-        <li>Time</li>
-        <li>Current position of the ship
-        <ul>
-        <li>Longitude</li>
-        <li>Latitude</li>
-        </ul></li>
-        <li>Heading</li>
-        <li>Speed over water (sow)</li>
-        <li>Depth</li>
-        <li>Course over ground (cog)</li>
-        <li>Speed over ground (sog).</li>
-        </ul>
-        <p>On <a href="/ears3Nav/nav/getLast/xml">http://
-        &lt;IP-ADRESS&gt;:&lt;PORT&gt;/ears3Nav/nav/getLast/xml</a>, the
-        latest navigational information is shown in xml format as
-        illustrated below. You can also use the <a
-        href="/ears3Nav/nav/getLast/json">/ears3Nav/nav/getLast/json</a>
-        or <a
-        href="/ears3Nav/nav/getLast/datagram">/ears3Nav/nav/getLast/datagram</a>
-        endpoints to view the data as json and csv respectively.</p>
-        <p><img src="/ears3/images/manual/image13.png" /></p>
-        <h3 id="export">Export</h3>
-        <h3 id="all-events">ALL events</h3>
-        <p>To export logged events, go to <a
-        href="/ears3/events">“Events”</a> and click on “Download all
-        events”. All events created so far in EARS are exported in a csv
-        file. After opening the csv file (with excel for instance), you
-        may select events of your cruise by filtering by the cruise’s
-        period.</p>
-        <h3 id="events-linked-to-a-cruise">Events linked to a
-        cruise</h3>
-        <p>When you select the <a
-        href="/ears3/cruises"><em>Cruises</em></a> tab, you can export
-        all events from the selected cruise. Please verify after
-        exporting the data, that the export was successful!</p>
-        <p><img src="/ears3/images/manual/image14.png" /></p>
-        <h3 id="points-of-attention-and-tips">Points of attention and
-        tips</h3>
-        <p>Points of attention:</p>
-        <ul>
-        <li><p>Time in EARS is in UTC. This is important to couple the
-        events with navigation and acquisition data. Always enter the
-        time in UTC.</p></li>
-        <li><p>Any creation or editing action is only successfully
-        executed when the ‘Submit’ button (or ‘Common scenario button’)
-        turns <span style="background-color:green">green</span> for a
-        couple of seconds. When this does not happen, verify that all
-        fields are filled in (e.g. <em>program</em>, <em>station</em>,
-        <em>label</em>).</p></li>
-        </ul>
-        <p>Tips:</p>
-        <ul>
-        <li>If the needed tool/scenario is not existing yet in EARS,
-        select a similar one and add a meaningful label or description
-        with the correct tool/scenario. Do not forget to request the
-        tool to BMDC for next time.</li>
-        </ul>
-        <p>A more complete manual can be found on: <a
-        href="https://github.com/naturalsciences/ears/releases/download/v3.0.3/Eurofleets+_D3.9_manual_ears3_client_webapp.pdf">https://github.com/naturalsciences/ears/releases/download/v3.0.3/Eurofleets+_D3.9_manual_ears3_client_webapp.pdf</a></p>
-        <h2 id="example-of-logged-parameters-and-units">Example of
-        logged parameters and units</h2>
-        <table>
-        <thead>
-        <tr class="header">
-        <th>Parameter</th>
-        <th>Unit</th>
-        </tr>
-        </thead>
-        <tbody>
-        <tr class="odd">
-        <td>Time stamp</td>
-        <td></td>
-        </tr>
-        <tr class="even">
-        <td>Actor</td>
-        <td></td>
-        </tr>
-        <tr class="odd">
-        <td>Program</td>
-        <td></td>
-        </tr>
-        <tr class="even">
-        <td>Principal Investigator</td>
-        <td></td>
-        </tr>
-        <tr class="odd">
-        <td>Tool category</td>
-        <td></td>
-        </tr>
-        <tr class="even">
-        <td>Tool category code</td>
-        <td></td>
-        </tr>
-        <tr class="odd">
-        <td>Tool</td>
-        <td></td>
-        </tr>
-        <tr class="even">
-        <td>Tool code</td>
-        <td></td>
-        </tr>
-        <tr class="odd">
-        <td>Process</td>
-        <td></td>
-        </tr>
-        <tr class="even">
-        <td>Action</td>
-        <td></td>
-        </tr>
-        <tr class="odd">
-        <td>Station</td>
-        <td></td>
-        </tr>
-        <tr class="even">
-        <td>Label</td>
-        <td></td>
-        </tr>
-        <tr class="odd">
-        <td>Description</td>
-        <td></td>
-        </tr>
-        <tr class="even">
-        <td>Acquisition Timestamp</td>
-        <td></td>
-        </tr>
-        <tr class="odd">
-        <td>Latitude</td>
-        <td>decimal degrees</td>
-        </tr>
-        <tr class="even">
-        <td>Longitude</td>
-        <td>decimal degrees</td>
-        </tr>
-        <tr class="odd">
-        <td>Depth</td>
-        <td>meters</td>
-        </tr>
-        <tr class="even">
-        <td>Heading</td>
-        <td>degrees</td>
-        </tr>
-        <tr class="odd">
-        <td>Course over Ground</td>
-        <td>degrees</td>
-        </tr>
-        <tr class="even">
-        <td>Speed over Ground</td>
-        <td>knots</td>
-        </tr>
-        <tr class="odd">
-        <td>Surface water temperature</td>
-        <td>degrees celsius</td>
-        </tr>
-        <tr class="even">
-        <td>Salinity</td>
-        <td>PSU</td>
-        </tr>
-        <tr class="odd">
-        <td>Conductivity</td>
-        <td>Siemens/meter</td>
-        </tr>
-        <tr class="even">
-        <td>Sigma T</td>
-        <td>Kilograms per cubic metre</td>
-        </tr>
-        <tr class="odd">
-        <td>Wind speed</td>
-        <td>Metres per second</td>
-        </tr>
-        <tr class="even">
-        <td>Wind direction</td>
-        <td>Degrees</td>
-        </tr>
-        <tr class="odd">
-        <td>Air temperature</td>
-        <td>Degrees Celsius</td>
-        </tr>
-        <tr class="even">
-        <td>Humidity</td>
-        <td>Percent</td>
-        </tr>
-        <tr class="odd">
-        <td>Air pressure</td>
-        <td>Hectopascals</td>
-        </tr>
-        <tr class="even">
-        <td>Solar Radiation</td>
-        <td>Watts/square meter</td>
-        </tr>
-        </tbody>
-        </table>
+        <div class="manual">
+            <h1 id="ears-web-app-users-guide">EARS Web App User's
+            Guide</h1>
+            <p><img src="/ears3/images/manual/image1.png" /></p>
+            <p><img src="/ears3/images/manual/image2.png" /> </p>
+            <p>This document contains information, which is proprietary
+            to the EUROFLEETS+ consortium. Neither this document nor the
+            information contained herein shall be used, duplicated or
+            communicated by any means to any third party, in whole or in
+            parts, except with prior written consent of the EUROFLEETS+
+            Coordinator. </p>
+            <h2 id="what-is-ears">What is EARS</h2>
+            <p>EARS stands for “Eurofleets Automatic Reporting System”
+            and is a tool allowing to log events such as sampling
+            events, gear deployments or instrument manipulations and to
+            couple the events with the underway data (i.e. navigation,
+            thermosalinometry and meteorology parameters). The concept
+            is as follows: the user defines the event e.g. <em>start of
+            sampling with Niskin bottles</em> and <em>submits</em> the
+            event while the sampling takes place. The event is logged
+            with its exact date and time and coupled with the
+            acquisition data of the same time (e.g. latitude and
+            longitude, depth, surface water temperature, salinity,
+            conductivity, solar radiation,…) which are continuously
+            recorded by the vessel equipment, by finding the nearest
+            value for each. In addition, events can be edited
+            afterwards, including time, or missed events can be added
+            and edited retroactively at the end of the cruise.</p>
+            <p>The software has been developed mainly by RBINS-BMDC in
+            the framework of the Eurofleets projects 2 and +.</p>
+            <h3 id="terminology">Terminology</h3>
+            <h4 id="general">General</h4>
+            <ul>
+            <li><strong>Cruise</strong> or <strong>campaign</strong>: a
+            scientific journey of a research vessel, with a start and
+            end harbour, led by a chief scientist.</li>
+            <li><strong>Program</strong>: a specific scientific research
+            project performed during a cruise, led by a principal
+            investigator. This can be a repeated activity across many
+            campaigns (even for many years), or specific to a single
+            cruise. In this case you can use the same name for both
+            cruise and program.</li>
+            </ul>
+            <h4 id="event">Event</h4>
+            <p>An event is some action that happens at specific time
+            with a scientific device. The person executing it and the
+            research program are also taken into account.</p>
+            <p>Events are composed of the following terms:</p>
+            <ul>
+            <li><strong>Tool category</strong>: groups of sensors,
+            instruments or sampling devices (e.g. sediment profile
+            imagers, beam trawls)</li>
+            <li><strong>Tool</strong>: the specific equipment performing
+            the event (e.g. sampling gear, instrument, sensor,
+            observational device, research vessel). Tools can belong to
+            one or more tool categories (e.g. Kongsberg (Simrad) TOPAS
+            PS018 sub-bottom profiler is both a sub-bottom profilers and
+            a chirper)</li>
+            <li><strong>Process</strong>: a general activity a tool can
+            do and consists of a sequence of punctuated actions
+            (including malfunctions and deliberate actions)
+            (e.g. Track)</li>
+            <li><strong>Action</strong>: a step in an ongoing process,
+            and can be deliberate (e.g. Start) or incidentally
+            (e.g. Failure)</li>
+            </ul>
+            <h2 id="access-to-ears">Access to EARS</h2>
+            <p>The application is only accessible onboard the vessel
+            from a local IP address.</p>
+            <p>The url at any RV is as follows: <a
+            href="/ears3">http://&lt;IP-ADDRESS&gt;:&lt;PORT&gt;/ears3</a>
+            and is specific to each EF+ Research Vessel. Ask your local
+            electronician for the correct location.</p>
+            <p>The EARS web application can be used with any internet
+            browser. At the moment, the application does not work
+            properly with the Chrome browser.</p>
+            <p>Note that the figures included in this document are taken
+            from the instance running on the RV Belgica and the shown ip
+            address will not be the same on another vessel.</p>
+            <h2 id="using-ears">Using EARS</h2>
+            <h3 id="general-1">General</h3>
+            <p>On first use, the user’s <a href="/ears3/settings">first
+            and last name as wel as a valid email address</a> are
+            requested, as well as their affiliation. The list of
+            organizations is extensive and (for now) unsorted. Start
+            typing the name of the organization. If the organization
+            does not appear, try searching for the full/abbreviated
+            name. These settings can ben changed at any moment by
+            clicking on the provided first and last name in the
+            navigation bar.</p>
+            <p><img src="/ears3/images/manual/image3.png" /></p>
+            <p><img src="/ears3/images/manual/image4.png" /></p>
+            <h3 id="event-creation">Event creation</h3>
+            <p>Before the user can start submitting a <a
+            href="/ears3/event/new">new event</a>, the <strong>Current
+            program</strong> needs to be selected. If you try to create
+            an event without program, an error is shown.</p>
+            <p><img src="/ears3/images/manual/image5.png" /></p>
+            <p>Drop-down lists show the available tool categories,
+            tools, processes and actions. A combination of these
+            selections describes an event. The contents of the drop-down
+            lists are pre-defined in EARS. In case the equipment is not
+            available in the selection list, it has to be requested
+            beforehand to a data manager who can pre-define it before
+            the cruise and make it available on the vessel EARS
+            server.</p>
+            <p><img src="/ears3/images/manual/image6.png" /></p>
+            <p>To create a new event, define first the station name (ex:
+            MOW1) as well as a label for the event (ex: st1 bodem). Both
+            are optional but are strongly recommended. In a next step
+            both are copied to the event’s text boxes, where they can be
+            further edited if needed. This way you don’t have to
+            repeatedly type them for each event.</p>
+            <p>To create the event, four terms need to be selected. They
+            can be selected in any order.</p>
+            <ul>
+            <li>Select the Category: e.g. discrete water sampler,
+            sediment grabs</li>
+            <li>Select the Tool: e.g. Niskin bottle, Van Veen grab</li>
+            <li>Select the Process: e.g. Sampling</li>
+            <li>Select the Action: e.g. Start</li>
+            </ul>
+            <p>Once you select a term, the other terms available become
+            more limited. For instance, if you first select
+            <em>Sampling</em>, only devices capable of sampling become
+            available.</p>
+            <p><img src="/ears3/images/manual/image7.png" /></p>
+            <p>When the four terms are selected, click on the
+            <em>Submit</em> button. A pop-up window will appear
+            confirming the station name and the event label. A
+            <strong>Description</strong> can be added as well from the
+            pop-up window. Click again on <em>Submit</em> when done.
+            When the submit button turns to green, the event is created
+            and logged in the vessel database of EARS.</p>
+            <p><img src="/ears3/images/manual/image8.png" /></p>
+            <p><img src="/ears3/images/manual/image9.png" /></p>
+            <p>When a new event is created, a shortcut scenario button
+            is automatically created in the <em>Common scenarios</em>
+            panel with the selected terms. This scenario button can be
+            used as shortcut to log events with the same terms (tool
+            category, tool, process and action). The actor, time stamp,
+            station, label and description may be different of course.
+            To log an event from the <em>Common scenarios</em>, click
+            the desired scenario, define the station, label and
+            description if needed and click on the <em>Submit</em>
+            button.</p>
+            <p>It is possible to discard a scenario by clicking
+            <strong>x</strong> on the scenario button. This does not
+            delete the events generated from it.</p>
+            <p><img src="/ears3/images/manual/image10.png" /></p>
+            <h3 id="accessing-the-logged-events">Accessing the logged
+            events</h3>
+            <p>The <a href="/ears3/events">Events</a> tab of the web
+            application allows to access the list of logged events. The
+            user can:</p>
+            <ul>
+            <li>Select and display the events details</li>
+            <li>Edit the event</li>
+            <li>Delete an event</li>
+            </ul>
+            <p>The logged times are in UTC.</p>
+            <p><img src="/ears3/images/manual/image11.png" /></p>
+            <p>To display the event details, click on the desired event.
+            The event description will open, displaying the station,
+            label, date, time and its features. You can immediately
+            modify the event if needed.</p>
+            <p>The <em>Current program</em> needs first to be
+            re-defined. Then, the event station, label, date and time
+            fields can be updated directly. To update the terms (tool,
+            tool category, process or action), first unlock the
+            corresponding red lock. When ready, click on
+            <em>Submit</em>.</p>
+            <p><img src="/ears3/images/manual/image12.png" /></p>
+            <p>Events can be edited or created at any time during the
+            cruise. However, it is strongly recommended to log the
+            events while the action is actually performed. Missed events
+            can still be added or updated retroactively during the
+            cruise but beware, the EARS application and database are
+            only accessible on board of the vessel. This means that it
+            is not possible to make any updates when you have left the
+            vessel after the cruise.</p>
+            <h3 id="show-current-navigation-information">Show current
+            navigation information</h3>
+            <p>This function is not directly related to the EARS web
+            application, but can be useful.</p>
+            <p>For complementary information on the vessel navigation,
+            it is possible to get access to the near real-time en-route
+            data that gives information on:</p>
+            <ul>
+            <li>Time</li>
+            <li>Current position of the ship
+            <ul>
+            <li>Longitude</li>
+            <li>Latitude</li>
+            </ul></li>
+            <li>Heading</li>
+            <li>Speed over water (sow)</li>
+            <li>Depth</li>
+            <li>Course over ground (cog)</li>
+            <li>Speed over ground (sog).</li>
+            </ul>
+            <p>On <a
+            href="/ears3Nav/nav/getLast/xml">/ears3Nav/nav/getLast/xml</a>,
+            the latest navigational information is shown in xml format
+            as illustrated below. You can also use the <a
+            href="/ears3Nav/nav/getLast/json">/ears3Nav/nav/getLast/json</a>
+            or <a
+            href="/ears3Nav/nav/getLast/datagram">/ears3Nav/nav/getLast/datagram</a>
+            endpoints to view the data as json and csv respectively.</p>
+            <p><img src="/ears3/images/manual/image13.png" /></p>
+            <h3 id="export">Export</h3>
+            <h3 id="all-events">ALL events</h3>
+            <p>To export logged events, go to <a
+            href="/ears3/events">Events</a> and click on “Download all
+            events”. All events created so far in EARS are exported in a
+            csv file. After opening the csv file (with excel for
+            instance), you may select events of your cruise by filtering
+            by the cruise’s period.</p>
+            <h3 id="events-linked-to-a-cruise">Events linked to a
+            cruise</h3>
+            <p>When you select the <a
+            href="/ears3/cruises"><em>Cruises</em></a> tab, you can
+            export all events from the selected cruise. Please verify
+            after exporting the data, that the export was
+            successful!</p>
+            <p><img src="/ears3/images/manual/image14.png" /></p>
+            <h3 id="points-of-attention-and-tips">Points of attention
+            and tips</h3>
+            <p>Points of attention:</p>
+            <ul>
+            <li><p>Time in EARS is in UTC. This is important to couple
+            the events with navigation and acquisition data. Always
+            enter the time in UTC.</p></li>
+            <li><p>Any creation or editing action is only successfully
+            executed when the <em>Submit</em> button (or <em>Common
+            scenario button</em>) turns <span
+            style="background-color:green">green</span> for a couple of
+            seconds. When this does not happen, verify that all fields
+            are filled in (e.g. <em>program</em>, <em>station</em>,
+            <em>label</em>).</p></li>
+            </ul>
+            <p>Tips:</p>
+            <ul>
+            <li>If the needed tool/scenario is not existing yet in EARS,
+            select a similar one and add a meaningful label or
+            description with the correct tool/scenario. Do not forget to
+            request the tool to BMDC for next time.</li>
+            </ul>
+            <p>A more complete manual can be found on: <a
+            href="https://github.com/naturalsciences/ears/releases/download/v3.0.3/Eurofleets+_D3.9_manual_ears3_client_webapp.pdf">https://github.com/naturalsciences/ears/releases/download/v3.0.3/Eurofleets+_D3.9_manual_ears3_client_webapp.pdf</a></p>
+            <h2 id="example-of-logged-parameters-and-units">Example of
+            logged parameters and units</h2>
+            <div class="manualTable">
+            <table>
+            <thead>
+            <tr class="header">
+            <th>Parameter</th>
+            <th>Unit</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr class="odd">
+            <td>Time stamp</td>
+            <td></td>
+            </tr>
+            <tr class="even">
+            <td>Actor</td>
+            <td></td>
+            </tr>
+            <tr class="odd">
+            <td>Program</td>
+            <td></td>
+            </tr>
+            <tr class="even">
+            <td>Principal Investigator</td>
+            <td></td>
+            </tr>
+            <tr class="odd">
+            <td>Tool category</td>
+            <td></td>
+            </tr>
+            <tr class="even">
+            <td>Tool category code</td>
+            <td></td>
+            </tr>
+            <tr class="odd">
+            <td>Tool</td>
+            <td></td>
+            </tr>
+            <tr class="even">
+            <td>Tool code</td>
+            <td></td>
+            </tr>
+            <tr class="odd">
+            <td>Process</td>
+            <td></td>
+            </tr>
+            <tr class="even">
+            <td>Action</td>
+            <td></td>
+            </tr>
+            <tr class="odd">
+            <td>Station</td>
+            <td></td>
+            </tr>
+            <tr class="even">
+            <td>Label</td>
+            <td></td>
+            </tr>
+            <tr class="odd">
+            <td>Description</td>
+            <td></td>
+            </tr>
+            <tr class="even">
+            <td>Acquisition Timestamp</td>
+            <td></td>
+            </tr>
+            <tr class="odd">
+            <td>Latitude</td>
+            <td>decimal degrees</td>
+            </tr>
+            <tr class="even">
+            <td>Longitude</td>
+            <td>decimal degrees</td>
+            </tr>
+            <tr class="odd">
+            <td>Depth</td>
+            <td>meters</td>
+            </tr>
+            <tr class="even">
+            <td>Heading</td>
+            <td>degrees</td>
+            </tr>
+            <tr class="odd">
+            <td>Course over Ground</td>
+            <td>degrees</td>
+            </tr>
+            <tr class="even">
+            <td>Speed over Ground</td>
+            <td>knots</td>
+            </tr>
+            <tr class="odd">
+            <td>Surface water temperature</td>
+            <td>degrees celsius</td>
+            </tr>
+            <tr class="even">
+            <td>Salinity</td>
+            <td>PSU</td>
+            </tr>
+            <tr class="odd">
+            <td>Conductivity</td>
+            <td>Siemens/meter</td>
+            </tr>
+            <tr class="even">
+            <td>Sigma T</td>
+            <td>Kilograms per cubic metre</td>
+            </tr>
+            <tr class="odd">
+            <td>Wind speed</td>
+            <td>Metres per second</td>
+            </tr>
+            <tr class="even">
+            <td>Wind direction</td>
+            <td>Degrees</td>
+            </tr>
+            <tr class="odd">
+            <td>Air temperature</td>
+            <td>Degrees Celsius</td>
+            </tr>
+            <tr class="even">
+            <td>Humidity</td>
+            <td>Percent</td>
+            </tr>
+            <tr class="odd">
+            <td>Air pressure</td>
+            <td>Hectopascals</td>
+            </tr>
+            <tr class="even">
+            <td>Solar Radiation</td>
+            <td>Watts/square meter</td>
+            </tr>
+            </tbody>
+            </table>
+            </div>
+        </div>
 
         <script src="/ears3/js/settings-in-menu.js" type="application/javascript"></script>
     </div>
