@@ -29,10 +29,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
  * @author Thomas Vandenberghe
  */
 @Entity
-@Table(
-        uniqueConstraints
-        = @UniqueConstraint(columnNames = {"first_name", "last_name", "organisation_id"})
-)
+@Table(uniqueConstraints = @UniqueConstraint(columnNames = { "first_name", "last_name", "organisation_id" }))
 @XmlRootElement
 @XmlAccessorType(XmlAccessType.FIELD) //ignore all the getters
 public class Person implements IPerson, Serializable {
@@ -60,9 +57,13 @@ public class Person implements IPerson, Serializable {
     public Person(PersonDTO dto) {
         this.firstName = dto.getFirstName();
         this.lastName = dto.getLastName();
+        this.phoneNumber = dto.getPhoneNumber();
+        this.faxNumber = dto.getFaxNumber();
+        this.email = dto.getEmail();
     }
 
-    public Person(String firstName, String lastName, IOrganisation organisation, String phoneNumber, String faxNumber, String email) {
+    public Person(String firstName, String lastName, IOrganisation organisation, String phoneNumber, String faxNumber,
+            String email) {
         this.firstName = firstName;
         this.lastName = lastName;
         this.organisation = (Organisation) organisation;

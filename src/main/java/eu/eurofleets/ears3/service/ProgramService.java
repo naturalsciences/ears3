@@ -70,6 +70,19 @@ public class ProgramService {
         if (env.getProperty("ears.read-only") == null || !env.getProperty("ears.read-only").equals("false")) {
             throw new IllegalArgumentException("Cannot create/modify entities on a read-only system.");
         }
+        if (dto.identifier == null) {
+            throw new IllegalArgumentException("Program must have an identifier.");
+        }
+        /* leave these checks out. Fully optional.
+        if (dto.description == null) {
+            throw new IllegalArgumentException("Program must have a description.");
+        }
+        if (dto.principalInvestigators != null) {
+            if (dto.principalInvestigators.stream().anyMatch(p -> p.getOrganisation() == null)) {
+                throw new IllegalArgumentException("PI must have an EDMO code");
+            }
+        }*/
+
         try {
             Program program = new Program();
             program.setDescription(dto.description);
