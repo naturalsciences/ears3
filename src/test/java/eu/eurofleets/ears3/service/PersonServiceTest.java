@@ -54,10 +54,10 @@ public class PersonServiceTest {
 	@Autowired
 	private PersonService personService;
 
-	@MockBean
+	@Autowired
 	private PersonRepository personRepository;
 
-	@MockBean
+	@Autowired
 	private OrganisationRepository organisationRepository;
 
 	@Test
