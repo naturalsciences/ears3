@@ -349,7 +349,11 @@ public class EventService {
                     propertyLdTerm = ldtService.findOrCreate(propertyLdTerm); // replace it with a managed one, either
                                                                               // new or selected.
                     Property property = new Property(propertyLdTerm, propertyDTO.value, propertyDTO.uom);
-                    propertyService.save(property);
+                    try {
+                        propertyService.save(property);
+                    } catch (Exception e) {
+                        int a = 5;
+                    }
                     properties.add(property);
                 }
             }

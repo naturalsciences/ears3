@@ -1,6 +1,9 @@
 # Project-specific excludes
 *.sh
 node_modules
+#H2 test database
+*.mv.db
+*.trace.db
 
 # Compiled class file
 *.class

@@ -8,6 +8,8 @@ package eu.eurofleets.ears3.domain;
 import be.naturalsciences.bmdc.cruise.model.ICountry;
 import be.naturalsciences.bmdc.cruise.model.ILinkedDataTerm;
 import be.naturalsciences.bmdc.cruise.model.IOrganisation;
+import eu.eurofleets.ears3.dto.OrganisationDTO;
+
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import java.io.Serializable;
 import javax.persistence.Entity;
@@ -157,7 +159,20 @@ public class Organisation implements IOrganisation, Serializable {
         this.emailAddress = emailAddresss;
     }
 
-    public Organisation(ILinkedDataTerm organisationTerm, String phoneNumber, String faxNumber, String emailAddress, String website, String deliveryPoint, String city, String postalCode, ICountry country) {
+    public Organisation(OrganisationDTO dto) {
+        this.term = new LinkedDataTerm(dto.term);
+        this.country = new Country();
+        this.phoneNumber = dto.phoneNumber;
+        this.faxNumber = dto.faxNumber;
+        this.emailAddress = dto.emailAddress;
+        this.website = dto.website;
+        this.deliveryPoint = dto.deliveryPoint;
+        this.city = dto.city;
+        this.postalCode = dto.postalCode;
+    }
+
+    public Organisation(ILinkedDataTerm organisationTerm, String phoneNumber, String faxNumber, String emailAddress,
+            String website, String deliveryPoint, String city, String postalCode, ICountry country) {
         this.term = (LinkedDataTerm) organisationTerm;
         this.phoneNumber = phoneNumber;
         this.faxNumber = faxNumber;

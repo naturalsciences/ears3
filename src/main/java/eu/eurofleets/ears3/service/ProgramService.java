@@ -99,8 +99,11 @@ public class ProgramService {
             if (dto.principalInvestigators != null) {
                 for (PersonDTO principalInvestigatorDTO : dto.principalInvestigators) {
                     Person p = new Person(principalInvestigatorDTO);
-                    Organisation organisation = organisationRepository
-                            .findByIdentifier(ILinkedDataTerm.cleanUrl(principalInvestigatorDTO.getOrganisation()));
+                    Organisation organisation = null;
+                    if (principalInvestigatorDTO.getOrganisation() != null) { //the organisation is optional
+                        organisation = organisationRepository
+                                .findByIdentifier(ILinkedDataTerm.cleanUrl(principalInvestigatorDTO.getOrganisation()));
+                    }
                     p.setOrganisation(organisation);
                     p = personService.findOrCreate(p);
                     principalInvestigators.add(p);

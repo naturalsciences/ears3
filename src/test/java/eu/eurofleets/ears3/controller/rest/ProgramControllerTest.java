@@ -62,6 +62,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.
 @WebAppConfiguration
 @ComponentScan(basePackages = { "eu.eurofleets.ears3.domain", " eu.eurofleets.ears3.service" })
 @TestPropertySource(locations = "classpath:test.properties")
+
 public class ProgramControllerTest {
 
         @Autowired
@@ -215,7 +216,7 @@ public class ProgramControllerTest {
                                                 .get("/api/programs?startDate="
                                                                 + lateStart.format(DateTimeFormatter.ISO_DATE_TIME))
                                                 .contentType(MediaType.APPLICATION_JSON)) // + "&endDate=" +
-                                                                                          // end.format(DateTimeFormatter.ISO_DATE_TIME)
+                                // end.format(DateTimeFormatter.ISO_DATE_TIME)
                                 .andDo(print())
                                 .andExpect(status().is(200))
                                 .andExpect(content().string(containsString("<identifier>PR-SEASHELL-20</identifier>")))
@@ -274,7 +275,46 @@ public class ProgramControllerTest {
                 // delete all previous events and programs
                 EventControllerTest.deleteAllEvents(this.mockMvc);
                 deleteAllPrograms(this.mockMvc);
+        }
 
+        @Test
+        public void testPostProgram2() throws Exception {
+                // delete all previous events and programs
+                EventControllerTest.deleteAllEvents(this.mockMvc);
+                deleteAllPrograms(this.mockMvc);
+
+                programUUID = UUID.randomUUID();
+
+                PersonControllerTest.assertPersonCount(this.mockMvc, 0);
+
+                //Create someone
+                PersonDTO person = new PersonDTO("Bob", "Rumes", "SDN:EDMO::3327", null, null,
+                                "brumes@naturalsciences.be");
+                String jsonPerson = objectMapper.writeValueAsString(person);
+                PersonControllerTest.postPerson(jsonPerson, this.mockMvc);
+
+                //Create a program with a mistaken email address. Someone uses the email adress of another person.
+                //This person should be created in the database as a new person
+                //And the program should be accepted.
+                String json = "{\"principalInvestigators\":[{\"firstName\":\"Danae\",\"lastName\":\"Kapasakali\",\"organisation\":\"SDN:EDMO::3327\",\"email\":\"brumes@naturalsciences.be\"},{\"firstName\":\"Steven\",\"lastName\":\"Degraer\",\"organisation\":\"SDN:EDMO::3327\",\"email\":\"sdegraer@naturalsciences.be\"}],\"identifier\":\""
+                                + programUUID + "\",\"sampling\":\"deployment and retrieval of ARMS\"" +
+                                ",\"name\":\"EDEN2000: Exploring options for a nature-proof development\",\"description\":\"In the framework of the 'EDEN2000' project (2019-2022; FPS Health, Food Chain Safety and Environment) a number of studies have been drafted.\"}";
+                this.mockMvc.perform(MockMvcRequestBuilders.post("/api/program").contentType(MediaType.APPLICATION_JSON)
+                                .content(json))
+                                // .andDo(print())
+                                .andExpect(status().isCreated())
+                                .andExpect(content().string(
+                                                containsString("<identifier>" + programUUID + "</identifier>")))
+                                .andExpect(content().string(containsString(
+                                                "<description>In the framework of the 'EDEN2000' project (2019-2022")))
+                                .andReturn();
+
+                PersonControllerTest.assertPersonCount(this.mockMvc, 3);
+                // delete all previous events and programs
+                EventControllerTest.deleteAllEvents(this.mockMvc);
+                PersonControllerTest.deleteAllPersons(this.mockMvc);
+
+                deleteAllPrograms(this.mockMvc);
         }
 
         @Test

@@ -43,7 +43,7 @@ public class Person implements IPerson, Serializable {
 
     private String phoneNumber;
     private String faxNumber;
-    @Column(unique = true)
+    //    @Column(unique = true) //do not have a unique constraint on email address. EDMO codes can detail at the sub-organisation level. Persons may move to different departments, and change organisation_id, but their email address remains.
     private String email;
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -54,6 +54,10 @@ public class Person implements IPerson, Serializable {
     public Person() {
     }
 
+    /**
+     * Create a person from a PersonDTO. This does not add the Organisation.
+     * @param dto
+     */
     public Person(PersonDTO dto) {
         this.firstName = dto.getFirstName();
         this.lastName = dto.getLastName();

@@ -1,6 +1,8 @@
 package eu.eurofleets.ears3.domain;
 
 import be.naturalsciences.bmdc.cruise.model.ILinkedDataTerm;
+import eu.eurofleets.ears3.dto.LinkedDataTermDTO;
+
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import java.io.Serializable;
 import java.util.Objects;
@@ -35,9 +37,9 @@ public class LinkedDataTerm implements ILinkedDataTerm, Serializable {
     private Long id;
 
     @Column(unique = true, nullable = false, length = 100)
-    private String identifier;  //an url in an external vocabulary, i.e. the EARS ontology
+    private String identifier; //an url in an external vocabulary, i.e. the EARS ontology
     @Column(unique = true, nullable = true, length = 100)
-    private String transitiveIdentifier;  //an identifier in a transitive vocanbulary, i.e. the BODC Tool list L22 (can only be url)
+    private String transitiveIdentifier; //an identifier in a transitive vocanbulary, i.e. the BODC Tool list L22 (can only be url)
     @Column(unique = false, nullable = false, length = 256)
     private String name;
     @Column(unique = true, nullable = true, length = 100)
@@ -86,6 +88,14 @@ public class LinkedDataTerm implements ILinkedDataTerm, Serializable {
         this.transitiveIdentifier = transitiveIdentifier;
         this.urn = ILinkedDataTerm.getUrnFromUrl(identifier);
         this.transitiveUrn = ILinkedDataTerm.getUrnFromUrl(transitiveIdentifier);
+    }
+
+    public LinkedDataTerm(LinkedDataTermDTO term) {
+        this.identifier = ILinkedDataTerm.cleanUrl(term.identifier);
+        this.name = term.name;
+        this.transitiveIdentifier = term.transitiveIdentifier;
+        this.urn = ILinkedDataTerm.getUrnFromUrl(term.identifier);
+        this.transitiveUrn = ILinkedDataTerm.getUrnFromUrl(term.transitiveIdentifier);
     }
 
     public Long getId() {

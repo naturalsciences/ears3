@@ -104,14 +104,14 @@ public class EventDTOControllerTest {
                                 this.objectMapper);
 
                 // we have 3 events after the break
-                EventControllerTest.countEventDTOTest(
+                EventControllerTest.assertEventDTOCount(
                                 "/api/dto/events.json?startDate=" +
                                                 breakTime.format(DateTimeFormatter.ISO_OFFSET_DATE_TIME),
                                 3, this.mockMvc,
                                 this.objectMapper);
 
                 // we have 1 event before the break
-                EventControllerTest.countEventDTOTest(
+                EventControllerTest.assertEventDTOCount(
                                 "/api/dto/events.json?endDate="
                                                 + breakTime.format(DateTimeFormatter.ISO_OFFSET_DATE_TIME),
                                 1, this.mockMvc,
