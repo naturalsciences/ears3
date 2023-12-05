@@ -4,71 +4,74 @@ To change this license header, choose License Headers in Project Properties.
 To change this template file, choose Tools | Templates
 and open the template in the editor.
 -->
-<html  xmlns="http://www.w3.org/1999/xhtml" 
-  xmlns:th="http://www.thymeleaf.org"
-  xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
-    <head th:fragment="head">
-        <meta charset="utf-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-        <link rel="shortcut icon" href="#" />
-        <link rel="stylesheet" type="text/css" href="/ears3/css/bootstrap.min.css">
-        <link rel="stylesheet" type="text/css" href="/ears3/css/bootstrap-select.css">
-        <link rel="stylesheet" type="text/css" href="/ears3/css/bootstrap-theme.min.css">
-        <link rel="stylesheet" type="text/css" href="/ears3/css/datatables.min.css" />
-        <link rel="stylesheet" type="text/css" href="/ears3/css/style.css" >
-        <link rel="stylesheet" type="text/css" href="/ears3/js/jquery-ui-1.12.1/jquery-ui.min.css" />
-        <script src="/ears3/js/jquery-3.6.0.min.js" type="text/javascript"></script>
-        <script src="/ears3/js/popper.min.js" type="text/javascript"></script>
-        <script src="/ears3/js/bootstrap.min.js" type="text/javascript"></script>
-        <script src="/ears3/js/bootstrap-select.js" type="text/javascript"></script>
-        <script src="/ears3/js/jquery-ui-1.12.1/jquery-ui.min.js" type="text/javascript"></script>
-        <!--<script src="/ears3/js/jsonpath-0.8.0.js" type="text/javascript"></script>-->
-        <script src="/ears3/js/index-browser-umd.cjs" type="text/javascript"></script>
-        <script>
-            //const programsGetLocation = "../programs.json?startDate=" + then.toISOString();
-            const eventsGetLocation = "/ears3/api/events.json";
-            const programsGetLocation = "/ears3/api/programs.json";
-        </script>
-    </head>
-    <body>
-        <nav class="navbar navbar-expand-md navbar-light " th:fragment="header">
-            <script>
-                $(document).ready(function () {
-                    $.getJSON(programsGetLocation, function (data) {
-                        $.each(data.programs, function (key, item) {
-                            let names = "";
-                            if (item.principalInvestigators !== 'undefined' && item.principalInvestigators.length > 0) {
-                                names = " (" + item.principalInvestigators.map(function (pi) {
-                                    return pi.firstName + " " + pi.lastName;
-                                }).join("/") + ")";
-                            }
-                            $("#programField").append($("<option />").val(item.identifier).text(item.identifier + names));
-                        });
-                        $('#programField').selectpicker('refresh');
-                    });
-                });
-            </script>
-            <div class="container">
-                <form  layout:fragment="head-form">           
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
 
-                </form>
-                <button class="navbar-toggler navbar-toggler-right border-0" type="button"
-                        data-toggle="collapse" data-target="#navbar4">
-                    <span class="navbar-toggler-icon"></span>
-                </button>
-                <div class="collapse navbar-collapse" id="navbar4">
-                    <ul class="navbar-nav ml-auto">
-                        <li class="nav-item"> <b class="nav-link">EARS</b> </li>
-                        <li class="nav-item"> <a class="nav-link" th:href="@{/event/new}">New event</a> </li>
-                        <li class="nav-item"> <a class="nav-link" th:href="@{/events}">Events</a> </li>
-                        <!--<li class="nav-item"> <a class="nav-link" th:href="@{/program/create}">Program</a> </li>-->
-                        <li class="nav-item"> <a class="nav-link" th:href="@{/cruises}">Cruises</a> </li>
-                        <li class="nav-item"> <a class="nav-link" th:href="@{/manual}">Manual</a> </li>
-                        <li class="nav-item"> <strong><a class="nav-link" id="settings-link" th:href="@{/settings}"></a></strong> </li>
-                    </ul>
-                </div>
+<head th:fragment="head">
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <link rel="shortcut icon" href="#" />
+    <link rel="stylesheet" type="text/css" href="/ears3/css/bootstrap.min.css">
+    <link rel="stylesheet" type="text/css" href="/ears3/css/bootstrap-select.css">
+    <link rel="stylesheet" type="text/css" href="/ears3/css/bootstrap-theme.min.css">
+    <link rel="stylesheet" type="text/css" href="/ears3/css/datatables.min.css" />
+    <link rel="stylesheet" type="text/css" href="/ears3/css/style.css">
+    <link rel="stylesheet" type="text/css" href="/ears3/js/jquery-ui-1.12.1/jquery-ui.min.css" />
+    <script src="/ears3/js/jquery-3.6.0.min.js" type="text/javascript"></script>
+    <script src="/ears3/js/popper.min.js" type="text/javascript"></script>
+    <script src="/ears3/js/bootstrap.min.js" type="text/javascript"></script>
+    <script src="/ears3/js/bootstrap-select.js" type="text/javascript"></script>
+    <script src="/ears3/js/jquery-ui-1.12.1/jquery-ui.min.js" type="text/javascript"></script>
+    <!--<script src="/ears3/js/jsonpath-0.8.0.js" type="text/javascript"></script>-->
+    <script src="/ears3/js/index-browser-umd.cjs" type="text/javascript"></script>
+    <script>
+        //const programsGetLocation = "../programs.json?startDate=" + then.toISOString();
+        const eventsGetLocation = "/ears3/api/events.json";
+        const programsGetLocation = "/ears3/api/programs.json";
+    </script>
+</head>
+
+<body>
+    <nav class="navbar navbar-expand-md navbar-light " th:fragment="header">
+        <script>
+            var earsProgramRegex = /[[${@environment.getProperty('ears.program.regex')}]]/;   
+            $(document).ready(function () {
+                $.getJSON(programsGetLocation, function (data) {
+                    $.each(data.programs, function (key, item) {
+                        let names = "";
+                        if (item.principalInvestigators !== 'undefined' && item.principalInvestigators.length > 0) {
+                            names = " (" + item.principalInvestigators.map(function (pi) {
+                                return pi.firstName + " " + pi.lastName;
+                            }).join("/") + ")";
+                        }
+                        if (earsProgramRegex.test(item.identifier)) {
+                            $("#programField").append($("<option />").val(item.identifier).text(item.identifier + names));
+                        }
+                    });
+                    $('#programField').selectpicker('refresh');
+                });
+            });
+        </script>
+        <div class="container">
+            <form layout:fragment="head-form">
+
+            </form>
+            <button class="navbar-toggler navbar-toggler-right border-0" type="button" data-toggle="collapse" data-target="#navbar4">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbar4">
+                <ul class="navbar-nav ml-auto">
+                    <li class="nav-item"> <b class="nav-link">EARS</b> </li>
+                    <li class="nav-item"> <a class="nav-link" th:href="@{/event/new}">New event</a> </li>
+                    <li class="nav-item"> <a class="nav-link" th:href="@{/events}">Events</a> </li>
+                    <!--<li class="nav-item"> <a class="nav-link" th:href="@{/program/create}">Program</a> </li>-->
+                    <li class="nav-item"> <a class="nav-link" th:href="@{/cruises}">Cruises</a> </li>
+                    <li class="nav-item"> <a class="nav-link" th:href="@{/manual}">Manual</a> </li>
+                    <li class="nav-item"> <strong><a class="nav-link" id="settings-link" th:href="@{/settings}"></a></strong> </li>
+                </ul>
             </div>
-        </nav>
-        <div class="container" layout:fragment="main"></div>
-    </body>
+        </div>
+    </nav>
+    <div class="container" layout:fragment="main"></div>
+</body>
+
 </html>
