@@ -40,6 +40,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.http.MediaType;
+import org.springframework.test.annotation.DirtiesContext;
+import org.springframework.test.annotation.DirtiesContext.ClassMode;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.context.web.WebAppConfiguration;
@@ -62,7 +64,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.
 @WebAppConfiguration
 @ComponentScan(basePackages = { "eu.eurofleets.ears3.domain", " eu.eurofleets.ears3.service" })
 @TestPropertySource(locations = "classpath:test.properties")
-
+@DirtiesContext(classMode = ClassMode.BEFORE_EACH_TEST_METHOD) //reset the database to base state before each test method
 public class ProgramControllerTest {
 
         @Autowired
@@ -312,7 +314,7 @@ public class ProgramControllerTest {
                 PersonControllerTest.assertPersonCount(this.mockMvc, 3);
                 // delete all previous events and programs
                 EventControllerTest.deleteAllEvents(this.mockMvc);
-                PersonControllerTest.deleteAllPersons(this.mockMvc);
+                //PersonControllerTest.deleteAllPersons(this.mockMvc);
 
                 deleteAllPrograms(this.mockMvc);
         }

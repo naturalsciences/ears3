@@ -15,12 +15,14 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.junit.Ignore;
-import org.junit.jupiter.api.*;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
 
-import static org.junit.jupiter.api.Assertions.*;
+import org.junit.Test;
+
+import static org.junit.Assert.*;
+import java.net.URL;
+import java.net.URLConnection;
 
 public class DatagramUtilitiesTest {
 
@@ -47,13 +49,32 @@ public class DatagramUtilitiesTest {
 	}
 
 	@Test
-	@Ignore
 	public void getCoordinate() throws MalformedURLException {
 		DatagramUtilities<Navigation> a = new DatagramUtilities<>(Navigation.class, "http://ostrea.rbins.be:8282");
 		String line = "$BELPOS,140707,085900,3.198707,51.336128,35.0,,10.1,,0.1";
-		Coordinate expected = new Coordinate(3.198707D,51.336128D);
+		Coordinate expected = new Coordinate(3.198707D, 51.336128D);
 		Coordinate actual = a.getCoordinate(line);
 
 		assertEquals(expected, actual);
+	}
+
+	@Test
+	public void tryConnect() throws IOException {
+		DatagramUtilities<Navigation> datagramUtilities = new DatagramUtilities<>(Navigation.class,
+				"http://www.kzfgks8921drghdqjb.com");
+		try {
+			DatagramUtilities.tryConnect(datagramUtilities.getBaseUrl());
+			fail();
+		} catch (IOException e) {
+
+		}
+		datagramUtilities = new DatagramUtilities<>(Navigation.class,
+				"http://www.google.com");
+		try {
+			DatagramUtilities.tryConnect(datagramUtilities.getBaseUrl());
+		} catch (IOException e) {
+			fail();
+		}
+
 	}
 }

@@ -16,6 +16,7 @@ import java.io.InputStreamReader;
 import java.io.Reader;
 import java.lang.reflect.Field;
 import java.net.ConnectException;
+import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLConnection;
@@ -29,6 +30,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+
+import org.springframework.web.client.ResourceAccessException;
 
 /**
  * A class to easily retrieve Objects of a certain acquisition type (nav, met, tss)
@@ -110,10 +113,7 @@ public class DatagramUtilities<A extends Acquisition> {
 
     private List<A> analyzeDatagram(URL endpoint) throws IOException, ConnectException {
         List<A> result = new ArrayList<>();
-
-        URLConnection connection = endpoint.openConnection();
-        connection.setConnectTimeout(CONNECT_TIMEOUT * 1000);
-        connection.setReadTimeout(240 * 1000);
+        URLConnection connection = tryConnect(endpoint);
         try (BufferedReader br = new BufferedReader(new InputStreamReader(
                 connection.getInputStream()))) {
             String line;
@@ -162,6 +162,23 @@ public class DatagramUtilities<A extends Acquisition> {
         return result;
     }
 
+    public static URLConnection tryConnect(URL url) throws IOException {
+
+        HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+        connection.setConnectTimeout(CONNECT_TIMEOUT * 1000);
+        connection.setReadTimeout(240 * 1000);
+        connection.setRequestMethod("GET");
+        connection.connect();
+
+        int code = connection.getResponseCode();
+        if (code == HttpURLConnection.HTTP_OK) {// status 200
+            return connection;
+        } else
+            throw new IOException(
+                    String.format("URL %s returned code %d%n", url.toString(), code));
+
+    }
+
     public List<Coordinate> getCoordinates(OffsetDateTime start, OffsetDateTime stop) throws IOException {
         if (start == null) {
             throw new IllegalArgumentException("Provided start time is null!");
@@ -172,13 +189,11 @@ public class DatagramUtilities<A extends Acquisition> {
         String startString = start.withOffsetSameInstant(ZoneOffset.UTC).format(DateTimeFormatter.ISO_DATE_TIME);
         String endString = stop.withOffsetSameInstant(ZoneOffset.UTC).format(DateTimeFormatter.ISO_DATE_TIME);
 
-        //URL website = new URL("https://ears.bmdc.be/ears3Nav/nav/getBetween/datagram?startDate=2014-07-07T08:00:00Z&endDate=2014-07-11T18:00:00Z");
+        //example: https://ears.bmdc.be/ears3Nav/nav/getBetween/datagram?startDate=2014-07-07T08:00:00Z&endDate=2014-07-11T18:00:00Z
         URL url = new URL(String.format("%s/ears3Nav/%s/getBetween/datagram?startDate=%s&endDate=%s",
                 baseUrl, abbrevs.get(this.cls), startString, endString));
 
-        URLConnection connection = url.openConnection();
-        connection.setConnectTimeout(CONNECT_TIMEOUT * 1000);
-        connection.setReadTimeout(240 * 1000);
+        URLConnection connection = tryConnect(url);
 
         return readStreamForCoords(new InputStreamReader(connection.getInputStream()));
     }

@@ -167,10 +167,12 @@ public class CruiseController {
                 try {
                     coordinates = datagramUtilities.getCoordinates(cruise.getStartDate(), cruise.getEndDate());
                 } catch (IOException e) {
-                    logger.warning(String.format("Could not access %s to retrieve navigation data.", navServer));
+                    logger.warning(String.format("Could not retrieve navigation data: %s", navServer,
+                            e.getMessage()));
                 }
             } catch (MalformedURLException e) {
-                logger.warning(String.format("The ears.navigation.server config has been set to '%s', which is an invalid URL.", navServer));
+                logger.warning(String.format(
+                        "The ears.navigation.server config has been set to '%s', which is an invalid URL.", navServer));
             }
 
             if (coordinates.size() > 0) {

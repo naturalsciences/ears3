@@ -18,10 +18,15 @@ import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.ComponentScan;
+import org.springframework.test.annotation.DirtiesContext;
+import org.springframework.test.annotation.DirtiesContext.ClassMode;
+import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.context.web.WebAppConfiguration;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
+
+import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
@@ -31,7 +36,8 @@ import org.springframework.web.context.WebApplicationContext;
 @SpringBootTest(classes = {Application.class}, properties = "spring.main.allow-bean-definition-overriding=true")
 @WebAppConfiguration
 @ComponentScan(basePackages = {"eu.eurofleets.ears3.domain", " eu.eurofleets.ears3.service"})
-@Ignore
+@TestPropertySource(locations = "classpath:test.properties")
+@DirtiesContext(classMode = ClassMode.BEFORE_EACH_TEST_METHOD) //reset the database to base state before each test method
 public class Ears2CruiseControllerTest {
 
     @Autowired
@@ -46,14 +52,13 @@ public class Ears2CruiseControllerTest {
         /*   MvcResult mvcResult = this.mockMvc.perform(MockMvcRequestBuilders.post("/sync/all")) //first we need all the harbours, countries etc in the system
                 //.andDo(print())
                 .andExpect(status().isOk())
-                .andReturn();*/
+                .andReturn();*/ 
     }
 
     @Autowired
     private ObjectMapper objectMapper;
 
     @Test
-    @Ignore
     public void testPostAndUpdateCruise() throws Exception {
         String identifier = "BE11/2007_18-" + UUID.randomUUID();
         CruiseDTO cruise = CruiseControllerTest.getTestCruise1(identifier);
@@ -61,9 +66,9 @@ public class Ears2CruiseControllerTest {
         CruiseControllerTest.postCruise(this.mockMvc, cruise, objectMapper);
 
         this.mockMvc.perform(MockMvcRequestBuilders.get("/ears2/cruises?platformCode=SDN:C17::11BE"))
-                //.andDo(print())
+                .andDo(print())
                 .andExpect(status().is(200))
-                .andExpect(content().string(containsString("{\"name\":\"Valérie+Dulière\",\"organisationCode\":\"SDN:EDMO::3330\",\"organisationName\":\"Royal Belgian Institute of Natural Sciences, Operational Directorate Natural Environment, Belgian Marine Data Centre\",\"country\":\"Belgium\"}"))).andReturn();
+                .andExpect(content().string(containsString("<ewsl:chiefScientist>[{\"firstName\":\"Katrijn\",\"lastName\":\"Baetens\",\"organisationCode\":\"SDN:EDMO::3330\",\"organisationName\":\"Royal Belgian Institute of Natural Sciences, Operational Directorate Natural Environment, Belgian Marine Data Centre\",\"country\":\"Belgium\"},{\"firstName\":\"Valérie\",\"lastName\":\"Dulière\",\"organisationCode\":\"SDN:EDMO::3330\",\"organisationName\":\"Royal Belgian Institute of Natural Sciences, Operational Directorate Natural Environment, Belgian Marine Data Centre\",\"country\":\"Belgium\"}]</ewsl:chiefScientist>"))).andReturn();
 
         CruiseControllerTest.deleteCruise(identifier, this.mockMvc);
     }

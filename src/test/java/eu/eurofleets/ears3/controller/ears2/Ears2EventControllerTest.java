@@ -23,12 +23,16 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.http.MediaType;
+import org.springframework.test.annotation.DirtiesContext;
+import org.springframework.test.annotation.DirtiesContext.ClassMode;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.context.web.WebAppConfiguration;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
+
+import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
@@ -44,7 +48,7 @@ import org.springframework.web.context.WebApplicationContext;
 @WebAppConfiguration
 @ComponentScan(basePackages = { "eu.eurofleets.ears3.domain", " eu.eurofleets.ears3.service" })
 @TestPropertySource("/test.properties")
-@Ignore
+@DirtiesContext(classMode = ClassMode.BEFORE_EACH_TEST_METHOD) //reset the database to base state before each test method
 public class Ears2EventControllerTest {
 
     @Autowired
@@ -68,6 +72,7 @@ public class Ears2EventControllerTest {
      * @throws Exception
      */
     @Test
+    @Ignore
     public void getEventByDates() throws Exception {
         EventDTO e = EventControllerTest.getTestEvent();
         e.setProgram("2020-MF");
@@ -79,6 +84,7 @@ public class Ears2EventControllerTest {
         MvcResult mvcResult = this.mockMvc
                 .perform(MockMvcRequestBuilders
                         .get("/ears2/events?startDate=2019-04-24T11:00:00Z&endDate=2019-04-26T12:00:00Z"))// .andDo(print())
+                .andDo(print())
                 .andExpect(status().is(200))
                 .andExpect(content().string(containsString("event eventId")))
                 .andExpect(content().string(containsString("<ewsl:program>2020-MF</ewsl:program>"))).andReturn();

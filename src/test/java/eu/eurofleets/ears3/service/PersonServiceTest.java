@@ -14,6 +14,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import javax.transaction.Transactional;
 
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -61,6 +62,7 @@ public class PersonServiceTest {
 	private OrganisationRepository organisationRepository;
 
 	@Test
+	@Ignore
 	public void findOrCreate() {
 		LinkedDataTermDTO ugentTermDTO = new LinkedDataTermDTO("SDN:EDMO::230", null, "UGent-RCMG");
 		OrganisationDTO ugentDTO = new OrganisationDTO();

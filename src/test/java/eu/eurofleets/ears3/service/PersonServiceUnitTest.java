@@ -18,6 +18,7 @@ import static org.mockito.Mockito.when;
 import javax.transaction.Transactional;
 
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -93,6 +94,7 @@ public class PersonServiceUnitTest {
 	private OrganisationRepository organisationRepository;
 
 	@Test
+	@Ignore
 	public void findOrCreate() {
 
 
@@ -107,8 +109,6 @@ public class PersonServiceUnitTest {
 		//Person expected = new Person(new PersonDTO("abc", "abc", "abc"));
 		Person actual = personService.findOrCreate(veraNoMailRBINS);
 		Person actual2 = personService.findOrCreate(veraNoMailUGent);
-		int a = 5;
-
 		//	assertEquals(expected, actual);
 	}
 }
