@@ -3,6 +3,7 @@ package eu.eurofleets.ears3.controller.rest;
 import be.naturalsciences.bmdc.cruise.model.ILinkedDataTerm;
 import be.naturalsciences.bmdc.cruise.model.IProgram;
 import be.naturalsciences.bmdc.cruise.model.IProperty;
+
 import com.opencsv.CSVWriter;
 import eu.eurofleets.ears3.domain.Event;
 import eu.eurofleets.ears3.domain.EventList;
@@ -11,6 +12,9 @@ import eu.eurofleets.ears3.domain.Navigation;
 import eu.eurofleets.ears3.domain.Thermosal;
 import eu.eurofleets.ears3.domain.Weather;
 import eu.eurofleets.ears3.dto.EventDTO;
+import eu.eurofleets.ears3.dto.PersonDTO;
+import eu.eurofleets.ears3.excel.SpreadsheetEvent;
+import eu.eurofleets.ears3.service.EventExcelService;
 import eu.eurofleets.ears3.service.EventService;
 import java.io.IOException;
 import java.io.Writer;
@@ -51,55 +55,71 @@ public class EventExcelInputController {
     private EventService eventService;
 
     @Autowired
+    private EventExcelService eventExcelService;
+
+    @Autowired
     private Environment env;
 
+    private static class ErrorRow {
+        int row;
+        String msg;
+        Exception e;
+    }
 
     @PostMapping(value = { "event" }, produces = { "application/xml; charset=utf-8", "application/json" })
     @ResponseStatus(HttpStatus.CREATED)
-    public ResponseEntity<Message<EventDTO>> createEvent(@RequestHeader("person") PersonDTO person, @RequestParam("file") MultipartFile file) {
-        if (eventDTO.getPlatform() == null) {
-            String property = env.getProperty("ears.platform");
-            if (property != null) {
-                eventDTO.setPlatform(property);
-            } else {
-                throw new IllegalArgumentException(
-                        "No platform has been provided in the POST body and no platform has been set in the web service configuration.");
+    public ResponseEntity<Message<List<ErrorRow>>> createEvent(@RequestHeader("person") PersonDTO actor,
+            @RequestParam("file") MultipartFile mpFile) {
+        //MultipartFile->Stream stream
+        //Document document=io.github.rushuat.ocell.document.Document.fromStream(stream);
+        //validateAllTabs();
+        //validateHeaders();
+        List<SpreadsheetEvent> data = document.getSheet("events", SpreadsheetEvent.class);
+        List<EventDTO> events;
+        boolean problems = false;
+        int i = 1;
+
+        for (SpreadsheetEvent row : data) {
+            try {
+                EventDTO event = eventExcelService.convert(row);
+                events.add(event);
+            } catch (Exception e) {
+                problems = true;
+            }
+
+            i++;
+        }
+        if (!problems)
+
+        {
+            for (EventDTO dto : events) {
+                eventService.save(dto);
             }
         }
-        Event event = this.eventService.save(eventDTO);
-        if (event != null) {
-            eventDTO = new EventDTO(event);
-            return new ResponseEntity<Message<EventDTO>>(
-                    new Message<EventDTO>(HttpStatus.CREATED.value(), event.getIdentifier(), eventDTO),
-                    HttpStatus.CREATED);
-        } else {
-            throw new ResponseStatusException(HttpStatus.CONFLICT, "Could not create Event.");
-        }
-        // return new ResponseEntity<Event>(, HttpStatus.CREATED);event
     }
 
     /* @PostMapping(value = { "event" }, produces = { "application/xml; charset=utf-8", "application/json" })
     @ResponseStatus(HttpStatus.CREATED)
     public ResponseEntity<Message<EventDTO>> createEvent(@RequestBody EventDTO eventDTO) {
-        if (eventDTO.getPlatform() == null) {
-            String property = env.getProperty("ears.platform");
-            if (property != null) {
-                eventDTO.setPlatform(property);
-            } else {
-                throw new IllegalArgumentException(
-                        "No platform has been provided in the POST body and no platform has been set in the web service configuration.");
-            }
-        }
-        Event event = this.eventService.save(eventDTO);
-        if (event != null) {
-            eventDTO = new EventDTO(event);
-            return new ResponseEntity<Message<EventDTO>>(
-                    new Message<EventDTO>(HttpStatus.CREATED.value(), event.getIdentifier(), eventDTO),
-                    HttpStatus.CREATED);
+    if (eventDTO.getPlatform() == null) {
+        String property = env.getProperty("ears.platform");
+        if (property != null) {
+            eventDTO.setPlatform(property);
         } else {
-            throw new ResponseStatusException(HttpStatus.CONFLICT, "Could not create Event.");
+            throw new IllegalArgumentException(
+                    "No platform has been provided in the POST body and no platform has been set in the web service configuration.");
         }
-        // return new ResponseEntity<Event>(, HttpStatus.CREATED);event
+    }
+    Event event = this.eventService.save(eventDTO);
+    if (event != null) {
+        eventDTO = new EventDTO(event);
+        return new ResponseEntity<Message<EventDTO>>(
+                new Message<EventDTO>(HttpStatus.CREATED.value(), event.getIdentifier(), eventDTO),
+                HttpStatus.CREATED);
+    } else {
+        throw new ResponseStatusException(HttpStatus.CONFLICT, "Could not create Event.");
+    }
+    // return new ResponseEntity<Event>(, HttpStatus.CREATED);event
     } */
 
 }

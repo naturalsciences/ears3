@@ -14,7 +14,7 @@ public class SpreadsheetEvent {
 
     public static enum FIELDS {
         Date, Tool,
-        Dist
+        Dist, Process
     };
 
     // @FieldName("Date")

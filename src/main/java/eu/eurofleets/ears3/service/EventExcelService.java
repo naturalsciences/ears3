@@ -134,6 +134,7 @@ public class EventExcelService {
         String processName = spreadsheetEvent.process;
         LinkedDataTermDTO linkedDataTerm = DEFS.get(processName);
         eventDTO.setProcess(linkedDataTerm);
+        return eventDTO;
     }
 
 }
