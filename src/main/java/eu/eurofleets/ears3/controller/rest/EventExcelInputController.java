@@ -16,7 +16,10 @@ import eu.eurofleets.ears3.dto.PersonDTO;
 import eu.eurofleets.ears3.excel.SpreadsheetEvent;
 import eu.eurofleets.ears3.service.EventExcelService;
 import eu.eurofleets.ears3.service.EventService;
+
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.Writer;
 import java.time.OffsetDateTime;
 import java.time.format.DateTimeFormatter;
@@ -25,11 +28,14 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
+
+import io.github.rushuat.ocell.document.Documents;
 import org.apache.commons.io.output.StringBuilderWriter;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.Environment;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -44,6 +50,8 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
+import io.github.rushuat.ocell.document.Document;
+import eu.eurofleets.ears3.service.EventExcelService.ErrorRow;
 
 @RestController()
 @RequestMapping(value = "/api")
@@ -60,42 +68,40 @@ public class EventExcelInputController {
     @Autowired
     private Environment env;
 
-    private static class ErrorRow {
-        int row;
-        String msg;
-        Exception e;
-    }
-
-    @PostMapping(value = { "event" }, produces = { "application/xml; charset=utf-8", "application/json" })
+    @PostMapping(value = { "event" },
+              produces = { "application/xml; charset=utf-8", "application/json" },
+              consumes = { MediaType.MULTIPART_FORM_DATA_VALUE })
     @ResponseStatus(HttpStatus.CREATED)
     public ResponseEntity<Message<List<ErrorRow>>> createEvent(@RequestHeader("person") PersonDTO actor,
-            @RequestParam("file") MultipartFile mpFile) {
-        //MultipartFile->Stream stream
-        //Document document=io.github.rushuat.ocell.document.Document.fromStream(stream);
-        //validateAllTabs();
-        //validateHeaders();
-        List<SpreadsheetEvent> data = document.getSheet("events", SpreadsheetEvent.class);
-        List<EventDTO> events;
-        boolean problems = false;
-        int i = 1;
-
-        for (SpreadsheetEvent row : data) {
-            try {
-                EventDTO event = eventExcelService.convert(row);
-                events.add(event);
-            } catch (Exception e) {
-                problems = true;
+                                                               @RequestParam("file") MultipartFile mpFile) {
+        List<ErrorRow> errorList = new ArrayList<>();
+        try (Document document = Documents.OOXML().create()) {
+            //MultipartFile->Stream stream
+            byte [] byteArr = mpFile.getBytes();
+            InputStream inputStream = new ByteArrayInputStream(byteArr);
+            //Document document=io.github.rushuat.ocell.document.Document.fromStream(stream);
+            document.fromStream(inputStream);
+            //validateAllTabs();
+            boolean areTabsOk = eventExcelService.validateAllTabs(document);
+            //validateHeaders();
+            String sheetName = "events";
+            boolean areHeadersOk = eventExcelService.validateHeaders(document, sheetName);
+            List<SpreadsheetEvent> data = document.getSheet(sheetName, SpreadsheetEvent.class);
+            List<EventDTO> events = new ArrayList<>();
+            boolean processProblems = eventExcelService.processSpreadsheetEvents(errorList, data, events);
+            boolean saveProblems = false;
+            if (!processProblems) { saveProblems = eventExcelService.saveSpreadsheetEvents(errorList, events); }
+            if ( processProblems || saveProblems ) {
+                Message<List<ErrorRow>> msg = new Message<>(HttpStatus.CONFLICT.value(),"Error Creating Excel Event", errorList);
+                return new ResponseEntity<>(msg, HttpStatus.CONFLICT );
             }
-
-            i++;
+        } catch (IOException e) {
+            e.printStackTrace();
+            Message<List<ErrorRow>> msg = new Message<>(HttpStatus.CONFLICT.value(),"Error Creating Excel Event", errorList);
+            return new ResponseEntity<>(msg, HttpStatus.CONFLICT );
         }
-        if (!problems)
-
-        {
-            for (EventDTO dto : events) {
-                eventService.save(dto);
-            }
-        }
+        Message<List<ErrorRow>> msg = new Message<>(HttpStatus.CREATED.value(),"Successfully created", errorList);
+        return new ResponseEntity<>(msg, HttpStatus.CREATED) ;
     }
 
     /* @PostMapping(value = { "event" }, produces = { "application/xml; charset=utf-8", "application/json" })
