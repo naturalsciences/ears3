@@ -72,8 +72,8 @@ public class EventExcelInputController {
               produces = { "application/xml; charset=utf-8", "application/json" },
               consumes = { MediaType.MULTIPART_FORM_DATA_VALUE })
     @ResponseStatus(HttpStatus.CREATED)
-    public ResponseEntity<Message<List<ErrorRow>>> createEvent(@RequestHeader("person") PersonDTO actor,
-                                                               @RequestParam("file") MultipartFile mpFile) {
+    public ResponseEntity<Message<List<ErrorRow>>> createEvent(@RequestParam("file") MultipartFile mpFile) {
+        //@RequestHeader("person") PersonDTO actor,
         List<ErrorRow> errorList = new ArrayList<>();
         try (Document document = Documents.OOXML().create()) {
             //MultipartFile->Stream stream
