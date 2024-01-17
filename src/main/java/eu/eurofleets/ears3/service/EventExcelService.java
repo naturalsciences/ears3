@@ -2,55 +2,25 @@ package eu.eurofleets.ears3.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import eu.eurofleets.ears3.domain.Acquisition;
-import eu.eurofleets.ears3.domain.Cruise;
-import eu.eurofleets.ears3.domain.Event;
-import eu.eurofleets.ears3.domain.LinkedDataTerm;
 import eu.eurofleets.ears3.domain.Navigation;
-import eu.eurofleets.ears3.domain.Organisation;
-import eu.eurofleets.ears3.domain.Person;
-import eu.eurofleets.ears3.domain.Platform;
-import eu.eurofleets.ears3.domain.Program;
-import eu.eurofleets.ears3.domain.Property;
 import eu.eurofleets.ears3.domain.Thermosal;
-import eu.eurofleets.ears3.domain.Tool;
 import eu.eurofleets.ears3.domain.Weather;
 import eu.eurofleets.ears3.dto.EventDTO;
 import eu.eurofleets.ears3.dto.LinkedDataTermDTO;
 import eu.eurofleets.ears3.dto.PropertyDTO;
 import eu.eurofleets.ears3.utilities.DatagramUtilities;
-import java.io.IOException;
+
 import java.net.MalformedURLException;
-import java.time.Duration;
-import java.time.Instant;
-import java.time.LocalDate;
-import java.time.OffsetDateTime;
-import java.time.OffsetTime;
-import java.time.ZoneId;
-import java.time.ZoneOffset;
-import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import org.apache.commons.collections4.IterableUtils;
-import org.apache.http.HttpResponse;
-import org.apache.http.client.HttpClient;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.entity.StringEntity;
-import org.apache.http.impl.client.HttpClientBuilder;
-import org.apache.http.util.EntityUtils;
+import java.util.stream.Collector;
+import java.util.stream.Collectors;
+
+import io.github.rushuat.ocell.document.Document;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.Environment;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
-import org.springframework.util.Assert;
-import org.springframework.web.server.ResponseStatusException;
 
 import eu.eurofleets.ears3.excel.SpreadsheetEvent;
 
@@ -109,32 +79,120 @@ public class EventExcelService {
         }
     }
 
+    private static List<String> allowedTabs = Arrays.asList("events");
+    private List<String> requiredHeaders = Arrays.stream(SpreadsheetEvent.FIELDS.values()).map(Enum::name).collect(Collectors.toList());
     static String DEFAULT_PROGRAM = "11BU_operations";
     static Map<String, LinkedDataTermDTO> DEFS = new HashMap<>();
 
     static {
-        LinkedDataTermDTO station = new LinkedDataTermDTO("http://ontologies.ef-ears.eu/ears2/1#pro_3", null,
-                "Station");
+        LinkedDataTermDTO station = new LinkedDataTermDTO("http://ontologies.ef-ears.eu/ears2/1#pro_3", null, "Station");
         DEFS.put("Station", station);
         // DEFS.put("Topas", "https://vocab.nerc.ac.uk/collection/L22/current/TOOL0859/");
     }
 
-    static Map<String, PropertyDTO> DEFS_PROPS = new HashMap<>();
+    private static Map<String, PropertyDTO> DEFS_PROPS = new HashMap<>();
 
     static {
-        PropertyDTO dist = new PropertyDTO(
-                new LinkedDataTermDTO("http://ontologies.ef-ears.eu/ears2/1#pry_2nn6546541", null,
-                        "Distance travelled"),
-                null, "nm");
+        PropertyDTO dist = new PropertyDTO( new LinkedDataTermDTO("http://ontologies.ef-ears.eu/ears2/1#pry_2nn6546541", null,"Distance travelled"), null, "nm");
         DEFS_PROPS.put(SpreadsheetEvent.FIELDS.Dist.name(), dist);
+
+        /*PropertyDTO dist = new PropertyDTO( new LinkedDataTermDTO("http://ontologies.ef-ears.eu/ears2/1#pry_2nn6546541", null,"Distance travelled"), null, "nm");
+        DEFS_PROPS.put(SpreadsheetEvent.FIELDS.Dist.name(), dist);
+        PropertyDTO dist = new PropertyDTO( new LinkedDataTermDTO("http://ontologies.ef-ears.eu/ears2/1#pry_2nn6546541", null,"Distance travelled"), null, "nm");
+        DEFS_PROPS.put(SpreadsheetEvent.FIELDS.Dist.name(), dist);
+        PropertyDTO dist = new PropertyDTO( new LinkedDataTermDTO("http://ontologies.ef-ears.eu/ears2/1#pry_2nn6546541", null,"Distance travelled"), null, "nm");
+        DEFS_PROPS.put(SpreadsheetEvent.FIELDS.Dist.name(), dist);*/
+    }
+
+    public static class ErrorRow {
+        int row;
+        String msg;
+        Exception e;
+
+        public ErrorRow(int row, String msg, Exception e) {
+            this.row = row;
+            this.msg = msg;
+            this.e = e;
+        }
     }
 
     public EventDTO convert(SpreadsheetEvent spreadsheetEvent) {
         EventDTO eventDTO = new EventDTO();
-        String processName = spreadsheetEvent.process;
+        String processName = spreadsheetEvent.getProcess();
         LinkedDataTermDTO linkedDataTerm = DEFS.get(processName);
         eventDTO.setProcess(linkedDataTerm);
+
+
+
+
+
+
         return eventDTO;
     }
 
+    public boolean validateAllTabs(Document document) {
+        boolean areTabsOk = true;
+        for (String sheetName : getAllowedTabs()) {
+            List<SpreadsheetEvent> sheet = document.getSheet(sheetName, SpreadsheetEvent.class);
+            if (sheet == null) {
+                areTabsOk = false;
+            }
+        }
+        return areTabsOk;
+    }
+
+    private List<String> getAllowedTabs() {
+        return allowedTabs;
+    }
+
+    /**@TODO    */
+    public boolean validateHeaders(Document document, String sheetName) {
+        boolean areHeadersOk = true;
+        //@Todo validation
+        /*
+        List<String> requiredHeaders = getRequiredHeaders();
+        List<SpreadsheetEvent> sheets = document.getSheet(sheetName, SpreadsheetEvent.class);
+        sheets.forEach(sheet ->{
+            System.out.println(sheet);
+
+        });
+        */
+
+        return areHeadersOk;
+    }
+
+    private List<String> getRequiredHeaders() {
+        return requiredHeaders;
+    }
+
+    public boolean processSpreadsheetEvents(List<ErrorRow> errorList, List<SpreadsheetEvent> data, List<EventDTO> events) {
+        boolean problems = false;
+        int i = 1;
+        for (SpreadsheetEvent row : data) {
+           try {
+               EventDTO event = convert(row);
+               events.add(event);
+           } catch (Exception e) {
+               problems = true;
+               errorList.add(new ErrorRow(i, "Error processing SpreadsheetEvents", e));
+           }
+           i++;
+        }
+        return problems;
+    }
+
+    public boolean saveSpreadsheetEvents(List<ErrorRow> errorList, List<EventDTO> events) {
+        boolean problems = false;
+        int i = 1;
+        for (EventDTO dto : events) {
+            try {
+                eventService.save(dto);
+            } catch (Exception e) {
+                problems = true;
+                errorList.add(new ErrorRow(i, "Error saving SpreadsheetEventDTO's", e));
+            }
+            i++;
+        }
+        return problems;
+    }
 }
