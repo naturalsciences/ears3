@@ -1,5 +1,6 @@
 package eu.eurofleets.ears3.controller.rest;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import eu.eurofleets.ears3.Application;
 import eu.eurofleets.ears3.dto.PersonDTO;
 
@@ -40,6 +41,9 @@ public class EventExcelInputControllerTest {
     @Autowired
     private WebApplicationContext wac;
 
+    @Autowired
+    private ObjectMapper objectMapper;
+
     private MockMvc mockMvc;
 
     /* public EventExcelInputControllerTest() {
@@ -64,8 +68,8 @@ public class EventExcelInputControllerTest {
         assertTrue(this.mockMvc != null);
 
         this.mockMvc.perform(MockMvcRequestBuilders.multipart("/api/event")
-                .file(mockMultipartFile))
-                //.header("person", joan))
+                .file(mockMultipartFile)//)
+                .header("person", objectMapper.writeValueAsString(this.joan)))
                 .andDo(print())
                 .andExpect(status().isOk());
     }

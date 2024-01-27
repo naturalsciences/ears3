@@ -5,9 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import eu.eurofleets.ears3.domain.Navigation;
 import eu.eurofleets.ears3.domain.Thermosal;
 import eu.eurofleets.ears3.domain.Weather;
-import eu.eurofleets.ears3.dto.EventDTO;
-import eu.eurofleets.ears3.dto.LinkedDataTermDTO;
-import eu.eurofleets.ears3.dto.PropertyDTO;
+import eu.eurofleets.ears3.dto.*;
 import eu.eurofleets.ears3.utilities.DatagramUtilities;
 
 import java.net.MalformedURLException;
@@ -18,6 +16,10 @@ import java.util.stream.Collector;
 import java.util.stream.Collectors;
 
 import io.github.rushuat.ocell.document.Document;
+import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.ss.usermodel.Workbook;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Service;
@@ -81,28 +83,90 @@ public class EventExcelService {
 
     private static List<String> allowedTabs = Arrays.asList("events");
     private List<String> requiredHeaders = Arrays.stream(SpreadsheetEvent.FIELDS.values()).map(Enum::name).collect(Collectors.toList());
-    static String DEFAULT_PROGRAM = "11BU_operations";
-    static Map<String, LinkedDataTermDTO> DEFS = new HashMap<>();
+    private static String DEFAULT_PROGRAM = "11BU_operations";
+    private static Map<String, LinkedDataTermDTO> DEFS = new HashMap<>();
 
     static {
-        LinkedDataTermDTO station = new LinkedDataTermDTO("http://ontologies.ef-ears.eu/ears2/1#pro_3", null, "Station");
-        DEFS.put("Station", station);
+        /**TODO: Ask Thomas, in EventDTO Station is a string?*/
+        //LinkedDataTermDTO station = new LinkedDataTermDTO("http://ontologies.ef-ears.eu/ears2/1#pro_3", null, "Station");
+        //DEFS.put("Station", station);
         // DEFS.put("Topas", "https://vocab.nerc.ac.uk/collection/L22/current/TOOL0859/");
+
+        /*LinkedDataTermDTO tool = new LinkedDataTermDTO("http://ontologies.ef-ears.eu/ears2/1#pro_3_johnnyTool", null, "Tool");
+        DEFS.put("Tool", tool);*/
+        LinkedDataTermDTO all = new LinkedDataTermDTO("http://ontologies.ef-ears.eu/ears2/1#pro_3_johnnyTool_All", null,"All");
+        DEFS.put("All", all);
+        LinkedDataTermDTO belgica = new LinkedDataTermDTO("http://ontologies.ef-ears.eu/ears2/1#pro_3_johnnyTool_Belgica", null,"Belgica");
+        DEFS.put("Belgica", belgica);
+        LinkedDataTermDTO command = new LinkedDataTermDTO("http://ontologies.ef-ears.eu/ears2/1#pro_3_johnnyTool_Command", null,"Command");
+        DEFS.put("Command", command);
+        LinkedDataTermDTO commandTeam = new LinkedDataTermDTO("http://ontologies.ef-ears.eu/ears2/1#pro_3_johnnyTool_Command team", null,"Command team");
+        DEFS.put("Command team", commandTeam);
+        LinkedDataTermDTO crew = new LinkedDataTermDTO("http://ontologies.ef-ears.eu/ears2/1#pro_3_johnnyTool_Crew", null,"Crew");
+        DEFS.put("Crew", crew);
+        LinkedDataTermDTO everyone = new LinkedDataTermDTO("http://ontologies.ef-ears.eu/ears2/1#pro_3_johnnyTool_Everyone is welcome", null,"Everyone is welcome");
+        DEFS.put("Everyone is welcome", everyone);
+        LinkedDataTermDTO scientists = new LinkedDataTermDTO("http://ontologies.ef-ears.eu/ears2/1#pro_3_johnnyTool_Scientists", null,"Scientists");
+        DEFS.put("Scientists", scientists);
+        LinkedDataTermDTO topas = new LinkedDataTermDTO("http://ontologies.ef-ears.eu/ears2/1#pro_3_johnnyTool_Topas", null,"Topas");
+        DEFS.put("Topas", topas);
+
+        /*LinkedDataTermDTO process = new LinkedDataTermDTO("http://ontologies.ef-ears.eu/ears2/1#pro_3_johnnyProcess", null, "Process");
+        DEFS.put("Process", process);*/
+        LinkedDataTermDTO calibration = new LinkedDataTermDTO("http://ontologies.ef-ears.eu/ears2/1#pro_3_johnnyProcess_Calibration", null,"Calibration");
+        DEFS.put("Calibration", calibration);
+        LinkedDataTermDTO cruise = new LinkedDataTermDTO("http://ontologies.ef-ears.eu/ears2/1#pro_3_johnnyProcess_Cruise", null,"Cruise");
+        DEFS.put("Cruise", cruise);
+        LinkedDataTermDTO demobilisation = new LinkedDataTermDTO("http://ontologies.ef-ears.eu/ears2/1#pro_3_johnnyProcess_Demobilisation", null,"Demobilisation");
+        DEFS.put("Demobilisation", demobilisation);
+        LinkedDataTermDTO deployment = new LinkedDataTermDTO("http://ontologies.ef-ears.eu/ears2/1#pro_3_johnnyProcess_Deployment", null,"Deployment");
+        DEFS.put("Deployment", deployment);
+        LinkedDataTermDTO exercise = new LinkedDataTermDTO("http://ontologies.ef-ears.eu/ears2/1#pro_3_johnnyProcess_Exercise", null,"Exercise");
+        DEFS.put("Exercise", exercise);
+        LinkedDataTermDTO line = new LinkedDataTermDTO("http://ontologies.ef-ears.eu/ears2/1#pro_3_johnnyProcess_Line", null,"Line");
+        DEFS.put("Line", line);
+        LinkedDataTermDTO meeting = new LinkedDataTermDTO("http://ontologies.ef-ears.eu/ears2/1#pro_3_johnnyProcess_Meeting", null,"Meeting");
+        DEFS.put("Meeting", meeting);
+        LinkedDataTermDTO mobilisation = new LinkedDataTermDTO("http://ontologies.ef-ears.eu/ears2/1#pro_3_johnnyProcess_Mobilisation", null,"Mobilisation");
+        DEFS.put("Mobilisation", mobilisation);
+        LinkedDataTermDTO recovery = new LinkedDataTermDTO("http://ontologies.ef-ears.eu/ears2/1#pro_3_johnnyProcess_Recovery", null,"Recovery");
+        DEFS.put("Recovery", recovery);
+        LinkedDataTermDTO recreation = new LinkedDataTermDTO("http://ontologies.ef-ears.eu/ears2/1#pro_3_johnnyProcess_Recreation", null,"Recreation");
+        DEFS.put("Recreation", recreation);
+        LinkedDataTermDTO sheltering = new LinkedDataTermDTO("http://ontologies.ef-ears.eu/ears2/1#pro_3_johnnyProcess_Sheltering", null,"Sheltering");
+        DEFS.put("Sheltering", sheltering);
+        LinkedDataTermDTO station = new LinkedDataTermDTO("http://ontologies.ef-ears.eu/ears2/1#pro_3_johnnyProcess_Station", null,"Station");
+        DEFS.put("Station", station);
+        LinkedDataTermDTO testing = new LinkedDataTermDTO("http://ontologies.ef-ears.eu/ears2/1#pro_3_johnnyProcess_Testing", null,"Testing");
+        DEFS.put("Testing", testing);
+        LinkedDataTermDTO transit = new LinkedDataTermDTO("http://ontologies.ef-ears.eu/ears2/1#pro_3_johnnyProcess_Transit", null,"Transit");
+        DEFS.put("Transit", transit);
+
+        /*LinkedDataTermDTO action = new LinkedDataTermDTO("http://ontologies.ef-ears.eu/ears2/1#pro_3_johnnyAction", null, "Action");
+        DEFS.put("Action", action);*/
+        LinkedDataTermDTO end = new LinkedDataTermDTO("http://ontologies.ef-ears.eu/ears2/1#pro_3_johnnyAction_End", null,"End");
+        DEFS.put("End", end);
+        LinkedDataTermDTO start = new LinkedDataTermDTO("http://ontologies.ef-ears.eu/ears2/1#pro_3_johnnyAction_Start", null,"Start");
+        DEFS.put("Start", start);
+
     }
 
-    private static Map<String, PropertyDTO> DEFS_PROPS = new HashMap<>();
+    //private static Map<String, PropertyDTO> DEFS_PROPS = new HashMap<>();
 
-    static {
+    /*static {
         PropertyDTO dist = new PropertyDTO( new LinkedDataTermDTO("http://ontologies.ef-ears.eu/ears2/1#pry_2nn6546541", null,"Distance travelled"), null, "nm");
         DEFS_PROPS.put(SpreadsheetEvent.FIELDS.Dist.name(), dist);
-
-        /*PropertyDTO dist = new PropertyDTO( new LinkedDataTermDTO("http://ontologies.ef-ears.eu/ears2/1#pry_2nn6546541", null,"Distance travelled"), null, "nm");
-        DEFS_PROPS.put(SpreadsheetEvent.FIELDS.Dist.name(), dist);
-        PropertyDTO dist = new PropertyDTO( new LinkedDataTermDTO("http://ontologies.ef-ears.eu/ears2/1#pry_2nn6546541", null,"Distance travelled"), null, "nm");
-        DEFS_PROPS.put(SpreadsheetEvent.FIELDS.Dist.name(), dist);
-        PropertyDTO dist = new PropertyDTO( new LinkedDataTermDTO("http://ontologies.ef-ears.eu/ears2/1#pry_2nn6546541", null,"Distance travelled"), null, "nm");
-        DEFS_PROPS.put(SpreadsheetEvent.FIELDS.Dist.name(), dist);*/
-    }
+        PropertyDTO time = new PropertyDTO( new LinkedDataTermDTO("http://ontologies.ef-ears.eu/ears2/1#johnny_time", null,"Distance travelled"), null, "u");
+        DEFS_PROPS.put(SpreadsheetEvent.FIELDS.Time.name(), time);
+        PropertyDTO status = new PropertyDTO( new LinkedDataTermDTO("http://ontologies.ef-ears.eu/ears2/1#johnny_status", null,"Distance travelled"), null, "nm");
+        DEFS_PROPS.put(SpreadsheetEvent.FIELDS.Status.name(), status);
+        PropertyDTO region = new PropertyDTO( new LinkedDataTermDTO("http://ontologies.ef-ears.eu/ears2/1#johnny_region", null,"Distance travelled"), null, "nm");
+        DEFS_PROPS.put(SpreadsheetEvent.FIELDS.Region.name(), region);
+        PropertyDTO weather = new PropertyDTO( new LinkedDataTermDTO("http://ontologies.ef-ears.eu/ears2/1#johnny_weather", null,"Distance travelled"), null, "nm");
+        DEFS_PROPS.put(SpreadsheetEvent.FIELDS.Weather.name(), weather);
+        PropertyDTO navigation = new PropertyDTO( new LinkedDataTermDTO("http://ontologies.ef-ears.eu/ears2/1#johnny_navigation", null,"Distance travelled"), null, "nm");
+        DEFS_PROPS.put(SpreadsheetEvent.FIELDS.Navigation.name(), navigation);
+    }*/
 
     public static class ErrorRow {
         int row;
@@ -116,24 +180,71 @@ public class EventExcelService {
         }
     }
 
-    public EventDTO convert(SpreadsheetEvent spreadsheetEvent) {
+    private EventDTO convert(SpreadsheetEvent spreadsheetEvent) {
         EventDTO eventDTO = new EventDTO();
+        /**TODO ADD TO EARS*///eventDTO.setRemarks(spreadsheetEvent.getRemarks());
+        /**TODO Verify ... currently Time, Status, Region, Weather, Navigation in the properties collection*/
+        /**TODO Date, Hour and Actor still not in the EventDTO
+         *
+         *
+         * Date+ Hour =>LocalDateTime met zone Brussel -> offsetDateTime -> wordt in eventDto opgeslagen
+         * OffsetDateTime  waar offset UTC is
+         * */
+        //eventDTO.setEventDefinitionId(spreadsheetEvent.getEventDefinitionId());
+        /**@TODO: Ask Thomas, how do we determine toolCategory*/
+        String uuid =  eventService.findUuidByToolActionProc("", spreadsheetEvent.getTool(), spreadsheetEvent.getProcess(), spreadsheetEvent.getAction());
+        eventDTO.setEventDefinitionId(uuid);
+        eventDTO.setProgram(DEFAULT_PROGRAM);
+
+        String toolName = spreadsheetEvent.getTool();
+        eventDTO.setTool(new ToolDTO(DEFS.get(toolName),null));
+
+        /**Todo: Ask Thomas about this Process field, it sometimes contains a Formula (VLOOKUP) sometimes a value like "Line"?
+         *
+         * => GEWOON STRING !!!
+         * */
         String processName = spreadsheetEvent.getProcess();
-        LinkedDataTermDTO linkedDataTerm = DEFS.get(processName);
-        eventDTO.setProcess(linkedDataTerm);
+        LinkedDataTermDTO process = DEFS.get(processName);
+        eventDTO.setProcess(process);
 
+        String actionName = spreadsheetEvent.getAction();
+        eventDTO.setAction(DEFS.get(actionName));
 
+        eventDTO.setLabel(spreadsheetEvent.getLabel());
 
+        String stationName = spreadsheetEvent.getStation();
+        //eventDTO.setStation(DEFS.get(stationName)); /**Station seems to be a string in EventDTO*/
+        eventDTO.setStation(stationName);
 
+        eventDTO.setDescription(spreadsheetEvent.getDescription());
 
+        Map<String, PropertyDTO> props = new HashMap<>();
+
+        PropertyDTO dist = new PropertyDTO( new LinkedDataTermDTO("http://ontologies.ef-ears.eu/ears2/1#pry_2nn6546541", null,"Distance travelled"), spreadsheetEvent.getDistance(), "nm");
+        props.put(SpreadsheetEvent.FIELDS.Dist.name(), dist);
+        PropertyDTO time = new PropertyDTO( new LinkedDataTermDTO("http://ontologies.ef-ears.eu/ears2/1#johnny_time", null,"Time"), spreadsheetEvent.getTime(), "u");
+        props.put(SpreadsheetEvent.FIELDS.Time.name(), time);
+        PropertyDTO status = new PropertyDTO( new LinkedDataTermDTO("http://ontologies.ef-ears.eu/ears2/1#johnny_status", null,"Status"), spreadsheetEvent.getStatus(), null);
+        props.put(SpreadsheetEvent.FIELDS.Status.name(), status);
+        PropertyDTO region = new PropertyDTO( new LinkedDataTermDTO("http://ontologies.ef-ears.eu/ears2/1#johnny_region", null,"Region"), spreadsheetEvent.getRegion(), null);
+        props.put(SpreadsheetEvent.FIELDS.Region.name(), region);
+        PropertyDTO weather = new PropertyDTO( new LinkedDataTermDTO("http://ontologies.ef-ears.eu/ears2/1#johnny_weather", null,"Weather"), spreadsheetEvent.getWeather(), null);
+        props.put(SpreadsheetEvent.FIELDS.Weather.name(), weather);
+        PropertyDTO navigation = new PropertyDTO( new LinkedDataTermDTO("http://ontologies.ef-ears.eu/ears2/1#johnny_navigation", null,"Navigation"), spreadsheetEvent.getNavigation(), null);
+        props.put(SpreadsheetEvent.FIELDS.Navigation.name(), navigation);
+
+        eventDTO.setProperties(props.values());
 
         return eventDTO;
     }
 
-    public boolean validateAllTabs(Document document) {
+
+    //public boolean validateAllTabs(Document document) {
+    public boolean validateAllTabs(Workbook document) {
         boolean areTabsOk = true;
         for (String sheetName : getAllowedTabs()) {
-            List<SpreadsheetEvent> sheet = document.getSheet(sheetName, SpreadsheetEvent.class);
+            Sheet sheet = document.getSheet(sheetName);
+            //List<SpreadsheetEvent> sheet = document.getSheet(sheetName, SpreadsheetEvent.class);
             if (sheet == null) {
                 areTabsOk = false;
             }
@@ -146,31 +257,53 @@ public class EventExcelService {
     }
 
     /**@TODO    */
-    public boolean validateHeaders(Document document, String sheetName) {
+//    public boolean validateHeaders(Document document, String sheetName) {
+    public boolean validateHeaders(Workbook document, String sheetName) {
         boolean areHeadersOk = true;
         //@Todo validation
-        /*
+        //*
         List<String> requiredHeaders = getRequiredHeaders();
-        List<SpreadsheetEvent> sheets = document.getSheet(sheetName, SpreadsheetEvent.class);
-        sheets.forEach(sheet ->{
-            System.out.println(sheet);
+        //List<SpreadsheetEvent> sheets = document.getSheet(sheetName, SpreadsheetEvent.class);
+        Sheet sheet = document.getSheet(sheetName);
+        Set<String> sheetHeaders = findColumnHeadersForSheet(sheet);
+        for (String requiredHeader : requiredHeaders) {
+            /*if (!actualHeaders.containsKey(correctHeader)) {
+                throw new WrongTemplateException("Sheet '%s' should contain mandatory header '%s'.",
+                        converter.getSheetName(), correctHeader);
+            }*/
+        }
 
-        });
-        */
+        //*/
 
         return areHeadersOk;
+    }
+
+    private Set<String> findColumnHeadersForSheet(Sheet sheet) {
+        Set<String> headers = new HashSet<>();
+        /*TMP*/int nbCol = 50;
+        if (sheet != null) {
+            Row row = sheet.getRow(0); //First row should contain the headers
+            for (int i = 0; i < nbCol; i++) {
+                Cell cell = row.getCell(i);
+                if (cell != null) {
+                    headers.add(cell.getStringCellValue());
+                }
+            }
+        }
+        return headers;
     }
 
     private List<String> getRequiredHeaders() {
         return requiredHeaders;
     }
 
-    public boolean processSpreadsheetEvents(List<ErrorRow> errorList, List<SpreadsheetEvent> data, List<EventDTO> events) {
+    public boolean processSpreadsheetEvents(List<ErrorRow> errorList, List<SpreadsheetEvent> data, List<EventDTO> events, PersonDTO actor) {
         boolean problems = false;
         int i = 1;
         for (SpreadsheetEvent row : data) {
            try {
                EventDTO event = convert(row);
+               event.setActor(actor);
                events.add(event);
            } catch (Exception e) {
                problems = true;

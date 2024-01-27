@@ -218,6 +218,14 @@ public class EventService {
         return this.eventRepository.findByCreatedOrModifiedAfter(after);
     }
 
+    public String findUuidByToolActionProc(String toolCategory,String tool,String process,String action){
+        String result = eventRepository.findUUIDByToolActionProc(toolCategory, tool, process, action);
+        /*if (result==null){
+           String uuid = UUID.randomUUID();
+        } else {  }*/
+        return (result==null) ? UUID.randomUUID().toString() : result;
+    }
+
     public Event save(EventDTO eventDTO) {
         OffsetDateTime serverTime = Instant.now().atOffset(ZoneOffset.UTC);
         if (env.getProperty("ears.read-only") == null || !env.getProperty("ears.read-only").equals("false")) {

@@ -56,4 +56,7 @@ public abstract interface EventRepository
 
     @Query("select e from Event e left join Program p on e.program = p.id left join Person pe on e.actor = pe.id inner join Cruise c on e.timeStamp between c.startDate and c.endDate where COALESCE(cast(?1 as string), c.identifier) = c.identifier and COALESCE(cast(?3 as string), pe.email) = pe.email and COALESCE(cast(?2 as string), p.identifier) = p.identifier order by e.timeStamp")
     public abstract List<Event> findAllByCruiseProgramAndActor(String cruiseIdentifier, String programIdentifier, String actorEmail);
+
+    /**@Todo: the Query*/
+    String findUUIDByToolActionProc(String toolCategory, String tool, String process, String action);
 }
