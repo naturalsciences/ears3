@@ -240,8 +240,6 @@ public class ProgramControllerTest {
         public void testGetProgramById() throws Exception {
                 ProgramDTO pr = getTestProgram1("2020-MF");
                 postProgram(this.mockMvc, pr, objectMapper);
-                ProgramControllerTest.postProgram(this.mockMvc, pr, objectMapper);
-
                 this.mockMvc.perform(MockMvcRequestBuilders.get("/api/program?identifier=2020-MF"))
                                 // .andDo(print())
                                 .andExpect(status().is(200))

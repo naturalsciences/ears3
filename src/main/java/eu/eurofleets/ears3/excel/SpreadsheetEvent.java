@@ -31,12 +31,12 @@ public class SpreadsheetEvent {
     @FieldConverter(StringConverter.class)
     @NotNull
     String date;
-//*
+    //*
     @FieldName("Hour")
     @FieldConverter(StringConverter.class)
-    String hour;  //err: Can not set java.lang.String field eu.eurofleets.ears3.excel.SpreadsheetEvent.hour to java.util.Date
+    String hour; //err: Can not set java.lang.String field eu.eurofleets.ears3.excel.SpreadsheetEvent.hour to java.util.Date
     //Date hour;      //err: Can not set java.util.Date field eu.eurofleets.ears3.excel.SpreadsheetEvent.hour to java.lang.String
-//*/
+    //*/
     @FieldName("Actor")
     @FieldConverter(StringConverter.class)
     String actor;
@@ -47,13 +47,13 @@ public class SpreadsheetEvent {
 
     @FieldName("Program")
     @FieldConverter(StringConverter.class)
+    @NotBlank
     String program;
 
     @FieldName("Tool")
     @FieldConverter(StringConverter.class)
     @NotBlank
     String tool;
-
 
     /**@Todo:  Check with Thomas since sometimes this field is filled with a value, sometimes it's a formula he used to
      * get values from the original structure form the captain to translate it to the proposed structure*/
@@ -65,6 +65,7 @@ public class SpreadsheetEvent {
 
     @FieldName("Action")
     @FieldConverter(StringConverter.class)
+    @NotBlank
     String action;
 
     @FieldName("Label")

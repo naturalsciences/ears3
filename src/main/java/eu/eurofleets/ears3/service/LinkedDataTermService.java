@@ -31,13 +31,21 @@ public class LinkedDataTermService {
         if (term == null) {
             return null;
         }
+        String urnFromUrl = ILinkedDataTerm.getUrnFromUrl(term.getIdentifier());
         LinkedDataTerm existingTerm = findByIdentifier(term.getIdentifier());
         if (existingTerm == null) {
             existingTerm = findByIdentifier(term.getTransitiveIdentifier());
         }
-
         if (existingTerm == null) {
-            return ldtRepository.save(term);
+            existingTerm = findByIdentifier(urnFromUrl);
+        }
+        if (existingTerm == null) {
+            try {
+                return ldtRepository.save(term);
+            } catch (Exception e) {
+                int a = 5;
+                return null;
+            }
         } else {
             return existingTerm;
         }
@@ -53,7 +61,8 @@ public class LinkedDataTermService {
     }
 
     public Map<String, LinkedDataTerm> findAllByIdentifier(Set<String> identifiers) {
-        return ldtRepository.findAllByIdentifier(identifiers).stream().collect(Collectors.toMap(LinkedDataTerm::getIdentifier, v -> v));
+        return ldtRepository.findAllByIdentifier(identifiers).stream()
+                .collect(Collectors.toMap(LinkedDataTerm::getIdentifier, v -> v));
     }
 
     public Iterable<LinkedDataTerm> saveAll(Collection<LinkedDataTerm> terms) {

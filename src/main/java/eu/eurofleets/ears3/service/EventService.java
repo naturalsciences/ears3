@@ -218,11 +218,11 @@ public class EventService {
         return this.eventRepository.findByCreatedOrModifiedAfter(after);
     }
 
-    public String findUuidByToolActionProc(String toolCategory,String tool,String process,String action){
+    public String findUuidByToolActionProc(String toolCategory, String tool, String process, String action) {
         //String result = eventRepository.findUUIDByToolActionProc(toolCategory, tool, process, action);
         String result = eventRepository.findUUIDByToolActionProc(tool, process, action);
         String prefix = "ears:sev::";
-        return (result==null) ? prefix + UUID.randomUUID().toString() : result;
+        return (result == null) ? prefix + UUID.randomUUID().toString() : result;
     }
 
     public Event save(EventDTO eventDTO) {
@@ -324,79 +324,89 @@ public class EventService {
             LinkedDataTerm toolCategory = ldtService.findOrCreate(eventDTO.getToolCategory());
             LinkedDataTerm toolLdTerm = ldtService.findOrCreate(eventDTO.getTool().tool);
             LinkedDataTerm parentToolLdTerm = ldtService.findOrCreate(eventDTO.getTool().parentTool);
-            Tool tool = new Tool(eventDTO.getTool()); // create a tool from the DTO
-            toolLdTerm.setTransitiveIdentifier(eventDTO.getTool().tool.transitiveIdentifier);
-            if (parentToolLdTerm != null && eventDTO.getTool().parentTool != null) {
-                parentToolLdTerm.setTransitiveIdentifier(eventDTO.getTool().parentTool.transitiveIdentifier);
-            }
-            tool.setTerm(toolLdTerm); // add the linkeddataterm to it
-            tool.setParentTool(parentToolLdTerm); // add the parent linkeddataterm to it
-            tool = toolService.findOrCreate(tool); // replace it with a managed entity, either by finding it or creating
-                                                   // it.
+            try {
+                Tool tool = new Tool(eventDTO.getTool()); // create a tool from the DTO
 
-            Platform platform = platformService.findByIdentifier(eventDTO.getPlatform());
-            if (platform == null) {
-                throw new IllegalArgumentException("Provided platform " + eventDTO.getPlatform()
-                        + " not found in EARS. Please use the appropriate identifier from the C17 vocabulary, eg. SDN:C17::11BU");
-            }
-            event.setPlatform(platform);
-            Person actor = null;
-            if (eventDTO.getActor() != null) {
-                Organisation organisation = organisationService.findByIdentifier(eventDTO.getActor().getOrganisation());
-                actor = new Person(eventDTO.getActor().getFirstName(), eventDTO.getActor().getLastName(), organisation,
-                        null, null, eventDTO.getActor().getEmail());
-                actor = personService.findOrCreate(actor);
-            }
-
-            Collection<Property> properties = new ArrayList<>();
-            if (eventDTO.getProperties() != null) {
-                for (PropertyDTO propertyDTO : eventDTO.getProperties()) {
-                    LinkedDataTerm propertyLdTerm = new LinkedDataTerm(propertyDTO.key.identifier,
-                            propertyDTO.key.transitiveIdentifier, propertyDTO.key.name);
-                    propertyLdTerm = ldtService.findOrCreate(propertyLdTerm); // replace it with a managed one, either
-                                                                              // new or selected.
-                    Property property = new Property(propertyLdTerm, propertyDTO.value, propertyDTO.uom);
-                    try {
-                        propertyService.save(property);
-                    } catch (Exception e) {
-                        int a = 5;
-                    }
-                    properties.add(property);
+                toolLdTerm.setTransitiveIdentifier(eventDTO.getTool().tool.transitiveIdentifier);
+                if (parentToolLdTerm != null && eventDTO.getTool().parentTool != null) {
+                    parentToolLdTerm.setTransitiveIdentifier(eventDTO.getTool().parentTool.transitiveIdentifier);
                 }
-            }
+                tool.setTerm(toolLdTerm); // add the linkeddataterm to it
+                tool.setParentTool(parentToolLdTerm); // add the parent linkeddataterm to it
+                tool = toolService.findOrCreate(tool); // replace it with a managed entity, either by finding it or creating
+                                                       // it.
 
-            Program program = programService.findByIdentifier(eventDTO.getProgram());
-            if (program == null) {
-                throw new IllegalArgumentException(
-                        "Provided program " + eventDTO.getProgram() + " not found in EARS. Please create it first.");
-            }
-            event.setLabel(eventDTO.getLabel() != null && eventDTO.getLabel().equals("") ? null : eventDTO.getLabel());
-            event.setStation(
-                    eventDTO.getStation() != null && eventDTO.getStation().equals("") ? null : eventDTO.getStation());
-            event.setDescription(eventDTO.getDescription() != null && eventDTO.getDescription().equals("") ? null
-                    : eventDTO.getDescription());
-            event.setAction(action);
-            event.setActor(actor);
-            event.setProcess(process);
-            event.setProgram(program);
-            event.setProperties(properties);
-            event.setSubject(subject);
-            event.setTool(tool);
-            event.setToolCategory(toolCategory);
-            this.eventRepository.save(event);
-            // enrichEventWithAcquisition(event);
-            new Thread() {
-                @Override
-                public void run() {
-                    try {
-                        enrichEventWithAcquisition(event);
-                        // sendToRemoteServer(event); //TODO: add this to program automated vessel to
-                        // shore sending automation
-                    } catch (IOException ex) {
-                        Logger.getLogger(EventService.class.getName()).log(Level.SEVERE, null, ex);
+                Platform platform = platformService.findByIdentifier(eventDTO.getPlatform());
+                if (platform == null) {
+                    throw new IllegalArgumentException("Provided platform " + eventDTO.getPlatform()
+                            + " not found in EARS. Please use the appropriate identifier from the C17 vocabulary, eg. SDN:C17::11BU");
+                }
+                event.setPlatform(platform);
+                Person actor = null;
+                if (eventDTO.getActor() != null) {
+                    Organisation organisation = organisationService
+                            .findByIdentifier(eventDTO.getActor().getOrganisation());
+                    actor = new Person(eventDTO.getActor().getFirstName(), eventDTO.getActor().getLastName(),
+                            organisation,
+                            null, null, eventDTO.getActor().getEmail());
+                    actor = personService.findOrCreate(actor);
+                }
+
+                Collection<Property> properties = new ArrayList<>();
+                if (eventDTO.getProperties() != null) {
+                    for (PropertyDTO propertyDTO : eventDTO.getProperties()) {
+                        LinkedDataTerm propertyLdTerm = new LinkedDataTerm(propertyDTO.key.identifier,
+                                propertyDTO.key.transitiveIdentifier, propertyDTO.key.name);
+                        propertyLdTerm = ldtService.findOrCreate(propertyLdTerm); // replace it with a managed one, either
+                                                                                  // new or selected.
+                        Property property = new Property(propertyLdTerm, propertyDTO.value, propertyDTO.uom);
+                        try {
+                            propertyService.save(property);
+                        } catch (Exception e) {
+                            int a = 5;
+                        }
+                        properties.add(property);
                     }
                 }
-            }.start();
+
+                Program program = programService.findByIdentifier(eventDTO.getProgram());
+                if (program == null) {
+                    throw new IllegalArgumentException(
+                            "Provided program " + eventDTO.getProgram()
+                                    + " not found in EARS. Please create it first.");
+                }
+                event.setLabel(
+                        eventDTO.getLabel() != null && eventDTO.getLabel().equals("") ? null : eventDTO.getLabel());
+                event.setStation(
+                        eventDTO.getStation() != null && eventDTO.getStation().equals("") ? null
+                                : eventDTO.getStation());
+                event.setDescription(eventDTO.getDescription() != null && eventDTO.getDescription().equals("") ? null
+                        : eventDTO.getDescription());
+                event.setAction(action);
+                event.setActor(actor);
+                event.setProcess(process);
+                event.setProgram(program);
+                event.setProperties(properties);
+                event.setSubject(subject);
+                event.setTool(tool);
+                event.setToolCategory(toolCategory);
+                this.eventRepository.save(event);
+                // enrichEventWithAcquisition(event);
+                new Thread() {
+                    @Override
+                    public void run() {
+                        try {
+                            enrichEventWithAcquisition(event);
+                            // sendToRemoteServer(event); //TODO: add this to program automated vessel to
+                            // shore sending automation
+                        } catch (IOException ex) {
+                            Logger.getLogger(EventService.class.getName()).log(Level.SEVERE, null, ex);
+                        }
+                    }
+                }.start();
+            } catch (NullPointerException e) {
+                int a = 5;
+            }
             return event;
 
         } catch (Exception ex) {
