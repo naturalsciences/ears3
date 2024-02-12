@@ -1,9 +1,12 @@
 package eu.eurofleets.ears3.service;
 
+import be.naturalsciences.bmdc.cruise.model.ILinkedDataTerm;
+import be.naturalsciences.bmdc.ontology.entities.IToolCategory;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import eu.eurofleets.ears3.domain.Navigation;
 import eu.eurofleets.ears3.domain.Thermosal;
+import eu.eurofleets.ears3.domain.Tool;
 import eu.eurofleets.ears3.domain.Weather;
 import eu.eurofleets.ears3.dto.*;
 import eu.eurofleets.ears3.utilities.DatagramUtilities;
@@ -20,6 +23,8 @@ import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
+import org.glassfish.json.JsonUtil;
+import org.hibernate.boot.jaxb.hbm.spi.ToolingHintContainer;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Service;
@@ -84,6 +89,7 @@ public class EventExcelService {
     private static List<String> allowedTabs = Arrays.asList("events");
     private List<String> requiredHeaders = Arrays.stream(SpreadsheetEvent.FIELDS.values()).map(Enum::name).collect(Collectors.toList());
     private static String DEFAULT_PROGRAM = "11BU_operations";
+    private static String PLATFORM = "Belgica";
     private static Map<String, LinkedDataTermDTO> DEFS = new HashMap<>();
 
     static {
@@ -129,6 +135,8 @@ public class EventExcelService {
         DEFS.put("Meeting", meeting);
         LinkedDataTermDTO mobilisation = new LinkedDataTermDTO("http://ontologies.ef-ears.eu/ears2/1#pro_3_johnnyProcess_Mobilisation", null,"Mobilisation");
         DEFS.put("Mobilisation", mobilisation);
+        LinkedDataTermDTO operation = new LinkedDataTermDTO("http://ontologies.ef-ears.eu/ears2/1#pro_3_johnnyProcess_Operation", null,"Operation");
+        DEFS.put("Operation", operation);
         LinkedDataTermDTO recovery = new LinkedDataTermDTO("http://ontologies.ef-ears.eu/ears2/1#pro_3_johnnyProcess_Recovery", null,"Recovery");
         DEFS.put("Recovery", recovery);
         LinkedDataTermDTO recreation = new LinkedDataTermDTO("http://ontologies.ef-ears.eu/ears2/1#pro_3_johnnyProcess_Recreation", null,"Recreation");
@@ -182,6 +190,7 @@ public class EventExcelService {
 
     private EventDTO convert(SpreadsheetEvent spreadsheetEvent) {
         EventDTO eventDTO = new EventDTO();
+        eventDTO.setIdentifier(null);
         /**TODO ADD TO EARS*///eventDTO.setRemarks(spreadsheetEvent.getRemarks());
         /**TODO Verify ... currently Time, Status, Region, Weather, Navigation in the properties collection*/
         /**TODO Date, Hour and Actor still not in the EventDTO
@@ -191,7 +200,13 @@ public class EventExcelService {
          * OffsetDateTime  waar offset UTC is
          * */
         //eventDTO.setEventDefinitionId(spreadsheetEvent.getEventDefinitionId());
-        /**@TODO: Ask Thomas, how do we determine toolCategory*/
+        /**@TODO: Ask Thomas, how do we determine toolCategory And PLATFORM ... I just called it Belgica ... */
+        Double rndNmbr = Math.random();
+        /**/LinkedDataTermDTO toolCategory = new LinkedDataTermDTO("http://vocab.nerc.ac.uk/collection/L05/current/50/Johnny_Temp_ToolCategory"+rndNmbr, null, "Johnny_Temp_ToolCategory");
+        eventDTO.setToolCategory(toolCategory);
+        eventDTO.setPlatform(PLATFORM);
+
+
         String uuid =  eventService.findUuidByToolActionProc("", spreadsheetEvent.getTool(), spreadsheetEvent.getProcess(), spreadsheetEvent.getAction());
         eventDTO.setEventDefinitionId(uuid);
         eventDTO.setProgram(DEFAULT_PROGRAM);
@@ -199,15 +214,13 @@ public class EventExcelService {
         String toolName = spreadsheetEvent.getTool();
         eventDTO.setTool(new ToolDTO(DEFS.get(toolName),null));
 
-        /**Todo: Ask Thomas about this Process field, it sometimes contains a Formula (VLOOKUP) sometimes a value like "Line"?
-         *
-         * => GEWOON STRING !!!
-         * */
         String processName = spreadsheetEvent.getProcess();
         LinkedDataTermDTO process = DEFS.get(processName);
+        //if (process == null) System.out.println(processName);
         eventDTO.setProcess(process);
 
         String actionName = spreadsheetEvent.getAction();
+        //*testing with existing one*/eventDTO.setAction(new LinkedDataTermDTO("http://ontologies.ef-ears.eu/ears2/1#act_2", null, "End"));
         eventDTO.setAction(DEFS.get(actionName));
 
         eventDTO.setLabel(spreadsheetEvent.getLabel());
@@ -272,8 +285,6 @@ public class EventExcelService {
                         converter.getSheetName(), correctHeader);
             }*/
         }
-
-        //*/
 
         return areHeadersOk;
     }

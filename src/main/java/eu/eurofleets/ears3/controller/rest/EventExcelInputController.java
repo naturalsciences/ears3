@@ -73,16 +73,14 @@ public class EventExcelInputController {
               produces = { "application/xml; charset=utf-8", "application/json" },
               consumes = { MediaType.MULTIPART_FORM_DATA_VALUE })
     @ResponseStatus(HttpStatus.CREATED)
-//    public ResponseEntity<Message<List<ErrorRow>>> createEvent(@RequestParam("file") MultipartFile mpFile) {
-    public ResponseEntity<Message<List<ErrorRow>>> createEvent(@RequestParam("file") MultipartFile mpFile, @RequestHeader("person") PersonDTO actor) {
-//    public ResponseEntity<Message<List<ErrorRow>>> createEvent(@RequestParam("file") MultipartFile mpFile, @RequestHeader("person") String actorName) {
-        //@RequestHeader("person") PersonDTO actor,
+//    public ResponseEntity<Message<List<ErrorRow>>> createEvent(@RequestParam("file") MultipartFile mpFile, @RequestHeader("person") PersonDTO actor) {
+    public ResponseEntity<Message<List<ErrorRow>>> createEvent(@RequestParam("file") MultipartFile mpFile, @RequestHeader("person") String actorName) {
         List<ErrorRow> errorList = new ArrayList<>();
 
-//        String[] nameParts = actorName.split("#");
-//        PersonDTO actor = new PersonDTO();
-//        actor.setFirstName(nameParts[0]);
-//        actor.setLastName(nameParts[1]);
+/**/        String[] nameParts = actorName.split("#");
+/**/        PersonDTO actor = new PersonDTO();
+/**/        actor.setFirstName(nameParts[0]);
+/**/        actor.setLastName(nameParts[1]);
         /** //TODO: uncomment as this should be done, just commented out for testing purposes;
         final List<Person> byName = personService.findByName(actor.getFirstName(), actor.getLastName());
         if( byName.size() != 1 ){
@@ -91,21 +89,17 @@ public class EventExcelInputController {
         } else {
             actor.setEmail(byName.get(0).getEmail());
         }*/
-
-//        /**TODO: EDIT this line*/actor.setEmail("blah@fake.com");
-//        actor.setOrganisation("SDN:EDMO::428");
+/**/        /**TODO: EDIT this line*/actor.setEmail("blah@fake.com");
+/**/        actor.setOrganisation("SDN:EDMO::428");
 
         try (Document document = Documents.OOXML().create()) {
-            //MultipartFile->Stream stream
             byte [] byteArr = mpFile.getBytes();
             InputStream inputStream = new ByteArrayInputStream(byteArr);
-            //Document document=io.github.rushuat.ocell.document.Document.fromStream(stream);
             document.fromStream(inputStream);
             //validateAllTabs();
             inputStream = new ByteArrayInputStream(byteArr);
             Workbook poiWb = WorkbookFactory.create(inputStream);
             boolean areTabsOk = eventExcelService.validateAllTabs(poiWb);
-            //boolean areTabsOk = eventExcelService.validateAllTabs(document);
             //validateHeaders();
             String sheetName = "events";
             ////////boolean areHeadersOk = eventExcelService.validateHeaders(document, sheetName);
@@ -126,29 +120,5 @@ public class EventExcelInputController {
         Message<List<ErrorRow>> msg = new Message<>(HttpStatus.CREATED.value(),"Successfully created", errorList);
         return new ResponseEntity<>(msg, HttpStatus.CREATED) ;
     }
-
-    /* @PostMapping(value = { "event" }, produces = { "application/xml; charset=utf-8", "application/json" })
-    @ResponseStatus(HttpStatus.CREATED)
-    public ResponseEntity<Message<EventDTO>> createEvent(@RequestBody EventDTO eventDTO) {
-    if (eventDTO.getPlatform() == null) {
-        String property = env.getProperty("ears.platform");
-        if (property != null) {
-            eventDTO.setPlatform(property);
-        } else {
-            throw new IllegalArgumentException(
-                    "No platform has been provided in the POST body and no platform has been set in the web service configuration.");
-        }
-    }
-    Event event = this.eventService.save(eventDTO);
-    if (event != null) {
-        eventDTO = new EventDTO(event);
-        return new ResponseEntity<Message<EventDTO>>(
-                new Message<EventDTO>(HttpStatus.CREATED.value(), event.getIdentifier(), eventDTO),
-                HttpStatus.CREATED);
-    } else {
-        throw new ResponseStatusException(HttpStatus.CONFLICT, "Could not create Event.");
-    }
-    // return new ResponseEntity<Event>(, HttpStatus.CREATED);event
-    } */
 
 }

@@ -57,6 +57,9 @@ public abstract interface EventRepository
     @Query("select e from Event e left join Program p on e.program = p.id left join Person pe on e.actor = pe.id inner join Cruise c on e.timeStamp between c.startDate and c.endDate where COALESCE(cast(?1 as string), c.identifier) = c.identifier and COALESCE(cast(?3 as string), pe.email) = pe.email and COALESCE(cast(?2 as string), p.identifier) = p.identifier order by e.timeStamp")
     public abstract List<Event> findAllByCruiseProgramAndActor(String cruiseIdentifier, String programIdentifier, String actorEmail);
 
-    /**@Todo: the Query*/
-    String findUUIDByToolActionProc(String toolCategory, String tool, String process, String action);
+    /**@Todo: LIMIT is not acceptable in JPQL /  Either the repository needs to use a Pageable interface, or I use the native Query here*/
+    //@Query("select distinct eventDefinitionId from event left join LinkedDataTerm ldp on ldp.id = event.processId left join LinkedDataTerm lda on lda.id = event.actionId left join tool t on t.id = event.toolId left join LinkedDataTerm ldt  on ldt.id = t.termId where ldp.name = ?3 and lda.name = ?4 and ldt.name=?2 limit 1")
+    @Query(value = "select distinct event_definition_id from event left join linked_data_term ldp on ldp.id = event.process_id left join linked_data_term lda on lda.id = event.action_id left join tool t on t.id = event.tool_id left join linked_data_term ldt on ldt.id = t.term_id where ldp.name = :process and lda.name = :action and ldt.name= :tool limit 1;", nativeQuery = true)
+    String findUUIDByToolActionProc(String tool, String process, String action);
+    //String findUUIDByToolActionProc(String toolCategory, String tool, String process, String action);
 }

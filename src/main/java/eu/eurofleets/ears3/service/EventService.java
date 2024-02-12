@@ -219,11 +219,10 @@ public class EventService {
     }
 
     public String findUuidByToolActionProc(String toolCategory,String tool,String process,String action){
-        String result = eventRepository.findUUIDByToolActionProc(toolCategory, tool, process, action);
-        /*if (result==null){
-           String uuid = UUID.randomUUID();
-        } else {  }*/
-        return (result==null) ? UUID.randomUUID().toString() : result;
+        //String result = eventRepository.findUUIDByToolActionProc(toolCategory, tool, process, action);
+        String result = eventRepository.findUUIDByToolActionProc(tool, process, action);
+        String prefix = "ears:sev::";
+        return (result==null) ? prefix + UUID.randomUUID().toString() : result;
     }
 
     public Event save(EventDTO eventDTO) {
