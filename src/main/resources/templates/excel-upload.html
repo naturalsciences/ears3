@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en"  xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" layout:decorate="~{fragments/f}">
+<head th:replace="fragments/f :: head"></head>
+<body>
+<nav th:replace="fragments/f :: header"></nav>
+<div class="container" layout:fragment="main">
+    <h1>Logfile submission</h1>
+    <div class="alert alert-light" role="alert">
+        <p>
+            Choose the logfile you want to upload.
+        </p>
+        <p>
+            This file is supposed to be a normal excel file (.xlsx)<br />
+            The file size should be less then <em th:text="${maxFileSize}"></em>
+        </p>
+    </div>
+    <div class="row">
+        <div class="col">
+            <form method="POST" enctype="multipart/form-data" th:action="@{/api/excelImport}">
+                <div class="input-group mb-3">
+                    <input id="actorField" type="hidden" name="actor">
+                    <input id="fileId" type="file" name="file" class="form-control" style="height: auto !important;" aria-describedby="importButton" aria-label="Upload">
+                    <button class="btn btn-outline-secondary" type="button" id="importButton">Import</button>
+                </div>
+            </form>
+            <script>
+                window.onload = function(){
+                    let actorField = document.getElementById("actorField");
+                    actorField.value = localStorage.getItem("actor");
+                }
+            </script>
+        </div>
+    </div>
+</div>
+</body>
+</html>

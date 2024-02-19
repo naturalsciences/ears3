@@ -11,9 +11,11 @@ import eu.eurofleets.ears3.domain.Thermosal;
 import eu.eurofleets.ears3.domain.Tool;
 import eu.eurofleets.ears3.domain.Weather;
 import eu.eurofleets.ears3.dto.*;
+import eu.eurofleets.ears3.excel.converters.DateHelper;
 import eu.eurofleets.ears3.utilities.DatagramUtilities;
 
 import java.net.MalformedURLException;
+import java.time.ZonedDateTime;
 import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -219,6 +221,17 @@ public class EventExcelService {
 
         EventDTO eventDTO = new EventDTO();
         eventDTO.setIdentifier(null);
+
+        String date = spreadsheetEvent.getDate();
+        String hour = spreadsheetEvent.getHour();
+        try {
+            ZonedDateTime zdt = DateHelper.dateTimeStringToZonedDateTime(date, hour);
+            eventDTO.setTimeStamp(zdt.toOffsetDateTime());
+        } catch (Exception e) {
+            int a=5;//break point opportunity
+            throw new ImportException(date + " " + hour, rowNb, String.format("Problem with %s%n", spreadsheetEvent.toString()), null);
+        }
+
         /**TODO ADD TO EARS*///eventDTO.setRemarks(spreadsheetEvent.getRemarks());
         /**TODO Verify ... currently Time, Status, Region, Weather, Navigation in the properties collection*/
         /**TODO Date, Hour and Actor still not in the EventDTO
@@ -266,30 +279,42 @@ public class EventExcelService {
 
         Map<String, PropertyDTO> props = new HashMap<>();
 
+        if ((spreadsheetEvent.getDistance()) != null && !(spreadsheetEvent.getDistance()).isEmpty()) {
         PropertyDTO dist = new PropertyDTO(
                 new LinkedDataTermDTO("http://ontologies.ef-ears.eu/ears2/1#pry_100000", null, "Distance travelled"),
                 spreadsheetEvent.getDistance(), "nm");
         props.put(SpreadsheetEvent.FIELDS.Dist.name(), dist);
+        }
+        if ((spreadsheetEvent.getDistance()) != null && !(spreadsheetEvent.getTime()).isEmpty()) {
         PropertyDTO time = new PropertyDTO(
                 new LinkedDataTermDTO("http://ontologies.ef-ears.eu/ears2/1#pry_100001", null, "Time"),
                 spreadsheetEvent.getTime(), "h");
         props.put(SpreadsheetEvent.FIELDS.Time.name(), time);
+        }
+        if ((spreadsheetEvent.getStatus()) != null && !(spreadsheetEvent.getStatus()).isEmpty()) {
         PropertyDTO status = new PropertyDTO(
                 new LinkedDataTermDTO("http://ontologies.ef-ears.eu/ears2/1#pry_100002", null, "Status"),
                 spreadsheetEvent.getStatus(), null);
         props.put(SpreadsheetEvent.FIELDS.Status.name(), status);
+        }
+        if ((spreadsheetEvent.getRegion()) != null && !(spreadsheetEvent.getRegion()).isEmpty()) {
         PropertyDTO region = new PropertyDTO(
                 new LinkedDataTermDTO("http://ontologies.ef-ears.eu/ears2/1#pry_100003", null, "Region"),
                 spreadsheetEvent.getRegion(), null);
         props.put(SpreadsheetEvent.FIELDS.Region.name(), region);
+        }
+        if ((spreadsheetEvent.getWeather()) != null && !(spreadsheetEvent.getWeather()).isEmpty()) {
         PropertyDTO weather = new PropertyDTO(
                 new LinkedDataTermDTO("http://ontologies.ef-ears.eu/ears2/1#pry_100004", null, "Weather"),
                 spreadsheetEvent.getWeather(), null);
         props.put(SpreadsheetEvent.FIELDS.Weather.name(), weather);
+        }
+        if ((spreadsheetEvent.getNavigation()) != null && !(spreadsheetEvent.getNavigation()).isEmpty()) {
         PropertyDTO navigation = new PropertyDTO(
                 new LinkedDataTermDTO("http://ontologies.ef-ears.eu/ears2/1#pry_100005", null, "Navigation"),
                 spreadsheetEvent.getNavigation(), null);
         props.put(SpreadsheetEvent.FIELDS.Navigation.name(), navigation);
+        }
 
         eventDTO.setProperties(props.values());
 

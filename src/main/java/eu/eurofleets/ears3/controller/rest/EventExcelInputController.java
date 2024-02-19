@@ -1,5 +1,7 @@
 package eu.eurofleets.ears3.controller.rest;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import eu.eurofleets.ears3.domain.*;
 import eu.eurofleets.ears3.dto.ErrorDTO;
 import eu.eurofleets.ears3.dto.EventDTO;
@@ -51,7 +53,10 @@ public class EventExcelInputController {
     @Autowired
     private Environment env;
 
-    @PostMapping(value = { "event" }, produces = { "application/xml; charset=utf-8", "application/json" }, consumes = {
+    @Autowired
+    private ObjectMapper objectMapper;
+
+    @PostMapping(value = { "excelImport" }, produces = { "application/xml; charset=utf-8", "application/json" }, consumes = {
             MediaType.MULTIPART_FORM_DATA_VALUE })
     @ResponseStatus(HttpStatus.CREATED)
     //    public ResponseEntity<Message<List<ErrorRow>>> createEvent(@RequestParam("file") MultipartFile mpFile, @RequestHeader("person") PersonDTO actor) {
@@ -59,21 +64,17 @@ public class EventExcelInputController {
             @RequestHeader("person") String actorName) {
         List<ErrorDTO> errorList = new ArrayList<>();
 
-        /**/ String[] nameParts = actorName.split("#");
-        /**/ PersonDTO actor = new PersonDTO();
-        /**/ actor.setFirstName(nameParts[0]);
-        /**/ actor.setLastName(nameParts[1]);
-        /** //TODO: uncomment as this should be done, just commented out for testing purposes;
+        PersonDTO actor;
+        try {
+            actor = objectMapper.readValue(actorName, PersonDTO.class);
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException(e);
+        }
         final List<Person> byName = personService.findByName(actor.getFirstName(), actor.getLastName());
         if( byName.size() != 1 ){
-            Message<List<ErrorRow>> msg = new Message<>(HttpStatus.EXPECTATION_FAILED.value(),"Error, Invalid or Unknown Person ! ", errorList);
+            Message<List<ErrorDTO>> msg = new Message<>(HttpStatus.EXPECTATION_FAILED.value(),"Error, Invalid or Unknown Person ! ", errorList);
             return new ResponseEntity<>(msg, HttpStatus.EXPECTATION_FAILED );
-        } else {
-            actor.setEmail(byName.get(0).getEmail());
-        }*/
-        /**/ /**TODO: EDIT this line*/
-        actor.setEmail("blah@fake.com");
-        /**/ actor.setOrganisation("SDN:EDMO::428");
+        }
 
         try (Document document = Documents.OOXML().create()) {
             byte[] byteArr = mpFile.getBytes();

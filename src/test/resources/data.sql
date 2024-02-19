@@ -19347,3 +19347,6 @@ INSERT INTO public.sea_area VALUES (881, -63.05438365, 46.52335752, 41.3663209, 
 --
 
 INSERT INTO public.tool VALUES (1882, NULL, 19097);
+
+
+INSERT INTO public.person VALUES (-1L, 'joan.backers@naturalsciences.be', NULL, 'Joan', 'Backers', NULL, NULL);
