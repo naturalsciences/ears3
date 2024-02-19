@@ -83,10 +83,13 @@ public class EventExcelInputController {
             //validateAllTabs();
             inputStream = new ByteArrayInputStream(byteArr);
             Workbook poiWb = WorkbookFactory.create(inputStream);
-            boolean areTabsOk = eventExcelService.validateAllTabs(poiWb);
-            //validateHeaders();
-           
-            ////////boolean areHeadersOk = eventExcelService.validateHeaders(document, sheetName);
+            boolean areTabsOk = eventExcelService.validateAllTabs(poiWb, errorList);
+            boolean areHeadersOk = eventExcelService.validateHeaders(poiWb, SHEETNAME, errorList);
+            if (!areHeadersOk || !areTabsOk ) {
+                Message<List<ErrorDTO>> msg = new Message<>(HttpStatus.CONFLICT.value(), "Error Creating Excel Event",
+                        errorList);
+                return new ResponseEntity<>(msg, HttpStatus.CONFLICT);
+            }
             List<SpreadsheetEvent> data = document.getSheet(SHEETNAME, SpreadsheetEvent.class);
             List<EventDTO> events = new ArrayList<>();
             boolean processProblems = eventExcelService.processSpreadsheetEvents(errorList, data, events, actor);

@@ -322,13 +322,14 @@ public class EventExcelService {
     }
 
     //public boolean validateAllTabs(Document document) {
-    public boolean validateAllTabs(Workbook document) {
+    public boolean validateAllTabs(Workbook document, List<ErrorDTO> errorList) {
         boolean areTabsOk = true;
         for (String sheetName : getAllowedTabs()) {
             Sheet sheet = document.getSheet(sheetName);
             //List<SpreadsheetEvent> sheet = document.getSheet(sheetName, SpreadsheetEvent.class);
             if (sheet == null) {
                 areTabsOk = false;
+                errorList.add(new ErrorDTO(0, String.format("Problem in sheet %s: %s%n", sheetName, "Missing sheet: " + sheetName), null));
             }
         }
         return areTabsOk;
@@ -340,21 +341,17 @@ public class EventExcelService {
 
     /**@TODO    */
     //    public boolean validateHeaders(Document document, String sheetName) {
-    public boolean validateHeaders(Workbook document, String sheetName) {
+    public boolean validateHeaders(Workbook document, String sheetName, List<ErrorDTO> errorList) {
         boolean areHeadersOk = true;
-        //@Todo validation
-        //*
         List<String> requiredHeaders = getRequiredHeaders();
-        //List<SpreadsheetEvent> sheets = document.getSheet(sheetName, SpreadsheetEvent.class);
         Sheet sheet = document.getSheet(sheetName);
         Set<String> sheetHeaders = findColumnHeadersForSheet(sheet);
         for (String requiredHeader : requiredHeaders) {
-            /*if (!actualHeaders.containsKey(correctHeader)) {
-                throw new WrongTemplateException("Sheet '%s' should contain mandatory header '%s'.",
-                        converter.getSheetName(), correctHeader);
-            }*/
+            if ( !sheetHeaders.contains(requiredHeader) ){
+                areHeadersOk = false;
+                errorList.add(new ErrorDTO(0, String.format("Problem in sheet %s: %s%n", sheetName, "Missing header: " + requiredHeader), null));
+            }
         }
-
         return areHeadersOk;
     }
 

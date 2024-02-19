@@ -242,6 +242,26 @@ public class EventExcelInputControllerTest {
                         .andDo(print())
                         .andExpect(status().is(201));
         }
+        @Test
+        public void validateOkFileMissingHourColumn() throws Exception {
+                ProgramDTO pr = getTestProgram("11BU_operations");
+                ProgramControllerTest.postProgram(this.mockMvc, pr, objectMapper);
+
+                MockMultipartFile mockMultipartFile = new MockMultipartFile(
+                        "file",
+                        "test-missingHourCol.xlsx",
+                        "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", // MediaType.APPLICATION_OCTET_STREAM_VALUE,
+                        new ClassPathResource("test-missingHourCol.xlsx").getInputStream());
+                assertTrue(this.mockMvc != null);
+
+                this.mockMvc.perform(MockMvcRequestBuilders.multipart("/api/excelImport")
+
+                                .file(mockMultipartFile).accept(MediaType.APPLICATION_JSON)
+                                //.header("person", joan.getFirstName() + '#' + joan.getLastName()))
+                                .header("person", objectMapper.writeValueAsString(this.joan)))
+                        .andDo(print())
+                        .andExpect(status().is(409)); //Since we are missing a required header we expect a failure to create the Excel Event
+        }
 
         //@Test
         void processSpreadsheetEvents() {
