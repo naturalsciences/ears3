@@ -133,7 +133,7 @@ public class DateHelper implements Serializable {
     }
 
     /**
-    * Combine two strings (one date, one time) to a ZonedDateTime (used as a timestamp). ISO formatted dates can be used.
+    * Combine two strings (one date, one time) to a ZonedDateTime (used as a timestamp), zoned for Belgium. ISO formatted dates can be used.
     * @param date
     * @param time
     * @return
