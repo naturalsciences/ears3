@@ -263,6 +263,29 @@ public class EventExcelInputControllerTest {
                         .andExpect(status().is(409)); //Since we are missing a required header we expect a failure to create the Excel Event
         }
 
+        @Test
+        public void validateVarious() throws Exception {
+                ProgramDTO pr = getTestProgram("11BU_operations");
+                ProgramControllerTest.postProgram(this.mockMvc, pr, objectMapper);
+
+                MockMultipartFile mockMultipartFile = new MockMultipartFile(
+                        "file",
+                        "test-various.xlsx",
+                        "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", // MediaType.APPLICATION_OCTET_STREAM_VALUE,
+                        new ClassPathResource("test-various.xlsx").getInputStream());
+                assertTrue(this.mockMvc != null);
+
+                this.mockMvc.perform(MockMvcRequestBuilders.multipart("/api/excelImport")
+
+                                .file(mockMultipartFile).accept(MediaType.APPLICATION_JSON)
+                                //.header("person", joan.getFirstName() + '#' + joan.getLastName()))
+                                .header("person", objectMapper.writeValueAsString(this.joan)))
+                        .andDo(print())
+                        .andExpect(status().is(409)); //Since we are checking for various problems
+        }
+
+
+
         //@Test
         void processSpreadsheetEvents() {
         }
@@ -306,28 +329,4 @@ public class EventExcelInputControllerTest {
                 return event;
         }
 
-        @Test
-        public void genericTest() {
-
-                /*LinkedDataTerm propertyLdTerm = getTestEvent();
-                propertyLdTerm = linkedDataTermService.findOrCreate(propertyLdTerm); // replace it with a managed one, either
-                
-                propertyLdTerm.*/
-
-                EventDTO event = getTestEvent();
-                System.out.println(event);
-                event.setProgram("2020-MF");
-                Event savedKnownAction = eventService.save(event);
-
-                LinkedDataTermDTO start = new LinkedDataTermDTO(
-                                "http://ontologies.ef-ears.eu/ears2/1#pro_3_johnnyAction_Start", null, "Start");
-                event.setAction(start);
-                event.setIdentifier(UUID.randomUUID().toString());
-                Event savedNewAction = eventService.save(event);
-
-                System.out.println(savedKnownAction);
-                System.out.println(savedNewAction);
-
-                System.out.println("HIER");
-        }
 }
