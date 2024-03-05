@@ -347,14 +347,14 @@ public class EventExcelService {
     }
 
     //public boolean validateAllTabs(Document document) {
-    public boolean validateAllTabs(Workbook document, List<ErrorDTO> errorList) {
+    public boolean validateAllTabs(Workbook document, ErrorDTOList errorList) {
         boolean areTabsOk = true;
         for (String sheetName : getAllowedTabs()) {
             Sheet sheet = document.getSheet(sheetName);
             //List<SpreadsheetEvent> sheet = document.getSheet(sheetName, SpreadsheetEvent.class);
             if (sheet == null) {
                 areTabsOk = false;
-                errorList.add(new ErrorDTO(0, String.format("Problem in sheet %s: %s%n", sheetName, "Missing sheet: " + sheetName), null));
+                errorList.addError(new ErrorDTO(0, String.format("Problem in sheet %s: %s%n", sheetName, "Missing sheet: " + sheetName), null));
             }
         }
         return areTabsOk;
@@ -366,7 +366,7 @@ public class EventExcelService {
 
     /**@TODO    */
     //    public boolean validateHeaders(Document document, String sheetName) {
-    public boolean validateHeaders(Workbook document, String sheetName, List<ErrorDTO> errorList) {
+    public boolean validateHeaders(Workbook document, String sheetName, ErrorDTOList errorList) {
         boolean areHeadersOk = true;
         List<String> requiredHeaders = getRequiredHeaders();
         Sheet sheet = document.getSheet(sheetName);
@@ -374,7 +374,7 @@ public class EventExcelService {
         for (String requiredHeader : requiredHeaders) {
             if ( !sheetHeaders.contains(requiredHeader) ){
                 areHeadersOk = false;
-                errorList.add(new ErrorDTO(0, String.format("Problem in sheet %s: %s%n", sheetName, "Missing header: " + requiredHeader), null));
+                errorList.addError(new ErrorDTO(0, String.format("Problem in sheet %s: %s%n", sheetName, "Missing header: " + requiredHeader), null));
             }
         }
         return areHeadersOk;
@@ -399,7 +399,7 @@ public class EventExcelService {
         return requiredHeaders;
     }
 
-    public boolean processSpreadsheetEvents(List<ErrorDTO> errorList, List<SpreadsheetEvent> data,
+    public boolean processSpreadsheetEvents(ErrorDTOList errorList, List<SpreadsheetEvent> data,
             List<EventDTO> events, PersonDTO actor) {
         boolean problems = false;
         int rowNb = 1;
@@ -411,7 +411,7 @@ public class EventExcelService {
             } catch (ImportException e) {
                 problems = true;
                 errorList
-                        .add(new ErrorDTO(rowNb,
+                        .addError(new ErrorDTO(rowNb,
                                 String.format("Problem on row %s in sheet %s: %s%n", e.lineNb, e.sheetName, e.message),
                                 e));
             }
@@ -420,7 +420,7 @@ public class EventExcelService {
         return problems;
     }
 
-    public boolean saveSpreadsheetEvents(List<ErrorDTO> errorList, List<EventDTO> events) {
+    public boolean saveSpreadsheetEvents(ErrorDTOList errorList, List<EventDTO> events) {
         boolean problems = false;
         int i = 1;
         for (EventDTO dto : events) {
@@ -428,7 +428,7 @@ public class EventExcelService {
                 eventService.save(dto);
             } catch (Exception e) {
                 problems = true;
-                errorList.add(new ErrorDTO(i, "Error saving SpreadsheetEventDTO's", e));
+                errorList.addError(new ErrorDTO(i, "Error saving SpreadsheetEventDTO's", e));
             }
             i++;
         }
