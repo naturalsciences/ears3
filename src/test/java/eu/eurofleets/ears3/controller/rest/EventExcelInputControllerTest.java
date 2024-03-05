@@ -81,6 +81,26 @@ public class EventExcelInputControllerTest {
         PersonDTO joan = new PersonDTO("Joan", "Backers", null, null, null, "joan.backers@naturalsciences.be");
         PersonDTO notJoan = new PersonDTO("NotJoan", "NotJoan", null, null, null, "Notjoan.backers@naturalsciences.be");
 
+/*I might have to change the header for person to param, as it might be needed to get this working IRL*/
+        @Test
+        public void validateOkSubmitterTWEE() throws Exception {
+                MockMultipartFile mockMultipartFile = new MockMultipartFile(
+                        "file",
+                        "test-5problems.xlsx",
+                        "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", // MediaType.APPLICATION_OCTET_STREAM_VALUE,
+                        new ClassPathResource("test-5problems.xlsx").getInputStream());
+                assertTrue(this.mockMvc != null);
+
+
+                this.mockMvc.perform(MockMvcRequestBuilders.multipart("/api/excelImport")
+
+                                .file(mockMultipartFile).accept(MediaType.APPLICATION_JSON)
+                                //.header("person", joan.getFirstName() + '#' + joan.getLastName()))
+                                .param("person", objectMapper.writeValueAsString(this.joan)))
+                        .andDo(print())
+                        .andExpect(status().is(409));  //we used the 5problems excel as inputfile so it is expected to get a 409
+        }
+
         @Test
         public void validateOkSubmitter() throws Exception {
                 MockMultipartFile mockMultipartFile = new MockMultipartFile(
@@ -95,7 +115,7 @@ public class EventExcelInputControllerTest {
 
                                 .file(mockMultipartFile).accept(MediaType.APPLICATION_JSON)
                                 //.header("person", joan.getFirstName() + '#' + joan.getLastName()))
-                                .header("person", objectMapper.writeValueAsString(this.joan)))
+                                .param("person", objectMapper.writeValueAsString(this.joan)))
                         .andDo(print())
                         .andExpect(status().is(409));  //we used the 5problems excel as inputfile so it is expected to get a 409
         }
@@ -114,7 +134,7 @@ public class EventExcelInputControllerTest {
 
                                 .file(mockMultipartFile).accept(MediaType.APPLICATION_JSON)
                                 //.header("person", joan.getFirstName() + '#' + joan.getLastName()))
-                                .header("person", objectMapper.writeValueAsString(this.notJoan)))
+                                .param("person", objectMapper.writeValueAsString(this.notJoan)))
                         .andDo(print())
                         .andExpect(status().is(417)); //notJoan does not exist in the testdatabase (only joan was inserted) so we expect 417
         }
@@ -131,7 +151,7 @@ public class EventExcelInputControllerTest {
 
                                 .file(mockMultipartFile).accept(MediaType.APPLICATION_JSON)
                                 //.header("person", joan.getFirstName() + '#' + joan.getLastName()))
-                                .header("person", objectMapper.writeValueAsString(this.joan)))
+                                .param("person", objectMapper.writeValueAsString(this.joan)))
                                 .andDo(print())
                                 .andExpect(status().is(409))
                                 .andExpect(content().string(containsString("\"row\":3")))
@@ -154,7 +174,7 @@ public class EventExcelInputControllerTest {
 
                                 .file(mockMultipartFile).accept(MediaType.APPLICATION_JSON)
                                 //.header("person", joan.getFirstName() + '#' + joan.getLastName()))
-                                .header("person", objectMapper.writeValueAsString(this.joan)))
+                                .param("person", objectMapper.writeValueAsString(this.joan)))
                         .andDo(print())
                         .andExpect(status().is(409))
                         .andExpect(content().string(containsString("\"row\":2")))
@@ -195,7 +215,8 @@ public class EventExcelInputControllerTest {
 
                                 .file(mockMultipartFile).accept(MediaType.APPLICATION_JSON)
                                 //.header("person", joan.getFirstName() + '#' + joan.getLastName()))
-                                .header("person", objectMapper.writeValueAsString(this.joan)))
+                                //.header("person", objectMapper.writeValueAsString(this.joan)))
+                                .param("person", objectMapper.writeValueAsString(this.joan)))
                                 .andDo(print())
                                 .andExpect(status().is(201));
 
@@ -238,7 +259,7 @@ public class EventExcelInputControllerTest {
 
                                 .file(mockMultipartFile).accept(MediaType.APPLICATION_JSON)
                                 //.header("person", joan.getFirstName() + '#' + joan.getLastName()))
-                                .header("person", objectMapper.writeValueAsString(this.joan)))
+                                .param("person", objectMapper.writeValueAsString(this.joan)))
                         .andDo(print())
                         .andExpect(status().is(201));
         }
@@ -258,7 +279,7 @@ public class EventExcelInputControllerTest {
 
                                 .file(mockMultipartFile).accept(MediaType.APPLICATION_JSON)
                                 //.header("person", joan.getFirstName() + '#' + joan.getLastName()))
-                                .header("person", objectMapper.writeValueAsString(this.joan)))
+                                .param("person", objectMapper.writeValueAsString(this.joan)))
                         .andDo(print())
                         .andExpect(status().is(409)); //Since we are missing a required header we expect a failure to create the Excel Event
         }
@@ -279,7 +300,7 @@ public class EventExcelInputControllerTest {
 
                                 .file(mockMultipartFile).accept(MediaType.APPLICATION_JSON)
                                 //.header("person", joan.getFirstName() + '#' + joan.getLastName()))
-                                .header("person", objectMapper.writeValueAsString(this.joan)))
+                                .param("person", objectMapper.writeValueAsString(this.joan)))
                         .andDo(print())
                         .andExpect(status().is(409)); //Since we are checking for various problems
         }

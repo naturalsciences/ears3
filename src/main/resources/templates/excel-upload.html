@@ -18,17 +18,19 @@
     </div>
     <div class="row">
         <div class="col">
-            <form method="POST" enctype="multipart/form-data" th:action="@{/api/excelImport}">
+            <!--            <form method="post" enctype="multipart/form-data" th:action="@{/api/excelImport}">   -->
+            <form method="post" enctype="multipart/form-data" th:action="@{/api/excelImportTest}">
                 <div class="input-group mb-3">
-                    <input id="actorField" type="hidden" name="actor">
+                    <input id="actorField" type="hidden" name="person">
                     <input id="fileId" type="file" name="file" class="form-control" style="height: auto !important;" aria-describedby="importButton" aria-label="Upload">
-                    <button class="btn btn-outline-secondary" type="button" id="importButton">Import</button>
+                    <button class="btn btn-outline-secondary" type="submit" id="importButton">Import</button>
                 </div>
             </form>
             <script>
                 window.onload = function(){
                     let actorField = document.getElementById("actorField");
                     actorField.value = localStorage.getItem("actor");
+                    //actorField.value = '{"firstName":"Joan","lastName":"Backers","email":"joan.backers@naturalsciences.be","organisation":"SDN:EDMO::3330","phoneNumber":null,"faxNumber":null}';
                 }
             </script>
         </div>

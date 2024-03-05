@@ -114,8 +114,8 @@ public class EventExcelService {
 
         /*LinkedDataTermDTO tool = new LinkedDataTermDTO("http://ontologies.ef-ears.eu/ears2/1#pro_3_johnnyTool", null, "Tool");
         DEFS.put("Tool", tool);*/
-        LinkedDataTermDTO human = new LinkedDataTermDTO(null,
-                "http://vocab.nerc.ac.uk/collection/L06/current/71/", "human");
+        LinkedDataTermDTO human = new LinkedDataTermDTO("http://vocab.nerc.ac.uk/collection/L06/current/71/",
+                null, "human");
         DEFS.put("Human", human);
 
         LinkedDataTermDTO all = new LinkedDataTermDTO("http://ontologies.ef-ears.eu/ears2/1#dev_100000", null,
