@@ -16,7 +16,7 @@
         <div class="form-group">
             <p>
                 <input name="station" id="stationField" placeholder=" " type="text" title="Current station"
-                    class="form-control" th:value="${event.station}" /><label for="station"
+                    class="form-control" th:value="${event.station}" /><label for="stationField"
                     class="txtBox">Station</label>
             </p>
         </div>
@@ -24,7 +24,7 @@
             <p>
                 <input name="label" id="labelField" placeholder=" " type="text"
                     title="Current event label (event identifier,...)" class="form-control" th:value="${event.label}"
-                    th:attr="data-description=${event.description}" /><label class="txtBox" for="label">Event
+                    th:attr="data-description=${event.description}" /><label class="txtBox" for="labelField">Event
                     label</label>
             </p>
         </div>
@@ -158,7 +158,7 @@
                             <p><input type="text" id="fixed_property_0" name="station" class="form-control"
                                     th:value="${event.station}"
                                     data-url="http://ontologies.ef-ears.eu/ears2/1#pry_station"><label class="txtBox"
-                                    for="property_0">station</label></p>
+                                    for="fixed_property_0">station</label></p>
                         </div>
                     </li>
                     <li>
@@ -166,7 +166,7 @@
                             <p><input type="text" id="fixed_property_1" name="label" class="form-control"
                                     th:value="${event.label}"
                                     data-url="http://ontologies.ef-ears.eu/ears2/1#pry_4"><label class="txtBox"
-                                    for="property_1">label</label></p>
+                                    for="fixed_property_1">label</label></p>
                         </div>
                     </li>
                     <li>
@@ -174,7 +174,7 @@
                             <p><input type="textarea" id="fixed_property_2" name="description" class="form-control"
                                     th:value="${event.description}"
                                     data-url="http://ontologies.ef-ears.eu/ears2/1#pry_description"><label
-                                    class="txtBox" for="property_2">description</label></p>
+                                    class="txtBox" for="fixed_property_2">description</label></p>
                         </div>
                     </li>
                 </ul>
