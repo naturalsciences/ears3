@@ -58,6 +58,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.http.MediaType;
+import org.springframework.test.annotation.DirtiesContext;
+import org.springframework.test.annotation.DirtiesContext.ClassMode;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.context.web.WebAppConfiguration;
@@ -80,6 +82,7 @@ import org.springframework.web.context.WebApplicationContext;
 @WebAppConfiguration
 @ComponentScan(basePackages = { "eu.eurofleets.ears3.domain", " eu.eurofleets.ears3.service" })
 @TestPropertySource(locations = "classpath:test.properties")
+@DirtiesContext(classMode = ClassMode.BEFORE_EACH_TEST_METHOD) //reset the database to base state before each test method
 public class EventControllerTest {
 
         @Autowired
@@ -353,7 +356,7 @@ public class EventControllerTest {
          * Count all Event events present in the GET response of a given url
          * 
          */
-        public static void countEventsTest(String url, int expected, MockMvc mockMvc, ObjectMapper objectMapper)
+        public static void assertEventCount(String url, int expected, MockMvc mockMvc, ObjectMapper objectMapper)
                         throws Exception {
                 MvcResult mvcResult = mockMvc
                                 .perform(MockMvcRequestBuilders.get(url)
@@ -373,7 +376,7 @@ public class EventControllerTest {
          * Count all EventDTO events present in the GET response of a given url
          * 
          */
-        public static void countEventDTOTest(String url, int expected, MockMvc mockMvc, ObjectMapper objectMapper)
+        public static void assertEventDTOCount(String url, int expected, MockMvc mockMvc, ObjectMapper objectMapper)
                         throws Exception {
                 MvcResult mvcResult = mockMvc
                                 .perform(MockMvcRequestBuilders.get(url)
@@ -408,6 +411,7 @@ public class EventControllerTest {
         public static void deleteAllEvents(MockMvc mockMvc) throws Exception {
                 MvcResult mvcResult = mockMvc
                                 .perform(MockMvcRequestBuilders.get("/api/events").accept(MediaType.APPLICATION_JSON))
+                                .andExpect(status().isOk())
                                 .andReturn();
 
                 for (String identifier : getIdentifiersFromJson(mvcResult)) { // delete all previous events
@@ -446,7 +450,7 @@ public class EventControllerTest {
                 MvcResult mvcResult = this.mockMvc
                                 .perform(MockMvcRequestBuilders.post("/api/event").accept(MediaType.APPLICATION_XML)
                                                 .contentType(MediaType.APPLICATION_JSON).content(json))
-                                // .andDo(print())
+                                 .andDo(print())
                                 .andExpect(status().isCreated())
                                 .andExpect(content().string(containsString(
                                                 "<eventDefinitionId>e3c8df0d-02e9-446d-a59b-224a14b89f9a</eventDefinitionId>")))
@@ -609,13 +613,13 @@ public class EventControllerTest {
                 ProgramControllerTest.postProgram(this.mockMvc, pr, objectMapper);
 
                 // count all events and verify there is none.
-                countEventsTest("/api/events", 0, this.mockMvc, this.objectMapper);
+                assertEventCount("/api/events", 0, this.mockMvc, this.objectMapper);
 
                 // post the event (Joan)
                 postEvent(mockMvc, e, objectMapper);
 
                 // count all events and verify there is 1.
-                countEventsTest("/api/events", 1, this.mockMvc, this.objectMapper);
+                assertEventCount("/api/events", 1, this.mockMvc, this.objectMapper);
 
                 // modify the event's actor
 
@@ -634,21 +638,21 @@ public class EventControllerTest {
                 postEvent(mockMvc, e, objectMapper);
 
                 // count all events and verify there are 2.
-                countEventsTest("/api/events", 2, this.mockMvc, this.objectMapper);
+                assertEventCount("/api/events", 2, this.mockMvc, this.objectMapper);
 
                 // post the modified event (Adalbert) again
                 postEvent(mockMvc, e, objectMapper);
 
                 // count all events and verify there are 3.
-                countEventsTest("/api/events", 3, this.mockMvc, this.objectMapper);
+                assertEventCount("/api/events", 3, this.mockMvc, this.objectMapper);
 
                 // post the modified event (Adalbert) again
                 postEvent(mockMvc, e, objectMapper);
 
                 // count all events and verify there are 4.
-                countEventsTest("/api/events", 4, this.mockMvc, this.objectMapper);
+                assertEventCount("/api/events", 4, this.mockMvc, this.objectMapper);
 
-                countEventsTest(String.format("/api/events?actorEmail=%s&platformIdentifier=%s&programIdentifier=%s",
+                assertEventCount(String.format("/api/events?actorEmail=%s&platformIdentifier=%s&programIdentifier=%s",
                                 adalbertEmail, platform, programIdentifier), 3, this.mockMvc, this.objectMapper);
 
                 // delete all previous events and programs
@@ -683,9 +687,9 @@ public class EventControllerTest {
 
                 // find all events of the first program
 
-                countEventsTest("/api/events?programIdentifier=" + e.getProgram(), 1, this.mockMvc, this.objectMapper);
+                assertEventCount("/api/events?programIdentifier=" + e.getProgram(), 1, this.mockMvc, this.objectMapper);
 
-                countEventsTest("/api/events?programIdentifier=" + e2.getProgram(), 1, this.mockMvc, this.objectMapper);
+                assertEventCount("/api/events?programIdentifier=" + e2.getProgram(), 1, this.mockMvc, this.objectMapper);
 
                 // delete all previous events and programs
                 deleteAllEvents(this.mockMvc);

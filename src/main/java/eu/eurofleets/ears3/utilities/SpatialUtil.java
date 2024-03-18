@@ -13,10 +13,9 @@ import eu.eurofleets.ears3.domain.Coordinate;
  */
 public class SpatialUtil {
     
-    
     public static Double bearingByCoord(Coordinate coord1, Coordinate coord2) {
         if (coord1 == null || coord2 == null) {
-            return null;
+            return 0D;
         }
         double λ1 = coord1.x;
         double λ2 = coord2.x;

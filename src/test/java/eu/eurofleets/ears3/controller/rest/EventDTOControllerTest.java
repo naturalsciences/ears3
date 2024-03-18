@@ -23,6 +23,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.http.MediaType;
+import org.springframework.test.annotation.DirtiesContext;
+import org.springframework.test.annotation.DirtiesContext.ClassMode;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.context.web.WebAppConfiguration;
@@ -42,6 +44,7 @@ import org.springframework.web.context.WebApplicationContext;
 @WebAppConfiguration
 @ComponentScan(basePackages = { "eu.eurofleets.ears3.domain", " eu.eurofleets.ears3.service" })
 @TestPropertySource(locations = "classpath:test.properties")
+@DirtiesContext(classMode = ClassMode.BEFORE_EACH_TEST_METHOD) //reset the database to base state before each test method
 public class EventDTOControllerTest {
 
         @Autowired
@@ -104,14 +107,14 @@ public class EventDTOControllerTest {
                                 this.objectMapper);
 
                 // we have 3 events after the break
-                EventControllerTest.countEventDTOTest(
+                EventControllerTest.assertEventDTOCount(
                                 "/api/dto/events.json?startDate=" +
                                                 breakTime.format(DateTimeFormatter.ISO_OFFSET_DATE_TIME),
                                 3, this.mockMvc,
                                 this.objectMapper);
 
                 // we have 1 event before the break
-                EventControllerTest.countEventDTOTest(
+                EventControllerTest.assertEventDTOCount(
                                 "/api/dto/events.json?endDate="
                                                 + breakTime.format(DateTimeFormatter.ISO_OFFSET_DATE_TIME),
                                 1, this.mockMvc,

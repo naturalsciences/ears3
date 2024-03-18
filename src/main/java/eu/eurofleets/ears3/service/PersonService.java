@@ -7,7 +7,12 @@ package eu.eurofleets.ears3.service;
 
 import eu.eurofleets.ears3.domain.Organisation;
 import eu.eurofleets.ears3.domain.Person;
+import eu.eurofleets.ears3.dto.PersonDTO;
+
+import java.util.ArrayList;
 import java.util.List;
+
+import org.apache.commons.collections4.IterableUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
@@ -20,10 +25,12 @@ import org.springframework.util.Assert;
 public class PersonService {
 
     private final PersonRepository personRepository;
+    private final OrganisationRepository organisationRepository;
 
     @Autowired
-    public PersonService(PersonRepository personRepository) {
+    public PersonService(PersonRepository personRepository, OrganisationRepository organisationRepository) {
         this.personRepository = personRepository;
+        this.organisationRepository = organisationRepository;
     }
 
     public List<Person> findByName(String firstName, String lastName) {
@@ -31,9 +38,9 @@ public class PersonService {
         Assert.notNull(lastName, "lastName must not be null");
         return this.personRepository.findByName(firstName, lastName);
     }
-    
-        public Person findById(Long id) {
-       
+
+    public Person findById(Long id) {
+
         return this.personRepository.findById(id).orElse(null);
     }
 
@@ -65,19 +72,21 @@ public class PersonService {
     }
 
     public Person findByNameAndOrganisation(Person person) {
-        return findByNameAndOrganisation(person.getFirstName(), person.getLastName(), (Organisation) person.getOrganisation());
+        return findByNameAndOrganisation(person.getFirstName(), person.getLastName(),
+                (Organisation) person.getOrganisation());
     }
 
     public Person findOrCreate(Person person) {
         if (person == null) {
             return null;
         }
-        //try {
-        Person foundPerson = personRepository.findByNameAndOrganisation(person.getFirstName(), person.getLastName(), (Organisation) person.getOrganisation());
+        Person foundPerson = personRepository.findByNameAndOrganisation(person.getFirstName(), person.getLastName(),
+                (Organisation) person.getOrganisation());
         if (foundPerson != null) {
-            person.setId(foundPerson.getId());
+            person.setId(foundPerson.getId()); //set the new variant to the id of the found one. If we later save() the new one we effectively update the the found one with info of the new one
         } else if (person.getEmail() != null) {
-            foundPerson = personRepository.findByEmail(person.getEmail());
+            foundPerson = personRepository.findByNameAndEmail(person.getFirstName(), person.getLastName(),
+                    person.getEmail());
             if (foundPerson != null) {
                 person.setId(foundPerson.getId());
             }
@@ -86,10 +95,21 @@ public class PersonService {
     }
 
     public void save(Person person) {
-         personRepository.save(person);
+        personRepository.save(person);
+    }
+
+    public void save(PersonDTO personDTO) {
+        Person person = new Person(personDTO);
+        Organisation foundOrganisation = organisationRepository.findByIdentifier(personDTO.getOrganisation());
+        person.setOrganisation(foundOrganisation);
+        findOrCreate(person);
     }
 
     public void delete(Person person) {
-         personRepository.delete(person);
+        personRepository.delete(person);
+    }
+
+    public List<Person> findAll() {
+        return IterableUtils.toList(this.personRepository.findAll());
     }
 }
