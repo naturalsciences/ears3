@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import eu.eurofleets.ears3.Exceptions.ImportException;
 import eu.eurofleets.ears3.controller.rest.EventExcelInputController;
 import eu.eurofleets.ears3.domain.Navigation;
+import eu.eurofleets.ears3.domain.Program;
 import eu.eurofleets.ears3.domain.Thermosal;
 import eu.eurofleets.ears3.domain.Weather;
 import eu.eurofleets.ears3.dto.*;
@@ -22,6 +23,7 @@ import javax.validation.ConstraintViolation;
 import javax.validation.Validation;
 import javax.validation.Validator;
 import javax.validation.ValidatorFactory;
+import javax.validation.constraints.NotBlank;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.poi.ss.usermodel.Cell;
@@ -32,6 +34,7 @@ import org.apache.poi.ss.usermodel.Workbook;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.env.Environment;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 
 import eu.eurofleets.ears3.excel.SpreadsheetEvent;
@@ -214,7 +217,8 @@ public class EventExcelService {
         synonym = loweredCapitalize(synonym);
         LinkedDataTermDTO targetLDT = DEFS.get(synonym);
         if (targetLDT == null) {
-            throw new ImportException(EventExcelInputController.SHEETNAME, rowNb, synonym, null);
+            throw new ImportException(EventExcelInputController.SHEETNAME, rowNb,
+                    String.format("Unknown Linked Data Term [ %s ]", synonym), null);
         } else {
             return targetLDT;
         }
@@ -224,7 +228,8 @@ public class EventExcelService {
         synonym = loweredCapitalize(synonym);
         LinkedDataTermDTO targetLDT = CATMAP.get(synonym);
         if (targetLDT == null) {
-            throw new ImportException(EventExcelInputController.SHEETNAME, rowNb, synonym, null);
+            throw new ImportException(EventExcelInputController.SHEETNAME, rowNb,
+                    String.format("Unknown ToolCategory [ %s ]", synonym), null);
         } else {
             return targetLDT;
         }
@@ -265,7 +270,14 @@ public class EventExcelService {
                 spreadsheetEvent.getProcess(),
                 spreadsheetEvent.getAction());
         eventDTO.setEventDefinitionId(uuid);
-        eventDTO.setProgram(DEFAULT_PROGRAM);
+
+        Program program = programService.findOrCreateProgram(spreadsheetEvent.getProgram());
+        if (program != null) {
+            eventDTO.setProgram(program.getIdentifier());
+        } else {
+            throw new ImportException( EventExcelInputController.SHEETNAME, rowNb,
+                    String.format("Error setting the Program [%s]%n.", spreadsheetEvent.getProgram()), null);
+        }
 
         String toolName = spreadsheetEvent.getTool();
 //        eventDTO.setTool(new ToolDTO(DEFS.get(loweredCapitalize(toolName)), null));
@@ -307,6 +319,22 @@ public class EventExcelService {
         return eventDTO;
     }
 
+    /*private Program findOrCreateProgram(String programName) {
+        Program program = programService.findByIdentifier(programName);
+        if( program == null ){
+            if( programName.equalsIgnoreCase(DEFAULT_PROGRAM) ){
+                program = new Program();
+                program.setIdentifier(String.format("%s_operations", platformUrn.replace("SDN:C17::", "")));
+                program.setName("General Belgica Operations");
+                program = programService.save(program);
+            } else {
+                String programWithYear = programName + "_" + ZonedDateTime.now().getYear();
+                program = programService.findByIdentifier(programWithYear);
+            }
+        }
+        return program;
+    }*/
+
     private static void createPropertiesIfAvailable(SpreadsheetEvent spreadsheetEvent, Map<String, PropertyDTO> props) {
         if ((spreadsheetEvent.getDistance()) != null && !(spreadsheetEvent.getDistance()).isEmpty()) {
         PropertyDTO dist = new PropertyDTO(
@@ -347,14 +375,14 @@ public class EventExcelService {
     }
 
     //public boolean validateAllTabs(Document document) {
-    public boolean validateAllTabs(Workbook document, List<ErrorDTO> errorList) {
+    public boolean validateAllTabs(Workbook document, ErrorDTOList errorList) {
         boolean areTabsOk = true;
         for (String sheetName : getAllowedTabs()) {
             Sheet sheet = document.getSheet(sheetName);
             //List<SpreadsheetEvent> sheet = document.getSheet(sheetName, SpreadsheetEvent.class);
             if (sheet == null) {
                 areTabsOk = false;
-                errorList.add(new ErrorDTO(0, String.format("Problem in sheet %s: %s%n", sheetName, "Missing sheet: " + sheetName), null));
+                errorList.addError(new ErrorDTO(0, String.format("Problem in sheet %s: %s%n", sheetName, "Missing sheet: " + sheetName), null));
             }
         }
         return areTabsOk;
@@ -366,7 +394,7 @@ public class EventExcelService {
 
     /**@TODO    */
     //    public boolean validateHeaders(Document document, String sheetName) {
-    public boolean validateHeaders(Workbook document, String sheetName, List<ErrorDTO> errorList) {
+    public boolean validateHeaders(Workbook document, String sheetName, ErrorDTOList errorList) {
         boolean areHeadersOk = true;
         List<String> requiredHeaders = getRequiredHeaders();
         Sheet sheet = document.getSheet(sheetName);
@@ -374,7 +402,7 @@ public class EventExcelService {
         for (String requiredHeader : requiredHeaders) {
             if ( !sheetHeaders.contains(requiredHeader) ){
                 areHeadersOk = false;
-                errorList.add(new ErrorDTO(0, String.format("Problem in sheet %s: %s%n", sheetName, "Missing header: " + requiredHeader), null));
+                errorList.addError(new ErrorDTO(0, String.format("Problem in sheet %s: %s%n", sheetName, "Missing header: " + requiredHeader), null));
             }
         }
         return areHeadersOk;
@@ -399,7 +427,7 @@ public class EventExcelService {
         return requiredHeaders;
     }
 
-    public boolean processSpreadsheetEvents(List<ErrorDTO> errorList, List<SpreadsheetEvent> data,
+    public boolean processSpreadsheetEvents(ErrorDTOList errorList, List<SpreadsheetEvent> data,
             List<EventDTO> events, PersonDTO actor) {
         boolean problems = false;
         int rowNb = 1;
@@ -411,7 +439,7 @@ public class EventExcelService {
             } catch (ImportException e) {
                 problems = true;
                 errorList
-                        .add(new ErrorDTO(rowNb,
+                        .addError(new ErrorDTO(rowNb,
                                 String.format("Problem on row %s in sheet %s: %s%n", e.lineNb, e.sheetName, e.message),
                                 e));
             }
@@ -420,15 +448,18 @@ public class EventExcelService {
         return problems;
     }
 
-    public boolean saveSpreadsheetEvents(List<ErrorDTO> errorList, List<EventDTO> events) {
+    public boolean saveSpreadsheetEvents(ErrorDTOList errorList, List<EventDTO> events) {
         boolean problems = false;
         int i = 1;
         for (EventDTO dto : events) {
             try {
                 eventService.save(dto);
+            } catch (DataIntegrityViolationException dve ) {
+                problems = true;
+                errorList.addError(new ErrorDTO(i, dve.getMessage(), dve));
             } catch (Exception e) {
                 problems = true;
-                errorList.add(new ErrorDTO(i, "Error saving SpreadsheetEventDTO's", e));
+                errorList.addError(new ErrorDTO(i, "General error saving SpreadsheetEventDTO's", e));
             }
             i++;
         }

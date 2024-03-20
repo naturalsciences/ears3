@@ -19,19 +19,63 @@
     <div class="row">
         <div class="col">
             <!--            <form method="post" enctype="multipart/form-data" th:action="@{/api/excelImport}">   -->
-            <form method="post" enctype="multipart/form-data" th:action="@{/api/excelImportTest}">
+            <form id="importCsvForm" method="post" enctype="multipart/form-data" th:action="@{/api/excelImport}">
                 <div class="input-group mb-3">
                     <input id="actorField" type="hidden" name="person">
                     <input id="fileId" type="file" name="file" class="form-control" style="height: auto !important;" aria-describedby="importButton" aria-label="Upload">
                     <button class="btn btn-outline-secondary" type="submit" id="importButton">Import</button>
                 </div>
             </form>
-            <script>
+
+            <div id="errors" class="alert alert-danger d-none"></div>
+            <div id="success" class="alert alert-success d-none"> Successfully uploaded and imported !</div>
+
+            <script th:inline="javascript">
+
                 window.onload = function(){
                     let actorField = document.getElementById("actorField");
                     actorField.value = localStorage.getItem("actor");
                     //actorField.value = '{"firstName":"Joan","lastName":"Backers","email":"joan.backers@naturalsciences.be","organisation":"SDN:EDMO::3330","phoneNumber":null,"faxNumber":null}';
                 }
+                $(document).ready(function() {
+                  /*<![CDATA[*/
+                      var homelink = /*[[@{'/'}]]*/ '';
+                  /*]]>*/
+
+                  $("form#importCsvForm").submit(function(e){
+                      event.preventDefault();
+                      var token = $("input[name='_csrf']").val();
+                      var header = "X-CSRF-TOKEN";
+                      var formData = new FormData(this);
+                      $.ajax({
+                          type: "POST",
+                          contentType: "application/json",
+                          url: homelink + "api/excelImport",
+                          data: formData,
+                          beforeSend: function(xhr) {
+                            xhr.setRequestHeader(header, token);
+                          },
+                          success: function(result) {
+                            console.info("SUUUUUUUUUUUUUUCCCCCCCCCCCCEEEEEESSSSSSSSSSSSS");
+                            console.log(result);
+                            //$("div#success").html(result.responseText);    //Toont message niet maar bij error wel??????
+                            $("div#success").html("Successfully Uploaded and Imported !");
+                            //$("row").prepend("Success ");
+                            document.getElementById("success").classList.remove('d-none');
+                          },
+                          error: function(result){
+                            console.info("ERRRRRRRRRRRRRRRRROOOOOOOOOOOOOORRRRRRRRRRRRRR");
+                            console.log(result);
+                            $("div#errors").html(result.responseText);
+                            $("row").prepend("Row ");
+                            document.getElementById("errors").classList.remove('d-none');
+                          },
+                          cache: false,
+                          contentType: false,
+                          processData: false
+                      });
+                  });
+                });
             </script>
         </div>
     </div>
