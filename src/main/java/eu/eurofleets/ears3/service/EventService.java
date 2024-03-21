@@ -381,6 +381,8 @@ public class EventService {
                             : eventDTO.getStation());
             event.setDescription(eventDTO.getDescription() != null && eventDTO.getDescription().equals("") ? null
                     : eventDTO.getDescription());
+            event.setRemarks( eventDTO.getRemarks() != null && eventDTO.getRemarks().isEmpty() ? null
+                    : eventDTO.getRemarks());
             event.setAction(action);
             event.setActor(actor);
             event.setProcess(process);

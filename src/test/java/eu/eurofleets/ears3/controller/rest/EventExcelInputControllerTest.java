@@ -222,6 +222,8 @@ public class EventExcelInputControllerTest {
                                 .andExpect(content().string(containsString("<identifier>11BU_operations</identifier>")))
                                 .andExpect(content().string(containsString("<name>Belgica operations</name>")))
 
+                                .andExpect(content().string(containsString("Laten we zien of dit ook opgepikt wordt")))
+
                                 //@TODO Verify with Thomas    //.andExpect(content().string(containsString("<timeStamp>2023-10-04T14:30:00+02</timeStamp>")))
                                 .andReturn();
         }

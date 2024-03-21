@@ -116,6 +116,8 @@ public class Event implements IEvent, Serializable {
                     @JoinColumn(name = "weather_id") })
     private Collection<Weather> weather;
 
+    private String remarks;
+
     @Override
     public String getIdentifier() {
         return identifier;
@@ -307,6 +309,9 @@ public class Event implements IEvent, Serializable {
     public void setStation(String station) {
         this.station = station;
     }
+
+    public String getRemarks() { return remarks; }
+    public void setRemarks(String remarks) { this.remarks = remarks; }
 
     @Override
     public String toString() {

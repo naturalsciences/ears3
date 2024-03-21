@@ -262,7 +262,7 @@ public class EventExcelService {
         eventDTO.setTimeStamp(zdt.toOffsetDateTime());
 
 
-        /**TODO ADD TO EARS*///eventDTO.setRemarks(spreadsheetEvent.getRemarks());
+        eventDTO.setRemarks(spreadsheetEvent.getRemarks());
 
         eventDTO.setPlatform(platformUrn);
 

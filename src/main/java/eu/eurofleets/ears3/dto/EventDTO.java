@@ -49,13 +49,14 @@ public class EventDTO {
     private Collection<NavigationDTO> navigation;
     private Collection<ThermosalDTO> thermosal;
     private Collection<WeatherDTO> weather;
+    private String remarks;
 
     public EventDTO() {
     }
 
     public EventDTO(String identifier, String eventDefinitionId, OffsetDateTime timeStamp, PersonDTO actor,
             LinkedDataTermDTO subject, ToolDTO tool, LinkedDataTermDTO toolCategory, LinkedDataTermDTO process,
-            LinkedDataTermDTO action, Collection<PropertyDTO> properties, String program, String platform) {
+            LinkedDataTermDTO action, Collection<PropertyDTO> properties, String program, String platform, String remarks) {
         this.identifier = identifier;
         this.eventDefinitionId = eventDefinitionId;
         this.timeStamp = timeStamp;
@@ -68,6 +69,7 @@ public class EventDTO {
         this.properties = properties;
         this.program = program;
         this.platform = platform;
+        this.remarks = remarks;
     }
 
     public EventDTO(Event event) {
@@ -101,6 +103,7 @@ public class EventDTO {
         this.label = event.getLabel();
         this.description = event.getDescription();
         this.station = event.getStation();
+        this.remarks = event.getRemarks();
     }
 
     public String getIdentifier() {
@@ -246,5 +249,8 @@ public class EventDTO {
     public void setStation(String station) {
         this.station = station;
     }
+
+    public String getRemarks(){ return remarks; }
+    public void setRemarks( String remarks ){ this.remarks = remarks; }
 
 }

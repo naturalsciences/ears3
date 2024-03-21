@@ -61,7 +61,8 @@ CREATE TABLE event (
     tool_category_id bigint NOT NULL,
     label character varying(100),
     description character varying(1000),
-    station character varying(100)
+    station character varying(100),
+    remarks character varying(500)
 );
 
 CREATE TABLE event_navigation (
