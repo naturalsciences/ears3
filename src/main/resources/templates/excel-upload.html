@@ -18,7 +18,6 @@
     </div>
     <div class="row">
         <div class="col">
-            <!--            <form method="post" enctype="multipart/form-data" th:action="@{/api/excelImport}">   -->
             <form id="importCsvForm" method="post" enctype="multipart/form-data" th:action="@{/api/excelImport}">
                 <div class="input-group mb-3">
                     <input id="actorField" type="hidden" name="person">
@@ -35,7 +34,6 @@
                 window.onload = function(){
                     let actorField = document.getElementById("actorField");
                     actorField.value = localStorage.getItem("actor");
-                    //actorField.value = '{"firstName":"Joan","lastName":"Backers","email":"joan.backers@naturalsciences.be","organisation":"SDN:EDMO::3330","phoneNumber":null,"faxNumber":null}';
                 }
                 $(document).ready(function() {
                   /*<![CDATA[*/
@@ -56,16 +54,11 @@
                             xhr.setRequestHeader(header, token);
                           },
                           success: function(result) {
-                            console.info("SUUUUUUUUUUUUUUCCCCCCCCCCCCEEEEEESSSSSSSSSSSSS");
-                            console.log(result);
                             //$("div#success").html(result.responseText);    //Toont message niet maar bij error wel??????
                             $("div#success").html("Successfully Uploaded and Imported !");
-                            //$("row").prepend("Success ");
                             document.getElementById("success").classList.remove('d-none');
                           },
                           error: function(result){
-                            console.info("ERRRRRRRRRRRRRRRRROOOOOOOOOOOOOORRRRRRRRRRRRRR");
-                            console.log(result);
                             $("div#errors").html(result.responseText);
                             $("row").prepend("Row ");
                             document.getElementById("errors").classList.remove('d-none');

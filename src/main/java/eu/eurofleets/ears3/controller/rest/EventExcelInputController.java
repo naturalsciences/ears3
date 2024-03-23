@@ -58,8 +58,6 @@ public class EventExcelInputController {
     @PostMapping(value = { "excelImport" }, produces = { "application/xml; charset=utf-8", "application/json" }, consumes = {
             MediaType.MULTIPART_FORM_DATA_VALUE })
     @ResponseStatus(HttpStatus.CREATED)
-    //    public ResponseEntity<Message<List<ErrorRow>>> createEvent(@RequestParam("file") MultipartFile mpFile, @RequestHeader("person") PersonDTO actor) {
-//    public ResponseEntity<PersonDTO> createEvent(@RequestParam("file") MultipartFile mpFile,
     public ResponseEntity<ErrorDTOList> createEvent(@RequestParam("file") MultipartFile mpFile,
                                                     @RequestParam("person") String actorName) {
 
@@ -76,18 +74,11 @@ public class EventExcelInputController {
             byte[] byteArr = mpFile.getBytes();
             InputStream inputStream = new ByteArrayInputStream(byteArr);
             document.fromStream(inputStream);
-            //validateAllTabs();
             inputStream = new ByteArrayInputStream(byteArr);
             Workbook poiWb = WorkbookFactory.create(inputStream);
             boolean areTabsOk = eventExcelService.validateAllTabs(poiWb, errorList);
             boolean areHeadersOk = eventExcelService.validateHeaders(poiWb, SHEETNAME, errorList);
             if (!areHeadersOk || !areTabsOk ) {
-                /*DIT HOORT ERGENS ANDERS UITGEWERKT TE WORDEN -> EventExcelService
-                Program program = new Program();
-                program.setIdentifier(String.format("%s_operations", shipCode.replace("SDN:C17::", "")));
-                program.setName("General Belgica Operations");
-                //STILL TO DO SAVING THE PROGRAM but only if it's that 11U thing, otherwise see notes/
-                // save(program);*/
                 Message<ErrorDTOList> msg = new Message<>(HttpStatus.CONFLICT.value(), "Error Creating Excel Event, CSV content does not comply with expectations. (ea: missing headers, sheets, tabs)",
                         errorList);
                 return new ResponseEntity<>(errorList, HttpStatus.CONFLICT);

@@ -5,6 +5,7 @@ import java.util.Date;
 import io.github.rushuat.ocell.field.ValueConverter;
 
 /**
+ * Class taken from Thomas Dasa-import?
  * OCell tries to convert everything to the format it thinks is native. We return everything as Strings, AS DISPLAYED IN EXCEL. 
  * Further processing (and validation) is deferred to the convert methods of ImportModelConverter.
  */

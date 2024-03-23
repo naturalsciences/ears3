@@ -110,13 +110,6 @@ public class EventExcelService {
     }
 
     static {
-        /**TODO: Ask Thomas, in EventDTO Station is a string?*/
-        //LinkedDataTermDTO station = new LinkedDataTermDTO("http://ontologies.ef-ears.eu/ears2/1#pro_3", null, "Station");
-        //DEFS.put("Station", station);
-        // DEFS.put("Topas", "https://vocab.nerc.ac.uk/collection/L22/current/TOOL0859/");
-
-        /*LinkedDataTermDTO tool = new LinkedDataTermDTO("http://ontologies.ef-ears.eu/ears2/1#pro_3_johnnyTool", null, "Tool");
-        DEFS.put("Tool", tool);*/
         LinkedDataTermDTO human = new LinkedDataTermDTO("http://vocab.nerc.ac.uk/collection/L06/current/71/",
                 null, "human");
         DEFS.put("Human", human);
@@ -280,32 +273,20 @@ public class EventExcelService {
         }
 
         String toolName = spreadsheetEvent.getTool();
-//        eventDTO.setTool(new ToolDTO(DEFS.get(loweredCapitalize(toolName)), null));
         eventDTO.setTool(new ToolDTO(extractLDT(toolName, rowNb), null));
-        /*Double rndNmbr = Math.random();
-        LinkedDataTermDTO toolCategory = new LinkedDataTermDTO(
-                "http://vocab.nerc.ac.uk/collection/L05/current/50/Johnny_Temp_ToolCategory" + rndNmbr, null,
-                "Johnny_Temp_ToolCategory");*/
         LinkedDataTermDTO toolCategory = extractToolCategory(toolName, rowNb);
         eventDTO.setToolCategory(toolCategory);
 
-
-
         String processName = spreadsheetEvent.getProcess();
-//        LinkedDataTermDTO process = DEFS.get(loweredCapitalize(processName));
         LinkedDataTermDTO process = extractLDT(processName, rowNb);
-        //if (process == null) System.out.println(processName);
         eventDTO.setProcess(process);
 
         String actionName = spreadsheetEvent.getAction();
-        //*testing with existing one*/eventDTO.setAction(new LinkedDataTermDTO("http://ontologies.ef-ears.eu/ears2/1#act_2", null, "End"));
-//        eventDTO.setAction(DEFS.get(loweredCapitalize(actionName)));
         eventDTO.setAction(extractLDT(actionName, rowNb));
 
         eventDTO.setLabel(spreadsheetEvent.getLabel());
 
         String stationName = spreadsheetEvent.getStation();
-        //eventDTO.setStation(DEFS.get(stationName)); /**Station seems to be a string in EventDTO*/
         eventDTO.setStation(stationName);
 
         eventDTO.setDescription(spreadsheetEvent.getDescription());
@@ -318,22 +299,6 @@ public class EventExcelService {
 
         return eventDTO;
     }
-
-    /*private Program findOrCreateProgram(String programName) {
-        Program program = programService.findByIdentifier(programName);
-        if( program == null ){
-            if( programName.equalsIgnoreCase(DEFAULT_PROGRAM) ){
-                program = new Program();
-                program.setIdentifier(String.format("%s_operations", platformUrn.replace("SDN:C17::", "")));
-                program.setName("General Belgica Operations");
-                program = programService.save(program);
-            } else {
-                String programWithYear = programName + "_" + ZonedDateTime.now().getYear();
-                program = programService.findByIdentifier(programWithYear);
-            }
-        }
-        return program;
-    }*/
 
     private static void createPropertiesIfAvailable(SpreadsheetEvent spreadsheetEvent, Map<String, PropertyDTO> props) {
         if ((spreadsheetEvent.getDistance()) != null && !(spreadsheetEvent.getDistance()).isEmpty()) {
@@ -374,7 +339,6 @@ public class EventExcelService {
         }
     }
 
-    //public boolean validateAllTabs(Document document) {
     public boolean validateAllTabs(Workbook document, ErrorDTOList errorList) {
         boolean areTabsOk = true;
         for (String sheetName : getAllowedTabs()) {
@@ -392,8 +356,6 @@ public class EventExcelService {
         return allowedTabs;
     }
 
-    /**@TODO    */
-    //    public boolean validateHeaders(Document document, String sheetName) {
     public boolean validateHeaders(Workbook document, String sheetName, ErrorDTOList errorList) {
         boolean areHeadersOk = true;
         List<String> requiredHeaders = getRequiredHeaders();

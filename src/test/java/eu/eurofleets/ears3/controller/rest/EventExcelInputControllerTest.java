@@ -68,11 +68,6 @@ public class EventExcelInputControllerTest {
 
         private MockMvc mockMvc;
 
-        /* public EventExcelInputControllerTest() {
-        this.mockMvc = MockMvcBuilders.webAppContextSetup(this.wac).build();
-        
-        } */
-
         @Before
         public void setup() throws Exception {
                 this.mockMvc = MockMvcBuilders.webAppContextSetup(this.wac).build();
@@ -98,26 +93,6 @@ public class EventExcelInputControllerTest {
                         .andExpect(status().is(409));  //we used the 5problems excel as inputfile so it is expected to get a 409
         }
 
-        /* //Test no longer useful as Thomas mentioned we don't need to concern ourselves with whether the user exists in DB
-        @Test
-        public void validateNietOkSubmitter() throws Exception {
-                MockMultipartFile mockMultipartFile = new MockMultipartFile(
-                        "file",
-                        "test-5problems.xlsx",
-                        "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", // MediaType.APPLICATION_OCTET_STREAM_VALUE,
-                        new ClassPathResource("test-5problems.xlsx").getInputStream());
-                assertTrue(this.mockMvc != null);
-
-
-                this.mockMvc.perform(MockMvcRequestBuilders.multipart("/api/excelImport")
-
-                                .file(mockMultipartFile).accept(MediaType.APPLICATION_JSON)
-                                //.header("person", joan.getFirstName() + '#' + joan.getLastName()))
-                                .param("person", objectMapper.writeValueAsString(this.notJoan)))
-                        .andDo(print())
-                        .andExpect(status().is(417)); //notJoan does not exist in the testdatabase (only joan was inserted) so we expect 417
-        }
-        */
         @Test
         public void validateErrorFile() throws Exception {
                 MockMultipartFile mockMultipartFile = new MockMultipartFile(
@@ -129,7 +104,6 @@ public class EventExcelInputControllerTest {
 
                 this.mockMvc.perform(MockMvcRequestBuilders.multipart("/api/excelImport")
                         .file(mockMultipartFile).accept(MediaType.APPLICATION_JSON)
-                        //.header("person", joan.getFirstName() + '#' + joan.getLastName()))
                         .param("person", objectMapper.writeValueAsString(this.joan)))
                         .andDo(print())
                         .andExpect(status().is(409))
@@ -156,7 +130,6 @@ public class EventExcelInputControllerTest {
                 this.mockMvc.perform(MockMvcRequestBuilders.multipart("/api/excelImport")
 
                                 .file(mockMultipartFile).accept(MediaType.APPLICATION_JSON)
-                                //.header("person", joan.getFirstName() + '#' + joan.getLastName()))
                                 .param("person", objectMapper.writeValueAsString(this.joan)))
                         .andDo(print())
                         .andExpect(status().is(409))
@@ -197,8 +170,6 @@ public class EventExcelInputControllerTest {
                 this.mockMvc.perform(MockMvcRequestBuilders.multipart("/api/excelImport")
 
                                 .file(mockMultipartFile).accept(MediaType.APPLICATION_JSON)
-                                //.header("person", joan.getFirstName() + '#' + joan.getLastName()))
-                                //.header("person", objectMapper.writeValueAsString(this.joan)))
                                 .param("person", objectMapper.writeValueAsString(this.joan)))
                                 .andDo(print())
                                 .andExpect(status().is(201));
@@ -217,14 +188,13 @@ public class EventExcelInputControllerTest {
                                 .andExpect(content().string(containsString("<name>Meeting</name>")))
                                 .andExpect(content().string(containsString("<name>Recreation</name>")))
                                 .andExpect(content().string(containsString("<name>Testing</name>")))
-//@TODO Dit komt niet in die xslx voor   //.andExpect(content().string(containsString("<name>Sheltering</name>")))
-
+                                //@TODO Dit komt niet in die xslx voor
+                                // .andExpect(content().string(containsString("<name>Sheltering</name>")))
                                 .andExpect(content().string(containsString("<identifier>11BU_operations</identifier>")))
                                 .andExpect(content().string(containsString("<name>Belgica operations</name>")))
-
                                 .andExpect(content().string(containsString("Laten we zien of dit ook opgepikt wordt")))
-
-                                //@TODO Verify with Thomas    //.andExpect(content().string(containsString("<timeStamp>2023-10-04T14:30:00+02</timeStamp>")))
+                                //@TODO Verify with Thomas
+                                // .andExpect(content().string(containsString("<timeStamp>2023-10-04T14:30:00+02</timeStamp>")))
                                 .andReturn();
         }
 
@@ -241,10 +211,8 @@ public class EventExcelInputControllerTest {
                 assertTrue(this.mockMvc != null);
 
                 this.mockMvc.perform(MockMvcRequestBuilders.multipart("/api/excelImport")
-
-                                .file(mockMultipartFile).accept(MediaType.APPLICATION_JSON)
-                                //.header("person", joan.getFirstName() + '#' + joan.getLastName()))
-                                .param("person", objectMapper.writeValueAsString(this.joan)))
+                        .file(mockMultipartFile).accept(MediaType.APPLICATION_JSON)
+                        .param("person", objectMapper.writeValueAsString(this.joan)))
                         .andDo(print())
                         .andExpect(status().is(201));
         }
@@ -261,10 +229,8 @@ public class EventExcelInputControllerTest {
                 assertTrue(this.mockMvc != null);
 
                 this.mockMvc.perform(MockMvcRequestBuilders.multipart("/api/excelImport")
-
-                                .file(mockMultipartFile).accept(MediaType.APPLICATION_JSON)
-                                //.header("person", joan.getFirstName() + '#' + joan.getLastName()))
-                                .param("person", objectMapper.writeValueAsString(this.joan)))
+                        .file(mockMultipartFile).accept(MediaType.APPLICATION_JSON)
+                        .param("person", objectMapper.writeValueAsString(this.joan)))
                         .andDo(print())
                         .andExpect(status().is(409)); //Since we are missing a required header we expect a failure to create the Excel Event
         }
@@ -282,57 +248,10 @@ public class EventExcelInputControllerTest {
                 assertTrue(this.mockMvc != null);
 
                 this.mockMvc.perform(MockMvcRequestBuilders.multipart("/api/excelImport")
-
-                                .file(mockMultipartFile).accept(MediaType.APPLICATION_JSON)
-                                //.header("person", joan.getFirstName() + '#' + joan.getLastName()))
-                                .param("person", objectMapper.writeValueAsString(this.joan)))
+                        .file(mockMultipartFile).accept(MediaType.APPLICATION_JSON)
+                        .param("person", objectMapper.writeValueAsString(this.joan)))
                         .andDo(print())
                         .andExpect(status().is(409)); //Since we are checking for various problems
-        }
-
-
-
-        //@Test
-        void processSpreadsheetEvents() {
-        }
-
-        //@Test
-        void saveSpreadsheetEvents() {
-        }
-
-        public static EventDTO getTestEvent() {
-                PersonDTO joan = new PersonDTO("Joan", "Backers", null, null, null, "joan.backers@naturalsciences.be");
-                EventDTO event = new EventDTO();
-                event.setIdentifier(null); // this is a purely new event.
-                event.setEventDefinitionId("e3c8df0d-02e9-446d-a59b-224a14b89f9a");
-                event.setTimeStamp(OffsetDateTime.parse("2019-04-25T11:08:00Z"));
-                event.setToolCategory(new LinkedDataTermDTO("http://vocab.nerc.ac.uk/collection/L05/current/50/", null,
-                                "sediment grabs"));
-                event.setTool(new ToolDTO(
-                                new LinkedDataTermDTO("http://vocab.nerc.ac.uk/collection/L22/current/TOOL0653/", null,
-                                                "Van Veen grab"),
-                                null));
-                event.setProcess(new LinkedDataTermDTO("http://ontologies.ef-ears.eu/ears2/1#pro_1", null, "Sampling"));
-                event.setAction(new LinkedDataTermDTO("http://ontologies.ef-ears.eu/ears2/1#act_2", null, "End"));
-                event.setSubject(new LinkedDataTermDTO("http://vocab.nerc.ac.uk/collection/C77/current/G71/", null,
-                                "In-situ seafloor measurement/sampling"));
-                event.setActor(joan);
-                event.setPlatform("SDN:C17::11BE");
-                List<PropertyDTO> properties = new ArrayList<>();
-                properties.add(new PropertyDTO(
-                                new LinkedDataTermDTO("http://ontologies.orr.org/fish_count", null, "fish_count"), "89",
-                                null));
-                properties.add(new PropertyDTO(
-                                new LinkedDataTermDTO("http://ontologies.ef-ears.eu/ears2/1#pry_21", null, "depth_m"),
-                                "3", "m"));
-                properties.add(new PropertyDTO(
-                                new LinkedDataTermDTO("http://ontologies.ef-ears.eu/ears2/1#pry_4", null, "label"),
-                                "W04", null));
-                properties.add(new PropertyDTO(
-                                new LinkedDataTermDTO("http://ontologies.ef-ears.eu/ears2/1#pry_16", null, "sampleId"),
-                                "20190506_12", null));
-                event.setProperties(properties);
-                return event;
         }
 
 }
