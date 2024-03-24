@@ -1,7 +1,5 @@
 package eu.eurofleets.ears3.service;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-
 import eu.eurofleets.ears3.Exceptions.ImportException;
 import eu.eurofleets.ears3.controller.rest.EventExcelInputController;
 import eu.eurofleets.ears3.domain.Navigation;
@@ -9,9 +7,24 @@ import eu.eurofleets.ears3.domain.Program;
 import eu.eurofleets.ears3.domain.Thermosal;
 import eu.eurofleets.ears3.domain.Weather;
 import eu.eurofleets.ears3.dto.*;
+import eu.eurofleets.ears3.excel.SpreadsheetEvent;
 import eu.eurofleets.ears3.excel.converters.DateHelper;
 import eu.eurofleets.ears3.utilities.DatagramUtilities;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.ss.usermodel.Workbook;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.env.Environment;
+import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.stereotype.Service;
 
+import javax.validation.ConstraintViolation;
+import javax.validation.Validation;
+import javax.validation.Validator;
+import javax.validation.ValidatorFactory;
 import java.net.MalformedURLException;
 import java.time.ZonedDateTime;
 import java.util.*;
@@ -19,59 +32,17 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
-import javax.validation.ConstraintViolation;
-import javax.validation.Validation;
-import javax.validation.Validator;
-import javax.validation.ValidatorFactory;
-import javax.validation.constraints.NotBlank;
-
-import org.apache.commons.lang3.StringUtils;
-import org.apache.poi.ss.usermodel.Cell;
-import org.apache.poi.ss.usermodel.Row;
-import org.apache.poi.ss.usermodel.Sheet;
-import org.apache.poi.ss.usermodel.Workbook;
-//import org.glassfish.json.JsonUtil;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.core.env.Environment;
-import org.springframework.dao.DataIntegrityViolationException;
-import org.springframework.stereotype.Service;
-
-import eu.eurofleets.ears3.excel.SpreadsheetEvent;
-
 @Service
 public class EventExcelService {
 
     private Validator validator;
 
     private final EventRepository eventRepository;
-
-    @Autowired
-    private LinkedDataTermService ldtService;
-    @Autowired
-    private ToolService toolService;
     @Autowired
     private ProgramService programService;
-    @Autowired
-    private PersonService personService;
-    @Autowired
-    private PropertyService propertyService;
-    @Autowired
-    private PlatformService platformService;
-    @Autowired
-    private OrganisationService organisationService;
-    @Autowired
-    private NavigationService navigationService;
-    @Autowired
-    private ThermosalService thermosalService;
-    @Autowired
-    private WeatherService weatherService;
 
     @Autowired
     private EventService eventService;
-
-    @Autowired
-    private ObjectMapper objectMapper;
 
     private DatagramUtilities<Navigation> navUtil;
     private DatagramUtilities<Thermosal> thermosalUtil;
@@ -84,8 +55,6 @@ public class EventExcelService {
     private static List<String> allowedTabs = Arrays.asList("events");
     private List<String> requiredHeaders = Arrays.stream(SpreadsheetEvent.FIELDS.values()).map(Enum::name)
             .collect(Collectors.toList());
-    private static String DEFAULT_PROGRAM = "11BU_operations";
-    // private static String PLATFORM = "SDN:C17::11BU";
 
     @Value("${ears.platform}")
     public String platformUrn;
@@ -234,7 +203,6 @@ public class EventExcelService {
         try {
             zdt = DateHelper.dateTimeStringToZonedDateTime(date, hour);
         } catch (Exception e) {
-            int a=5;//break point opportunity
             throw new ImportException(date + " " + hour, rowNb, String.format("Problem with %s%n", spreadsheetEvent.toString()), null);
         }
         return zdt;

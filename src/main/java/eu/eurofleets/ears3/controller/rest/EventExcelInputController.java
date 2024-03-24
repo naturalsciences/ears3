@@ -2,33 +2,29 @@ package eu.eurofleets.ears3.controller.rest;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import eu.eurofleets.ears3.domain.*;
+import eu.eurofleets.ears3.domain.Message;
 import eu.eurofleets.ears3.dto.ErrorDTO;
 import eu.eurofleets.ears3.dto.ErrorDTOList;
 import eu.eurofleets.ears3.dto.EventDTO;
 import eu.eurofleets.ears3.dto.PersonDTO;
 import eu.eurofleets.ears3.excel.SpreadsheetEvent;
 import eu.eurofleets.ears3.service.EventExcelService;
-import eu.eurofleets.ears3.service.EventService;
+import io.github.rushuat.ocell.document.Document;
+import io.github.rushuat.ocell.document.Documents;
+import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.ss.usermodel.WorkbookFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
-import eu.eurofleets.ears3.service.PersonService;
-import io.github.rushuat.ocell.document.Documents;
-import org.apache.poi.ss.usermodel.Workbook;
-import org.apache.poi.ss.usermodel.WorkbookFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.core.env.Environment;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
-import org.springframework.web.multipart.MultipartFile;
-import io.github.rushuat.ocell.document.Document;
 
 @RestController()
 @RequestMapping(value = "/api")
@@ -37,23 +33,12 @@ public class EventExcelInputController {
 
     public static final String DEFAULT_VALUE = "_";
     public static final String SHEETNAME = "events";
-    @Autowired
-    private EventService eventService;
-
-    @Autowired
-    private PersonService personService;
 
     @Autowired
     private EventExcelService eventExcelService;
 
     @Autowired
-    private Environment env;
-
-    @Autowired
     private ObjectMapper objectMapper;
-
-    @Value("${ears.platform}")
-    private String shipCode;
 
     @PostMapping(value = { "excelImport" }, produces = { "application/xml; charset=utf-8", "application/json" }, consumes = {
             MediaType.MULTIPART_FORM_DATA_VALUE })
