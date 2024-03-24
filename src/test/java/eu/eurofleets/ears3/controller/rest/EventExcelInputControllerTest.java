@@ -1,11 +1,14 @@
 package eu.eurofleets.ears3.controller.rest;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import eu.eurofleets.ears3.Application;
+import eu.eurofleets.ears3.dto.LinkedDataTermDTO;
 import eu.eurofleets.ears3.dto.PersonDTO;
 import eu.eurofleets.ears3.dto.ProgramDTO;
 import eu.eurofleets.ears3.service.EventService;
 import eu.eurofleets.ears3.service.LinkedDataTermService;
+import org.apache.commons.lang3.StringUtils;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -24,8 +27,8 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
 
-import java.util.Arrays;
-import java.util.List;
+import java.io.File;
+import java.util.*;
 
 import static org.hamcrest.Matchers.containsString;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -239,6 +242,52 @@ public class EventExcelInputControllerTest {
                         .param("person", objectMapper.writeValueAsString(this.joan)))
                         .andDo(print())
                         .andExpect(status().is(409)); //Since we are checking for various problems
+        }
+
+
+
+
+
+        @Test
+        public void justatest() throws Exception {
+
+                Map<String, LinkedDataTermDTO> DEFS = new HashMap<>();
+                Map<String, LinkedDataTermDTO> CATMAP = new HashMap<>();
+
+                JsonNode rootNode;
+                ObjectMapper objectMapper;
+                objectMapper = new ObjectMapper();
+                File jsonFile = new ClassPathResource("my.json").getFile();
+                rootNode = objectMapper.readTree(jsonFile);
+
+                JsonNode properties = rootNode.get("properties");
+                ArrayList<LinkedHashMap<String,String>> list = objectMapper.convertValue(properties, ArrayList.class);
+
+                JsonNode catmap = rootNode.get("catmap");
+                ArrayList<LinkedHashMap<String,String>> cmList = objectMapper.convertValue(catmap, ArrayList.class);
+
+
+                for( LinkedHashMap<String,String> item : list ){
+                        System.out.println( "het item: " + item + "\n");
+                        LinkedDataTermDTO ldtDTO = new LinkedDataTermDTO(item.get("identifier"), item.get("transitveldidentifier"), item.get("name"));
+                        String key = StringUtils.capitalize(StringUtils.lowerCase( item.get("name") ) );
+                        DEFS.put(key, ldtDTO);
+                }
+
+                for( LinkedHashMap<String,String> item : cmList ){
+                        System.out.println( "het item: " + item + "\n");
+                        //LinkedDataTermDTO ldtDTO = new LinkedDataTermDTO(item.get("identifier"), item.get("transitveldidentifier"), item.get("name"));
+                        String key = StringUtils.capitalize(StringUtils.lowerCase( item.get("name") ) );
+                        String prop = StringUtils.capitalize(StringUtils.lowerCase( item.get("prop") ) );
+                        LinkedDataTermDTO ldtDTO = DEFS.get(prop);
+                        CATMAP.put(key, ldtDTO);
+                }
+
+
+                int a=5;
+                //String prettyPrintEmployee = objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(rootNode);
+                //System.out.println(prettyPrintEmployee+"\n");
+
         }
 
 }
