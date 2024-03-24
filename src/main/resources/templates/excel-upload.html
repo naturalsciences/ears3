@@ -42,6 +42,8 @@
 
                   $("form#importCsvForm").submit(function(e){
                       event.preventDefault();
+                      $(document.getElementById("success")).addClass("d-none");
+                      $(document.getElementById("errors")).addClass("d-none");
                       var token = $("input[name='_csrf']").val();
                       var header = "X-CSRF-TOKEN";
                       var formData = new FormData(this);
