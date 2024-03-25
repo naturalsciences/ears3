@@ -275,7 +275,7 @@ public class EventExcelService {
                 spreadsheetEvent.getDistance(), "nm");
         props.put(SpreadsheetEvent.FIELDS.Dist.name(), dist);
         }
-        if ((spreadsheetEvent.getDistance()) != null && !(spreadsheetEvent.getTime()).isEmpty()) {
+        if ((spreadsheetEvent.getTime()) != null && !(spreadsheetEvent.getTime()).isEmpty()) {
         PropertyDTO time = new PropertyDTO(
                 new LinkedDataTermDTO("http://ontologies.ef-ears.eu/ears2/1#pry_100001", null, "Time"),
                 spreadsheetEvent.getTime(), "h");
