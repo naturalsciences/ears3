@@ -61,7 +61,8 @@ CREATE TABLE event (
     tool_category_id bigint NOT NULL,
     label character varying(100),
     description character varying(1000),
-    station character varying(100)
+    station character varying(100),
+    remarks character varying(500)
 );
 
 CREATE TABLE event_navigation (
@@ -247,6 +248,8 @@ ALTER TABLE thermosal
     ADD CONSTRAINT thermosal_pkey PRIMARY KEY (id);
 ALTER TABLE tool
     ADD CONSTRAINT tool_pkey PRIMARY KEY (id);
+ALTER TABLE event
+    ADD CONSTRAINT event_unique UNIQUE (time_stamp, action_id, platform_id, process_id, program_id, tool_id, tool_category_id);
 ALTER TABLE tool
     ADD CONSTRAINT uk5t3r8cloglmcymweq9ia322l3 UNIQUE (term_id, parent_term_id);
 ALTER TABLE platform

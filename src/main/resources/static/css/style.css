@@ -211,3 +211,14 @@ select#idSelect_tc+button, select#idSelect_t+button,select#idSelect_p+button,sel
 .manualTable td{
     padding-left: 15px;
 }
+
+error {
+  display: inline-block;
+  margin-bottom: 0.5em;
+}
+
+error > message {
+  margin-left: 1em;
+  font-size:small;
+}
+

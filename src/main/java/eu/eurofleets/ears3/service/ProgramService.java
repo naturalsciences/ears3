@@ -10,12 +10,14 @@ import eu.eurofleets.ears3.dto.ProgramDTO;
 import java.time.Instant;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
+import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
@@ -36,6 +38,9 @@ public class ProgramService {
     public ProjectService projectService;
     @Autowired
     private Environment env;
+    @Value("${ears.platform}")
+    public String platformUrn;
+    private static String DEFAULT_PROGRAM = "11BU_operations";
 
     @Autowired
     public ProgramService(ProgramRepository programRepository, ProjectRepository projectRepository,
@@ -162,5 +167,22 @@ public class ProgramService {
     public Set<Program> findByAtDate(OffsetDateTime at) {
         return this.programRepository.findAtDate(at);
     }
+
+    public Program findOrCreateProgram(String programName) {
+        Program program = findByIdentifier(programName);
+        if( program == null ){
+            if( programName.equalsIgnoreCase(DEFAULT_PROGRAM) ){
+                program = new Program();
+                program.setIdentifier(String.format("%s_operations", platformUrn.replace("SDN:C17::", "")));
+                program.setName("General Belgica Operations");
+                program = save(program);
+            } else {
+                String programWithYear = programName + "_" + ZonedDateTime.now().getYear();
+                program = findByIdentifier(programWithYear);
+            }
+        }
+        return program;
+    }
+
 
 }

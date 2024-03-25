@@ -23,7 +23,7 @@ import javax.xml.bind.annotation.XmlRootElement;
 public class CruiseDTOList {
 
     @XmlElement(name = "cruise")
-    private List<CruiseDTO> cruises;
+    private List<CruiseDTO> cruises = new ArrayList<>();
 
     public CruiseDTOList() {
     }
