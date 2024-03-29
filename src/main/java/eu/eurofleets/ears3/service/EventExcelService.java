@@ -18,6 +18,7 @@ import org.apache.poi.ss.usermodel.Workbook;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.env.Environment;
+import org.springframework.core.io.ClassPathResource;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 
@@ -25,12 +26,16 @@ import javax.validation.ConstraintViolation;
 import javax.validation.Validation;
 import javax.validation.Validator;
 import javax.validation.ValidatorFactory;
+import java.io.File;
+import java.io.IOException;
 import java.net.MalformedURLException;
 import java.time.ZonedDateTime;
 import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 @Service
 public class EventExcelService {
@@ -61,6 +66,7 @@ public class EventExcelService {
 
     private static Map<String, LinkedDataTermDTO> DEFS = new HashMap<>();
     private static Map<String, LinkedDataTermDTO> CATMAP = new HashMap<>();
+    private static Map<String, PropertyDTO> PROPMAPDEF = new HashMap<>();
 
     @Autowired
     public EventExcelService(EventRepository eventRepository, Environment env) {
@@ -73,104 +79,51 @@ public class EventExcelService {
             navUtil = new DatagramUtilities<>(Navigation.class, navigationServer);
             thermosalUtil = new DatagramUtilities<>(Thermosal.class, navigationServer);
             weatherUtil = new DatagramUtilities<>(Weather.class, navigationServer);
+            initializeHashmaps();
         } catch (MalformedURLException ex) {
             Logger.getLogger(EventService.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (IOException ioe) {
+            throw new RuntimeException(ioe);
         }
     }
 
-    static {
-        LinkedDataTermDTO human = new LinkedDataTermDTO("http://vocab.nerc.ac.uk/collection/L06/current/71/",
-                null, "human");
-        DEFS.put("Human", human);
+    private void initializeHashmaps() throws IOException {
 
-        LinkedDataTermDTO all = new LinkedDataTermDTO("http://ontologies.ef-ears.eu/ears2/1#dev_100000", null,
-                "All persons");
-        DEFS.put("All persons", all);
-        CATMAP.put("All persons", human);
-        LinkedDataTermDTO command = new LinkedDataTermDTO("http://ontologies.ef-ears.eu/ears2/1#dev_100001", null,
-                "Command");
-        DEFS.put("Command", command);
-        CATMAP.put("Command", human);
-        LinkedDataTermDTO crew = new LinkedDataTermDTO("http://ontologies.ef-ears.eu/ears2/1#dev_1000002", null,
-                "Crew");
-        DEFS.put("Crew", crew);
-        CATMAP.put("Crew", human);
-        LinkedDataTermDTO scientists = new LinkedDataTermDTO("http://ontologies.ef-ears.eu/ears2/1#dev_100003", null,
-                "Scientists");
-        DEFS.put("Scientists", scientists);
-        CATMAP.put("Scientists", human);
-        LinkedDataTermDTO sparker = new LinkedDataTermDTO("http://ontologies.ef-ears.eu/ears2/1#ctg_123",
-                null,
-                "Sparker");
-        DEFS.put("Sparker", sparker);
-        CATMAP.put("Sparker", sparker);
-        LinkedDataTermDTO unknownSparker = new LinkedDataTermDTO("http://ontologies.ef-ears.eu/ears2/1#dev_100004",
-                null,
-                "Unknown sparker");
-        DEFS.put("Unknown sparker", unknownSparker);
-        CATMAP.put("Unknown sparker", sparker);
+        JsonNode rootNode;
+        ObjectMapper objectMapper;
+        objectMapper = new ObjectMapper();
+        File jsonFile = new ClassPathResource("static/json/my.json").getFile();
+        rootNode = objectMapper.readTree(jsonFile);
 
-        LinkedDataTermDTO topas = new LinkedDataTermDTO("http://ontologies.ef-ears.eu/ears2/1#dev_3292", null, "Topas");
-        DEFS.put("Topas", topas);
+        JsonNode defs = rootNode.get("defs");
+        ArrayList<LinkedHashMap<String,String>> defList = objectMapper.convertValue(defs, ArrayList.class);
 
-        LinkedDataTermDTO rv = new LinkedDataTermDTO("http://ontologies.ef-ears.eu/ears2/1#ctg_26", null,
-                "Research vessel");
-        DEFS.put("Research vessel", rv);
-        LinkedDataTermDTO belgica = new LinkedDataTermDTO("http://ontologies.ef-ears.eu/ears2/1#ves_1792", null,
-                "Belgica");
-        DEFS.put("Belgica", belgica);
-        CATMAP.put("Belgica", rv);
+        JsonNode catmap = rootNode.get("catmap");
+        ArrayList<LinkedHashMap<String,String>> cmList = objectMapper.convertValue(catmap, ArrayList.class);
 
-        LinkedDataTermDTO calibration = new LinkedDataTermDTO("http://ontologies.ef-ears.eu/ears2/1#pro_6", null,
-                "Calibration");
-        DEFS.put("Calibration", calibration);
-        LinkedDataTermDTO cruise = new LinkedDataTermDTO("http://ontologies.ef-ears.eu/ears2/1#pro_20", null, "Cruise");
-        DEFS.put("Cruise", cruise);
-        LinkedDataTermDTO deployment = new LinkedDataTermDTO("http://ontologies.ef-ears.eu/ears2/1#pro_22", null,
-                "Deployment");
-        DEFS.put("Deployment", deployment);
-        LinkedDataTermDTO line = new LinkedDataTermDTO("http://ontologies.ef-ears.eu/ears2/1#pro_12", null, "Line");
-        DEFS.put("Line", line);
+        JsonNode properties = rootNode.get("properties");
+        ArrayList<LinkedHashMap<String,String>> propList = objectMapper.convertValue(properties, ArrayList.class);
 
-        LinkedDataTermDTO operation = new LinkedDataTermDTO("http://ontologies.ef-ears.eu/ears2/1#pro_28", null,
-                "Operation");
-        DEFS.put("Operation", operation);
-        LinkedDataTermDTO recovery = new LinkedDataTermDTO("http://ontologies.ef-ears.eu/ears2/1#pro_23", null,
-                "Recovery");
-        DEFS.put("Recovery", recovery);
-        LinkedDataTermDTO transit = new LinkedDataTermDTO("http://ontologies.ef-ears.eu/ears2/1#pro_14", null,
-                "Transit");
-        DEFS.put("Transit", transit);
-        LinkedDataTermDTO station = new LinkedDataTermDTO("http://ontologies.ef-ears.eu/ears2/1#pro_3", null,
-                "Station");
-        DEFS.put("Station", station);
+        for( LinkedHashMap<String,String> item : defList ){
+            LinkedDataTermDTO ldtDTO = new LinkedDataTermDTO(item.get("identifier"), item.get("transitveldidentifier"), item.get("name"));
+            String key = StringUtils.capitalize(StringUtils.lowerCase( item.get("name") ) );
+            DEFS.put(key, ldtDTO);
+        }
 
-        LinkedDataTermDTO testing = new LinkedDataTermDTO("http://ontologies.ef-ears.eu/ears2/1#pro_100001", null,
-                "Testing");
-        DEFS.put("Testing", testing);
-        LinkedDataTermDTO exercise = new LinkedDataTermDTO("http://ontologies.ef-ears.eu/ears2/1#pro_100002", null,
-                "Exercise");
-        DEFS.put("Exercise", exercise);
-        LinkedDataTermDTO meeting = new LinkedDataTermDTO("http://ontologies.ef-ears.eu/ears2/1#pro_100003", null,
-                "Meeting");
-        DEFS.put("Meeting", meeting);
-        LinkedDataTermDTO recreation = new LinkedDataTermDTO("http://ontologies.ef-ears.eu/ears2/1#pro_100004", null,
-                "Recreation");
-        DEFS.put("Recreation", recreation);
-        LinkedDataTermDTO sheltering = new LinkedDataTermDTO("http://ontologies.ef-ears.eu/ears2/1#pro_100005", null,
-                "Sheltering");
-        DEFS.put("Sheltering", sheltering);
-        LinkedDataTermDTO demobilisation = new LinkedDataTermDTO("http://ontologies.ef-ears.eu/ears2/1#pro_100006",
-                null, "Demobilisation");
-        DEFS.put("Demobilisation", demobilisation);
-        LinkedDataTermDTO mobilisation = new LinkedDataTermDTO("http://ontologies.ef-ears.eu/ears2/1#pro_100007", null,
-                "Mobilisation");
-        DEFS.put("Mobilisation", mobilisation);
+        for( LinkedHashMap<String,String> item : cmList ){
+            String key = StringUtils.capitalize(StringUtils.lowerCase( item.get("name") ) );
+            String prop = StringUtils.capitalize(StringUtils.lowerCase( item.get("prop") ) );
+            LinkedDataTermDTO ldtDTO = DEFS.get(prop);
+            CATMAP.put(key, ldtDTO);
+        }
 
-        LinkedDataTermDTO start = new LinkedDataTermDTO("http://ontologies.ef-ears.eu/ears2/1#act_1", null, "Start");
-        DEFS.put("Start", start);
-        LinkedDataTermDTO end = new LinkedDataTermDTO("http://ontologies.ef-ears.eu/ears2/1#act_2", null, "End");
-        DEFS.put("End", end);
+        for( LinkedHashMap<String, String> item : propList ){
+            LinkedDataTermDTO ldtDTO = new LinkedDataTermDTO(item.get("identifier"), item.get("transitveldidentifier"), item.get("name"));
+            PropertyDTO pDTO = new PropertyDTO(ldtDTO, item.get("value"), item.get("uom"));
+            String key = StringUtils.capitalize(StringUtils.lowerCase(item.get("name")));
+            PROPMAPDEF.put(key, pDTO);
+        }
+
     }
 
     private String loweredCapitalize(String input){ return StringUtils.capitalize(input.toLowerCase()); }
@@ -270,40 +223,34 @@ public class EventExcelService {
 
     private static void createPropertiesIfAvailable(SpreadsheetEvent spreadsheetEvent, Map<String, PropertyDTO> props) {
         if ((spreadsheetEvent.getDistance()) != null && !(spreadsheetEvent.getDistance()).isEmpty()) {
-        PropertyDTO dist = new PropertyDTO(
-                new LinkedDataTermDTO("http://ontologies.ef-ears.eu/ears2/1#pry_100000", null, "Distance travelled"),
-                spreadsheetEvent.getDistance(), "nm");
-        props.put(SpreadsheetEvent.FIELDS.Dist.name(), dist);
+            PropertyDTO dist = PROPMAPDEF.get("Distance travelled");
+            dist.setValue(spreadsheetEvent.getDistance());
+            props.put(SpreadsheetEvent.FIELDS.Dist.name(), dist);
         }
         if ((spreadsheetEvent.getTime()) != null && !(spreadsheetEvent.getTime()).isEmpty()) {
-        PropertyDTO time = new PropertyDTO(
-                new LinkedDataTermDTO("http://ontologies.ef-ears.eu/ears2/1#pry_100001", null, "Time"),
-                spreadsheetEvent.getTime(), "h");
-        props.put(SpreadsheetEvent.FIELDS.Time.name(), time);
+            PropertyDTO time = PROPMAPDEF.get("Time");
+            time.setValue(spreadsheetEvent.getTime());
+            props.put(SpreadsheetEvent.FIELDS.Time.name(), time);
         }
         if ((spreadsheetEvent.getStatus()) != null && !(spreadsheetEvent.getStatus()).isEmpty()) {
-        PropertyDTO status = new PropertyDTO(
-                new LinkedDataTermDTO("http://ontologies.ef-ears.eu/ears2/1#pry_100002", null, "Status"),
-                spreadsheetEvent.getStatus(), null);
-        props.put(SpreadsheetEvent.FIELDS.Status.name(), status);
+            PropertyDTO status = PROPMAPDEF.get("Status");
+            status.setValue(spreadsheetEvent.getStatus());
+            props.put(SpreadsheetEvent.FIELDS.Status.name(), status);
         }
         if ((spreadsheetEvent.getRegion()) != null && !(spreadsheetEvent.getRegion()).isEmpty()) {
-        PropertyDTO region = new PropertyDTO(
-                new LinkedDataTermDTO("http://ontologies.ef-ears.eu/ears2/1#pry_100003", null, "Region"),
-                spreadsheetEvent.getRegion(), null);
-        props.put(SpreadsheetEvent.FIELDS.Region.name(), region);
+            PropertyDTO region = PROPMAPDEF.get("Region");
+            region.setValue(spreadsheetEvent.getRegion());
+            props.put(SpreadsheetEvent.FIELDS.Region.name(), region);
         }
         if ((spreadsheetEvent.getWeather()) != null && !(spreadsheetEvent.getWeather()).isEmpty()) {
-        PropertyDTO weather = new PropertyDTO(
-                new LinkedDataTermDTO("http://ontologies.ef-ears.eu/ears2/1#pry_100004", null, "Weather"),
-                spreadsheetEvent.getWeather(), null);
-        props.put(SpreadsheetEvent.FIELDS.Weather.name(), weather);
+            PropertyDTO weather = PROPMAPDEF.get("Weather");
+            weather.setValue(spreadsheetEvent.getWeather());
+            props.put(SpreadsheetEvent.FIELDS.Weather.name(), weather);
         }
         if ((spreadsheetEvent.getNavigation()) != null && !(spreadsheetEvent.getNavigation()).isEmpty()) {
-        PropertyDTO navigation = new PropertyDTO(
-                new LinkedDataTermDTO("http://ontologies.ef-ears.eu/ears2/1#pry_100005", null, "Navigation"),
-                spreadsheetEvent.getNavigation(), null);
-        props.put(SpreadsheetEvent.FIELDS.Navigation.name(), navigation);
+            PropertyDTO navigation = PROPMAPDEF.get("Navigation");
+            navigation.setValue(spreadsheetEvent.getNavigation());
+            props.put(SpreadsheetEvent.FIELDS.Navigation.name(), navigation);
         }
     }
 
@@ -311,7 +258,6 @@ public class EventExcelService {
         boolean areTabsOk = true;
         for (String sheetName : getAllowedTabs()) {
             Sheet sheet = document.getSheet(sheetName);
-            //List<SpreadsheetEvent> sheet = document.getSheet(sheetName, SpreadsheetEvent.class);
             if (sheet == null) {
                 areTabsOk = false;
                 errorList.addError(new ErrorDTO(0, String.format("Problem in sheet %s: %s%n", sheetName, "Missing sheet: " + sheetName), null));

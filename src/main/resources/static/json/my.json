@@ -1,0 +1,215 @@
+{
+  "defs": [
+    {
+      "identifier": "http://vocab.nerc.ac.uk/collection/L06/current/71/",
+      "transitveldidentifier": null,
+      "name": "human"
+    },
+    {
+      "identifier": "http://ontologies.ef-ears.eu/ears2/1#dev_100000",
+      "transitveldidentifier": null,
+      "name": "All persons"
+    },
+    {
+      "identifier": "http://ontologies.ef-ears.eu/ears2/1#dev_100001",
+      "transitveldidentifier": null,
+      "name": "Command"
+    },
+    {
+      "identifier": "http://ontologies.ef-ears.eu/ears2/1#dev_1000002",
+      "transitveldidentifier": null,
+      "name": "Crew"
+    },
+    {
+      "identifier": "http://ontologies.ef-ears.eu/ears2/1#dev_100003",
+      "transitveldidentifier": null,
+      "name": "Scientists"
+    },
+    {
+      "identifier": "http://ontologies.ef-ears.eu/ears2/1#ctg_123",
+      "transitveldidentifier": null,
+      "name": "Sparker"
+    },
+    {
+      "identifier": "http://ontologies.ef-ears.eu/ears2/1#dev_100004",
+      "transitveldidentifier": null,
+      "name": "Unknown sparker"
+    },
+    {
+      "identifier": "http://ontologies.ef-ears.eu/ears2/1#dev_3292",
+      "transitveldidentifier": null,
+      "name": "Topas"
+    },
+    {
+      "identifier": "http://ontologies.ef-ears.eu/ears2/1#ctg_26",
+      "transitveldidentifier": null,
+      "name": "Research vessel"
+    },
+    {
+      "identifier": "http://ontologies.ef-ears.eu/ears2/1#ves_1792",
+      "transitveldidentifier": null,
+      "name": "Belgica"
+    },
+    {
+      "identifier": "http://ontologies.ef-ears.eu/ears2/1#pro_6",
+      "transitveldidentifier": null,
+      "name": "Calibration"
+    },
+    {
+      "identifier": "http://ontologies.ef-ears.eu/ears2/1#pro_20",
+      "transitveldidentifier": null,
+      "name": "Cruise"
+    },
+    {
+      "identifier": "http://ontologies.ef-ears.eu/ears2/1#pro_22",
+      "transitveldidentifier": null,
+      "name": "Deployment"
+    },
+    {
+      "identifier": "http://ontologies.ef-ears.eu/ears2/1#pro_12",
+      "transitveldidentifier": null,
+      "name": "Line"
+    },
+    {
+      "identifier": "http://ontologies.ef-ears.eu/ears2/1#pro_28",
+      "transitveldidentifier": null,
+      "name": "Operation"
+    },
+    {
+      "identifier": "http://ontologies.ef-ears.eu/ears2/1#pro_23",
+      "transitveldidentifier": null,
+      "name": "Recovery"
+    },
+    {
+      "identifier": "http://ontologies.ef-ears.eu/ears2/1#pro_14",
+      "transitveldidentifier": null,
+      "name": "Transit"
+    },
+    {
+      "identifier": "http://ontologies.ef-ears.eu/ears2/1#pro_3",
+      "transitveldidentifier": null,
+      "name": "Station"
+    },
+    {
+      "identifier": "http://ontologies.ef-ears.eu/ears2/1#pro_100001",
+      "transitveldidentifier": null,
+      "name": "Testing"
+    },
+    {
+      "identifier": "http://ontologies.ef-ears.eu/ears2/1#pro_100002",
+      "transitveldidentifier": null,
+      "name": "Exercise"
+    },
+    {
+      "identifier": "http://ontologies.ef-ears.eu/ears2/1#pro_100003",
+      "transitveldidentifier": null,
+      "name": "Meeting"
+    },
+    {
+      "identifier": "http://ontologies.ef-ears.eu/ears2/1#pro_100004",
+      "transitveldidentifier": null,
+      "name": "Recreation"
+    },
+    {
+      "identifier": "http://ontologies.ef-ears.eu/ears2/1#pro_100005",
+      "transitveldidentifier": null,
+      "name": "Sheltering"
+    },
+    {
+      "identifier": "http://ontologies.ef-ears.eu/ears2/1#pro_100006",
+      "transitveldidentifier": null,
+      "name": "Demobilisation"
+    },
+    {
+      "identifier": "http://ontologies.ef-ears.eu/ears2/1#pro_100007",
+      "transitveldidentifier": null,
+      "name": "Mobilisation"
+    },
+    {
+      "identifier": "http://ontologies.ef-ears.eu/ears2/1#act_1",
+      "transitveldidentifier": null,
+      "name": "Start"
+    },
+    {
+      "identifier": "http://ontologies.ef-ears.eu/ears2/1#act_2",
+      "transitveldidentifier": null,
+      "name": "End"
+    }
+  ],
+  "catmap":[
+    {
+      "name": "All persons",
+      "prop": "Human"
+    },
+    {
+      "name": "Command",
+      "prop": "Human"
+    },
+    {
+      "name": "Crew",
+      "prop": "Human"
+    },
+    {
+      "name": "Scientists",
+      "prop": "Human"
+    },
+    {
+      "name": "Sparker",
+      "prop": "Sparker"
+    },
+    {
+      "name": "Unknown sparker",
+      "prop": "Sparker"
+    },
+    {
+      "name": "Belgica",
+      "prop": "Research vessel"
+    }
+  ],
+  "properties": [
+    {
+      "identifier": "http://ontologies.ef-ears.eu/ears2/1#pry_100000",
+      "transitveldidentifier": null,
+      "name": "Distance travelled",
+      "value": null,
+      "uom": "nm"
+    },
+    {
+      "identifier": "http://ontologies.ef-ears.eu/ears2/1#pry_100001",
+      "transitveldidentifier": null,
+      "name": "Time",
+      "value": null,
+      "uom": "h"
+    },
+    {
+      "identifier": "http://ontologies.ef-ears.eu/ears2/1#pry_100002",
+      "transitveldidentifier": null,
+      "name": "Status",
+      "value": null,
+      "uom": null
+    },
+    {
+      "identifier": "http://ontologies.ef-ears.eu/ears2/1#pry_100003",
+      "transitveldidentifier": null,
+      "name": "Region",
+      "value": null,
+      "uom": null
+    },
+    {
+      "identifier": "http://ontologies.ef-ears.eu/ears2/1#pry_100004",
+      "transitveldidentifier": null,
+      "name": "Weather",
+      "value": null,
+      "uom": null
+    },
+    {
+      "identifier": "http://ontologies.ef-ears.eu/ears2/1#pry_100005",
+      "transitveldidentifier": null,
+      "name": "Navigation",
+      "value": null,
+      "uom": null
+    }
+  ]
+}
+
+
