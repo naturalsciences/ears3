@@ -156,7 +156,7 @@ public class EventExcelService {
         try {
             zdt = DateHelper.dateTimeStringToZonedDateTime(date, hour);
         } catch (Exception e) {
-            throw new ImportException(date + " " + hour, rowNb, String.format("Problem with %s%n", spreadsheetEvent.toString()), null);
+            throw new ImportException(EventExcelInputController.SHEETNAME, rowNb, String.format("Problem with [%s]%n", e.getMessage()), null);
         }
         return zdt;
     }
@@ -165,8 +165,10 @@ public class EventExcelService {
         Set<ConstraintViolation<SpreadsheetEvent>> errors = validator.validate(spreadsheetEvent);
         if (!errors.isEmpty()) {
             System.out.printf("Problem with %s%n", spreadsheetEvent.toString());
+            ArrayList<String> message = new ArrayList<>();
+            errors.forEach(error -> { message.add( error.getPropertyPath() + " " + error.getMessage()); });
             throw new ImportException(EventExcelInputController.SHEETNAME, rowNb,
-                    String.format("Problem with %s%n", spreadsheetEvent.toString()), null);
+                    String.format("Problem with %s%n", message.toString()), null);
         }
 
         EventDTO eventDTO = new EventDTO();
