@@ -23,13 +23,13 @@ public class HtmlImportExcelController {
     public String event( Model model) {
         String maxFileSize = env.getProperty("spring.servlet.multipart.max-file-size");
         File shipTemplate = null;
-        try {
+        /*try {
             shipTemplate = new ClassPathResource("static/ship_log_template.xlsx").getFile();
         } catch (IOException e) {
             throw new RuntimeException(e);
-        }
+        }*/
         model.addAttribute("maxFileSize", maxFileSize);
-        model.addAttribute("shipTemplateURI", shipTemplate.toURI());
+        //model.addAttribute("shipTemplateURI", shipTemplate.toURI());
         return "excel-upload";
     }
 

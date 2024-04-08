@@ -47,11 +47,13 @@ public class WebConfig implements WebMvcConfigurer {
                 "/js/**",
                 "/css/**",
                 "/images/**",
+                "/excel/**",
                 "/json/**")
                 .addResourceLocations(
                         "classpath:/static/js/",
                         "classpath:/static/css/",
                         "classpath:/static/images/",
+                        "classpath:/static/excel/",
                         "classpath:/static/json/");
     }
 
