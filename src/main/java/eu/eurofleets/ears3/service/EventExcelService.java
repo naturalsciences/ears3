@@ -162,38 +162,35 @@ public class EventExcelService {
     }
 
     private EventDTO processSpreadsheetEvent(SpreadsheetEvent spreadsheetEvent, int rowNb) throws ImportException {
+        EventDTO eventDTO = new EventDTO();
+        eventDTO.setIdentifier(null);
+        //Bail out early if we already know all the constraints that have been violated.
+        ArrayList<String> errorSummaryForRow = new ArrayList<>();
         Set<ConstraintViolation<SpreadsheetEvent>> errors = validator.validate(spreadsheetEvent);
         if (!errors.isEmpty()) {
             System.out.printf("Problem with %s%n", spreadsheetEvent.toString());
-            ArrayList<String> message = new ArrayList<>();
-            errors.forEach(error -> { message.add( error.getPropertyPath() + " " + error.getMessage()); });
-            throw new ImportException(EventExcelInputController.SHEETNAME, rowNb,
-                    String.format("Problem with %s%n", message.toString()), null);
+            errors.forEach(error -> { errorSummaryForRow.add( error.getPropertyPath() + " " + error.getMessage()); });
         }
 
-        EventDTO eventDTO = new EventDTO();
-        eventDTO.setIdentifier(null);
+        Program program = programService.findOrCreateProgram(spreadsheetEvent.getProgram());
+        if (program != null) { eventDTO.setProgram(program.getIdentifier()); }
+        else { errorSummaryForRow.add("\nError setting the Program ["+spreadsheetEvent.getProgram()+"].\n"); }
+
+        if(!errorSummaryForRow.isEmpty()){
+            System.out.println(errorSummaryForRow.toString());
+            throw new ImportException(EventExcelInputController.SHEETNAME, rowNb,
+                    String.format("Problem with %s%n", errorSummaryForRow.toString()), null);
+        }
 
         ZonedDateTime zdt = createZonedDateTime(spreadsheetEvent, rowNb);
         eventDTO.setTimeStamp(zdt.toOffsetDateTime());
-
-
         eventDTO.setRemarks(spreadsheetEvent.getRemarks());
-
         eventDTO.setPlatform(platformUrn);
 
         String uuid = eventService.findUuidByToolActionProc("", spreadsheetEvent.getTool(),
                 spreadsheetEvent.getProcess(),
                 spreadsheetEvent.getAction());
         eventDTO.setEventDefinitionId(uuid);
-
-        Program program = programService.findOrCreateProgram(spreadsheetEvent.getProgram());
-        if (program != null) {
-            eventDTO.setProgram(program.getIdentifier());
-        } else {
-            throw new ImportException( EventExcelInputController.SHEETNAME, rowNb,
-                    String.format("Error setting the Program [%s]%n.", spreadsheetEvent.getProgram()), null);
-        }
 
         String toolName = spreadsheetEvent.getTool();
         eventDTO.setTool(new ToolDTO(extractLDT(toolName, rowNb), null));

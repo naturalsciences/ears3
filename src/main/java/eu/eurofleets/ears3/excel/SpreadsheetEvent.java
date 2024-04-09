@@ -26,14 +26,16 @@ public class SpreadsheetEvent {
         Date, Hour, Actor, eventDefinitionId, Program, Tool, Process, Action, Label, Station, Description,
         Remarks, Dist, Time, Status, Region, Weather, Navigation
     };
-
+//
     @FieldName("Date")
     @FieldConverter(StringConverter.class)
-    @NotNull
+    //@NotNull
+    @NotBlank
     String date;
 
     @FieldName("Hour")
     @FieldConverter(StringConverter.class)
+    @NotBlank
     String hour;
 
     @FieldName("Actor")
