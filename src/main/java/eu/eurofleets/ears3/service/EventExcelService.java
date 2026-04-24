@@ -253,6 +253,7 @@ public class EventExcelService {
         }
     }
 
+    //public boolean validateAllTabs(Document document) {
     public boolean validateAllTabs(Workbook document, ErrorDTOList errorList) {
         boolean areTabsOk = true;
         for (String sheetName : getAllowedTabs()) {
@@ -302,27 +303,26 @@ public class EventExcelService {
                 return requiredHeaders;
         }
 
-        public boolean processSpreadsheetEvents(ErrorDTOList errorList, List<SpreadsheetEvent> data,
-                        List<EventDTO> events, PersonDTO actor) {
-                boolean problems = false;
-                int rowNb = 1;
-                for (SpreadsheetEvent row : data) {
-                        try {
-                                EventDTO event = processSpreadsheetEvent(row, rowNb);
-                                event.setActor(actor);
-                                events.add(event);
-                        } catch (ImportException e) {
-                                problems = true;
-                                errorList
-                                                .addError(new ErrorDTO(rowNb,
-                                                                String.format("Problem on row %s in sheet %s: %s%n",
-                                                                                e.lineNb, e.sheetName, e.message),
-                                                                e));
-                        }
-                        rowNb++;
-                }
-                return problems;
+    public boolean processSpreadsheetEvents(ErrorDTOList errorList, List<SpreadsheetEvent> data,
+            List<EventDTO> events, PersonDTO actor) {
+        boolean problems = false;
+        int rowNb = 1;
+        for (SpreadsheetEvent row : data) {
+            try {
+                EventDTO event = processSpreadsheetEvent(row, rowNb);
+                event.setActor(actor);
+                events.add(event);
+            } catch (ImportException e) {
+                problems = true;
+                errorList
+                        .addError(new ErrorDTO(rowNb,
+                                String.format("Problem on row %s in sheet %s: %s%n", e.lineNb, e.sheetName, e.message),
+                                e));
+            }
+            rowNb++;
         }
+        return problems;
+    }
 
         public boolean saveSpreadsheetEvents(ErrorDTOList errorList, List<EventDTO> events) {
                 boolean problems = false;
