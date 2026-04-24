@@ -4,9 +4,6 @@
 [submodule "cruise-api"]
 	path = cruise-api
 	url = https://github.com/naturalsciences/cruise-api.git
-[submodule "metadata-generator"]
-	path = metadata-generator
-	url = https://github.com/naturalsciences/metadata-generator.git
 [submodule "csr-generator"]
 	path = csr-generator
 	url = https://github.com/naturalsciences/csr-generator.git
