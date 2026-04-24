@@ -44,6 +44,7 @@ import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.util.EntityUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.Environment;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
@@ -218,6 +219,13 @@ public class EventService {
         return this.eventRepository.findByCreatedOrModifiedAfter(after);
     }
 
+    public String findUuidByToolActionProc(String toolCategory, String tool, String process, String action) {
+        //String result = eventRepository.findUUIDByToolActionProc(toolCategory, tool, process, action);
+        String result = eventRepository.findUUIDByToolActionProc(tool, process, action);
+        String prefix = "ears:sev::";
+        return (result == null) ? prefix + UUID.randomUUID().toString() : result;
+    }
+
     public Event save(EventDTO eventDTO) {
         OffsetDateTime serverTime = Instant.now().atOffset(ZoneOffset.UTC);
         if (env.getProperty("ears.read-only") == null || !env.getProperty("ears.read-only").equals("false")) {
@@ -273,15 +281,15 @@ public class EventService {
                         log.log(Level.INFO, "server time: " + serverTime.toString());
                         log.log(Level.INFO, "event timestamp: none given");
                         Duration acquisitiondrift = Duration.between(acquisitionTime, serverTime); // positive if server
-                                                                                                   // ahead of
-                                                                                                   // acquisition,
-                                                                                                   // negative if
-                                                                                                   // acquisition ahead
-                                                                                                   // of server
+                        // ahead of
+                        // acquisition,
+                        // negative if
+                        // acquisition ahead
+                        // of server
                         long acquisitionDiff = acquisitiondrift.toMinutes();
                         if (acquisitionTime == null || acquisitionDiff > 2) { // if the acquisition is null or lagging
-                                                                              // behind server for more than 2 minutes,
-                                                                              // take the server time
+                            // behind server for more than 2 minutes,
+                            // take the server time
                             eventDTO.setTimeStamp(serverTime);
                             drift = true;
                         } else {// if the server is lagging behind acquisition, or equal, take the acquisition
@@ -295,9 +303,9 @@ public class EventService {
                     }
                 }
             } else { // it has an identifier, so it might be a modification OR come from another EARS
-                     // instqace.
+                // instqace.
                 Event existingEvent = eventRepository.findByIdentifier(identifier); // it's an existing event, so a
-                                                                                    // modification
+                // modification
                 if (existingEvent != null) {
                     event.setId(existingEvent.getId());
                     event.setModificationTime(Instant.now().atOffset(ZoneOffset.UTC));
@@ -317,7 +325,9 @@ public class EventService {
             LinkedDataTerm toolCategory = ldtService.findOrCreate(eventDTO.getToolCategory());
             LinkedDataTerm toolLdTerm = ldtService.findOrCreate(eventDTO.getTool().tool);
             LinkedDataTerm parentToolLdTerm = ldtService.findOrCreate(eventDTO.getTool().parentTool);
+
             Tool tool = new Tool(eventDTO.getTool()); // create a tool from the DTO
+
             toolLdTerm.setTransitiveIdentifier(eventDTO.getTool().tool.transitiveIdentifier);
             if (parentToolLdTerm != null && eventDTO.getTool().parentTool != null) {
                 parentToolLdTerm.setTransitiveIdentifier(eventDTO.getTool().parentTool.transitiveIdentifier);
@@ -325,7 +335,7 @@ public class EventService {
             tool.setTerm(toolLdTerm); // add the linkeddataterm to it
             tool.setParentTool(parentToolLdTerm); // add the parent linkeddataterm to it
             tool = toolService.findOrCreate(tool); // replace it with a managed entity, either by finding it or creating
-                                                   // it.
+            // it.
 
             Platform platform = platformService.findByIdentifier(eventDTO.getPlatform());
             if (platform == null) {
@@ -336,8 +346,8 @@ public class EventService {
             Person actor = null;
             if (eventDTO.getActor() != null) {
                 Organisation organisation = organisationService.findByIdentifier(eventDTO.getActor().getOrganisation());
-                actor = new Person(eventDTO.getActor().getFirstName(), eventDTO.getActor().getLastName(), organisation,
-                        null, null, eventDTO.getActor().getEmail());
+                actor = new Person(eventDTO.getActor().getFirstName(), eventDTO.getActor().getLastName(),
+                        organisation, null, null, eventDTO.getActor().getEmail());
                 actor = personService.findOrCreate(actor);
             }
 
@@ -347,7 +357,7 @@ public class EventService {
                     LinkedDataTerm propertyLdTerm = new LinkedDataTerm(propertyDTO.key.identifier,
                             propertyDTO.key.transitiveIdentifier, propertyDTO.key.name);
                     propertyLdTerm = ldtService.findOrCreate(propertyLdTerm); // replace it with a managed one, either
-                                                                              // new or selected.
+                    // new or selected.
                     Property property = new Property(propertyLdTerm, propertyDTO.value, propertyDTO.uom);
                     try {
                         propertyService.save(property);
@@ -361,13 +371,18 @@ public class EventService {
             Program program = programService.findByIdentifier(eventDTO.getProgram());
             if (program == null) {
                 throw new IllegalArgumentException(
-                        "Provided program " + eventDTO.getProgram() + " not found in EARS. Please create it first.");
+                        "Provided program " + eventDTO.getProgram()
+                                + " not found in EARS. Please create it first.");
             }
-            event.setLabel(eventDTO.getLabel() != null && eventDTO.getLabel().equals("") ? null : eventDTO.getLabel());
+            event.setLabel(
+                    eventDTO.getLabel() != null && eventDTO.getLabel().equals("") ? null : eventDTO.getLabel());
             event.setStation(
-                    eventDTO.getStation() != null && eventDTO.getStation().equals("") ? null : eventDTO.getStation());
+                    eventDTO.getStation() != null && eventDTO.getStation().equals("") ? null
+                            : eventDTO.getStation());
             event.setDescription(eventDTO.getDescription() != null && eventDTO.getDescription().equals("") ? null
                     : eventDTO.getDescription());
+            event.setRemarks( eventDTO.getRemarks() != null && eventDTO.getRemarks().isEmpty() ? null
+                    : eventDTO.getRemarks());
             event.setAction(action);
             event.setActor(actor);
             event.setProcess(process);
@@ -392,7 +407,11 @@ public class EventService {
             }.start();
             return event;
 
-        } catch (Exception ex) {
+        } catch (DataIntegrityViolationException dve ){
+            Logger.getLogger(EventService.class.getName()).log(Level.SEVERE, null, dve);
+            String message = ( dve.getMessage() != null ) ? dve.getMessage() : dve.toString();
+            throw new DataIntegrityViolationException(message, dve.getMostSpecificCause());
+        }catch (Exception ex) {
             Logger.getLogger(EventService.class.getName()).log(Level.SEVERE, null, ex);
             return null;
         }

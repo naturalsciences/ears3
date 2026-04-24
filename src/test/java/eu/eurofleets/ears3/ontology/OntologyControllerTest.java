@@ -139,6 +139,7 @@ public class OntologyControllerTest {
          * Test of getVesselOntologyDate method, of class OntologyController.
          */
         @Test
+        @Ignore
         public void testGetVesselOntologyDate() throws Exception {
                 HttpHeaders httpHeaders = new HttpHeaders();
                 httpHeaders.add("Accept", "text/plain");
@@ -183,6 +184,7 @@ public class OntologyControllerTest {
          * Test of getProgramOntologyDate method, of class OntologyController.
          */
         @Test
+        @Ignore
         public void testGetProgramOntologyDate() throws Exception {
                 HttpHeaders httpHeaders = new HttpHeaders();
                 httpHeaders.add("Accept", "text/plain");

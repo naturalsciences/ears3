@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en"  xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" layout:decorate="~{fragments/f}">
+<head th:replace="fragments/f :: head"></head>
+<body>
+<nav th:replace="fragments/f :: header"></nav>
+<div class="container" layout:fragment="main">
+    <h1>Logfile submission</h1>
+    <div class="alert alert-light" role="alert">
+        <p>
+            Choose the logfile you want to upload.
+        </p>
+        <p>
+            This file is supposed to be a normal excel file (.xlsx)<br />
+            The file size should be less then <em th:text="${maxFileSize}"></em>
+        </p>
+        <p>
+            An empty template with example tab can be downloaded: <a th:href="@{/excel/ship_log_template.xlsx}">Ship Log Template</a>
+        </p>
+        <p>
+            When every row sends an error containing <strong>ERROR: duplicate key value violates unique constraint "event_unique"</strong>, the file was probably already uploaded before.
+        </p>
+    </div>
+    <div class="row">
+        <div class="col">
+            <form id="importCsvForm" method="post" enctype="multipart/form-data" th:action="@{/api/excelImport}">
+                <div class="input-group mb-3">
+                    <input id="actorField" type="hidden" name="person">
+                    <input id="fileId" type="file" name="file" class="form-control" style="height: auto !important;" aria-describedby="importButton" aria-label="Upload">
+                    <button class="btn btn-outline-secondary" type="submit" id="importButton">Import</button>
+                </div>
+            </form>
+
+            <div id="errors" class="alert alert-danger d-none"></div>
+            <div id="success" class="alert alert-success d-none"> Successfully uploaded and imported !</div>
+
+            <script th:inline="javascript">
+
+                window.onload = function(){
+                    let actorField = document.getElementById("actorField");
+                    actorField.value = localStorage.getItem("actor");
+                }
+                $(document).ready(function() {
+                  /*<![CDATA[*/
+                      var homelink = /*[[@{'/'}]]*/ '';
+                  /*]]>*/
+
+                  $("form#importCsvForm").submit(function(e){
+                      event.preventDefault();
+                      $(document.getElementById("success")).addClass("d-none");
+                      $(document.getElementById("errors")).addClass("d-none");
+                      var token = $("input[name='_csrf']").val();
+                      var header = "X-CSRF-TOKEN";
+                      var formData = new FormData(this);
+                      $.ajax({
+                          type: "POST",
+                          contentType: "application/json",
+                          url: homelink + "api/excelImport",
+                          data: formData,
+                          beforeSend: function(xhr) {
+                            xhr.setRequestHeader(header, token);
+                          },
+                          success: function(result) {
+                            //$("div#success").html(result.responseText);    //Toont message niet maar bij error wel??????
+                            $("div#success").html("Successfully Uploaded and Imported !");
+                            document.getElementById("success").classList.remove('d-none');
+                          },
+                          error: function(result){
+                            $("div#errors").html(result.responseText);
+                            $("row").prepend("Row ");
+                            document.getElementById("errors").classList.remove('d-none');
+                          },
+                          cache: false,
+                          contentType: false,
+                          processData: false
+                      });
+                  });
+                });
+            </script>
+        </div>
+    </div>
+</div>
+</body>
+</html>

@@ -100,7 +100,7 @@ public class Cruise implements ICruise, Serializable {
     private Collection<Program> programs;
     @ManyToOne(optional = false)
     private Platform platform;
-    @Column(length = 7500)
+    @Column(length = 10000)
     private String objectives;
     private boolean isCancelled; //additional field so that cancelled cruises don't need to be deleted from the database. They just don't show up in EARS.
     @ManyToMany()

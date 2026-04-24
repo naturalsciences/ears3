@@ -103,7 +103,7 @@ public class EventControllerTest {
                 objectMapper.registerModule(new OrganisationModule());
                 objectMapper.registerModule(new PropertyModule());
                 objectMapper.registerModule(new ProgramModule());
-                
+
         }
 
         /*
@@ -268,6 +268,7 @@ public class EventControllerTest {
 
         public static EventDTO getTestEvent2() {
                 PersonDTO joan = new PersonDTO("Joan", "Backers", null, null, null, "jb@rbins.be");
+
                 EventDTO event = new EventDTO();
                 event.setIdentifier(null);// UUID.randomUUID().toString());
                 event.setEventDefinitionId("e3c8ff9d-02e9-446d-a59b-224a14b89f9a");
@@ -450,7 +451,7 @@ public class EventControllerTest {
                 MvcResult mvcResult = this.mockMvc
                                 .perform(MockMvcRequestBuilders.post("/api/event").accept(MediaType.APPLICATION_XML)
                                                 .contentType(MediaType.APPLICATION_JSON).content(json))
-                                 .andDo(print())
+                                .andDo(print())
                                 .andExpect(status().isCreated())
                                 .andExpect(content().string(containsString(
                                                 "<eventDefinitionId>e3c8df0d-02e9-446d-a59b-224a14b89f9a</eventDefinitionId>")))
@@ -689,7 +690,8 @@ public class EventControllerTest {
 
                 assertEventCount("/api/events?programIdentifier=" + e.getProgram(), 1, this.mockMvc, this.objectMapper);
 
-                assertEventCount("/api/events?programIdentifier=" + e2.getProgram(), 1, this.mockMvc, this.objectMapper);
+                assertEventCount("/api/events?programIdentifier=" + e2.getProgram(), 1, this.mockMvc,
+                                this.objectMapper);
 
                 // delete all previous events and programs
                 deleteAllEvents(this.mockMvc);

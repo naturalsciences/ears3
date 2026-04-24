@@ -30,10 +30,7 @@ import javax.xml.bind.annotation.XmlTransient;
  * @author Thomas Vandenberghe
  */
 @Entity
-@Table(
-        uniqueConstraints
-        = @UniqueConstraint(columnNames = {"term_id", "parent_term_id"})
-)
+@Table(uniqueConstraints = @UniqueConstraint(columnNames = { "term_id", "parent_term_id" }))
 @XmlRootElement
 @XmlAccessorType(XmlAccessType.FIELD) //ignore all the getters
 public class Tool implements ITool, Serializable {
@@ -81,7 +78,8 @@ public class Tool implements ITool, Serializable {
     public Tool(ToolDTO toolDTO) {
         this.term = new LinkedDataTerm(toolDTO.tool.identifier, toolDTO.tool.transitiveIdentifier, toolDTO.tool.name);
         if (toolDTO.parentTool != null) {
-            this.parentTerm = new LinkedDataTerm(toolDTO.parentTool.identifier, toolDTO.parentTool.transitiveIdentifier, toolDTO.parentTool.name);
+            this.parentTerm = new LinkedDataTerm(toolDTO.parentTool.identifier, toolDTO.parentTool.transitiveIdentifier,
+                    toolDTO.parentTool.name);
         }
     }
 
@@ -116,15 +114,15 @@ public class Tool implements ITool, Serializable {
     /*  public OffsetDateTime getBeginPosition() {
         return beginPosition;
     }
-
+    
     public void setBeginPosition(OffsetDateTime beginPosition) {
         this.beginPosition = beginPosition;
     }
-
+    
     public OffsetDateTime getEndPosition() {
         return endPosition;
     }
-
+    
     public void setEndPosition(OffsetDateTime endPosition) {
         this.endPosition = endPosition;
     }*/
