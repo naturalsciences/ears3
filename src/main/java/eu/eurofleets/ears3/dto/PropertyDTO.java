@@ -27,4 +27,6 @@ public class PropertyDTO {
         this.uom = uom;
     }
 
+    public void setValue( String value ) { this.value = value; }
+
 }

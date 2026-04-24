@@ -6,6 +6,7 @@ import eu.eurofleets.ears3.Application;
 import eu.eurofleets.ears3.dto.LinkedDataTermDTO;
 import eu.eurofleets.ears3.dto.PersonDTO;
 import eu.eurofleets.ears3.dto.ProgramDTO;
+import eu.eurofleets.ears3.dto.PropertyDTO;
 import eu.eurofleets.ears3.service.EventService;
 import eu.eurofleets.ears3.service.LinkedDataTermService;
 import org.apache.commons.lang3.StringUtils;
@@ -247,12 +248,16 @@ public class EventExcelInputControllerTest {
 
 
 
-
+/*Refactor Idea:  In order to replace the static definitions of these properties and DEFS and CATMAP, create a function based on this concept that fills in the
+* maps from the my.json file.
+* for the propertiesMap, we'll have to change it to getting the empty poperty from the map, fill the current value, push that value to another (props) map
+* */
         @Test
         public void justatest() throws Exception {
 
                 Map<String, LinkedDataTermDTO> DEFS = new HashMap<>();
                 Map<String, LinkedDataTermDTO> CATMAP = new HashMap<>();
+                Map<String, PropertyDTO> propertiesMap = new HashMap<>();
 
                 JsonNode rootNode;
                 ObjectMapper objectMapper;
@@ -260,14 +265,16 @@ public class EventExcelInputControllerTest {
                 File jsonFile = new ClassPathResource("my.json").getFile();
                 rootNode = objectMapper.readTree(jsonFile);
 
-                JsonNode properties = rootNode.get("properties");
-                ArrayList<LinkedHashMap<String,String>> list = objectMapper.convertValue(properties, ArrayList.class);
+                JsonNode defs = rootNode.get("defs");
+                ArrayList<LinkedHashMap<String,String>> defList = objectMapper.convertValue(defs, ArrayList.class);
 
                 JsonNode catmap = rootNode.get("catmap");
                 ArrayList<LinkedHashMap<String,String>> cmList = objectMapper.convertValue(catmap, ArrayList.class);
 
+                JsonNode properties = rootNode.get("properties");
+                ArrayList<LinkedHashMap<String,String>> propList = objectMapper.convertValue(properties, ArrayList.class);
 
-                for( LinkedHashMap<String,String> item : list ){
+                for( LinkedHashMap<String,String> item : defList ){
                         System.out.println( "het item: " + item + "\n");
                         LinkedDataTermDTO ldtDTO = new LinkedDataTermDTO(item.get("identifier"), item.get("transitveldidentifier"), item.get("name"));
                         String key = StringUtils.capitalize(StringUtils.lowerCase( item.get("name") ) );
@@ -276,13 +283,20 @@ public class EventExcelInputControllerTest {
 
                 for( LinkedHashMap<String,String> item : cmList ){
                         System.out.println( "het item: " + item + "\n");
-                        //LinkedDataTermDTO ldtDTO = new LinkedDataTermDTO(item.get("identifier"), item.get("transitveldidentifier"), item.get("name"));
                         String key = StringUtils.capitalize(StringUtils.lowerCase( item.get("name") ) );
                         String prop = StringUtils.capitalize(StringUtils.lowerCase( item.get("prop") ) );
                         LinkedDataTermDTO ldtDTO = DEFS.get(prop);
                         CATMAP.put(key, ldtDTO);
                 }
 
+                //Value moet nog wel ingevuld worden in EventExcelService dan
+                for( LinkedHashMap<String, String> item : propList ){
+                        System.out.println("De property: " + item + "\n");
+                        LinkedDataTermDTO ldtDTO = new LinkedDataTermDTO(item.get("identifier"), item.get("transitveldidentifier"), item.get("name"));
+                        PropertyDTO pDTO = new PropertyDTO(ldtDTO, item.get("value"), item.get("uom"));
+                        String key = StringUtils.capitalize(StringUtils.lowerCase(item.get("name")));
+                        propertiesMap.put(key, pDTO);
+                }
 
                 int a=5;
                 //String prettyPrintEmployee = objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(rootNode);

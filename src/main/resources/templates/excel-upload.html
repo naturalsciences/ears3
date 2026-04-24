@@ -15,6 +15,12 @@
             This file is supposed to be a normal excel file (.xlsx)<br />
             The file size should be less then <em th:text="${maxFileSize}"></em>
         </p>
+        <p>
+            An empty template with example tab can be downloaded: <a th:href="@{/excel/ship_log_template.xlsx}">Ship Log Template</a>
+        </p>
+        <p>
+            When every row sends an error containing <strong>ERROR: duplicate key value violates unique constraint "event_unique"</strong>, the file was probably already uploaded before.
+        </p>
     </div>
     <div class="row">
         <div class="col">

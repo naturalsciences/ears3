@@ -213,7 +213,7 @@ select#idSelect_tc+button, select#idSelect_t+button,select#idSelect_p+button,sel
 }
 
 error {
-  display: inline-block;
+  display: block;
   margin-bottom: 0.5em;
 }
 

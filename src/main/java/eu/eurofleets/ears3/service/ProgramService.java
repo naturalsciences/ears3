@@ -169,6 +169,7 @@ public class ProgramService {
     }
 
     public Program findOrCreateProgram(String programName) {
+        if( programName == null ){ programName=""; }
         Program program = findByIdentifier(programName);
         if( program == null ){
             if( programName.equalsIgnoreCase(DEFAULT_PROGRAM) ){

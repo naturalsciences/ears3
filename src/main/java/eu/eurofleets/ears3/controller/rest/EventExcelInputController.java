@@ -64,7 +64,7 @@ public class EventExcelInputController {
             boolean areTabsOk = eventExcelService.validateAllTabs(poiWb, errorList);
             boolean areHeadersOk = eventExcelService.validateHeaders(poiWb, SHEETNAME, errorList);
             if (!areHeadersOk || !areTabsOk ) {
-                Message<ErrorDTOList> msg = new Message<>(HttpStatus.CONFLICT.value(), "Error Creating Excel Event, CSV content does not comply with expectations. (ea: missing headers, sheets, tabs)",
+                Message<ErrorDTOList> msg = new Message<>(HttpStatus.CONFLICT.value(), "Error Creating Excel Event, file does not comply with expectations. (ea: missing headers, sheets, tabs)",
                         errorList);
                 return new ResponseEntity<>(errorList, HttpStatus.CONFLICT);
             }
