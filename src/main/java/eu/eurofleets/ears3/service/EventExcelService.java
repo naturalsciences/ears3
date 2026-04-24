@@ -40,29 +40,29 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 @Service
 public class EventExcelService {
 
-        private Validator validator;
+    private Validator validator;
 
-        private final EventRepository eventRepository;
-        @Autowired
-        private ProgramService programService;
+    private final EventRepository eventRepository;
+    @Autowired
+    private ProgramService programService;
 
-        @Autowired
-        private EventService eventService;
+    @Autowired
+    private EventService eventService;
 
-        private DatagramUtilities<Navigation> navUtil;
-        private DatagramUtilities<Thermosal> thermosalUtil;
-        private DatagramUtilities<Weather> weatherUtil;
-        public static Logger log = Logger.getLogger(EventService.class.getSimpleName());
+    private DatagramUtilities<Navigation> navUtil;
+    private DatagramUtilities<Thermosal> thermosalUtil;
+    private DatagramUtilities<Weather> weatherUtil;
+    public static Logger log = Logger.getLogger(EventService.class.getSimpleName());
 
-        @Autowired
-        private final Environment env;
+    @Autowired
+    private final Environment env;
 
-        private static List<String> allowedTabs = Arrays.asList("events");
-        private List<String> requiredHeaders = Arrays.stream(SpreadsheetEvent.FIELDS.values()).map(Enum::name)
-                        .collect(Collectors.toList());
+    private static List<String> allowedTabs = Arrays.asList("events");
+    private List<String> requiredHeaders = Arrays.stream(SpreadsheetEvent.FIELDS.values()).map(Enum::name)
+            .collect(Collectors.toList());
 
-        @Value("${ears.platform}")
-        public String platformUrn;
+    @Value("${ears.platform}")
+    public String platformUrn;
 
     private static Map<String, LinkedDataTermDTO> DEFS = new HashMap<>();
     private static Map<String, LinkedDataTermDTO> CATMAP = new HashMap<>();
@@ -96,29 +96,31 @@ public class EventExcelService {
         rootNode = objectMapper.readTree(jsonFile);
 
         JsonNode defs = rootNode.get("defs");
-        ArrayList<LinkedHashMap<String,String>> defList = objectMapper.convertValue(defs, ArrayList.class);
+        ArrayList<LinkedHashMap<String, String>> defList = objectMapper.convertValue(defs, ArrayList.class);
 
         JsonNode catmap = rootNode.get("catmap");
-        ArrayList<LinkedHashMap<String,String>> cmList = objectMapper.convertValue(catmap, ArrayList.class);
+        ArrayList<LinkedHashMap<String, String>> cmList = objectMapper.convertValue(catmap, ArrayList.class);
 
         JsonNode properties = rootNode.get("properties");
-        ArrayList<LinkedHashMap<String,String>> propList = objectMapper.convertValue(properties, ArrayList.class);
+        ArrayList<LinkedHashMap<String, String>> propList = objectMapper.convertValue(properties, ArrayList.class);
 
-        for( LinkedHashMap<String,String> item : defList ){
-            LinkedDataTermDTO ldtDTO = new LinkedDataTermDTO(item.get("identifier"), item.get("transitveldidentifier"), item.get("name"));
-            String key = StringUtils.capitalize(StringUtils.lowerCase( item.get("name") ) );
+        for (LinkedHashMap<String, String> item : defList) {
+            LinkedDataTermDTO ldtDTO = new LinkedDataTermDTO(item.get("identifier"), item.get("transitveldidentifier"),
+                    item.get("name"));
+            String key = StringUtils.capitalize(StringUtils.lowerCase(item.get("name")));
             DEFS.put(key, ldtDTO);
         }
 
-        for( LinkedHashMap<String,String> item : cmList ){
-            String key = StringUtils.capitalize(StringUtils.lowerCase( item.get("name") ) );
-            String prop = StringUtils.capitalize(StringUtils.lowerCase( item.get("prop") ) );
+        for (LinkedHashMap<String, String> item : cmList) {
+            String key = StringUtils.capitalize(StringUtils.lowerCase(item.get("name")));
+            String prop = StringUtils.capitalize(StringUtils.lowerCase(item.get("prop")));
             LinkedDataTermDTO ldtDTO = DEFS.get(prop);
             CATMAP.put(key, ldtDTO);
         }
 
-        for( LinkedHashMap<String, String> item : propList ){
-            LinkedDataTermDTO ldtDTO = new LinkedDataTermDTO(item.get("identifier"), item.get("transitveldidentifier"), item.get("name"));
+        for (LinkedHashMap<String, String> item : propList) {
+            LinkedDataTermDTO ldtDTO = new LinkedDataTermDTO(item.get("identifier"), item.get("transitveldidentifier"),
+                    item.get("name"));
             PropertyDTO pDTO = new PropertyDTO(ldtDTO, item.get("value"), item.get("uom"));
             String key = StringUtils.capitalize(StringUtils.lowerCase(item.get("name")));
             PROPMAPDEF.put(key, pDTO);
@@ -126,7 +128,9 @@ public class EventExcelService {
 
     }
 
-    private String loweredCapitalize(String input){ return StringUtils.capitalize(input.toLowerCase()); }
+    private String loweredCapitalize(String input) {
+        return StringUtils.capitalize(input.toLowerCase());
+    }
 
     public LinkedDataTermDTO extractLDT(String synonym, int rowNb) throws ImportException {
         synonym = loweredCapitalize(synonym);
@@ -149,14 +153,17 @@ public class EventExcelService {
             return targetLDT;
         }
     }
-    private static ZonedDateTime createZonedDateTime(SpreadsheetEvent spreadsheetEvent, int rowNb) throws  ImportException{
+
+    private static ZonedDateTime createZonedDateTime(SpreadsheetEvent spreadsheetEvent, int rowNb)
+            throws ImportException {
         ZonedDateTime zdt = null;
         String date = spreadsheetEvent.getDate();
         String hour = spreadsheetEvent.getHour();
         try {
             zdt = DateHelper.dateTimeStringToZonedDateTime(date, hour);
         } catch (Exception e) {
-            throw new ImportException(EventExcelInputController.SHEETNAME, rowNb, String.format("Problem with [%s]%n", e.getMessage()), null);
+            throw new ImportException(EventExcelInputController.SHEETNAME, rowNb,
+                    String.format("Problem with [%s]%n", e.getMessage()), null);
         }
         return zdt;
     }
@@ -169,14 +176,19 @@ public class EventExcelService {
         Set<ConstraintViolation<SpreadsheetEvent>> errors = validator.validate(spreadsheetEvent);
         if (!errors.isEmpty()) {
             System.out.printf("Problem with %s%n", spreadsheetEvent.toString());
-            errors.forEach(error -> { errorSummaryForRow.add( error.getPropertyPath() + " " + error.getMessage()); });
+            errors.forEach(error -> {
+                errorSummaryForRow.add(error.getPropertyPath() + " " + error.getMessage());
+            });
         }
 
         Program program = programService.findOrCreateProgram(spreadsheetEvent.getProgram());
-        if (program != null) { eventDTO.setProgram(program.getIdentifier()); }
-        else { errorSummaryForRow.add("\nError setting the Program ["+spreadsheetEvent.getProgram()+"].\n"); }
+        if (program != null) {
+            eventDTO.setProgram(program.getIdentifier());
+        } else {
+            errorSummaryForRow.add("\nError setting the Program [" + spreadsheetEvent.getProgram() + "].\n");
+        }
 
-        if(!errorSummaryForRow.isEmpty()){
+        if (!errorSummaryForRow.isEmpty()) {
             System.out.println(errorSummaryForRow.toString());
             throw new ImportException(EventExcelInputController.SHEETNAME, rowNb,
                     String.format("Problem with %s%n", errorSummaryForRow.toString()), null);
@@ -260,7 +272,8 @@ public class EventExcelService {
             Sheet sheet = document.getSheet(sheetName);
             if (sheet == null) {
                 areTabsOk = false;
-                errorList.addError(new ErrorDTO(0, String.format("Problem in sheet %s: %s%n", sheetName, "Missing sheet: " + sheetName), null));
+                errorList.addError(new ErrorDTO(0,
+                        String.format("Problem in sheet %s: %s%n", sheetName, "Missing sheet: " + sheetName), null));
             }
         }
         return areTabsOk;
@@ -276,32 +289,34 @@ public class EventExcelService {
         Sheet sheet = document.getSheet(sheetName);
         Set<String> sheetHeaders = findColumnHeadersForSheet(sheet);
         for (String requiredHeader : requiredHeaders) {
-            if ( !sheetHeaders.contains(requiredHeader) ){
+            if (!sheetHeaders.contains(requiredHeader)) {
                 areHeadersOk = false;
-                errorList.addError(new ErrorDTO(0, String.format("Problem in sheet %s: %s%n", sheetName, "Missing header: " + requiredHeader), null));
+                errorList.addError(new ErrorDTO(0,
+                        String.format("Problem in sheet %s: %s%n", sheetName, "Missing header: " + requiredHeader),
+                        null));
             }
         }
         return areHeadersOk;
     }
 
-        private Set<String> findColumnHeadersForSheet(Sheet sheet) {
-                Set<String> headers = new HashSet<>();
-                /*TMP*/int nbCol = 50;
-                if (sheet != null) {
-                        Row row = sheet.getRow(0); //First row should contain the headers
-                        for (int i = 0; i < nbCol; i++) {
-                                Cell cell = row.getCell(i);
-                                if (cell != null) {
-                                        headers.add(cell.getStringCellValue());
-                                }
-                        }
+    private Set<String> findColumnHeadersForSheet(Sheet sheet) {
+        Set<String> headers = new HashSet<>();
+        /*TMP*/int nbCol = 50;
+        if (sheet != null) {
+            Row row = sheet.getRow(0); //First row should contain the headers
+            for (int i = 0; i < nbCol; i++) {
+                Cell cell = row.getCell(i);
+                if (cell != null) {
+                    headers.add(cell.getStringCellValue());
                 }
-                return headers;
+            }
         }
+        return headers;
+    }
 
-        private List<String> getRequiredHeaders() {
-                return requiredHeaders;
-        }
+    private List<String> getRequiredHeaders() {
+        return requiredHeaders;
+    }
 
     public boolean processSpreadsheetEvents(ErrorDTOList errorList, List<SpreadsheetEvent> data,
             List<EventDTO> events, PersonDTO actor) {
@@ -324,21 +339,21 @@ public class EventExcelService {
         return problems;
     }
 
-        public boolean saveSpreadsheetEvents(ErrorDTOList errorList, List<EventDTO> events) {
-                boolean problems = false;
-                int i = 1;
-                for (EventDTO dto : events) {
-                        try {
-                                eventService.save(dto);
-                        } catch (DataIntegrityViolationException dve) {
-                                problems = true;
-                                errorList.addError(new ErrorDTO(i, dve.getMessage(), dve));
-                        } catch (Exception e) {
-                                problems = true;
-                                errorList.addError(new ErrorDTO(i, "General error saving SpreadsheetEventDTO's", e));
-                        }
-                        i++;
-                }
-                return problems;
+    public boolean saveSpreadsheetEvents(ErrorDTOList errorList, List<EventDTO> events) {
+        boolean problems = false;
+        int i = 1;
+        for (EventDTO dto : events) {
+            try {
+                eventService.save(dto);
+            } catch (DataIntegrityViolationException dve) {
+                problems = true;
+                errorList.addError(new ErrorDTO(i, dve.getMessage(), dve));
+            } catch (Exception e) {
+                problems = true;
+                errorList.addError(new ErrorDTO(i, "General error saving SpreadsheetEventDTO's", e));
+            }
+            i++;
         }
+        return problems;
+    }
 }

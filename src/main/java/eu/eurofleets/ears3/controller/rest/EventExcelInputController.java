@@ -3,13 +3,14 @@ package eu.eurofleets.ears3.controller.rest;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import eu.eurofleets.ears3.domain.Message;
+import eu.eurofleets.ears3.domain.Program;
 import eu.eurofleets.ears3.dto.ErrorDTO;
-import eu.eurofleets.ears3.dto.ErrorDTOList;
 import eu.eurofleets.ears3.dto.ErrorDTOList;
 import eu.eurofleets.ears3.dto.EventDTO;
 import eu.eurofleets.ears3.dto.PersonDTO;
 import eu.eurofleets.ears3.excel.SpreadsheetEvent;
 import eu.eurofleets.ears3.service.EventExcelService;
+import eu.eurofleets.ears3.service.ProgramService;
 import io.github.rushuat.ocell.document.Document;
 import io.github.rushuat.ocell.document.Documents;
 import org.apache.poi.ss.usermodel.Workbook;
@@ -39,6 +40,9 @@ public class EventExcelInputController {
 
     @Autowired
     private EventExcelService eventExcelService;
+
+    @Autowired
+    private ProgramService programService;
 
     @Autowired
     private ObjectMapper objectMapper;
@@ -118,7 +122,7 @@ public class EventExcelInputController {
                 Program program = new Program();
                 program.setIdentifier(String.format("%s_operations", shipCode.replace("SDN:C17::", "")));
                 program.setName("General Belgica Operations");
-                save(program);
+                programService.save(program);
                 /*                 Message<ErrorDTOList> message = new Message<>(HttpStatus.CONFLICT.value(),
                         "Error Creating Excel Event",
                         errorList); */
