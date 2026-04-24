@@ -37,12 +37,12 @@ public class EventExcelService {
 
         private Validator validator;
 
-    private final EventRepository eventRepository;
-    @Autowired
-    private ProgramService programService;
+        private final EventRepository eventRepository;
+        @Autowired
+        private ProgramService programService;
 
-    @Autowired
-    private EventService eventService;
+        @Autowired
+        private EventService eventService;
 
         private DatagramUtilities<Navigation> navUtil;
         private DatagramUtilities<Thermosal> thermosalUtil;
@@ -52,15 +52,15 @@ public class EventExcelService {
         @Autowired
         private final Environment env;
 
-    private static List<String> allowedTabs = Arrays.asList("events");
-    private List<String> requiredHeaders = Arrays.stream(SpreadsheetEvent.FIELDS.values()).map(Enum::name)
-            .collect(Collectors.toList());
+        private static List<String> allowedTabs = Arrays.asList("events");
+        private List<String> requiredHeaders = Arrays.stream(SpreadsheetEvent.FIELDS.values()).map(Enum::name)
+                        .collect(Collectors.toList());
 
         @Value("${ears.platform}")
         public String platformUrn;
 
-    private static Map<String, LinkedDataTermDTO> DEFS = new HashMap<>();
-    private static Map<String, LinkedDataTermDTO> CATMAP = new HashMap<>();
+        private static Map<String, LinkedDataTermDTO> DEFS = new HashMap<>();
+        private static Map<String, LinkedDataTermDTO> CATMAP = new HashMap<>();
 
         @Autowired
         public EventExcelService(EventRepository eventRepository, Environment env) {
@@ -78,48 +78,52 @@ public class EventExcelService {
                 }
         }
 
-    static {
-        LinkedDataTermDTO human = new LinkedDataTermDTO("http://vocab.nerc.ac.uk/collection/L06/current/71/",
-                null, "human");
-        DEFS.put("Human", human);
+        static {
+                LinkedDataTermDTO human = new LinkedDataTermDTO("http://vocab.nerc.ac.uk/collection/L06/current/71/",
+                                null, "human");
+                DEFS.put("Human", human);
 
-        LinkedDataTermDTO all = new LinkedDataTermDTO("http://ontologies.ef-ears.eu/ears2/1#dev_100000", null,
-                "All persons");
-        DEFS.put("All persons", all);
-        CATMAP.put("All persons", human);
-        LinkedDataTermDTO command = new LinkedDataTermDTO("http://ontologies.ef-ears.eu/ears2/1#dev_100001", null,
-                "Command");
-        DEFS.put("Command", command);
-        CATMAP.put("Command", human);
-        LinkedDataTermDTO crew = new LinkedDataTermDTO("http://ontologies.ef-ears.eu/ears2/1#dev_1000002", null,
-                "Crew");
-        DEFS.put("Crew", crew);
-        CATMAP.put("Crew", human);
-        LinkedDataTermDTO scientists = new LinkedDataTermDTO("http://ontologies.ef-ears.eu/ears2/1#dev_100003", null,
-                "Scientists");
-        DEFS.put("Scientists", scientists);
-        CATMAP.put("Scientists", human);
-        LinkedDataTermDTO sparker = new LinkedDataTermDTO("http://ontologies.ef-ears.eu/ears2/1#ctg_123",
-                null,
-                "Sparker");
-        DEFS.put("Sparker", sparker);
-        CATMAP.put("Sparker", sparker);
-        LinkedDataTermDTO unknownSparker = new LinkedDataTermDTO("http://ontologies.ef-ears.eu/ears2/1#dev_100004",
-                null,
-                "Unknown sparker");
-        DEFS.put("Unknown sparker", unknownSparker);
-        CATMAP.put("Unknown sparker", sparker);
+                LinkedDataTermDTO all = new LinkedDataTermDTO("http://ontologies.ef-ears.eu/ears2/1#dev_100000", null,
+                                "All persons");
+                DEFS.put("All persons", all);
+                CATMAP.put("All persons", human);
+                LinkedDataTermDTO command = new LinkedDataTermDTO("http://ontologies.ef-ears.eu/ears2/1#dev_100001",
+                                null,
+                                "Command");
+                DEFS.put("Command", command);
+                CATMAP.put("Command", human);
+                LinkedDataTermDTO crew = new LinkedDataTermDTO("http://ontologies.ef-ears.eu/ears2/1#dev_1000002", null,
+                                "Crew");
+                DEFS.put("Crew", crew);
+                CATMAP.put("Crew", human);
+                LinkedDataTermDTO scientists = new LinkedDataTermDTO("http://ontologies.ef-ears.eu/ears2/1#dev_100003",
+                                null,
+                                "Scientists");
+                DEFS.put("Scientists", scientists);
+                CATMAP.put("Scientists", human);
+                LinkedDataTermDTO sparker = new LinkedDataTermDTO("http://ontologies.ef-ears.eu/ears2/1#ctg_123",
+                                null,
+                                "Sparker");
+                DEFS.put("Sparker", sparker);
+                CATMAP.put("Sparker", sparker);
+                LinkedDataTermDTO unknownSparker = new LinkedDataTermDTO(
+                                "http://ontologies.ef-ears.eu/ears2/1#dev_100004",
+                                null,
+                                "Unknown sparker");
+                DEFS.put("Unknown sparker", unknownSparker);
+                CATMAP.put("Unknown sparker", sparker);
 
-        LinkedDataTermDTO topas = new LinkedDataTermDTO("http://ontologies.ef-ears.eu/ears2/1#dev_3292", null, "Topas");
-        DEFS.put("Topas", topas);
+                LinkedDataTermDTO topas = new LinkedDataTermDTO("http://ontologies.ef-ears.eu/ears2/1#dev_3292", null,
+                                "Topas");
+                DEFS.put("Topas", topas);
 
-        LinkedDataTermDTO rv = new LinkedDataTermDTO("http://ontologies.ef-ears.eu/ears2/1#ctg_26", null,
-                "Research vessel");
-        DEFS.put("Research vessel", rv);
-        LinkedDataTermDTO belgica = new LinkedDataTermDTO("http://ontologies.ef-ears.eu/ears2/1#ves_1792", null,
-                "Belgica");
-        DEFS.put("Belgica", belgica);
-        CATMAP.put("Belgica", rv);
+                LinkedDataTermDTO rv = new LinkedDataTermDTO("http://ontologies.ef-ears.eu/ears2/1#ctg_26", null,
+                                "Research vessel");
+                DEFS.put("Research vessel", rv);
+                LinkedDataTermDTO belgica = new LinkedDataTermDTO("http://ontologies.ef-ears.eu/ears2/1#ves_1792", null,
+                                "Belgica");
+                DEFS.put("Belgica", belgica);
+                CATMAP.put("Belgica", rv);
 
                 LinkedDataTermDTO human = new LinkedDataTermDTO(null,
                                 "http://vocab.nerc.ac.uk/collection/L06/current/71/", "human");
@@ -196,46 +200,53 @@ public class EventExcelService {
                                 "Mobilisation");
                 DEFS.put("Mobilisation", mobilisation);
 
-        LinkedDataTermDTO start = new LinkedDataTermDTO("http://ontologies.ef-ears.eu/ears2/1#act_1", null, "Start");
-        DEFS.put("Start", start);
-        LinkedDataTermDTO end = new LinkedDataTermDTO("http://ontologies.ef-ears.eu/ears2/1#act_2", null, "End");
-        DEFS.put("End", end);
-    }
-
-    private String loweredCapitalize(String input){ return StringUtils.capitalize(input.toLowerCase()); }
-
-    public LinkedDataTermDTO extractLDT(String synonym, int rowNb) throws ImportException {
-        synonym = loweredCapitalize(synonym);
-        LinkedDataTermDTO targetLDT = DEFS.get(synonym);
-        if (targetLDT == null) {
-            throw new ImportException(EventExcelInputController.SHEETNAME, rowNb,
-                    String.format("Unknown Linked Data Term [ %s ]", synonym), null);
-        } else {
-            return targetLDT;
+                LinkedDataTermDTO start = new LinkedDataTermDTO("http://ontologies.ef-ears.eu/ears2/1#act_1", null,
+                                "Start");
+                DEFS.put("Start", start);
+                LinkedDataTermDTO end = new LinkedDataTermDTO("http://ontologies.ef-ears.eu/ears2/1#act_2", null,
+                                "End");
+                DEFS.put("End", end);
         }
-    }
 
-    public LinkedDataTermDTO extractToolCategory(String synonym, int rowNb) throws ImportException {
-        synonym = loweredCapitalize(synonym);
-        LinkedDataTermDTO targetLDT = CATMAP.get(synonym);
-        if (targetLDT == null) {
-            throw new ImportException(EventExcelInputController.SHEETNAME, rowNb,
-                    String.format("Unknown ToolCategory [ %s ]", synonym), null);
-        } else {
-            return targetLDT;
+        private String loweredCapitalize(String input) {
+                return StringUtils.capitalize(input.toLowerCase());
         }
-    }
-    private static ZonedDateTime createZonedDateTime(SpreadsheetEvent spreadsheetEvent, int rowNb) throws  ImportException{
-        ZonedDateTime zdt = null;
-        String date = spreadsheetEvent.getDate();
-        String hour = spreadsheetEvent.getHour();
-        try {
-            zdt = DateHelper.dateTimeStringToZonedDateTime(date, hour);
-        } catch (Exception e) {
-            throw new ImportException(date + " " + hour, rowNb, String.format("Problem with %s%n", spreadsheetEvent.toString()), null);
+
+        public LinkedDataTermDTO extractLDT(String synonym, int rowNb) throws ImportException {
+                synonym = loweredCapitalize(synonym);
+                LinkedDataTermDTO targetLDT = DEFS.get(synonym);
+                if (targetLDT == null) {
+                        throw new ImportException(EventExcelInputController.SHEETNAME, rowNb,
+                                        String.format("Unknown Linked Data Term [ %s ]", synonym), null);
+                } else {
+                        return targetLDT;
+                }
         }
-        return zdt;
-    }
+
+        public LinkedDataTermDTO extractToolCategory(String synonym, int rowNb) throws ImportException {
+                synonym = loweredCapitalize(synonym);
+                LinkedDataTermDTO targetLDT = CATMAP.get(synonym);
+                if (targetLDT == null) {
+                        throw new ImportException(EventExcelInputController.SHEETNAME, rowNb,
+                                        String.format("Unknown ToolCategory [ %s ]", synonym), null);
+                } else {
+                        return targetLDT;
+                }
+        }
+
+        private static ZonedDateTime createZonedDateTime(SpreadsheetEvent spreadsheetEvent, int rowNb)
+                        throws ImportException {
+                ZonedDateTime zdt = null;
+                String date = spreadsheetEvent.getDate();
+                String hour = spreadsheetEvent.getHour();
+                try {
+                        zdt = DateHelper.dateTimeStringToZonedDateTime(date, hour);
+                } catch (Exception e) {
+                        throw new ImportException(date + " " + hour, rowNb,
+                                        String.format("Problem with %s%n", spreadsheetEvent.toString()), null);
+                }
+                return zdt;
+        }
 
         private EventDTO processSpreadsheetEvent(SpreadsheetEvent spreadsheetEvent, int rowNb) throws ImportException {
 
@@ -251,124 +262,134 @@ public class EventExcelService {
                 EventDTO eventDTO = new EventDTO();
                 eventDTO.setIdentifier(null);
 
-        ZonedDateTime zdt = createZonedDateTime(spreadsheetEvent, rowNb);
-        eventDTO.setTimeStamp(zdt.toOffsetDateTime());
+                ZonedDateTime zdt = createZonedDateTime(spreadsheetEvent, rowNb);
+                eventDTO.setTimeStamp(zdt.toOffsetDateTime());
 
+                eventDTO.setRemarks(spreadsheetEvent.getRemarks());
 
-        eventDTO.setRemarks(spreadsheetEvent.getRemarks());
+                eventDTO.setPlatform(platformUrn);
 
-        eventDTO.setPlatform(platformUrn);
+                String uuid = eventService.findUuidByToolActionProc("", spreadsheetEvent.getTool(),
+                                spreadsheetEvent.getProcess(),
+                                spreadsheetEvent.getAction());
+                eventDTO.setEventDefinitionId(uuid);
 
-        String uuid = eventService.findUuidByToolActionProc("", spreadsheetEvent.getTool(),
-                spreadsheetEvent.getProcess(),
-                spreadsheetEvent.getAction());
-        eventDTO.setEventDefinitionId(uuid);
+                Program program = programService.findOrCreateProgram(spreadsheetEvent.getProgram());
+                if (program != null) {
+                        eventDTO.setProgram(program.getIdentifier());
+                } else {
+                        throw new ImportException(EventExcelInputController.SHEETNAME, rowNb,
+                                        String.format("Error setting the Program [%s]%n.",
+                                                        spreadsheetEvent.getProgram()),
+                                        null);
+                }
 
-        Program program = programService.findOrCreateProgram(spreadsheetEvent.getProgram());
-        if (program != null) {
-            eventDTO.setProgram(program.getIdentifier());
-        } else {
-            throw new ImportException( EventExcelInputController.SHEETNAME, rowNb,
-                    String.format("Error setting the Program [%s]%n.", spreadsheetEvent.getProgram()), null);
-        }
+                String toolName = spreadsheetEvent.getTool();
+                eventDTO.setTool(new ToolDTO(extractLDT(toolName, rowNb), null));
+                LinkedDataTermDTO toolCategory = extractToolCategory(toolName, rowNb);
+                eventDTO.setToolCategory(toolCategory);
 
-        String toolName = spreadsheetEvent.getTool();
-        eventDTO.setTool(new ToolDTO(extractLDT(toolName, rowNb), null));
-        LinkedDataTermDTO toolCategory = extractToolCategory(toolName, rowNb);
-        eventDTO.setToolCategory(toolCategory);
+                String processName = spreadsheetEvent.getProcess();
+                LinkedDataTermDTO process = extractLDT(processName, rowNb);
+                eventDTO.setProcess(process);
 
-        String processName = spreadsheetEvent.getProcess();
-        LinkedDataTermDTO process = extractLDT(processName, rowNb);
-        eventDTO.setProcess(process);
-
-        String actionName = spreadsheetEvent.getAction();
-        eventDTO.setAction(extractLDT(actionName, rowNb));
+                String actionName = spreadsheetEvent.getAction();
+                eventDTO.setAction(extractLDT(actionName, rowNb));
 
                 eventDTO.setLabel(spreadsheetEvent.getLabel());
 
-        String stationName = spreadsheetEvent.getStation();
-        eventDTO.setStation(stationName);
+                String stationName = spreadsheetEvent.getStation();
+                eventDTO.setStation(stationName);
 
                 eventDTO.setDescription(spreadsheetEvent.getDescription());
                 eventDTO.setSubject(new LinkedDataTermDTO("https://vocab.nerc.ac.uk/collection/C77/current/M06", null,
                                 "Routine standard measurements"));
 
-        Map<String, PropertyDTO> props = new HashMap<>();
-        createPropertiesIfAvailable(spreadsheetEvent, props);
-        eventDTO.setProperties(props.values());
+                Map<String, PropertyDTO> props = new HashMap<>();
+                createPropertiesIfAvailable(spreadsheetEvent, props);
+                eventDTO.setProperties(props.values());
 
-        return eventDTO;
-    }
+                return eventDTO;
+        }
 
-    private static void createPropertiesIfAvailable(SpreadsheetEvent spreadsheetEvent, Map<String, PropertyDTO> props) {
-        if ((spreadsheetEvent.getDistance()) != null && !(spreadsheetEvent.getDistance()).isEmpty()) {
-        PropertyDTO dist = new PropertyDTO(
-                new LinkedDataTermDTO("http://ontologies.ef-ears.eu/ears2/1#pry_100000", null, "Distance travelled"),
-                spreadsheetEvent.getDistance(), "nm");
-        props.put(SpreadsheetEvent.FIELDS.Dist.name(), dist);
+        private static void createPropertiesIfAvailable(SpreadsheetEvent spreadsheetEvent,
+                        Map<String, PropertyDTO> props) {
+                if ((spreadsheetEvent.getDistance()) != null && !(spreadsheetEvent.getDistance()).isEmpty()) {
+                        PropertyDTO dist = new PropertyDTO(
+                                        new LinkedDataTermDTO("http://ontologies.ef-ears.eu/ears2/1#pry_100000", null,
+                                                        "Distance travelled"),
+                                        spreadsheetEvent.getDistance(), "nm");
+                        props.put(SpreadsheetEvent.FIELDS.Dist.name(), dist);
+                }
+                if ((spreadsheetEvent.getDistance()) != null && !(spreadsheetEvent.getTime()).isEmpty()) {
+                        PropertyDTO time = new PropertyDTO(
+                                        new LinkedDataTermDTO("http://ontologies.ef-ears.eu/ears2/1#pry_100001", null,
+                                                        "Time"),
+                                        spreadsheetEvent.getTime(), "h");
+                        props.put(SpreadsheetEvent.FIELDS.Time.name(), time);
+                }
+                if ((spreadsheetEvent.getStatus()) != null && !(spreadsheetEvent.getStatus()).isEmpty()) {
+                        PropertyDTO status = new PropertyDTO(
+                                        new LinkedDataTermDTO("http://ontologies.ef-ears.eu/ears2/1#pry_100002", null,
+                                                        "Status"),
+                                        spreadsheetEvent.getStatus(), null);
+                        props.put(SpreadsheetEvent.FIELDS.Status.name(), status);
+                }
+                if ((spreadsheetEvent.getRegion()) != null && !(spreadsheetEvent.getRegion()).isEmpty()) {
+                        PropertyDTO region = new PropertyDTO(
+                                        new LinkedDataTermDTO("http://ontologies.ef-ears.eu/ears2/1#pry_100003", null,
+                                                        "Region"),
+                                        spreadsheetEvent.getRegion(), null);
+                        props.put(SpreadsheetEvent.FIELDS.Region.name(), region);
+                }
+                if ((spreadsheetEvent.getWeather()) != null && !(spreadsheetEvent.getWeather()).isEmpty()) {
+                        PropertyDTO weather = new PropertyDTO(
+                                        new LinkedDataTermDTO("http://ontologies.ef-ears.eu/ears2/1#pry_100004", null,
+                                                        "Weather"),
+                                        spreadsheetEvent.getWeather(), null);
+                        props.put(SpreadsheetEvent.FIELDS.Weather.name(), weather);
+                }
+                if ((spreadsheetEvent.getNavigation()) != null && !(spreadsheetEvent.getNavigation()).isEmpty()) {
+                        PropertyDTO navigation = new PropertyDTO(
+                                        new LinkedDataTermDTO("http://ontologies.ef-ears.eu/ears2/1#pry_100005", null,
+                                                        "Navigation"),
+                                        spreadsheetEvent.getNavigation(), null);
+                        props.put(SpreadsheetEvent.FIELDS.Navigation.name(), navigation);
+                }
         }
-        if ((spreadsheetEvent.getDistance()) != null && !(spreadsheetEvent.getTime()).isEmpty()) {
-        PropertyDTO time = new PropertyDTO(
-                new LinkedDataTermDTO("http://ontologies.ef-ears.eu/ears2/1#pry_100001", null, "Time"),
-                spreadsheetEvent.getTime(), "h");
-        props.put(SpreadsheetEvent.FIELDS.Time.name(), time);
-        }
-        if ((spreadsheetEvent.getStatus()) != null && !(spreadsheetEvent.getStatus()).isEmpty()) {
-        PropertyDTO status = new PropertyDTO(
-                new LinkedDataTermDTO("http://ontologies.ef-ears.eu/ears2/1#pry_100002", null, "Status"),
-                spreadsheetEvent.getStatus(), null);
-        props.put(SpreadsheetEvent.FIELDS.Status.name(), status);
-        }
-        if ((spreadsheetEvent.getRegion()) != null && !(spreadsheetEvent.getRegion()).isEmpty()) {
-        PropertyDTO region = new PropertyDTO(
-                new LinkedDataTermDTO("http://ontologies.ef-ears.eu/ears2/1#pry_100003", null, "Region"),
-                spreadsheetEvent.getRegion(), null);
-        props.put(SpreadsheetEvent.FIELDS.Region.name(), region);
-        }
-        if ((spreadsheetEvent.getWeather()) != null && !(spreadsheetEvent.getWeather()).isEmpty()) {
-        PropertyDTO weather = new PropertyDTO(
-                new LinkedDataTermDTO("http://ontologies.ef-ears.eu/ears2/1#pry_100004", null, "Weather"),
-                spreadsheetEvent.getWeather(), null);
-        props.put(SpreadsheetEvent.FIELDS.Weather.name(), weather);
-        }
-        if ((spreadsheetEvent.getNavigation()) != null && !(spreadsheetEvent.getNavigation()).isEmpty()) {
-        PropertyDTO navigation = new PropertyDTO(
-                new LinkedDataTermDTO("http://ontologies.ef-ears.eu/ears2/1#pry_100005", null, "Navigation"),
-                spreadsheetEvent.getNavigation(), null);
-        props.put(SpreadsheetEvent.FIELDS.Navigation.name(), navigation);
-        }
-    }
 
-    public boolean validateAllTabs(Workbook document, ErrorDTOList errorList) {
-        boolean areTabsOk = true;
-        for (String sheetName : getAllowedTabs()) {
-            Sheet sheet = document.getSheet(sheetName);
-            //List<SpreadsheetEvent> sheet = document.getSheet(sheetName, SpreadsheetEvent.class);
-            if (sheet == null) {
-                areTabsOk = false;
-                errorList.addError(new ErrorDTO(0, String.format("Problem in sheet %s: %s%n", sheetName, "Missing sheet: " + sheetName), null));
-            }
+        public boolean validateAllTabs(Workbook document, ErrorDTOList errorList) {
+                boolean areTabsOk = true;
+                for (String sheetName : getAllowedTabs()) {
+                        Sheet sheet = document.getSheet(sheetName);
+                        //List<SpreadsheetEvent> sheet = document.getSheet(sheetName, SpreadsheetEvent.class);
+                        if (sheet == null) {
+                                areTabsOk = false;
+                                errorList.addError(new ErrorDTO(0, String.format("Problem in sheet %s: %s%n", sheetName,
+                                                "Missing sheet: " + sheetName), null));
+                        }
+                }
+                return areTabsOk;
         }
-        return areTabsOk;
-    }
 
         private List<String> getAllowedTabs() {
                 return allowedTabs;
         }
 
-    public boolean validateHeaders(Workbook document, String sheetName, ErrorDTOList errorList) {
-        boolean areHeadersOk = true;
-        List<String> requiredHeaders = getRequiredHeaders();
-        Sheet sheet = document.getSheet(sheetName);
-        Set<String> sheetHeaders = findColumnHeadersForSheet(sheet);
-        for (String requiredHeader : requiredHeaders) {
-            if ( !sheetHeaders.contains(requiredHeader) ){
-                areHeadersOk = false;
-                errorList.addError(new ErrorDTO(0, String.format("Problem in sheet %s: %s%n", sheetName, "Missing header: " + requiredHeader), null));
-            }
+        public boolean validateHeaders(Workbook document, String sheetName, ErrorDTOList errorList) {
+                boolean areHeadersOk = true;
+                List<String> requiredHeaders = getRequiredHeaders();
+                Sheet sheet = document.getSheet(sheetName);
+                Set<String> sheetHeaders = findColumnHeadersForSheet(sheet);
+                for (String requiredHeader : requiredHeaders) {
+                        if (!sheetHeaders.contains(requiredHeader)) {
+                                areHeadersOk = false;
+                                errorList.addError(new ErrorDTO(0, String.format("Problem in sheet %s: %s%n", sheetName,
+                                                "Missing header: " + requiredHeader), null));
+                        }
+                }
+                return areHeadersOk;
         }
-        return areHeadersOk;
-    }
 
         private Set<String> findColumnHeadersForSheet(Sheet sheet) {
                 Set<String> headers = new HashSet<>();
@@ -389,42 +410,43 @@ public class EventExcelService {
                 return requiredHeaders;
         }
 
-    public boolean processSpreadsheetEvents(ErrorDTOList errorList, List<SpreadsheetEvent> data,
-            List<EventDTO> events, PersonDTO actor) {
-        boolean problems = false;
-        int rowNb = 1;
-        for (SpreadsheetEvent row : data) {
-            try {
-                EventDTO event = processSpreadsheetEvent(row, rowNb);
-                event.setActor(actor);
-                events.add(event);
-            } catch (ImportException e) {
-                problems = true;
-                errorList
-                        .addError(new ErrorDTO(rowNb,
-                                String.format("Problem on row %s in sheet %s: %s%n", e.lineNb, e.sheetName, e.message),
-                                e));
-            }
-            rowNb++;
+        public boolean processSpreadsheetEvents(ErrorDTOList errorList, List<SpreadsheetEvent> data,
+                        List<EventDTO> events, PersonDTO actor) {
+                boolean problems = false;
+                int rowNb = 1;
+                for (SpreadsheetEvent row : data) {
+                        try {
+                                EventDTO event = processSpreadsheetEvent(row, rowNb);
+                                event.setActor(actor);
+                                events.add(event);
+                        } catch (ImportException e) {
+                                problems = true;
+                                errorList
+                                                .addError(new ErrorDTO(rowNb,
+                                                                String.format("Problem on row %s in sheet %s: %s%n",
+                                                                                e.lineNb, e.sheetName, e.message),
+                                                                e));
+                        }
+                        rowNb++;
+                }
+                return problems;
         }
-        return problems;
-    }
 
-    public boolean saveSpreadsheetEvents(ErrorDTOList errorList, List<EventDTO> events) {
-        boolean problems = false;
-        int i = 1;
-        for (EventDTO dto : events) {
-            try {
-                eventService.save(dto);
-            } catch (DataIntegrityViolationException dve ) {
-                problems = true;
-                errorList.addError(new ErrorDTO(i, dve.getMessage(), dve));
-            } catch (Exception e) {
-                problems = true;
-                errorList.addError(new ErrorDTO(i, "General error saving SpreadsheetEventDTO's", e));
-            }
-            i++;
+        public boolean saveSpreadsheetEvents(ErrorDTOList errorList, List<EventDTO> events) {
+                boolean problems = false;
+                int i = 1;
+                for (EventDTO dto : events) {
+                        try {
+                                eventService.save(dto);
+                        } catch (DataIntegrityViolationException dve) {
+                                problems = true;
+                                errorList.addError(new ErrorDTO(i, dve.getMessage(), dve));
+                        } catch (Exception e) {
+                                problems = true;
+                                errorList.addError(new ErrorDTO(i, "General error saving SpreadsheetEventDTO's", e));
+                        }
+                        i++;
+                }
+                return problems;
         }
-        return problems;
-    }
 }
