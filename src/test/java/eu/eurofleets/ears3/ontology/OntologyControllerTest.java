@@ -38,7 +38,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-import org.springframework.util.Base64Utils;
+import java.util.Base64;
 import org.springframework.web.util.UriUtils;
 
 /**
@@ -91,7 +91,7 @@ public class OntologyControllerTest {
                 return this.mockMvc
                                 .perform(multipart("/ontology/vessel/upload").file(multipartFile).header(
                                                 HttpHeaders.AUTHORIZATION,
-                                                "Basic " + Base64Utils.encodeToString((user + ":" + pass).getBytes())))
+                                                "Basic " + Base64.getEncoder().encodeToString((user + ":" + pass).getBytes())))
                                 //.andDo(print())
                                 .andExpect(status().is(status));
         }
@@ -205,7 +205,7 @@ public class OntologyControllerTest {
                 String pass = "REPLACEME";
                 httpHeaders.add("Accept", "text/plain");
                 httpHeaders.add(HttpHeaders.AUTHORIZATION,
-                                "Basic " + Base64Utils.encodeToString((user + ":" + pass).getBytes()));
+                                "Basic " + Base64.getEncoder().encodeToString((user + ":" + pass).getBytes()));
                 this.mockMvc.perform(get("/ontology/authenticate").headers(httpHeaders))
                                 //.andDo(print())
                                 .andExpect(status().isOk())
@@ -215,7 +215,7 @@ public class OntologyControllerTest {
                 pass = "wrong";
                 httpHeaders.remove(HttpHeaders.AUTHORIZATION);
                 httpHeaders.add(HttpHeaders.AUTHORIZATION,
-                                "Basic " + Base64Utils.encodeToString((user + ":" + pass).getBytes()));
+                                "Basic " + Base64.getEncoder().encodeToString((user + ":" + pass).getBytes()));
                 this.mockMvc.perform(get("/ontology/authenticate").headers(httpHeaders))
                                 //.andDo(print())
                                 .andExpect(status().isOk())

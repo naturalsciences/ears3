@@ -3,7 +3,7 @@ package eu.eurofleets.ears3.service;
 import eu.eurofleets.ears3.domain.Organisation;
 import eu.eurofleets.ears3.domain.Person;
 import java.util.List;
-import javax.transaction.Transactional;
+import jakarta.transaction.Transactional;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.stereotype.Repository;

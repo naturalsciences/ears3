@@ -8,11 +8,12 @@ import java.time.*;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Logger;
 import java.util.regex.Pattern;
 
-import javax.transaction.Transactional;
+import jakarta.transaction.Transactional;
 
-import lombok.extern.slf4j.Slf4j;
+//import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
 import eu.eurofleets.ears3.Exceptions.IllegalCellValueCombinationException;
@@ -25,8 +26,10 @@ import eu.eurofleets.ears3.Exceptions.IllegalDateConversionException;
 
 @Component
 @Transactional
-@Slf4j
+//@Slf4j
 public class DateHelper implements Serializable {
+
+    private static Logger logger = Logger.getLogger(DateHelper.class.getName());
 
     public static DateFormat ISO_FORMATTER = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ");
     public static final ZoneId BRUSSELS = ZoneId.of("Europe/Brussels"); // Zone information
@@ -88,7 +91,7 @@ public class DateHelper implements Serializable {
         try {
             return LocalDate.ofInstant(ISO_FORMATTER.parse(date).toInstant(), BRUSSELS);
         } catch (ParseException e) {
-            log.info("Date not parseable with ISO_FORMATTER. Continuing with other approaches");
+            logger.info("Date not parseable with ISO_FORMATTER. Continuing with other approaches");
         }
 
         date = date.replaceAll("\\.0$", ""); //integers formatted as doubles eg. 2019.0
@@ -122,7 +125,7 @@ public class DateHelper implements Serializable {
             LocalDateTime localDateTime = LocalDateTime.ofInstant(ISO_FORMATTER.parse(datetime).toInstant(), BRUSSELS);
             return localDateTime.atZone(BRUSSELS);
         } catch (ParseException e) {
-            log.info("Date not parseable with ISO_FORMATTER. Continuing with other approaches");
+            logger.info("Date not parseable with ISO_FORMATTER. Continuing with other approaches");
         }
 
         String[] split = datetime.split(" ");
@@ -176,7 +179,7 @@ public class DateHelper implements Serializable {
         try {
             return LocalDateTime.ofInstant(ISO_FORMATTER.parse(time).toInstant(), BRUSSELS);
         } catch (ParseException e) {
-            log.info("Date not parseable with ISO_FORMATTER. Continuing with other approaches");
+            logger.info("Date not parseable with ISO_FORMATTER. Continuing with other approaches");
         }
         LocalDate localDate = LocalDate.of(2000, 1, 1); //arbitrary time in the past
         LocalTime localDateTime = hhmmTimeStringToLocalTime(time);

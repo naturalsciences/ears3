@@ -32,7 +32,7 @@ public class WebConfig implements WebMvcConfigurer {
      */
     @Override
     public void configureContentNegotiation(ContentNegotiationConfigurer configurer) {
-        configurer.favorPathExtension(true).
+        configurer.//favorPathExtension(true).
                 favorParameter(false).
                 //    parameterName("mediaType").
                 ignoreAcceptHeader(false).

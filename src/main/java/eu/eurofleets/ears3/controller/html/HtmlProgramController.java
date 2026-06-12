@@ -7,7 +7,7 @@ package eu.eurofleets.ears3.controller.html;
 
 import eu.eurofleets.ears3.domain.Program;
 import eu.eurofleets.ears3.service.ProgramService;
-import javax.validation.Valid;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;

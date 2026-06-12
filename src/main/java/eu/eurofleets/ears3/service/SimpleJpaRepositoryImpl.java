@@ -6,7 +6,8 @@
 package eu.eurofleets.ears3.service;
 
 import java.io.Serializable;
-import javax.persistence.EntityManager;
+import jakarta.persistence.EntityManager;
+
 import org.springframework.data.jpa.repository.support.JpaEntityInformation;
 import org.springframework.data.jpa.repository.support.SimpleJpaRepository;
 
@@ -19,7 +20,7 @@ public class SimpleJpaRepositoryImpl<T, ID extends Serializable>
 
     private EntityManager entityManager;
 
-    public SimpleJpaRepositoryImpl(JpaEntityInformation<T, ?> entityInformation, EntityManager entityManager) {
+    public SimpleJpaRepositoryImpl(JpaEntityInformation<T, ID> entityInformation, EntityManager entityManager) {
         super(entityInformation, entityManager);
         this.entityManager = entityManager;
     }

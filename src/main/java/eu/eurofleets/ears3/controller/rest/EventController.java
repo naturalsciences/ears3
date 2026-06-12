@@ -116,7 +116,7 @@ public class EventController {
         Writer writer = new StringBuilderWriter();
         // CSVWriter csvWriter = null;
 
-        try (CSVWriter csvWriter = new CSVWriter(writer, ',')) {
+        try (CSVWriter csvWriter = new CSVWriter(writer)) {
             csvWriter.writeNext(entry, true);
 
             // "Time stamp", "Actor", "Program", "Principal Investigator", "Tool category",

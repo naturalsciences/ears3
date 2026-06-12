@@ -11,7 +11,6 @@ import io.github.rushuat.ocell.field.ValueConverter;
  */
 public class StringConverter implements ValueConverter<String, Object> {
 
-    @Override
     public String convertInput(Object value) {
         String result;
         if (value == null) {
@@ -44,7 +43,13 @@ public class StringConverter implements ValueConverter<String, Object> {
     }
 
     @Override
-    public Object convertOutput(String value) {
-        return value.toString();
+    public String toModel(Object value) throws Exception {
+        return convertInput(value);
+    }
+
+    @Override
+    public Object toDocument(String value) throws Exception {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'toDocument'");
     }
 }

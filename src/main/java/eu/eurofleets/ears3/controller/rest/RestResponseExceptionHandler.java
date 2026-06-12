@@ -16,6 +16,7 @@ import org.postgresql.util.PSQLException;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.HttpStatusCode;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ControllerAdvice;
@@ -38,10 +39,10 @@ public class RestResponseExceptionHandler
             ClassNotFoundException.class, DateTimeParseException.class })
     protected ResponseEntity<Object> handleConflict(
             RuntimeException ex, WebRequest request) throws Exception {
-        HttpStatus status = null;
+        HttpStatusCode status = null;
         if (ex instanceof ResponseStatusException) {
             ResponseStatusException rpex = (ResponseStatusException) ex;
-            status = rpex.getStatus();
+            status = rpex.getStatusCode();
         } else {
             status = HttpStatus.CONFLICT;
         }

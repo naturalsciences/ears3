@@ -227,7 +227,7 @@ public class Cruise implements ICruise, Serializable {
     }
 
     @Override
-    @Cascade({CascadeType.SAVE_UPDATE, CascadeType.DELETE})
+    //@Cascade({CascadeType.SAVE_UPDATE, CascadeType.DELETE})
     public void setPrograms(Collection<? extends IProgram> programs) {
         this.programs = (Collection<Program>) programs;
     }
