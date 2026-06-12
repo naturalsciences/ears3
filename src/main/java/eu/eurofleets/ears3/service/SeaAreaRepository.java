@@ -15,18 +15,18 @@ public abstract interface SeaAreaRepository
         extends CrudRepository<SeaArea, Long> {
 
     
-    @Query("select s from SeaArea s left join LinkedDataTerm l on l.id=s.term where l.identifier= ?1 or l.urn=?1")
+    @Query("select s from SeaArea s left join s.term l where l.identifier= ?1 or l.urn=?1")
     public abstract SeaArea findByIdentifier(String identifier);
            
-    @Query("select p from SeaArea p left join LinkedDataTerm l on l.id=p.term where l.identifier in (?1)")
+    @Query("select s from SeaArea s left join s.term l where l.identifier in (?1)")
     public abstract List<SeaArea> findAllByIdentifier(Set<String> identifiers);
     
-    @Query("select p from SeaArea p left join LinkedDataTerm l on l.id=p.term where l.name= ?1")
+    @Query("select s from SeaArea s left join s.term l where l.name= ?1")
     public abstract SeaArea findByName(String name);
 
     @Modifying
     @org.springframework.transaction.annotation.Transactional
-    @Query("delete from SeaArea p where p.term in (select l.id from LinkedDataTerm l where l.identifier= ?1 or l.urn=?1)")
+    @Query("delete from SeaArea s where s.term in (select l from LinkedDataTerm l where l.identifier= ?1 or l.urn=?1)")
     public abstract void deleteByIdentifier(String identifier);
 }
 

@@ -31,8 +31,6 @@ import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import org.springframework.web.client.ResourceAccessException;
-
 /**
  * A class to easily retrieve Objects of a certain acquisition type (nav, met, tss)
  * @author Thomas Vandenberghe

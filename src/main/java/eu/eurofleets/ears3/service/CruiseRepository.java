@@ -19,7 +19,7 @@ public interface CruiseRepository
     @Query("select c from Cruise c where c.identifier = ?1")
     public abstract Cruise findByIdentifier(String identifier);
 
-    @Query("select c from Cruise c left join Platform p on c.platform = p.id left join LinkedDataTerm l on l.id=p.term where l.identifier= ?1 or l.urn= ?1 order by c.endDate")
+    @Query("select c from Cruise c left join c.platform p left join p.term l where l.identifier= ?1 or l.urn= ?1 order by c.endDate")
     public abstract Set<Cruise> findByPlatformCode(String code);
 
     @Query("select c from Cruise c where c.startDate>=?1 and c.endDate<=?2  order by c.endDate")
@@ -28,10 +28,10 @@ public interface CruiseRepository
     @Query("select c from Cruise c where ?1 between c.startDate and c.endDate")
     public abstract Set<Cruise> findAtDate(OffsetDateTime at);
 
-    @Query("select c from Cruise c left join Platform p on c.platform = p.id left join LinkedDataTerm l on l.id=p.term where (l.identifier= ?3 or l.urn= ?3) and c.startDate>=?1 and c.endDate<=?2  order by c.endDate")
+    @Query("select c from Cruise c left join c.platform p left join p.term l where (l.identifier= ?3 or l.urn= ?3) and c.startDate>=?1 and c.endDate<=?2  order by c.endDate")
     public Set<Cruise> findBetweenDate(OffsetDateTime startDate, OffsetDateTime endDate, String platformIdentifier);
 
-    @Query("select c from Cruise c left join Platform p on c.platform = p.id left join LinkedDataTerm l on l.id=p.term where (l.identifier= ?2 or l.urn= ?2) and (?1 between c.startDate and c.endDate) order by c.endDate")
+    @Query("select c from Cruise c left join c.platform p left join p.term l where (l.identifier= ?2 or l.urn= ?2) and (?1 between c.startDate and c.endDate) order by c.endDate")
     public Set<Cruise> findAtDate(OffsetDateTime at, String platformIdentifier);
 
     @Modifying

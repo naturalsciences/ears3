@@ -6,7 +6,7 @@
 package eu.eurofleets.ears3.domain;
 
 import be.naturalsciences.bmdc.cruise.model.ISamplingEvent;
-import javax.persistence.Entity;
+import jakarta.persistence.Entity;
 
 /**
  *

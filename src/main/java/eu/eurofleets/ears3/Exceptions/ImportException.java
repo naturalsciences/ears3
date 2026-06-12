@@ -1,6 +1,5 @@
 package eu.eurofleets.ears3.Exceptions;
 
-import java.util.Comparator;
 
 public class ImportException extends Exception {
 

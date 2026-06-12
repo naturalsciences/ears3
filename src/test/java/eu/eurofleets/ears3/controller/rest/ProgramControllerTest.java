@@ -4,9 +4,8 @@
  * and open the template in the editor.
  */
 package eu.eurofleets.ears3.controller.rest;
-
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.ObjectMapper;
 import eu.eurofleets.ears3.Application;
 import eu.eurofleets.ears3.domain.Program;
 import eu.eurofleets.ears3.dto.CruiseDTO;
@@ -37,8 +36,6 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.*;
-import org.junit.jupiter.api.Disabled;
-//import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.ComponentScan;
@@ -46,7 +43,6 @@ import org.springframework.http.MediaType;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.annotation.DirtiesContext.ClassMode;
 import org.springframework.test.context.TestPropertySource;
-import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.context.web.WebAppConfiguration;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
@@ -186,7 +182,7 @@ public class ProgramControllerTest {
                         ObjectMapper objectMapper = new ObjectMapper();
 
                         objectMapper.readValue(content, Iterable.class);
-                } catch (JsonProcessingException | UnsupportedEncodingException e) {
+                } catch (JacksonException | UnsupportedEncodingException e) {
                         // TODO Auto-generated catch block
                         e.printStackTrace();
                 }
@@ -259,7 +255,6 @@ public class ProgramControllerTest {
                 testCruise = CruiseControllerTest.getTestCruise1("SEASHELL-19");
                 start = OffsetDateTime.parse("2019-04-25T11:08:00Z");
                 end = OffsetDateTime.parse("2019-04-29T11:08:00Z");
-                OffsetDateTime earlyStart = start;
                 testCruise.startDate = start;
                 testCruise.endDate = end;
                 testCruise.programs = new ArrayList<>();
@@ -313,7 +308,6 @@ public class ProgramControllerTest {
         }
 
         private static UUID programUUID;
-        private static String programId;
 
         @Test
         public void testPostProgram() throws Exception {

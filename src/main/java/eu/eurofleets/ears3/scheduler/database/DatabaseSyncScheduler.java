@@ -5,8 +5,7 @@
  */
 package eu.eurofleets.ears3.scheduler.database;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import eu.eurofleets.ears3.dto.EventDTOList;
+import tools.jackson.databind.ObjectMapper;
 import eu.eurofleets.ears3.service.CountryService;
 import eu.eurofleets.ears3.service.HarbourService;
 import eu.eurofleets.ears3.service.LinkedDataTermRepository;
@@ -16,19 +15,15 @@ import eu.eurofleets.ears3.service.PlatformService;
 import eu.eurofleets.ears3.service.ProjectService;
 import eu.eurofleets.ears3.service.SeaAreaService;
 import eu.eurofleets.ears3.service.ToolService;
-//import io.swagger.v3.oas.annotations.Operation;
 import java.io.IOException;
 import java.net.MalformedURLException;
-import java.net.URL;
 import java.time.Instant;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
-import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
 import java.util.concurrent.CompletableFuture;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-//import org.codehaus.jackson.JsonProcessingException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.env.Environment;
@@ -87,8 +82,8 @@ public class DatabaseSyncScheduler {
         log.log(Level.INFO, "Syncing database");
         String vesselAddress = env.getProperty("ears.vessel-address");
         OffsetDateTime after = Instant.now().minus(1, ChronoUnit.DAYS).atOffset(ZoneOffset.UTC);
-        EventDTOList events = objectMapper.readValue(new URL(vesselAddress + "/dto/events?after=" + after.format(DateTimeFormatter.ISO_OFFSET_DATE_TIME)), EventDTOList.class);
-
+        //EventDTOList events = objectMapper.readValue(new URL(vesselAddress + "/dto/events?after=" + after.format(DateTimeFormatter.ISO_OFFSET_DATE_TIME)), EventDTOList.class);
+        //TODO
         return CompletableFuture.completedFuture("Finished syncing database");
     }
 

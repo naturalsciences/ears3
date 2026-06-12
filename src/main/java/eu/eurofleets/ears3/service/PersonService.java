@@ -7,22 +7,13 @@ package eu.eurofleets.ears3.service;
 
 import eu.eurofleets.ears3.domain.Organisation;
 import eu.eurofleets.ears3.domain.Person;
-import eu.eurofleets.ears3.domain.Program;
 import eu.eurofleets.ears3.dto.PersonDTO;
-
-import java.util.ArrayList;
 import java.util.List;
-
 import org.apache.commons.collections4.IterableUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
 
-/**
- *
- * @author Thomas Vandenberghe
- */
 @Service
 public class PersonService {
 

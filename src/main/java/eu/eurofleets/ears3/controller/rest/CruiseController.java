@@ -29,7 +29,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.logging.Logger;
-import javax.xml.bind.JAXBException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.Environment;
 import org.springframework.http.HttpStatus;
@@ -139,7 +138,7 @@ public class CruiseController {
     @RequestMapping(method = { RequestMethod.GET }, value = { "cruise/csr" }, params = { "identifier" }, produces = {
             "application/xml; charset=utf-8" })
     public String getCSRByName(@RequestParam(required = true, value = "identifier") String identifier)
-            throws JAXBException, IllegalCSRArgumentException {
+            throws  IllegalCSRArgumentException {
         Cruise cruise = this.cruiseService.findByIdentifier(identifier);
         if (cruise != null) {
             if (cruise.getStartDate().isAfter(OffsetDateTime.now())) {

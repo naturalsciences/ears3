@@ -1,8 +1,8 @@
 package eu.eurofleets.ears3.service;
 
 import be.naturalsciences.bmdc.cruise.model.ILinkedDataTerm;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.ObjectMapper;
 import eu.eurofleets.ears3.domain.Cruise;
 import eu.eurofleets.ears3.domain.Harbour;
 import eu.eurofleets.ears3.domain.LinkedDataTerm;
@@ -113,7 +113,7 @@ public class CruiseService {
         String json = null;
         try {
             json = objectMapper.writeValueAsString(dto);
-        } catch (JsonProcessingException ex) {
+        } catch (JacksonException ex) {
             Logger.getLogger(CruiseService.class.getName()).log(Level.SEVERE, "Problem reading JSON:" + json, ex);
         }
 

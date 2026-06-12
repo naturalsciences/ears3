@@ -6,7 +6,7 @@
 package eu.eurofleets.ears3.utilities;
 
 import java.time.Instant;
-import javax.xml.bind.annotation.adapters.XmlAdapter;
+import jakarta.xml.bind.annotation.adapters.XmlAdapter;
 
 /**
  *

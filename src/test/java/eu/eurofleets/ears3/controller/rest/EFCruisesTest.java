@@ -5,7 +5,7 @@
  */
 package eu.eurofleets.ears3.controller.rest;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.databind.ObjectMapper;
 import eu.eurofleets.ears3.Application;
 import eu.eurofleets.ears3.dto.CruiseDTO;
 import eu.eurofleets.ears3.dto.PersonDTO;

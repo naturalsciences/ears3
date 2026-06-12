@@ -9,7 +9,7 @@ import be.naturalsciences.bmdc.cruise.model.IConcept;
 import eu.eurofleets.ears3.AbstractConcept;
 import eu.eurofleets.ears3.domain.SeaArea;
 import static eu.eurofleets.ears3.scheduler.vocabulary.HarbourCopyAssistant.getJsonKeyVals;
-import gnu.trove.map.hash.THashMap;
+import java.util.HashMap;
 import java.util.Map;
 
 /**
@@ -39,7 +39,7 @@ public class SeaAreaCopyAssistant implements ICopyAssistant {
     }
 
     public void copy(AbstractConcept concept, SeaArea seaArea) {
-        Map<String, String> keyVal = new THashMap<>();
+        Map<String, String> keyVal = new HashMap<>();
         String definitionEn = concept.getDefinitionEn();
         if (definitionEn != null) {
             keyVal.put("Southernmost_latitude", "");

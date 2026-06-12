@@ -1,18 +1,18 @@
 package eu.eurofleets.ears3.domain;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import javax.persistence.Entity;
-import javax.persistence.Id;
-import javax.xml.bind.annotation.XmlAccessType;
-import javax.xml.bind.annotation.XmlAccessorType;
-import javax.xml.bind.annotation.XmlRootElement;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Id;
+import jakarta.xml.bind.annotation.XmlAccessType;
+import jakarta.xml.bind.annotation.XmlAccessorType;
+import jakarta.xml.bind.annotation.XmlRootElement;
 import eu.eurofleets.ears3.utilities.DatagramOrder;
 import java.util.Collection;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.ManyToMany;
-import javax.persistence.NamedNativeQuery;
-import javax.xml.bind.annotation.XmlTransient;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.ManyToMany;
+import jakarta.persistence.NamedNativeQuery;
+import jakarta.xml.bind.annotation.XmlTransient;
 
 @Entity
 @XmlRootElement

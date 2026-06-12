@@ -1,28 +1,18 @@
 package eu.eurofleets.ears3.utilities;
 
-import eu.eurofleets.ears3.domain.Acquisition;
 import eu.eurofleets.ears3.domain.Coordinate;
 import eu.eurofleets.ears3.domain.Navigation;
-
-import java.io.FileReader;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
 import java.net.MalformedURLException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.util.ArrayList;
 import java.util.List;
-
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
-
 import org.junit.Test;
-
 import static org.junit.Assert.*;
-import java.net.URL;
-import java.net.URLConnection;
 
 public class DatagramUtilitiesTest {
 

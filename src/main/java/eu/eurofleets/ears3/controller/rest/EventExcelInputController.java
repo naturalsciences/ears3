@@ -1,7 +1,7 @@
 package eu.eurofleets.ears3.controller.rest;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.ObjectMapper;
 import eu.eurofleets.ears3.domain.Message;
 import eu.eurofleets.ears3.domain.Program;
 import eu.eurofleets.ears3.dto.ErrorDTO;
@@ -17,7 +17,6 @@ import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.ss.usermodel.WorkbookFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.core.env.Environment;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -64,7 +63,7 @@ public class EventExcelInputController {
         PersonDTO actor;
         try {
             actor = objectMapper.readValue(actorName, PersonDTO.class);
-        } catch (JsonProcessingException e) {
+        } catch (JacksonException e) {
             throw new RuntimeException(e);
         }
         System.out.println("hier zie je de original filename: " + mpFile.getOriginalFilename());
@@ -96,7 +95,7 @@ public class EventExcelInputController {
         PersonDTO actor;
         try {
             actor = objectMapper.readValue(actorName, PersonDTO.class);
-        } catch (JsonProcessingException e) {
+        } catch (JacksonException e) {
             throw new RuntimeException(e);
         }
         /*         final List<Person> byName = personService.findByName(actor.getFirstName(), actor.getLastName());

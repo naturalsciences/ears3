@@ -1,6 +1,6 @@
 package eu.eurofleets.ears3.service;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.databind.ObjectMapper;
 import eu.eurofleets.ears3.domain.Acquisition;
 import eu.eurofleets.ears3.domain.Cruise;
 import eu.eurofleets.ears3.domain.Event;
@@ -24,7 +24,6 @@ import java.time.Instant;
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
 import java.time.OffsetTime;
-import java.time.ZoneId;
 import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
@@ -36,12 +35,7 @@ import java.util.UUID;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.apache.commons.collections4.IterableUtils;
-import org.apache.http.HttpResponse;
-import org.apache.http.client.HttpClient;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.entity.StringEntity;
-import org.apache.http.impl.client.HttpClientBuilder;
-import org.apache.http.util.EntityUtils;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.Environment;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -381,7 +375,7 @@ public class EventService {
                             : eventDTO.getStation());
             event.setDescription(eventDTO.getDescription() != null && eventDTO.getDescription().equals("") ? null
                     : eventDTO.getDescription());
-            event.setRemarks( eventDTO.getRemarks() != null && eventDTO.getRemarks().isEmpty() ? null
+            event.setRemarks(eventDTO.getRemarks() != null && eventDTO.getRemarks().isEmpty() ? null
                     : eventDTO.getRemarks());
             event.setAction(action);
             event.setActor(actor);
@@ -407,23 +401,24 @@ public class EventService {
             }.start();
             return event;
 
-        } catch (DataIntegrityViolationException dve ){
+        } catch (DataIntegrityViolationException dve) {
             Logger.getLogger(EventService.class.getName()).log(Level.SEVERE, null, dve);
-            String message = ( dve.getMessage() != null ) ? dve.getMessage() : dve.toString();
+            String message = (dve.getMessage() != null) ? dve.getMessage() : dve.toString();
             throw new DataIntegrityViolationException(message, dve.getMostSpecificCause());
-        }catch (Exception ex) {
+        } catch (Exception ex) {
             Logger.getLogger(EventService.class.getName()).log(Level.SEVERE, null, ex);
             return null;
         }
     }
 
-    private void sendToRemoteServer(Event event) {
+    /* private void sendToRemoteServer(Event event) {
+        //TODO
         String remoteServer = env.getProperty("ears.send-events-to") + "/ears3/api/event";
         if (remoteServer != null && !remoteServer.equals("")) {
             try {
                 String json = objectMapper.writeValueAsString(new EventDTO(event));
                 HttpClient httpClient = HttpClientBuilder.create().build();
-
+    
                 HttpPost request = new HttpPost(remoteServer);
                 StringEntity postingString = new StringEntity(json, "UTF-8");// gson.tojson() converts your pojo to json
                 request.setHeader("Content-type", "application/json");
@@ -434,13 +429,12 @@ public class EventService {
                 if (status != 201) {
                     System.out.println("Failure:" + body);
                 }
-
+    
             } catch (IOException ex) {
                 Logger.getLogger(EventService.class.getName()).log(Level.SEVERE, null, ex);
             }
         }
-
-    }
+    } */
 
     public static final int STALE_DATA_THRESHOLD = 15; // 15 minutes is too old
 

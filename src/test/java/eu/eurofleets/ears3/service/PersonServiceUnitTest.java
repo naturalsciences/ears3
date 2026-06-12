@@ -1,6 +1,5 @@
 package eu.eurofleets.ears3.service;
 
-import eu.eurofleets.ears3.Application;
 import eu.eurofleets.ears3.domain.Organisation;
 import eu.eurofleets.ears3.domain.Person;
 import eu.eurofleets.ears3.dto.LinkedDataTermDTO;
@@ -10,34 +9,9 @@ import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
-
-import static org.junit.Assert.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.when;
-
-//import javax.transaction.Transactional;
-
-import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-//import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.context.annotation.ComponentScan;
-import org.springframework.test.annotation.Commit;
-import org.springframework.test.context.TestPropertySource;
-import org.springframework.test.context.junit.jupiter.SpringExtension;
-import org.springframework.test.context.junit4.SpringRunner;
-import org.springframework.test.context.web.WebAppConfiguration;
-import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.setup.MockMvcBuilders;
-import org.springframework.web.context.WebApplicationContext;
-
-import com.fasterxml.jackson.databind.ObjectMapper;
-
-import be.naturalsciences.bmdc.cruise.model.ILinkedDataTerm;
 
 @RunWith(MockitoJUnitRunner.class)
 public class PersonServiceUnitTest {

@@ -22,12 +22,12 @@ import eu.eurofleets.ears3.dto.ProgramDTO;
 import eu.eurofleets.ears3.dto.PropertyDTO;
 import eu.eurofleets.ears3.dto.ToolDTO;
 
-import com.fasterxml.jackson.core.JacksonException;
-import com.fasterxml.jackson.core.JsonParser;
-import com.fasterxml.jackson.databind.DeserializationContext;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.deser.std.StdDeserializer;
-import com.fasterxml.jackson.databind.module.SimpleModule;
+import tools.jackson.core.JacksonException;
+import tools.jackson.core.JsonParser;
+import tools.jackson.databind.DeserializationContext;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.deser.std.StdDeserializer;
+import tools.jackson.databind.module.SimpleModule;
 
 import be.naturalsciences.bmdc.cruise.model.ILinkedDataTerm;
 import be.naturalsciences.bmdc.cruise.model.IOrganisation;
@@ -36,8 +36,6 @@ import be.naturalsciences.bmdc.cruise.model.IPlatform;
 import be.naturalsciences.bmdc.cruise.model.IProgram;
 import be.naturalsciences.bmdc.cruise.model.IProperty;
 import be.naturalsciences.bmdc.cruise.model.ITool;
-
-import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
@@ -49,7 +47,6 @@ import java.util.regex.Pattern;
 import static org.hamcrest.Matchers.not;
 import static org.hamcrest.core.StringContains.containsString;
 
-import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import static org.junit.Assert.*;
@@ -70,7 +67,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
-import org.springframework.util.StringUtils;
 import org.springframework.web.context.WebApplicationContext;
 
 /**
@@ -96,14 +92,13 @@ public class EventControllerTest {
         @Before
         public void setup() throws Exception {
                 this.mockMvc = MockMvcBuilders.webAppContextSetup(this.wac).build();
-                objectMapper.registerModule(new PersonModule());
+                /* objectMapper.registerModule(new PersonModule());
                 objectMapper.registerModule(new LinkedDataModule());
                 objectMapper.registerModule(new ToolModule());
                 objectMapper.registerModule(new PlatformModule());
                 objectMapper.registerModule(new OrganisationModule());
                 objectMapper.registerModule(new PropertyModule());
-                objectMapper.registerModule(new ProgramModule());
-
+                objectMapper.registerModule(new ProgramModule()); */
         }
 
         /*
@@ -116,7 +111,7 @@ public class EventControllerTest {
                 }
 
                 public IPerson deserialize(JsonParser jsonParser, DeserializationContext context)
-                                throws IOException, JacksonException {
+                                throws JacksonException {
                         return jsonParser.readValueAs(Person.class);
                 }
         }
@@ -133,7 +128,7 @@ public class EventControllerTest {
                 }
 
                 public ILinkedDataTerm deserialize(JsonParser jsonParser, DeserializationContext context)
-                                throws IOException, JacksonException {
+                                throws JacksonException {
                         return jsonParser.readValueAs(LinkedDataTerm.class);
                 }
         }
@@ -150,7 +145,7 @@ public class EventControllerTest {
                 }
 
                 public ITool deserialize(JsonParser jsonParser, DeserializationContext context)
-                                throws IOException, JacksonException {
+                                throws JacksonException {
                         return jsonParser.readValueAs(Tool.class);
                 }
         }
@@ -167,7 +162,7 @@ public class EventControllerTest {
                 }
 
                 public IPlatform deserialize(JsonParser jsonParser, DeserializationContext context)
-                                throws IOException, JacksonException {
+                                throws JacksonException {
                         return jsonParser.readValueAs(Platform.class);
                 }
         }
@@ -184,7 +179,7 @@ public class EventControllerTest {
                 }
 
                 public IOrganisation deserialize(JsonParser jsonParser, DeserializationContext context)
-                                throws IOException, JacksonException {
+                                throws JacksonException {
                         return jsonParser.readValueAs(Organisation.class);
                 }
         }
@@ -201,7 +196,7 @@ public class EventControllerTest {
                 }
 
                 public IProperty deserialize(JsonParser jsonParser, DeserializationContext context)
-                                throws IOException, JacksonException {
+                                throws JacksonException {
                         return jsonParser.readValueAs(Property.class);
                 }
         }
@@ -218,7 +213,7 @@ public class EventControllerTest {
                 }
 
                 public IProgram deserialize(JsonParser jsonParser, DeserializationContext context)
-                                throws IOException, JacksonException {
+                                throws JacksonException {
                         return jsonParser.readValueAs(Program.class);
                 }
         }

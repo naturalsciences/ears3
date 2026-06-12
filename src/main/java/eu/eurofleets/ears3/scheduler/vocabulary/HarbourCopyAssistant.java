@@ -10,7 +10,7 @@ import eu.eurofleets.ears3.AbstractConcept;
 import eu.eurofleets.ears3.domain.Country;
 import eu.eurofleets.ears3.domain.Harbour;
 import eu.eurofleets.ears3.service.CountryService;
-import gnu.trove.map.hash.THashMap;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -52,7 +52,7 @@ public class HarbourCopyAssistant implements ICopyAssistant {
     }
 
     public void copy(AbstractConcept concept, Harbour harbour) {
-        Map<String, String> keyVal = new THashMap<>();
+        Map<String, String> keyVal = new HashMap<>();
         String definitionEn = concept.getDefinitionEn();
         if (definitionEn != null) {
             keyVal.put("country", "");

@@ -5,7 +5,7 @@
  */
 package eu.eurofleets.ears3.controller.rest;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.databind.ObjectMapper;
 import eu.eurofleets.ears3.Application;
 import eu.eurofleets.ears3.domain.Country;
 import eu.eurofleets.ears3.domain.Cruise;
@@ -29,7 +29,6 @@ import java.time.ZoneOffset;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.UUID;
 import static org.hamcrest.Matchers.not;
 import static org.hamcrest.core.StringContains.containsString;
 import org.junit.Before;

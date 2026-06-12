@@ -6,8 +6,6 @@
 package eu.eurofleets.ears3.dto;
 
 import be.naturalsciences.bmdc.cruise.model.ILinkedDataTerm;
-import eu.eurofleets.ears3.domain.LinkedDataTerm;
-import eu.eurofleets.ears3.domain.Tool;
 
 /**
  *

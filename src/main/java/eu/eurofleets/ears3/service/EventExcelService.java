@@ -34,8 +34,9 @@ import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.type.CollectionType;
 
 @Service
 public class EventExcelService {
@@ -95,14 +96,17 @@ public class EventExcelService {
         File jsonFile = new ClassPathResource("static/json/my.json").getFile();
         rootNode = objectMapper.readTree(jsonFile);
 
+        CollectionType type = objectMapper.getTypeFactory()
+                .constructCollectionType(List.class, LinkedHashMap.class);
+
         JsonNode defs = rootNode.get("defs");
-        ArrayList<LinkedHashMap<String, String>> defList = objectMapper.convertValue(defs, ArrayList.class);
+        ArrayList<LinkedHashMap<String, String>> defList = objectMapper.convertValue(defs, type);
 
         JsonNode catmap = rootNode.get("catmap");
-        ArrayList<LinkedHashMap<String, String>> cmList = objectMapper.convertValue(catmap, ArrayList.class);
+        ArrayList<LinkedHashMap<String, String>> cmList = objectMapper.convertValue(catmap, type);
 
         JsonNode properties = rootNode.get("properties");
-        ArrayList<LinkedHashMap<String, String>> propList = objectMapper.convertValue(properties, ArrayList.class);
+        ArrayList<LinkedHashMap<String, String>> propList = objectMapper.convertValue(properties, type);
 
         for (LinkedHashMap<String, String> item : defList) {
             LinkedDataTermDTO ldtDTO = new LinkedDataTermDTO(item.get("identifier"), item.get("transitveldidentifier"),

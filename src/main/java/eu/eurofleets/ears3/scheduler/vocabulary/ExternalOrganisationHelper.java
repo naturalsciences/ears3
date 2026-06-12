@@ -8,8 +8,8 @@ package eu.eurofleets.ears3.scheduler.vocabulary;
 import eu.eurofleets.ears3.domain.Country;
 import eu.eurofleets.ears3.domain.LinkedDataTerm;
 import eu.eurofleets.ears3.domain.Organisation;
-import gnu.trove.map.hash.THashMap;
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -43,7 +43,7 @@ public class ExternalOrganisationHelper implements IExternalHelper<Organisation>
         if (this.retrieved != null) {
             return this.retrieved;
         } else {
-            Map<String, Organisation> map = new THashMap<>();//new ArrayList();
+            Map<String, Organisation> map = new HashMap<>();//new ArrayList();
             DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
             DocumentBuilder dBuilder;
             NodeList nList = null;

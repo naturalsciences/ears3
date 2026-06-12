@@ -8,11 +8,11 @@ package eu.eurofleets.ears3.domain;
 import be.naturalsciences.bmdc.cruise.model.ILicense;
 import be.naturalsciences.bmdc.cruise.model.ILinkedDataTerm;
 import java.io.Serializable;
-import javax.persistence.Entity;
-import javax.persistence.Id;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.ManyToOne;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Id;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.ManyToOne;
 
 /**
  *

@@ -11,6 +11,6 @@ import org.springframework.stereotype.Repository;
 public abstract interface PropertyRepository
         extends CrudRepository<Property, Long> {
     
-    @Query("select p from Property p left join LinkedDataTerm l on l.id=p.key where l.identifier= ?1 or l.urn=?1")
+    @Query("select p from Property p left join p.key l where l.identifier= ?1 or l.urn=?1")
     public abstract Property findByIdentifier(String identifier);
 }

@@ -5,13 +5,12 @@
  */
 package eu.eurofleets.ears3.controller.rest;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.databind.ObjectMapper;
 import eu.eurofleets.ears3.Application;
 import static eu.eurofleets.ears3.controller.rest.EventControllerTest.deleteEvent;
 import static eu.eurofleets.ears3.controller.rest.EventControllerTest.getTestEvent;
 import static eu.eurofleets.ears3.controller.rest.EventControllerTest.postEvent;
 import eu.eurofleets.ears3.dto.EventDTO;
-import eu.eurofleets.ears3.dto.PersonDTO;
 import eu.eurofleets.ears3.dto.ProgramDTO;
 import static org.hamcrest.core.StringContains.containsString;
 import org.junit.Before;

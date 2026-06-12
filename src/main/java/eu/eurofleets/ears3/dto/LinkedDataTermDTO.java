@@ -1,8 +1,8 @@
 package eu.eurofleets.ears3.dto;
 
 import be.naturalsciences.bmdc.cruise.model.ILinkedDataTerm;
-import javax.xml.bind.annotation.XmlAccessType;
-import javax.xml.bind.annotation.XmlAccessorType;
+import jakarta.xml.bind.annotation.XmlAccessType;
+import jakarta.xml.bind.annotation.XmlAccessorType;
 
 /*
  * To change this license header, choose License Headers in Project Properties.

@@ -1,6 +1,5 @@
 package eu.eurofleets.ears3.controller.html;
 
-import be.naturalsciences.bmdc.cruise.model.IProperty;
 import eu.eurofleets.ears3.domain.Event;
 import eu.eurofleets.ears3.service.EventService;
 import org.springframework.beans.factory.annotation.Autowired;

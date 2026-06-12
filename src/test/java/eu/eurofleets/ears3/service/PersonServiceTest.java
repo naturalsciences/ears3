@@ -7,12 +7,6 @@ import eu.eurofleets.ears3.dto.LinkedDataTermDTO;
 import eu.eurofleets.ears3.dto.OrganisationDTO;
 import eu.eurofleets.ears3.dto.PersonDTO;
 import org.junit.runner.RunWith;
-
-import static org.junit.Assert.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-
-//import javax.transaction.Transactional;
-
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
@@ -20,7 +14,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 //import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.ComponentScan;
-import org.springframework.test.annotation.Commit;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.context.web.WebAppConfiguration;
@@ -28,7 +21,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.databind.ObjectMapper;
 
 import be.naturalsciences.bmdc.cruise.model.ILinkedDataTerm;
 
@@ -118,7 +111,6 @@ public class PersonServiceTest {
 		//Person expected = new Person(new PersonDTO("abc", "abc", "abc"));
 		Person actual = personService.findOrCreate(person);
 		Person actual2 = personService.findOrCreate(person2);
-		int a = 5;
 
 		//	assertEquals(expected, actual);
 	}

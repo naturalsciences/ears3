@@ -28,14 +28,13 @@ public class ProgramService {
     public static Logger log = Logger.getLogger(CruiseService.class.getSimpleName());
 
     private final ProgramRepository programRepository;
-    private final ProjectRepository projectRepository;
     private final OrganisationRepository organisationRepository;
 
     @Autowired
     public PersonService personService;
-
     @Autowired
     public ProjectService projectService;
+    
     @Autowired
     private Environment env;
     @Value("${ears.platform}")
@@ -43,10 +42,9 @@ public class ProgramService {
     private static String DEFAULT_PROGRAM = "11BU_operations";
 
     @Autowired
-    public ProgramService(ProgramRepository programRepository, ProjectRepository projectRepository,
+    public ProgramService(ProgramRepository programRepository,
             OrganisationRepository organisationRepository) {
         this.programRepository = programRepository;
-        this.projectRepository = projectRepository;
         this.organisationRepository = organisationRepository;
     }
 

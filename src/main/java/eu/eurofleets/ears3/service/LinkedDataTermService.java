@@ -43,7 +43,6 @@ public class LinkedDataTermService {
             try {
                 return ldtRepository.save(term);
             } catch (Exception e) {
-                int a = 5;
                 return null;
             }
         } else {

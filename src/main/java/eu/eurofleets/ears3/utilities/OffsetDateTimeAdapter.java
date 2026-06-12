@@ -7,7 +7,7 @@ package eu.eurofleets.ears3.utilities;
 
 import java.time.OffsetDateTime;
 import java.time.format.DateTimeFormatter;
-import javax.xml.bind.annotation.adapters.XmlAdapter;
+import jakarta.xml.bind.annotation.adapters.XmlAdapter;
 
 /**
  *

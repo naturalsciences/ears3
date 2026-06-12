@@ -7,10 +7,10 @@ import io.github.rushuat.ocell.annotation.FieldName;
 /* import lombok.*;
 import lombok.experimental.FieldDefaults; */
 
-import jakarta.persistence.Entity;
+//import jakarta.persistence.Entity;
 import jakarta.validation.constraints.NotBlank;
 
-@Entity
+//@Entity
 /* @Data
 @FieldDefaults(level = AccessLevel.PRIVATE)
 @NoArgsConstructor
@@ -25,6 +25,7 @@ public class SpreadsheetEvent {
         Date, Hour, Actor, eventDefinitionId, Program, Tool, Process, Action, Label, Station, Description,
         Remarks, Dist, Time, Status, Region, Weather, Navigation
     };
+
 
     //
     @FieldName("Date")
