@@ -7,6 +7,7 @@ package eu.eurofleets.ears3.service;
 
 import eu.eurofleets.ears3.domain.Organisation;
 import eu.eurofleets.ears3.domain.Person;
+import eu.eurofleets.ears3.domain.Program;
 import eu.eurofleets.ears3.dto.PersonDTO;
 
 import java.util.ArrayList;
@@ -14,6 +15,7 @@ import java.util.List;
 
 import org.apache.commons.collections4.IterableUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
 
@@ -107,6 +109,18 @@ public class PersonService {
 
     public void delete(Person person) {
         personRepository.delete(person);
+    }
+
+    public void delete(PersonDTO person) {
+        Organisation org = organisationRepository.findByIdentifier(person.getOrganisation());
+        Person foundPerson = personRepository.findByNameAndOrganisation(person.getFirstName(), person.getLastName(),
+                org);
+        personRepository.delete(foundPerson);
+    }
+
+    public void deleteById(String id) {
+        Person foundPerson = personRepository.findById(Long.parseLong(id)).orElse(null);
+        this.personRepository.delete(foundPerson);
     }
 
     public List<Person> findAll() {

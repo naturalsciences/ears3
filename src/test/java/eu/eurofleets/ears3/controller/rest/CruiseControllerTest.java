@@ -63,6 +63,7 @@ import org.springframework.web.context.WebApplicationContext;
 @TestPropertySource(locations = "classpath:test.properties")
 @DirtiesContext(classMode = ClassMode.BEFORE_EACH_TEST_METHOD) //reset the database to base state before each test method
 public class CruiseControllerTest {
+        
 
         @Autowired
         private WebApplicationContext wac;

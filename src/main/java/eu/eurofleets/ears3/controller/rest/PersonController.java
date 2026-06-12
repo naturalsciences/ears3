@@ -6,6 +6,7 @@ import eu.eurofleets.ears3.service.PersonService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -39,5 +40,14 @@ public class PersonController {
     @ResponseStatus(HttpStatus.CREATED)
     public void createPerson(@RequestBody PersonDTO personDTO) {
         this.personService.save(personDTO);
+    }
+
+
+    @DeleteMapping(value = { "person" }, params = { "id" }, produces = { "application/xml; charset=utf-8",
+            "application/json;charset=UTF-8" })
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public String removePersonByIdentifier(@RequestParam(required = true) String id) {
+        this.personService.deleteById(id);
+        return "";
     }
 }

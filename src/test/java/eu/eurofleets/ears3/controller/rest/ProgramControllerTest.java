@@ -5,6 +5,7 @@
  */
 package eu.eurofleets.ears3.controller.rest;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import eu.eurofleets.ears3.Application;
 import eu.eurofleets.ears3.domain.Program;
@@ -20,6 +21,7 @@ import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -30,12 +32,13 @@ import java.util.regex.Pattern;
 import static org.hamcrest.Matchers.not;
 import static org.hamcrest.core.StringContains.containsString;
 
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
-import static org.junit.Assert.*;
 import org.junit.Ignore;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import static org.junit.jupiter.api.Assertions.*;
+import org.junit.jupiter.api.Disabled;
+//import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.ComponentScan;
@@ -59,7 +62,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.
  *
  * @author Thomas Vandenberghe
  */
-@RunWith(SpringRunner.class)
 @SpringBootTest(classes = { Application.class }, properties = "spring.main.allow-bean-definition-overriding=true")
 @WebAppConfiguration
 @ComponentScan(basePackages = { "eu.eurofleets.ears3.domain", " eu.eurofleets.ears3.service" })
@@ -72,12 +74,12 @@ public class ProgramControllerTest {
 
         private MockMvc mockMvc;
 
-        @Before
+        @BeforeEach
         public void setup() throws Exception {
                 this.mockMvc = MockMvcBuilders.webAppContextSetup(this.wac).build();
         }
 
-        @After
+        @AfterEach
         public void after() throws Exception {
 
         }
@@ -132,7 +134,7 @@ public class ProgramControllerTest {
                                 .perform(MockMvcRequestBuilders.get("/api/programs").accept(MediaType.APPLICATION_JSON))
                                 .andReturn();
 
-                for (String identifier : getIdentifiersFromJson(mvcResult)) { // delete all previous events
+                for (String identifier : getIdentifiersFromJson(mvcResult)) { // delete all previous programs
                         mvcResult = mockMvc
                                         .perform(MockMvcRequestBuilders
                                                         .delete(String.format("/api/program?identifier=%s",
@@ -141,9 +143,72 @@ public class ProgramControllerTest {
                 }
         }
 
+        public static void deleteAllPersons(MockMvc mockMvc) throws Exception {
+
+                MvcResult mvcResult = mockMvc
+                                .perform(MockMvcRequestBuilders.get("/api/persons").accept(MediaType.APPLICATION_JSON))
+                                .andReturn();
+                Set<PersonDTO> persons = new HashSet<PersonDTO>();
+                persons.addAll(getPersonsFromJson(mvcResult));
+                System.out.println(persons.size());
+                Set<String> idsFromJson = getIdsFromJson(mvcResult);
+                System.out.println(idsFromJson.size());
+                for (String identifier : idsFromJson) {
+                        mvcResult = mockMvc
+                                        .perform(MockMvcRequestBuilders
+                                                        .delete(String.format("/api/person?id=%s",
+                                                                        identifier)))
+                                        .andExpect(status().is(204)).andReturn();
+                }
+        }
+
+        private static Collection<? extends PersonDTO> getPersonsFromJson(MvcResult mvcResult) {
+                /* String contentAsString = null;
+                try {
+                        contentAsString = mvcResult.getResponse().getContentAsString();
+                } catch (UnsupportedEncodingException e) {
+                        e.printStackTrace();
+                }
+                Pattern p = Pattern.compile(
+                                "\\{\"id\":\"(.*?)\",\"firstName\":\"(.*?)\",\"lastName\":\"(.*?)\",\"organisation\":\"(.*?)\",\"email\":\"(.*?)\"}");
+                Matcher m = p.matcher(contentAsString);
+                Set<PersonDTO> allMatches = new HashSet<PersonDTO>();
+                
+                while (m.find()) {
+                        PersonDTO personDTO = new PersonDTO(m.group(2), m.group(3), m.group(4), null, null, m.group(5));
+                        personDTO.setId(m.group(1));
+                        allMatches.add(personDTO);
+                }
+                return allMatches;*/
+
+                try {
+                        String content = mvcResult.getResponse().getContentAsString();
+                        ObjectMapper objectMapper = new ObjectMapper();
+
+                        objectMapper.readValue(content, Iterable.class);
+                } catch (JsonProcessingException | UnsupportedEncodingException e) {
+                        // TODO Auto-generated catch block
+                        e.printStackTrace();
+                }
+                return new ArrayList<PersonDTO>();
+        }
+
         private static Set<String> getIdentifiersFromJson(MvcResult mvcResult) throws UnsupportedEncodingException {
                 String contentAsString = mvcResult.getResponse().getContentAsString();
                 Pattern p = Pattern.compile("\\{\"identifier\":\"(.*?)\"");
+                Matcher m = p.matcher(contentAsString);
+                Set<String> allMatches = new HashSet<String>();
+
+                while (m.find()) {
+                        allMatches.add(m.group(1));
+                }
+                return allMatches;
+        }
+
+        private static Set<String> getIdsFromJson(MvcResult mvcResult) throws UnsupportedEncodingException {
+                String contentAsString = mvcResult.getResponse().getContentAsString();
+                System.out.println(contentAsString);
+                Pattern p = Pattern.compile("\\{\"id\":\"(.*?)\"");
                 Matcher m = p.matcher(contentAsString);
                 Set<String> allMatches = new HashSet<String>();
 
@@ -255,6 +320,7 @@ public class ProgramControllerTest {
                 // delete all previous events and programs
                 EventControllerTest.deleteAllEvents(this.mockMvc);
                 deleteAllPrograms(this.mockMvc);
+                deleteAllPersons(this.mockMvc);
 
                 programUUID = UUID.randomUUID();
                 ProgramDTO program = getTestProgram1("KB_" + programUUID);
@@ -282,7 +348,7 @@ public class ProgramControllerTest {
                 // delete all previous events and programs
                 EventControllerTest.deleteAllEvents(this.mockMvc);
                 deleteAllPrograms(this.mockMvc);
-
+                deleteAllPersons(this.mockMvc);
                 programUUID = UUID.randomUUID();
 
                 PersonControllerTest.assertPersonCount(this.mockMvc, 0);
