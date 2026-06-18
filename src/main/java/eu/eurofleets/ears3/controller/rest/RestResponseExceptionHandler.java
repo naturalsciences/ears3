@@ -38,7 +38,7 @@ public class RestResponseExceptionHandler
             PSQLException.class, DataIntegrityViolationException.class, ConstraintViolationException.class,
             ClassNotFoundException.class, DateTimeParseException.class })
     protected ResponseEntity<Object> handleConflict(
-            RuntimeException ex, WebRequest request) throws Exception {
+            Exception ex, WebRequest request) throws Exception {
         HttpStatusCode status = null;
         if (ex instanceof ResponseStatusException) {
             ResponseStatusException rpex = (ResponseStatusException) ex;
