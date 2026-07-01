@@ -16,15 +16,15 @@ import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.http.MediaType;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.annotation.DirtiesContext.ClassMode;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.context.web.WebAppConfiguration;
@@ -35,15 +35,9 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
 
-/**
- *
- * @author Thomas Vandenberghe
- */
-@RunWith(SpringRunner.class)
-@SpringBootTest(classes = { Application.class }, properties = "spring.main.allow-bean-definition-overriding=true")
+@SpringBootTest(classes = { Application.class })
 @WebAppConfiguration
-@ComponentScan(basePackages = { "eu.eurofleets.ears3.domain", " eu.eurofleets.ears3.service" })
-@TestPropertySource(locations = "classpath:test.properties")
+@ActiveProfiles("test")
 @DirtiesContext(classMode = ClassMode.BEFORE_EACH_TEST_METHOD) //reset the database to base state before each test method
 public class EventDTOControllerTest {
 
@@ -52,7 +46,7 @@ public class EventDTOControllerTest {
 
         private MockMvc mockMvc;
 
-        @Before
+        @BeforeEach
         public void setup() throws Exception {
                 this.mockMvc = MockMvcBuilders.webAppContextSetup(this.wac).build();
         }
@@ -93,7 +87,7 @@ public class EventDTOControllerTest {
                 EventControllerTest.postEvent(this.mockMvc, e, objectMapper);
 
                 MvcResult mvcResult = this.mockMvc
-                                .perform(MockMvcRequestBuilders.get("/api/dto/events.json")
+                                .perform(MockMvcRequestBuilders.get("/api/dto/events.json").accept(MediaType.APPLICATION_XML)
                                                 .contentType(MediaType.APPLICATION_JSON))
                                 // .andDo(print())
                                 .andExpect(status().is(200))

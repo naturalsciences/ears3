@@ -2,6 +2,10 @@ package eu.eurofleets.ears3.utilities;
 
 import eu.eurofleets.ears3.domain.Coordinate;
 import eu.eurofleets.ears3.domain.Navigation;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.fail;
+
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.Reader;
@@ -11,8 +15,7 @@ import java.nio.file.Paths;
 import java.util.List;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
-import org.junit.Test;
-import static org.junit.Assert.*;
+import org.junit.jupiter.api.Test;
 
 public class DatagramUtilitiesTest {
 

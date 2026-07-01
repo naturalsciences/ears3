@@ -5,15 +5,15 @@ import eu.eurofleets.ears3.domain.Person;
 import eu.eurofleets.ears3.dto.LinkedDataTermDTO;
 import eu.eurofleets.ears3.dto.OrganisationDTO;
 import eu.eurofleets.ears3.dto.PersonDTO;
-import org.junit.runner.RunWith;
+//import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import static org.mockito.Mockito.when;
-import org.junit.Ignore;
-import org.junit.Test;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 
-@RunWith(MockitoJUnitRunner.class)
+//@RunWith(MockitoJUnitRunner.class)
 public class PersonServiceUnitTest {
 	static Organisation ugent;
 	static Organisation rbins;
@@ -68,7 +68,7 @@ public class PersonServiceUnitTest {
 	private OrganisationRepository organisationRepository;
 
 	@Test
-	@Ignore
+	@Disabled 
 	public void findOrCreate() {
 
 

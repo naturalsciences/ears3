@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.http.MediaType;
 
 @RestController
 @RequestMapping(value = "/api")
@@ -20,7 +21,7 @@ public class PlatformController {
     @Autowired
     private Environment env;
 
-    @RequestMapping(method = {RequestMethod.GET}, value = {"platform/current"}, produces = {"application/xml; charset=utf-8", "application/json"})
+    @RequestMapping(method = {RequestMethod.GET}, value = {"platform/current"}, produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
     public Platform getCurrentPlatform() {
         String identifier = env.getProperty("ears.platform");
         Platform p = platformService.findByIdentifier(identifier);

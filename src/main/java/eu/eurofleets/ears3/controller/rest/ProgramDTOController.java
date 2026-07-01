@@ -23,6 +23,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
+import org.springframework.http.MediaType;
 
 @RestController
 @RequestMapping(value = "/api/dto")
@@ -35,7 +36,7 @@ public class ProgramDTOController {
     @Autowired
     private CruiseService cruiseService;
 
-    @RequestMapping(method = {RequestMethod.GET}, value = {"programs"}, produces = {"application/xml; charset=utf-8", "application/json"})
+    @RequestMapping(method = {RequestMethod.GET}, value = {"programs"}, produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
     public ProgramDTOList getPrograms() {
         Set<Program> res = this.programService.findAll();
         Set<Program> currents = this.programService.findCurrent();
@@ -46,7 +47,7 @@ public class ProgramDTOController {
     }
 
     //@Operation(summary = "Find programs by cruiseIdentifier")
-    @RequestMapping(method = {RequestMethod.GET}, value = {"programs"}, params = {"cruiseIdentifier"}, produces = {"application/xml; charset=utf-8", "application/json"})
+    @RequestMapping(method = {RequestMethod.GET}, value = {"programs"}, params = {"cruiseIdentifier"}, produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
     public ProgramDTOList getPrograms(@RequestParam(required = false, defaultValue = "") String cruiseIdentifier) {
         Set<Program> res;
         if (cruiseIdentifier == null || "".equals(cruiseIdentifier)) {
@@ -62,7 +63,7 @@ public class ProgramDTOController {
     }
 
     //@Operation(summary = "Find programs by startDate and endDate")
-    @RequestMapping(method = {RequestMethod.GET}, value = {"programs"}, params = {"startDate", "endDate"}, produces = {"application/xml; charset=utf-8", "application/json"})
+    @RequestMapping(method = {RequestMethod.GET}, value = {"programs"}, params = {"startDate", "endDate"}, produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
     public ProgramDTOList getPrograms(@RequestParam(required = false, defaultValue = "") String startDate, @RequestParam(required = false, defaultValue = "") String endDate) { //@DateTimeFormat(iso = ISO.DATE_TIME)
         OffsetDateTime start = OffsetDateTime.parse(startDate);
         OffsetDateTime end = OffsetDateTime.parse(endDate);
@@ -84,7 +85,7 @@ public class ProgramDTOController {
         return new ProgramDTOList(res);
     }
 
-    @RequestMapping(method = {RequestMethod.GET}, value = {"program/{id}"}, produces = {"application/xml; charset=utf-8", "application/json"})
+    @RequestMapping(method = {RequestMethod.GET}, value = {"program/{id}"}, produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
     public ProgramDTO getProgramById(@PathVariable(value = "id") String id) {
         Program program = this.programService.findById(Long.parseLong(id));
         if (program != null) {
@@ -94,12 +95,12 @@ public class ProgramDTOController {
         }
     }
 
-    @RequestMapping(method = {RequestMethod.GET}, value = {"program/current"}, produces = {"application/xml; charset=utf-8", "application/json"})
+    @RequestMapping(method = {RequestMethod.GET}, value = {"program/current"}, produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
     public ProgramDTOList getCurrent() {
         return new ProgramDTOList(this.programService.findCurrent());
     }
 
-    @RequestMapping(method = {RequestMethod.GET}, value = {"program"}, params = {"identifier"}, produces = {"application/xml; charset=utf-8", "application/json"})
+    @RequestMapping(method = {RequestMethod.GET}, value = {"program"}, params = {"identifier"}, produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
     public ProgramDTO getProgramByidentifier(@RequestParam(required = true, value = "identifier") String identifier) {
         Program program = this.programService.findByIdentifier(identifier);
         if (program != null) {

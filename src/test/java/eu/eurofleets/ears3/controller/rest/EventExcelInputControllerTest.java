@@ -7,9 +7,8 @@ import eu.eurofleets.ears3.dto.PersonDTO;
 import eu.eurofleets.ears3.dto.ProgramDTO;
 import eu.eurofleets.ears3.service.EventService;
 import eu.eurofleets.ears3.service.LinkedDataTermService;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.ComponentScan;
@@ -17,6 +16,8 @@ import org.springframework.core.io.ClassPathResource;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.annotation.DirtiesContext;
+import org.springframework.test.annotation.DirtiesContext.ClassMode;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.context.web.WebAppConfiguration;
@@ -33,12 +34,10 @@ import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@RunWith(SpringRunner.class)
-@SpringBootTest(classes = { Application.class }, properties = "spring.main.allow-bean-definition-overriding=true")
+@SpringBootTest(classes = { Application.class })
 @WebAppConfiguration
-@ComponentScan(basePackages = { "eu.eurofleets.ears3.domain", " eu.eurofleets.ears3.service" })
-@TestPropertySource(locations = "classpath:test.properties")
-@DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD) //reset the database to base state before each test method
+@ActiveProfiles("test")
+@DirtiesContext(classMode = ClassMode.BEFORE_EACH_TEST_METHOD) //reset the database to base state before each test method
 public class EventExcelInputControllerTest {
 
         @Autowired
@@ -55,7 +54,7 @@ public class EventExcelInputControllerTest {
 
         private MockMvc mockMvc;
 
-        @Before
+        @BeforeEach
         public void setup() throws Exception {
                 this.mockMvc = MockMvcBuilders.webAppContextSetup(this.wac).build();
         }
@@ -158,7 +157,7 @@ public class EventExcelInputControllerTest {
                                 .andDo(print())
                                 .andExpect(status().is(201));
 
-                this.mockMvc.perform(MockMvcRequestBuilders.get("/api/events"))
+                this.mockMvc.perform(MockMvcRequestBuilders.get("/api/events").accept(MediaType.APPLICATION_XML))
                                 .andExpect(status().is(200))
                                 .andDo(print())
                                 .andExpect(content().string(containsString("<name>All persons</name>")))

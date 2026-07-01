@@ -82,7 +82,6 @@ public class ProgramController {
         return getPrograms(null, endDate);
     }
 
-    // @Operation(summary = "Find programs by startDate and endDate")
     @RequestMapping(method = { RequestMethod.GET }, value = { "programs" }, params = { "startDate",
             "endDate" }, produces = { "application/xml; charset=utf-8", "application/json;charset=UTF-8" })
     public ProgramList getPrograms(@RequestParam(required = false, defaultValue = "") String startDate,
@@ -90,14 +89,7 @@ public class ProgramController {
         OffsetDateTime start = null;
         OffsetDateTime end = null;
         Set<Program> res = new HashSet<>();
-        /*
-         * if (cruiseIdentifier == null || "".equals(cruiseIdentifier) && startDate ==
-         * null && endDate == null) {
-         * res = this.programService.findAll();
-         * } else if (!"".equals(cruiseIdentifier)) {
-         * res = this.programService.findByCruiseIdentifier(cruiseIdentifier);
-         * } else
-         */ if (startDate == null && endDate == null) {
+        if (startDate == null && endDate == null) {
             res = this.programService.findAll();
         } else {
             DateTimeFormatter parser = DateTimeFormatter.ofPattern("yyyy-MM-dd");

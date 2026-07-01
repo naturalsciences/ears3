@@ -1,0 +1,53 @@
+spring:
+  datasource:
+    driver-class-name: org.h2.Driver
+    url: jdbc:h2:mem:${random.uuid};MODE=PostgreSQL
+    username: ""
+    password: ""
+    test-on-borrow: true
+    validationQuery: SELECT 1
+
+  jpa:
+    hibernate:
+      ddl-auto: none
+      naming:
+        strategy: org.hibernate.cfg.EJB3NamingStrategy
+    defer-datasource-initialization: true
+
+  mvc:
+    static-path-pattern: /resources/**
+
+  h2:
+    console:
+      enabled: true
+
+logging:
+  level:
+    org:
+      springframework:
+        web: DEBUG
+java:
+  util:
+    logging:
+      SimpleFormatter:
+        format: "%1$tY-%1$tm-%1$td %1$tH:%1$tM:%1$tS %4$-6s %2$s %5$s%6$s%n"
+
+server:
+  port: 8081
+  servlet:
+    context-path: /ears3
+
+
+ears:
+  platform: SDN:C17::11BU
+  send-events-to: http://replace.me
+  navigation:
+    server: http://replace.me
+  csr:
+    license: UN
+  ontology:
+    username: earsontology
+    password: REPLACEME
+  read-only: false
+  program:
+    regex: "202[6-9]"

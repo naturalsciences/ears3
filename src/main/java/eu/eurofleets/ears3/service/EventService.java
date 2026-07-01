@@ -1,6 +1,5 @@
 package eu.eurofleets.ears3.service;
 
-import tools.jackson.databind.ObjectMapper;
 import eu.eurofleets.ears3.domain.Acquisition;
 import eu.eurofleets.ears3.domain.Cruise;
 import eu.eurofleets.ears3.domain.Event;
@@ -17,6 +16,8 @@ import eu.eurofleets.ears3.domain.Weather;
 import eu.eurofleets.ears3.dto.EventDTO;
 import eu.eurofleets.ears3.dto.PropertyDTO;
 import eu.eurofleets.ears3.utilities.DatagramUtilities;
+import tools.jackson.databind.ObjectMapper;
+
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.time.Duration;
@@ -69,9 +70,6 @@ public class EventService {
     private ThermosalService thermosalService;
     @Autowired
     private WeatherService weatherService;
-
-    @Autowired
-    private ObjectMapper objectMapper;
 
     private DatagramUtilities<Navigation> navUtil;
     private DatagramUtilities<Thermosal> thermosalUtil;

@@ -26,6 +26,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.Environment;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -51,16 +52,8 @@ public class EventController {
     @Autowired
     private Environment env;
 
-    /*
-     * @RequestMapping(method = {RequestMethod.GET}, value = {"events"}, produces =
-     * {"application/xml; charset=utf-8", "application/json"})
-     * public EventList getEvents() {
-     * List<Event> res = this.eventService.findAll();
-     * return new EventList(res);
-     * }
-     */
-    @RequestMapping(method = { RequestMethod.GET }, value = { "events" }, produces = { "application/xml; charset=utf-8",
-            "application/json" })
+    @RequestMapping(method = { RequestMethod.GET }, value = { "events" }, produces = { MediaType.APPLICATION_JSON_VALUE,
+            MediaType.APPLICATION_XML_VALUE })
     public EventList getEvents(@RequestParam Map<String, String> allParams) {
         List<Event> res = this.eventService.advancedFind(allParams);
         return new EventList(res);
@@ -77,7 +70,7 @@ public class EventController {
     List<String> fakeProps = new ArrayList<>(Arrays.asList("http://ontologies.ef-ears.eu/ears2/1#pry_4",
             "http://ontologies.ef-ears.eu/ears2/1#pry_station",
             "http://ontologies.ef-ears.eu/ears2/1#pry_description")); // label, station and description hide as
-                                                                      // properties but are not saved as properties
+                                                                                                                                                                                                                               // properties but are not saved as properties
 
     @RequestMapping(method = { RequestMethod.GET }, value = { "events.csv" }, produces = { "text/csv; charset=utf-8" })
     public String getEventsAsCSV(@RequestParam Map<String, String> allParams) throws IOException {
@@ -218,38 +211,20 @@ public class EventController {
         return writer.toString();
     }
 
-    /*
-     * @RequestMapping(method = {RequestMethod.GET}, value = {"events"}, produces =
-     * {"application/xml; charset=utf-8", "application/json"})
-     * public EventList getEventsByActorAndProgram(@RequestParam(required = false,
-     * defaultValue = "") String platformIdentifier, @RequestParam(required = false,
-     * defaultValue = "") String programIdentifier, @RequestParam(required = false,
-     * defaultValue = "") String actorEmail) {
-     * List<Event> res;
-     * if ((programIdentifier == null || "".equals(programIdentifier)) &&
-     * (actorEmail == null || "".equals(actorEmail))) {
-     * return getEvents(platformIdentifier);
-     * } else {
-     * res = this.eventService.findAllByPlatformActorAndProgram(platformIdentifier,
-     * actorEmail, programIdentifier);
-     * }
-     * return new EventList(res);
-     * }
-     */
-    @RequestMapping(method = { RequestMethod.GET }, value = { "event/{id}" }, produces = { "application/xml",
-            "application/json" })
+    @RequestMapping(method = { RequestMethod.GET }, value = { "event/{id}" }, produces = {
+            MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE })
     public Event getEventById(@PathVariable(value = "id") String id) {
         return this.eventService.findById(Long.parseLong(id));
 
     }
 
     @RequestMapping(method = { RequestMethod.GET }, value = { "event" }, params = { "identifier" }, produces = {
-            "application/xml", "application/json" })
+            MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE })
     public Event getEventByIdentifier(@RequestParam(required = true, value = "identifier") String identifier) {
         return this.eventService.findByIdentifier(identifier);
     }
 
-    @PostMapping(value = { "event" }, produces = { "application/xml; charset=utf-8", "application/json" })
+    @PostMapping(value = { "event" }, produces = { MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE })
     @ResponseStatus(HttpStatus.CREATED)
     public ResponseEntity<Message<EventDTO>> createEvent(@RequestBody EventDTO eventDTO) {
         if (eventDTO.getPlatform() == null) {
@@ -273,8 +248,7 @@ public class EventController {
         // return new ResponseEntity<Event>(, HttpStatus.CREATED);event
     }
 
-    @DeleteMapping(value = { "event" }, params = { "identifier" }, produces = { "application/xml; charset=utf-8",
-            "application/json" })
+    @DeleteMapping(value = { "event" }, params = { "identifier" }, produces = { MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE })
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public String removeEventByIdentifier(@RequestParam(required = true) String identifier) {
         this.eventService.deleteByIdentifier(identifier);

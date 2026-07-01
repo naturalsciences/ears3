@@ -28,11 +28,10 @@ import java.util.regex.Pattern;
 import org.apache.commons.io.FileUtils;
 import static org.hamcrest.Matchers.not;
 import static org.hamcrest.core.StringContains.containsString;
-import static org.junit.Assert.fail;
+import static org.junit.jupiter.api.Assertions.fail;
 
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.BeforeEach;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.ComponentScan;
@@ -40,8 +39,7 @@ import org.springframework.core.env.Environment;
 import org.springframework.http.MediaType;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.annotation.DirtiesContext.ClassMode;
-import org.springframework.test.context.TestPropertySource;
-import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.web.WebAppConfiguration;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
@@ -52,31 +50,24 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.util.StringUtils;
 import org.springframework.web.context.WebApplicationContext;
 
-/**
- *
- * @author Thomas Vandenberghe
- */
-@RunWith(SpringRunner.class)
-@SpringBootTest(classes = { Application.class }, properties = { "spring.main.allow-bean-definition-overriding=true" })
+@SpringBootTest(classes = { Application.class })
 @WebAppConfiguration
-@ComponentScan(basePackages = { "eu.eurofleets.ears3.domain", " eu.eurofleets.ears3.service" })
-@TestPropertySource(locations = "classpath:test.properties")
+@ActiveProfiles("test")
 @DirtiesContext(classMode = ClassMode.BEFORE_EACH_TEST_METHOD) //reset the database to base state before each test method
 public class CruiseControllerTest {
-        
 
         @Autowired
         private WebApplicationContext wac;
 
         private MockMvc mockMvc;
 
-        @Before
+        @Autowired
+        private ObjectMapper objectMapper;
+
+        @BeforeEach
         public void setup() throws Exception {
                 this.mockMvc = MockMvcBuilders.webAppContextSetup(this.wac).build();
         }
-
-        @Autowired
-        private ObjectMapper objectMapper;
 
         @Autowired
         private Environment env;
@@ -142,6 +133,7 @@ public class CruiseControllerTest {
                 String identifier = cruise.identifier;
                 MvcResult mvcResult = mockMvc
                                 .perform(MockMvcRequestBuilders.post("/api/cruise")
+                                                .accept(MediaType.APPLICATION_XML)
                                                 .contentType(MediaType.APPLICATION_JSON)
                                                 .content(json))
                                 // .andDo(print())
@@ -179,7 +171,9 @@ public class CruiseControllerTest {
                 cruise.endDate = Instant.now().atOffset(ZoneOffset.UTC).plusDays(5);
                 postCruise(mockMvc, cruise, objectMapper);
 
-                MvcResult mvcResult = this.mockMvc.perform(MockMvcRequestBuilders.get("/api/cruise/current"))
+                MvcResult mvcResult = this.mockMvc
+                                .perform(MockMvcRequestBuilders.get("/api/cruise/current")
+                                                .accept(MediaType.APPLICATION_XML))
                                 // .andDo(print())
                                 .andExpect(status().is(200))
                                 .andExpect(content()
@@ -188,7 +182,9 @@ public class CruiseControllerTest {
                                 .andExpect(content().string(containsString("SDN:P02::VDFC")))
                                 .andExpect(content().string(containsString("SDN:C19::1_2"))).andReturn();
 
-                mvcResult = this.mockMvc.perform(MockMvcRequestBuilders.get("/api/program/current"))
+                mvcResult = this.mockMvc
+                                .perform(MockMvcRequestBuilders.get("/api/program/current")
+                                                .accept(MediaType.APPLICATION_XML))
                                 // .andDo(print())
                                 .andExpect(status().is(200))
                                 .andExpect(content().string(
@@ -216,12 +212,14 @@ public class CruiseControllerTest {
                 String json = objectMapper.writeValueAsString(cruise);
                 this.mockMvc
                                 .perform(MockMvcRequestBuilders.post("/api/cruise")
+                                                .accept(MediaType.APPLICATION_XML)
                                                 .contentType(MediaType.APPLICATION_JSON)
                                                 .content(json))
                                 .andExpect(status().isCreated()).andReturn();
                 // .andExpect(content().string(containsString("<identifier>https://edmo.seadatanet.org/report/230</identifier>"))).andReturn();
 
-                this.mockMvc.perform(MockMvcRequestBuilders.get("/api/cruise?identifier=" + cruiseId))
+                this.mockMvc.perform(MockMvcRequestBuilders.get("/api/cruise?identifier=" + cruiseId)
+                                .accept(MediaType.APPLICATION_XML))
                                 // .andDo(print())
                                 .andExpect(status().is(200))
                                 .andExpect(content().string(
@@ -252,6 +250,7 @@ public class CruiseControllerTest {
                 String json = objectMapper.writeValueAsString(cruise);
                 this.mockMvc
                                 .perform(MockMvcRequestBuilders.post("/api/cruise")
+                                                .accept(MediaType.APPLICATION_XML)
                                                 .contentType(MediaType.APPLICATION_JSON)
                                                 .content(json))
                                 // .andDo(print())
@@ -335,7 +334,8 @@ public class CruiseControllerTest {
 
                 String licenseString = env.getProperty("ears.csr.license");
                 this.mockMvc
-                                .perform(MockMvcRequestBuilders.get("/api/cruise/csr?identifier=" + identifier))
+                                .perform(MockMvcRequestBuilders.get("/api/cruise/csr?identifier=" + identifier)
+                                                .accept(MediaType.APPLICATION_XML))
                                 // .andDo(print())
                                 .andExpect(status().isOk())
                                 .andExpect(content().string(not(containsString("4.0"))))
@@ -353,15 +353,16 @@ public class CruiseControllerTest {
                                 .andReturn();
                 if (!isOffline) {
                         this.mockMvc
-                                        .perform(MockMvcRequestBuilders.get("/api/cruise/csr?identifier=" + identifier))
+                                        .perform(MockMvcRequestBuilders.get("/api/cruise/csr?identifier=" + identifier)
+                                                        .accept(MediaType.APPLICATION_XML))
                                         // .andDo(print())
                                         .andExpect(status().isOk())
-                                        .andExpect(content().string(containsString(
-                                                        "<gml:posList srsName=\"http://www.opengis.net/gml/srs/epsg.xml#4326\" srsDimension=\"2\">")))
+                                        .andExpect(content().string(containsString("<gml:posList srsName=\"http://www.opengis.net/gml/srs/epsg.xml#4326\" srsDimension=\"2\">")))
                                         .andReturn();
                 } else {
                         this.mockMvc
-                                        .perform(MockMvcRequestBuilders.get("/api/cruise/csr?identifier=" + identifier))
+                                        .perform(MockMvcRequestBuilders.get("/api/cruise/csr?identifier=" + identifier)
+                                                        .accept(MediaType.APPLICATION_XML))
                                         // .andDo(print())
                                         .andExpect(status().isOk())
                                         .andExpect(content().string(not(containsString(

@@ -13,15 +13,15 @@ import static eu.eurofleets.ears3.controller.rest.EventControllerTest.postEvent;
 import eu.eurofleets.ears3.dto.EventDTO;
 import eu.eurofleets.ears3.dto.ProgramDTO;
 import static org.hamcrest.core.StringContains.containsString;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.http.MediaType;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.annotation.DirtiesContext.ClassMode;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.context.web.WebAppConfiguration;
@@ -40,11 +40,10 @@ import org.springframework.web.context.WebApplicationContext;
  *
  * @author Thomas Vandenberghe
  */
-@RunWith(SpringRunner.class)
+@ActiveProfiles("test")
 @SpringBootTest(classes = { Application.class }, properties = "spring.main.allow-bean-definition-overriding=true")
 @WebAppConfiguration
 @ComponentScan(basePackages = { "eu.eurofleets.ears3.domain", " eu.eurofleets.ears3.service" })
-@TestPropertySource(locations = "classpath:test.properties")
 @DirtiesContext(classMode = ClassMode.BEFORE_EACH_TEST_METHOD) //reset the database to base state before each test method
 public class PersonControllerTest {
 
@@ -53,7 +52,7 @@ public class PersonControllerTest {
 
     private MockMvc mockMvc;
 
-    @Before
+    @BeforeEach
     public void setup() throws Exception {
         this.mockMvc = MockMvcBuilders.webAppContextSetup(this.wac).build();
 
@@ -108,7 +107,7 @@ public class PersonControllerTest {
         MvcResult postEvent = postEvent(this.mockMvc, e, this.objectMapper);
 
         mvcResult = this.mockMvc
-                .perform(MockMvcRequestBuilders.get("/api/person?fullName=" + firstName + " " + lastName))
+                .perform(MockMvcRequestBuilders.get("/api/person?fullName=" + firstName + " " + lastName).accept(MediaType.APPLICATION_XML))
                 //.andDo(print())
                 .andExpect(status().is(200))
                 .andExpect(content().string(containsString(
@@ -119,7 +118,7 @@ public class PersonControllerTest {
 
     public static void assertPersonCount(MockMvc mockMvc, int testNumber) throws Exception {
         MvcResult mvcResult = mockMvc
-                .perform(MockMvcRequestBuilders.get("/api/persons").accept(MediaType.APPLICATION_JSON))
+                .perform(MockMvcRequestBuilders.get("/api/persons").accept(MediaType.APPLICATION_XML).accept(MediaType.APPLICATION_JSON))
                 .andDo(print())
                 .andExpect(status().is(200))
                 .andExpect(MockMvcResultMatchers.jsonPath("$.persons.length()").value(testNumber))

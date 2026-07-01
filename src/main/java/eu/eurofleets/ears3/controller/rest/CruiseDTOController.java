@@ -24,6 +24,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
+import org.springframework.http.MediaType;
 
 /**
  *
@@ -49,8 +50,12 @@ public class CruiseDTOController {
         return new CruiseDTOList(res);
     }
 
-    @RequestMapping(method = {RequestMethod.GET}, value = {"cruises"}, produces = {"application/xml; charset=utf-8", "application/json"})
-    public CruiseDTOList getCruisesAt(@RequestParam(required = false, defaultValue = "") String platformIdentifier, @RequestParam(required = false) OffsetDateTime startDate, @RequestParam(required = false) OffsetDateTime endDate, @RequestParam(required = false) OffsetDateTime atDate) {
+    @RequestMapping(method = { RequestMethod.GET }, value = { "cruises" }, produces = {
+            MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE })
+    public CruiseDTOList getCruisesAt(@RequestParam(required = false, defaultValue = "") String platformIdentifier,
+            @RequestParam(required = false) OffsetDateTime startDate,
+            @RequestParam(required = false) OffsetDateTime endDate,
+            @RequestParam(required = false) OffsetDateTime atDate) {
         if (startDate == null && endDate == null && atDate == null) {
             return getCruises(platformIdentifier);
         }
@@ -71,7 +76,8 @@ public class CruiseDTOController {
         return new CruiseDTOList(res);
     }
 
-    @RequestMapping(method = {RequestMethod.GET}, value = {"cruise/{id}"}, produces = {"application/xml; charset=utf-8", "application/json"})
+    @RequestMapping(method = { RequestMethod.GET }, value = { "cruise/{id}" }, produces = {
+            MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE })
     public CruiseDTO getCruiseById(@PathVariable(value = "id") String id) {
         Cruise cruise = this.cruiseService.findById(Long.parseLong(id));
         if (cruise != null) {
@@ -81,7 +87,8 @@ public class CruiseDTOController {
         }
     }
 
-    @RequestMapping(method = {RequestMethod.GET}, value = {"cruise"}, params = {"identifier"}, produces = {"application/xml; charset=utf-8", "application/json"})
+    @RequestMapping(method = { RequestMethod.GET }, value = { "cruise" }, params = { "identifier" }, produces = {
+            MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE })
     public CruiseDTO getCruiseByidentifier(@RequestParam(required = true, value = "identifier") String identifier) {
         Cruise cruise = this.cruiseService.findByIdentifier(identifier);
         if (cruise != null) {
@@ -91,7 +98,8 @@ public class CruiseDTOController {
         }
     }
 
-    @RequestMapping(method = {RequestMethod.GET}, value = {"cruise/current"}, produces = {"application/xml; charset=utf-8", "application/json"})
+    @RequestMapping(method = { RequestMethod.GET }, value = { "cruise/current" }, produces = {
+            MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE })
     public CruiseDTOList getCurrent() {
         return new CruiseDTOList(this.cruiseService.findCurrent());
     }

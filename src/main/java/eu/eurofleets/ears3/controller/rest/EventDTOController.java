@@ -12,6 +12,7 @@ import eu.eurofleets.ears3.service.EventService;
 import java.util.List;
 import java.util.Map;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -32,14 +33,14 @@ public class EventDTOController {
     private EventService eventService;
 
     //@Operation(summary = "Find all events in DTO format")
-    @RequestMapping(method = {RequestMethod.GET}, value = {"events"}, produces = {"application/xml; charset=utf-8", "application/json"})
+    @RequestMapping(method = {RequestMethod.GET}, value = {"events"}, produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
     public EventDTOList getEvents(@RequestParam Map<String, String> allParams) {
         List<Event> res = this.eventService.advancedFind(allParams);
         return new EventDTOList(res, true);
     }
 
     //@Operation(summary = "Find a single event by its identifier in DTO format")
-    @RequestMapping(method = {RequestMethod.GET}, value = {"event"}, params = {"identifier"}, produces = {"application/xml; charset=utf-8", "application/json"})
+    @RequestMapping(method = {RequestMethod.GET}, value = {"event"}, params = {"identifier"}, produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
     public EventDTO getEventByIdentifier(@RequestParam(required = true, value = "identifier") String identifier) {
         return new EventDTO(this.eventService.findByIdentifier(identifier));
 

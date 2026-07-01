@@ -46,17 +46,20 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import static org.hamcrest.Matchers.not;
 import static org.hamcrest.core.StringContains.containsString;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import org.junit.Before;
-import org.junit.Test;
-import static org.junit.Assert.*;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.http.MediaType;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.annotation.DirtiesContext.ClassMode;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.context.web.WebAppConfiguration;
@@ -69,15 +72,9 @@ import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
 
-/**
- *
- * @author Thomas Vandenberghe
- */
-@RunWith(SpringRunner.class)
-@SpringBootTest(classes = { Application.class }, properties = "spring.main.allow-bean-definition-overriding=true")
+@SpringBootTest(classes = { Application.class })
 @WebAppConfiguration
-@ComponentScan(basePackages = { "eu.eurofleets.ears3.domain", " eu.eurofleets.ears3.service" })
-@TestPropertySource(locations = "classpath:test.properties")
+@ActiveProfiles("test")
 @DirtiesContext(classMode = ClassMode.BEFORE_EACH_TEST_METHOD) //reset the database to base state before each test method
 public class EventControllerTest {
 
@@ -89,16 +86,9 @@ public class EventControllerTest {
         @Autowired
         private ObjectMapper objectMapper;
 
-        @Before
+        @BeforeEach
         public void setup() throws Exception {
                 this.mockMvc = MockMvcBuilders.webAppContextSetup(this.wac).build();
-                /* objectMapper.registerModule(new PersonModule());
-                objectMapper.registerModule(new LinkedDataModule());
-                objectMapper.registerModule(new ToolModule());
-                objectMapper.registerModule(new PlatformModule());
-                objectMapper.registerModule(new OrganisationModule());
-                objectMapper.registerModule(new PropertyModule());
-                objectMapper.registerModule(new ProgramModule()); */
         }
 
         /*
@@ -355,7 +345,7 @@ public class EventControllerTest {
         public static void assertEventCount(String url, int expected, MockMvc mockMvc, ObjectMapper objectMapper)
                         throws Exception {
                 MvcResult mvcResult = mockMvc
-                                .perform(MockMvcRequestBuilders.get(url)
+                                .perform(MockMvcRequestBuilders.get(url).accept(MediaType.APPLICATION_XML)
                                                 .accept(MediaType.APPLICATION_JSON))
                                 .andReturn();
                 // String contentAsString = mvcResult.getResponse().getContentAsString();
@@ -375,7 +365,7 @@ public class EventControllerTest {
         public static void assertEventDTOCount(String url, int expected, MockMvc mockMvc, ObjectMapper objectMapper)
                         throws Exception {
                 MvcResult mvcResult = mockMvc
-                                .perform(MockMvcRequestBuilders.get(url)
+                                .perform(MockMvcRequestBuilders.get(url).accept(MediaType.APPLICATION_XML)
                                                 .contentType(MediaType.APPLICATION_JSON))
                                 .andReturn();
 
@@ -392,7 +382,7 @@ public class EventControllerTest {
         public static void assertSingleEventDTOTest(String url, MockMvc mockMvc, ObjectMapper objectMapper)
                         throws Exception {
                 MvcResult mvcResult = mockMvc
-                                .perform(MockMvcRequestBuilders.get(url)
+                                .perform(MockMvcRequestBuilders.get(url).accept(MediaType.APPLICATION_XML)
                                                 .contentType(MediaType.APPLICATION_JSON))
                                 .andReturn();
 
@@ -406,7 +396,8 @@ public class EventControllerTest {
          */
         public static void deleteAllEvents(MockMvc mockMvc) throws Exception {
                 MvcResult mvcResult = mockMvc
-                                .perform(MockMvcRequestBuilders.get("/api/events").accept(MediaType.APPLICATION_JSON))
+                                .perform(MockMvcRequestBuilders.get("/api/events").accept(MediaType.APPLICATION_XML)
+                                                .accept(MediaType.APPLICATION_JSON))
                                 .andExpect(status().isOk())
                                 .andReturn();
 
@@ -420,7 +411,8 @@ public class EventControllerTest {
 
         @Test
         public void testHome() throws Exception {
-                MvcResult mvcResult = this.mockMvc.perform(MockMvcRequestBuilders.get("/api/events"))
+                MvcResult mvcResult = this.mockMvc
+                                .perform(MockMvcRequestBuilders.get("/api/events").accept(MediaType.APPLICATION_XML))
                                 // .andDo(print())
                                 .andExpect(status().isOk())
                                 .andExpect(content().string(containsString("events")))
@@ -483,7 +475,9 @@ public class EventControllerTest {
                 // 4);
 
                 // Assert that the XML is correctly rendered
-                mvcResult = this.mockMvc.perform(MockMvcRequestBuilders.get("/api/events"))
+                mvcResult = this.mockMvc
+                                .perform(MockMvcRequestBuilders.get("/api/events").accept(MediaType.APPLICATION_XML)
+                                                .accept(MediaType.APPLICATION_XML))
                                 .andExpect(status().is(200))
                                 .andExpect(content().string(
                                                 containsString("<identifier>" + eventIdentifier + "</identifier>")))
@@ -572,6 +566,7 @@ public class EventControllerTest {
                 // Assert that the JSON is correctly rendered
                 mvcResult = this.mockMvc
                                 .perform(MockMvcRequestBuilders.get("/api/event?identifier=" + eventIdentifier)
+                                                .accept(MediaType.APPLICATION_XML)
                                                 .accept(MediaType.APPLICATION_JSON))
                                 .andDo(print())
                                 .andExpect(status().is(200))
@@ -586,7 +581,7 @@ public class EventControllerTest {
 
         @Test
         public void testGetEventsCSV() throws Exception {
-                this.mockMvc.perform(MockMvcRequestBuilders.get("/api/events.csv")
+                this.mockMvc.perform(MockMvcRequestBuilders.get("/api/events.csv").accept(MediaType.APPLICATION_XML)
                                 .accept(MediaType.valueOf("text/csv")))
                                 // .andDo(print())
                                 .andExpect(status().is(200))

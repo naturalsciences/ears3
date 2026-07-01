@@ -4,6 +4,7 @@
  * and open the template in the editor.
  */
 package eu.eurofleets.ears3.controller.rest;
+
 import tools.jackson.core.JacksonException;
 import tools.jackson.databind.ObjectMapper;
 import eu.eurofleets.ears3.Application;
@@ -31,18 +32,16 @@ import java.util.regex.Pattern;
 import static org.hamcrest.Matchers.not;
 import static org.hamcrest.core.StringContains.containsString;
 
-import org.junit.Ignore;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.context.annotation.ComponentScan;
 import org.springframework.http.MediaType;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.annotation.DirtiesContext.ClassMode;
-import org.springframework.test.context.TestPropertySource;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.web.WebAppConfiguration;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
@@ -54,14 +53,9 @@ import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 
-/**
- *
- * @author Thomas Vandenberghe
- */
-@SpringBootTest(classes = { Application.class }, properties = "spring.main.allow-bean-definition-overriding=true")
+@SpringBootTest(classes = { Application.class })
 @WebAppConfiguration
-@ComponentScan(basePackages = { "eu.eurofleets.ears3.domain", " eu.eurofleets.ears3.service" })
-@TestPropertySource(locations = "classpath:test.properties")
+@ActiveProfiles("test")
 @DirtiesContext(classMode = ClassMode.BEFORE_EACH_TEST_METHOD) //reset the database to base state before each test method
 public class ProgramControllerTest {
 
@@ -70,20 +64,13 @@ public class ProgramControllerTest {
 
         private MockMvc mockMvc;
 
+        @Autowired
+        private ObjectMapper objectMapper;
+
         @BeforeEach
         public void setup() throws Exception {
                 this.mockMvc = MockMvcBuilders.webAppContextSetup(this.wac).build();
         }
-
-        @AfterEach
-        public void after() throws Exception {
-
-        }
-
-        @Autowired
-        private ObjectMapper objectMapper;
-
-        // Methods to get mock objects
 
         public static ProgramDTO getTestProgram1(String identifier) {
                 List<PersonDTO> principalInvestigators1 = Arrays.asList(new PersonDTO[] {
@@ -127,7 +114,8 @@ public class ProgramControllerTest {
         public static void deleteAllPrograms(MockMvc mockMvc) throws Exception {
 
                 MvcResult mvcResult = mockMvc
-                                .perform(MockMvcRequestBuilders.get("/api/programs").accept(MediaType.APPLICATION_JSON))
+                                .perform(MockMvcRequestBuilders.get("/api/programs").accept(MediaType.APPLICATION_XML)
+                                                .accept(MediaType.APPLICATION_JSON))
                                 .andReturn();
 
                 for (String identifier : getIdentifiersFromJson(mvcResult)) { // delete all previous programs
@@ -142,7 +130,8 @@ public class ProgramControllerTest {
         public static void deleteAllPersons(MockMvc mockMvc) throws Exception {
 
                 MvcResult mvcResult = mockMvc
-                                .perform(MockMvcRequestBuilders.get("/api/persons").accept(MediaType.APPLICATION_JSON))
+                                .perform(MockMvcRequestBuilders.get("/api/persons").accept(MediaType.APPLICATION_XML)
+                                                .accept(MediaType.APPLICATION_JSON))
                                 .andReturn();
                 Set<PersonDTO> persons = new HashSet<PersonDTO>();
                 persons.addAll(getPersonsFromJson(mvcResult));
@@ -222,7 +211,8 @@ public class ProgramControllerTest {
                 ProgramDTO pr = getTestProgram1("2020-MF");
                 postProgram(this.mockMvc, pr, objectMapper);
 
-                MvcResult mvcResult = this.mockMvc.perform(MockMvcRequestBuilders.get("/api/programs"))
+                MvcResult mvcResult = this.mockMvc
+                                .perform(MockMvcRequestBuilders.get("/api/programs").accept(MediaType.APPLICATION_XML))
                                 // .andDo(print())
                                 .andExpect(status().is(200))
                                 .andExpect(content().string(containsString("<identifier>2020-MF</identifier>")))
@@ -300,7 +290,8 @@ public class ProgramControllerTest {
         public void testGetProgramById() throws Exception {
                 ProgramDTO pr = getTestProgram1("2020-MF");
                 postProgram(this.mockMvc, pr, objectMapper);
-                this.mockMvc.perform(MockMvcRequestBuilders.get("/api/program?identifier=2020-MF"))
+                this.mockMvc.perform(MockMvcRequestBuilders.get("/api/program?identifier=2020-MF")
+                                .accept(MediaType.APPLICATION_XML))
                                 // .andDo(print())
                                 .andExpect(status().is(200))
                                 .andExpect(content().string(containsString("<identifier>2020-MF</identifier>")))
@@ -322,6 +313,7 @@ public class ProgramControllerTest {
 
                 this.mockMvc
                                 .perform(MockMvcRequestBuilders.post("/api/program")
+                                                .accept(MediaType.APPLICATION_XML)
                                                 .contentType(MediaType.APPLICATION_JSON)
                                                 .content(json))
                                 // .andDo(print())
@@ -359,7 +351,8 @@ public class ProgramControllerTest {
                 String json = "{\"principalInvestigators\":[{\"firstName\":\"Danae\",\"lastName\":\"Kapasakali\",\"organisation\":\"SDN:EDMO::3327\",\"email\":\"brumes@naturalsciences.be\"},{\"firstName\":\"Steven\",\"lastName\":\"Degraer\",\"organisation\":\"SDN:EDMO::3327\",\"email\":\"sdegraer@naturalsciences.be\"}],\"identifier\":\""
                                 + programUUID + "\",\"sampling\":\"deployment and retrieval of ARMS\"" +
                                 ",\"name\":\"EDEN2000: Exploring options for a nature-proof development\",\"description\":\"In the framework of the 'EDEN2000' project (2019-2022; FPS Health, Food Chain Safety and Environment) a number of studies have been drafted.\"}";
-                this.mockMvc.perform(MockMvcRequestBuilders.post("/api/program").contentType(MediaType.APPLICATION_JSON)
+                this.mockMvc.perform(MockMvcRequestBuilders.post("/api/program").accept(MediaType.APPLICATION_XML)
+                                .contentType(MediaType.APPLICATION_JSON)
                                 .content(json))
                                 // .andDo(print())
                                 .andExpect(status().isCreated())
@@ -375,42 +368,6 @@ public class ProgramControllerTest {
                 //PersonControllerTest.deleteAllPersons(this.mockMvc);
 
                 deleteAllPrograms(this.mockMvc);
-        }
-
-        @Test
-        @Ignore
-        public void testGetProgramByidentifier() {
-                String identifier = "";
-                ProgramController instance = new ProgramController();
-                Program expResult = null;
-                Program result = instance.getProgramByidentifier(identifier);
-                assertEquals(expResult, result);
-                // TODO review the generated test code and remove the default call to fail.
-                // fail("The test case is a prototype.");
-        }
-
-        @Test
-        @Ignore
-        public void testRemoveProgramByIdentifier() {
-                String identifier = "";
-                ProgramController instance = new ProgramController();
-                String expResult = "";
-                String result = instance.removeProgramByIdentifier(identifier);
-                assertEquals(expResult, result);
-                // TODO review the generated test code and remove the default call to fail.
-                // fail("The test case is a prototype.");
-        }
-
-        @Test
-        @Ignore
-        public void testRemoveProgramById() {
-                String id = "";
-                ProgramController instance = new ProgramController();
-                String expResult = "";
-                String result = instance.removeProgramById(id);
-                assertEquals(expResult, result);
-                // TODO review the generated test code and remove the default call to fail.
-                // fail("The test case is a prototype.");
         }
 
 }

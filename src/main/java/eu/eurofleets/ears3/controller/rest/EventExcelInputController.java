@@ -49,8 +49,7 @@ public class EventExcelInputController {
     @Value("${ears.platform}")
     private String shipCode;
 
-    @PostMapping(value = { "excelImportTest" }, produces = { "application/xml; charset=utf-8",
-            "application/json" }, consumes = {
+    @PostMapping(value = { "excelImportTest" }, produces = { MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE }, consumes = {
                     MediaType.MULTIPART_FORM_DATA_VALUE })
     //@ResponseStatus(HttpStatus.CREATED)
     @ResponseBody
@@ -80,8 +79,7 @@ public class EventExcelInputController {
         return new ResponseEntity<PersonDTO>(actor, HttpStatus.CREATED);
     }
 
-    @PostMapping(value = { "excelImport" }, produces = { "application/xml; charset=utf-8",
-            "application/json" }, consumes = {
+    @PostMapping(value = { "excelImport" }, produces = { MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE }, consumes = {
                     MediaType.MULTIPART_FORM_DATA_VALUE })
     @ResponseStatus(HttpStatus.CREATED)
     //    public ResponseEntity<Message<List<ErrorRow>>> createEvent(@RequestParam("file") MultipartFile mpFile, @RequestHeader("person") PersonDTO actor) {
@@ -165,7 +163,7 @@ public class EventExcelInputController {
     }
 
     /*
-    @PostMapping(value = { "excelImportTest" }, produces = { "application/xml; charset=utf-8", "application/json" }, consumes = {
+    @PostMapping(value = { "excelImportTest" }, produces = { MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE }, consumes = {
         MediaType.MULTIPART_FORM_DATA_VALUE })
     @ResponseStatus(HttpStatus.CREATED)
     public ResponseEntity<Message> createEventTest(

@@ -6,14 +6,14 @@ import eu.eurofleets.ears3.domain.Person;
 import eu.eurofleets.ears3.dto.LinkedDataTermDTO;
 import eu.eurofleets.ears3.dto.OrganisationDTO;
 import eu.eurofleets.ears3.dto.PersonDTO;
-import org.junit.runner.RunWith;
-import org.junit.Before;
-import org.junit.Ignore;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 //import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.ComponentScan;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.context.web.WebAppConfiguration;
@@ -25,11 +25,10 @@ import tools.jackson.databind.ObjectMapper;
 
 import be.naturalsciences.bmdc.cruise.model.ILinkedDataTerm;
 
-@RunWith(SpringRunner.class)
+@ActiveProfiles("test")
 @SpringBootTest(classes = { Application.class }, properties = "spring.main.allow-bean-definition-overriding=true")
 @WebAppConfiguration
 @ComponentScan(basePackages = { "eu.eurofleets.ears3.domain", " eu.eurofleets.ears3.service" })
-@TestPropertySource(locations = "classpath:test.properties")
 public class PersonServiceTest {
 
 	@Autowired
@@ -37,7 +36,7 @@ public class PersonServiceTest {
 
 	private MockMvc mockMvc;
 
-	@Before
+	@BeforeEach
 	public void setup() throws Exception {
 		this.mockMvc = MockMvcBuilders.webAppContextSetup(this.wac).build();
 	}
@@ -55,7 +54,7 @@ public class PersonServiceTest {
 	private OrganisationRepository organisationRepository;
 
 	@Test
-	@Ignore
+	@Disabled 
 	public void findOrCreate() {
 		LinkedDataTermDTO ugentTermDTO = new LinkedDataTermDTO("SDN:EDMO::230", null, "UGent-RCMG");
 		OrganisationDTO ugentDTO = new OrganisationDTO();

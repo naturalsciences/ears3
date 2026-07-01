@@ -10,10 +10,9 @@ import java.io.IOException;
 import java.io.InputStream;
 import static org.hamcrest.Matchers.matchesPattern;
 import static org.hamcrest.core.StringContains.containsString;
-import org.junit.Before;
-import org.junit.Ignore;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.ComponentScan;
@@ -22,6 +21,7 @@ import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.annotation.DirtiesContext.ClassMode;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.context.web.WebAppConfiguration;
@@ -45,11 +45,10 @@ import org.springframework.web.util.UriUtils;
  *
  * @author Thomas Vandenberghe
  */
-@RunWith(SpringRunner.class)
+@ActiveProfiles("test")
 @SpringBootTest(classes = { Application.class }, properties = "spring.main.allow-bean-definition-overriding=true")
 @WebAppConfiguration
 @ComponentScan(basePackages = { "eu.eurofleets.ears3.domain", " eu.eurofleets.ears3.service" })
-@TestPropertySource(locations = "classpath:test.properties")
 @DirtiesContext(classMode = ClassMode.BEFORE_EACH_TEST_METHOD) //reset the database to base state before each test method
 public class OntologyControllerTest {
 
@@ -58,7 +57,7 @@ public class OntologyControllerTest {
 
         private MockMvc mockMvc;
 
-        @Before
+        @BeforeEach
         public void setup() throws Exception {
                 this.mockMvc = MockMvcBuilders.webAppContextSetup(this.wac).build();
         }
@@ -139,7 +138,7 @@ public class OntologyControllerTest {
          * Test of getVesselOntologyDate method, of class OntologyController.
          */
         @Test
-        @Ignore
+        @Disabled 
         public void testGetVesselOntologyDate() throws Exception {
                 HttpHeaders httpHeaders = new HttpHeaders();
                 httpHeaders.add("Accept", "text/plain");
@@ -184,7 +183,7 @@ public class OntologyControllerTest {
          * Test of getProgramOntologyDate method, of class OntologyController.
          */
         @Test
-        @Ignore
+        @Disabled 
         public void testGetProgramOntologyDate() throws Exception {
                 HttpHeaders httpHeaders = new HttpHeaders();
                 httpHeaders.add("Accept", "text/plain");
@@ -226,7 +225,7 @@ public class OntologyControllerTest {
          * Test of sparqlEndpoint method, of class OntologyController.
          */
         @Test
-        @Ignore
+        @Disabled 
         public void testSparqlEndpoint() throws Exception {
                 HttpHeaders httpHeaders = new HttpHeaders();
                 httpHeaders.add("Accept", "application/json");
@@ -269,7 +268,7 @@ public class OntologyControllerTest {
         }
 
         @Test
-        @Ignore
+        @Disabled 
         public void testSparqlEndpointProgram() throws Exception {
                 HttpHeaders httpHeaders = new HttpHeaders();
                 httpHeaders.add("Accept", "application/json");

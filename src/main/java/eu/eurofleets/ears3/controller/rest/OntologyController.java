@@ -96,7 +96,7 @@ public class OntologyController {
         return uploadOntology(file, authorization, true, ScopeMap.Scope.VESSEL, VESSEL_ONTOLOGY_FILE_NAME);
     }
 
-    @PostMapping(value = {"program/upload"}, consumes = MediaType.MULTIPART_FORM_DATA_VALUE, produces = {"application/xml; charset=utf-8", "application/json"})
+    @PostMapping(value = {"program/upload"}, consumes = MediaType.MULTIPART_FORM_DATA_VALUE, produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
     @ResponseStatus(HttpStatus.ACCEPTED)
     public ResponseEntity<StringMessage> uploadProgramOntology(@RequestParam("file") MultipartFile file) throws IOException {
         return uploadOntology(file, null, false, ScopeMap.Scope.PROGRAM, file.getOriginalFilename());

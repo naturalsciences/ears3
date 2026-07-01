@@ -31,14 +31,16 @@ import java.util.Arrays;
 import java.util.List;
 import static org.hamcrest.Matchers.not;
 import static org.hamcrest.core.StringContains.containsString;
-import org.junit.Before;
-import org.junit.Ignore;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.http.MediaType;
+import org.springframework.test.annotation.DirtiesContext;
+import org.springframework.test.annotation.DirtiesContext.ClassMode;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.context.web.WebAppConfiguration;
@@ -51,16 +53,11 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 
-/**
- *
- * @author Thomas Vandenberghe
- */
-@RunWith(SpringRunner.class)
-@SpringBootTest(classes = { Application.class }, properties = "spring.main.allow-bean-definition-overriding=true")
+@SpringBootTest(classes = { Application.class })
 @WebAppConfiguration
-@ComponentScan(basePackages = { "eu.eurofleets.ears3.domain", " eu.eurofleets.ears3.service" })
-@TestPropertySource(locations = "classpath:test.properties")
-@Ignore
+@ActiveProfiles("test")
+@DirtiesContext(classMode = ClassMode.BEFORE_EACH_TEST_METHOD) //reset the database to base state before each test method
+@Disabled 
 public class SmlControllerTest {
 
         @Autowired
@@ -68,7 +65,7 @@ public class SmlControllerTest {
 
         private MockMvc mockMvc;
 
-        @Before
+        @BeforeEach
         public void setup() throws Exception {
                 this.mockMvc = MockMvcBuilders.webAppContextSetup(this.wac).build();
         }
@@ -238,7 +235,7 @@ public class SmlControllerTest {
                         EventControllerTest.postEvent(mockMvc, new EventDTO(event), objectMapper);
                 }
 
-                this.mockMvc.perform(MockMvcRequestBuilders.get("/instrument/SDN:C17::11BE")
+                this.mockMvc.perform(MockMvcRequestBuilders.get("/instrument/SDN:C17::11BE").accept(MediaType.APPLICATION_XML)
                                 .accept(MediaType.APPLICATION_XML))
                                 .andDo(print())
                                 .andExpect(status().isOk())
@@ -264,7 +261,7 @@ public class SmlControllerTest {
                 }
 
                 MvcResult readSmlAfter = this.mockMvc
-                                .perform(MockMvcRequestBuilders.get("/instrument/SDN:C17::11BE/SDN:L22::TOOL0653"))
+                                .perform(MockMvcRequestBuilders.get("/instrument/SDN:C17::11BE/SDN:L22::TOOL0653").accept(MediaType.APPLICATION_XML))
                                 .andExpect(status().isOk())
                                 .andDo(print())
                                 .andExpect(content().string(

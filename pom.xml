@@ -43,6 +43,7 @@
             <artifactId>spring-boot-starter-test</artifactId>
             <scope>test</scope>
         </dependency>
+
         <!-- DB -->
         <dependency>
             <groupId>com.h2database</groupId>
@@ -165,11 +166,23 @@
             <artifactId>opencsv</artifactId>
             <version>5.11.1</version>
             <type>jar</type>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.junit.vintage</groupId>
+                    <artifactId>junit-vintage-engine</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
         <dependency>
             <groupId>io.github.rushuat</groupId>
             <artifactId>ocell</artifactId>
             <version>0.1.11</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>com.fasterxml.jackson.core</groupId>
+                    <artifactId>jackson-annotations</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
         <dependency>
             <groupId>nz.net.ultraq.thymeleaf</groupId>
