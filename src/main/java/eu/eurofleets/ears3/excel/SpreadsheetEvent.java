@@ -90,6 +90,7 @@ public class SpreadsheetEvent {
 
     @FieldName("Time")
     @FieldConverter(StringConverter.class)
+
     String time;
 
     @FieldName("Status")

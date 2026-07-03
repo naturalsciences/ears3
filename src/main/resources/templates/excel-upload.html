@@ -24,7 +24,7 @@
     </div>
     <div class="row">
         <div class="col">
-            <form id="importCsvForm" method="post" enctype="multipart/form-data" th:action="@{/api/excelImport}">
+            <form id="importCsvForm" method="post" enctype="multipart/form-data" th:action="@{/api/event/import}">
                 <div class="input-group mb-3">
                     <input id="actorField" type="hidden" name="person">
                     <input id="fileId" type="file" name="file" class="form-control" style="height: auto !important;" aria-describedby="importButton" aria-label="Upload">

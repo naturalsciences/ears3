@@ -1,7 +1,7 @@
 spring:
   datasource:
     driver-class-name: org.postgresql.Driver
-    url: jdbc:postgresql://y:6543/ears3
+    url: jdbc:postgresql://localhost:6543/ears3
     username: ears
     password: ears
     test-on-borrow: true

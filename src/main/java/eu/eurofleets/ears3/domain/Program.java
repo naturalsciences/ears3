@@ -4,8 +4,12 @@ import be.naturalsciences.bmdc.cruise.model.ICruise;
 import be.naturalsciences.bmdc.cruise.model.IPerson;
 import be.naturalsciences.bmdc.cruise.model.IProgram;
 import be.naturalsciences.bmdc.cruise.model.IProject;
+
 import java.io.Serializable;
 import java.util.Collection;
+
+import eu.eurofleets.ears3.dto.PersonDTO;
+import eu.eurofleets.ears3.dto.ProgramDTO;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
@@ -26,6 +30,7 @@ import java.util.Objects;
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
+
 /**
  *
  * @author Thomas Vandenberghe
@@ -66,6 +71,19 @@ public class Program implements IProgram, Serializable, Comparable<Program> {
         this.principalInvestigators = (Collection<Person>) principalInvestigators;
         this.description = description;
         this.projects = (Collection<Project>) projects;
+    }
+
+    public Program(ProgramDTO programDTO) {
+        this.name = programDTO.name;
+        this.sampling = programDTO.sampling;
+        this.identifier = programDTO.identifier;
+        this.description = programDTO.description;
+        for (PersonDTO principalInvestigator : programDTO.principalInvestigators) {
+            if (principalInvestigator != null) {
+                this.principalInvestigators.add(new Person(principalInvestigator));
+            }
+        }
+        //TODO this.projects = (Collection<Project>) projects;
     }
 
     @Override

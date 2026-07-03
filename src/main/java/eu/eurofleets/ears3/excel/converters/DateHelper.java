@@ -6,6 +6,7 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.*;
 import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Logger;
@@ -21,7 +22,7 @@ import eu.eurofleets.ears3.Exceptions.IllegalConversionException;
 import eu.eurofleets.ears3.Exceptions.IllegalDateConversionException;
 
 /**
- *  Entire Class taken from Dasa-import from Thomas
+ * Entire Class taken from Dasa-import from Thomas
  */
 
 @Component
@@ -38,7 +39,7 @@ public class DateHelper implements Serializable {
      * Provided a date in a String format and a List of formatters, looping over
      * those formatters, return the first LocalDate that those formatters can
      * legally parse.
-     * 
+     *
      * @param date
      * @param formatters
      * @return
@@ -59,7 +60,7 @@ public class DateHelper implements Serializable {
      * Provided a date in a String format and a List of formatters, looping over
      * those formatters, return the first LocalTime that those formatters can
      * legally parse.
-     * 
+     *
      * @param time
      * @param formatters
      * @return
@@ -78,7 +79,7 @@ public class DateHelper implements Serializable {
 
     /**
      * Convert a given date String to a LocalDate. Different formats are legal.
-     * 
+     *
      * @param date
      * @return
      * @throws IllegalConversionException
@@ -110,81 +111,49 @@ public class DateHelper implements Serializable {
     }
 
     /**
-     * Convert a string that contains both the date and the time to a ZonedDateTime. ISO formatted dates can be used.
-     * @param datetime
+     * Combine two strings (one date, one time) to a ZonedDateTime (used as a timestamp), zoned for Belgium.
+     * The date and time are interpreted as being in {@code sourceZone}, then converted to Europe/Brussels time.
+     * ISO formatted date (yyyy-MM-dd) and time (HH:mm:ss) strings are expected.
+     *
+     * @param date
+     * @param time
+     * @param sourceZone the zone the incoming date/time strings are expressed in (e.g. BRUSSELS or ZoneOffset.UTC)
      * @return
      * @throws IllegalDateConversionException
      */
-    public static ZonedDateTime dateTimeStringToZonedDateTime(String datetime, boolean acceptJustDates)
-            throws IllegalDateConversionException {
-        if (datetime == null) {
-            return null;
-        }
-        datetime = datetime.trim();
-        try {
-            LocalDateTime localDateTime = LocalDateTime.ofInstant(ISO_FORMATTER.parse(datetime).toInstant(), BRUSSELS);
-            return localDateTime.atZone(BRUSSELS);
-        } catch (ParseException e) {
-            logger.info("Date not parseable with ISO_FORMATTER. Continuing with other approaches");
-        }
-
-        String[] split = datetime.split(" ");
-        if (!acceptJustDates && split.length == 1) { //if we only accept datetimes, not just dates but only a date is provided
-            throw new IllegalDateConversionException(datetime,
-                    "Date %s not consisting of two parts dd/MM/YYYY and hh:mm:ss", datetime);
-        } else if (acceptJustDates) { //if just dates are ok and 
-            return dateTimeStringToZonedDateTime(split[0], "00:00:00"); //just pick midnight
-        } else {
-            return dateTimeStringToZonedDateTime(split[0], split[1]);
-        }
-    }
-
-    /**
-    * Combine two strings (one date, one time) to a ZonedDateTime (used as a timestamp), zoned for Belgium. ISO formatted dates can be used.
-    * @param date
-    * @param time
-    * @return
-    * @throws IllegalDateConversionException
-    */
-    public static ZonedDateTime dateTimeStringToZonedDateTime(String date, String time)
+    public static ZonedDateTime dateTimeStringToZonedDateTime(String date, String time, ZoneId sourceZone)
             throws IllegalDateConversionException {
         if (date == null) {
             return null;
         }
         date = date.trim();
-        time = time.trim();
+
+        // validate/normalize the date part using the existing helper
         LocalDate localDate = dateStringToLocalDate(date);
-        LocalDateTime localDateTime = timeStringToLocalDateTime(time);
-        localDate.atTime(localDateTime.toLocalTime());
-        if (time != null) {
-            LocalDateTime localTime = timeStringToLocalDateTime(time); //convert the time to a LocalDateTime with arbitrary date 2000-1-1
-            localDateTime = localDate.atTime(localTime.toLocalTime());
-        } else {
-            LocalTime midnight = LocalTime.MIDNIGHT;
-            localDateTime = localDate.atTime(midnight);
+
+        String timePart = (time != null) ? time.trim() : "00:00:00";
+
+        LocalDateTime localDateTime;
+        try {
+            localDateTime = LocalDateTime.parse(localDate + "T" + timePart);
+        } catch (DateTimeParseException e) {
+            throw new IllegalDateConversionException(date + " " + time, "Could not parse date/time");
         }
 
-        return localDateTime.atZone(BRUSSELS);
+        // Interpret the naive datetime in the given source zone, then convert to Brussels time
+        return localDateTime.atZone(sourceZone).withZoneSameInstant(BRUSSELS);
     }
 
     /**
-     * Convert a String denoting the time to a ZonedDateTime (used as a timestamp). ISO formatted dates can be used, in that case the date part is ignored! hh:mm or hh:mm:ss can be used as well.
-     * @param time
-     * @return
+     * Convenience overload assuming the incoming date/time strings are already Belgian local time
+     * (the common case). Use the {@link #dateTimeStringToZonedDateTime(String, String, ZoneId)}
+     * overload directly for the rare case where the source is UTC (or another zone).
      */
-    private static LocalDateTime timeStringToLocalDateTime(String time) {
-        if (time == null) {
-            return null;
-        }
-        try {
-            return LocalDateTime.ofInstant(ISO_FORMATTER.parse(time).toInstant(), BRUSSELS);
-        } catch (ParseException e) {
-            logger.info("Date not parseable with ISO_FORMATTER. Continuing with other approaches");
-        }
-        LocalDate localDate = LocalDate.of(2000, 1, 1); //arbitrary time in the past
-        LocalTime localDateTime = hhmmTimeStringToLocalTime(time);
-        return localDate.atTime(localDateTime);
+    public static ZonedDateTime dateTimeStringToZonedDateTime(String date, String time)
+            throws IllegalDateConversionException {
+        return dateTimeStringToZonedDateTime(date, time, BRUSSELS);
     }
+
 
     private static LocalDate ddmmyyyDateStringToLocalDate(String date) throws IllegalDateConversionException {
         if (date == null) {

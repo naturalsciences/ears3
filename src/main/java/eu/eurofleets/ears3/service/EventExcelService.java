@@ -1,7 +1,7 @@
 package eu.eurofleets.ears3.service;
 
 import eu.eurofleets.ears3.Exceptions.ImportException;
-import eu.eurofleets.ears3.controller.rest.EventExcelInputController;
+import eu.eurofleets.ears3.controller.rest.EventExcelController;
 import eu.eurofleets.ears3.domain.Navigation;
 import eu.eurofleets.ears3.domain.Program;
 import eu.eurofleets.ears3.domain.Thermosal;
@@ -26,6 +26,7 @@ import jakarta.validation.ConstraintViolation;
 import jakarta.validation.Validation;
 import jakarta.validation.Validator;
 import jakarta.validation.ValidatorFactory;
+
 import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
@@ -34,6 +35,7 @@ import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
+
 import tools.jackson.databind.JsonNode;
 import tools.jackson.databind.ObjectMapper;
 import tools.jackson.databind.type.CollectionType;
@@ -140,7 +142,7 @@ public class EventExcelService {
         synonym = loweredCapitalize(synonym);
         LinkedDataTermDTO targetLDT = DEFS.get(synonym);
         if (targetLDT == null) {
-            throw new ImportException(EventExcelInputController.SHEETNAME, rowNb,
+            throw new ImportException(EventExcelController.SHEETNAME, rowNb,
                     String.format("Unknown Linked Data Term [ %s ]", synonym), null);
         } else {
             return targetLDT;
@@ -151,7 +153,7 @@ public class EventExcelService {
         synonym = loweredCapitalize(synonym);
         LinkedDataTermDTO targetLDT = CATMAP.get(synonym);
         if (targetLDT == null) {
-            throw new ImportException(EventExcelInputController.SHEETNAME, rowNb,
+            throw new ImportException(EventExcelController.SHEETNAME, rowNb,
                     String.format("Unknown ToolCategory [ %s ]", synonym), null);
         } else {
             return targetLDT;
@@ -166,16 +168,15 @@ public class EventExcelService {
         try {
             zdt = DateHelper.dateTimeStringToZonedDateTime(date, hour);
         } catch (Exception e) {
-            throw new ImportException(EventExcelInputController.SHEETNAME, rowNb,
+            throw new ImportException(EventExcelController.SHEETNAME, rowNb,
                     String.format("Problem with [%s]%n", e.getMessage()), null);
         }
         return zdt;
     }
 
-    private EventDTO processSpreadsheetEvent(SpreadsheetEvent spreadsheetEvent, int rowNb) throws ImportException {
+    private EventDTO processSpreadsheetEvent(SpreadsheetEvent spreadsheetEvent, int rowNb, String programIdentifier) throws ImportException {
         EventDTO eventDTO = new EventDTO();
         eventDTO.setIdentifier(null);
-        //Bail out early if we already know all the constraints that have been violated.
         ArrayList<String> errorSummaryForRow = new ArrayList<>();
         Set<ConstraintViolation<SpreadsheetEvent>> errors = validator.validate(spreadsheetEvent);
         if (!errors.isEmpty()) {
@@ -184,8 +185,10 @@ public class EventExcelService {
                 errorSummaryForRow.add(error.getPropertyPath() + " " + error.getMessage());
             });
         }
-
-        Program program = programService.findOrCreateProgram(spreadsheetEvent.getProgram());
+        if (programIdentifier == null) { //overrides the program identifier set in the excel sheet
+            programIdentifier = spreadsheetEvent.getProgram();
+        }
+        Program program = programService.findOrCreateProgram(programIdentifier);
         if (program != null) {
             eventDTO.setProgram(program.getIdentifier());
         } else {
@@ -194,7 +197,7 @@ public class EventExcelService {
 
         if (!errorSummaryForRow.isEmpty()) {
             System.out.println(errorSummaryForRow.toString());
-            throw new ImportException(EventExcelInputController.SHEETNAME, rowNb,
+            throw new ImportException(EventExcelController.SHEETNAME, rowNb,
                     String.format("Problem with %s%n", errorSummaryForRow.toString()), null);
         }
 
@@ -305,7 +308,8 @@ public class EventExcelService {
 
     private Set<String> findColumnHeadersForSheet(Sheet sheet) {
         Set<String> headers = new HashSet<>();
-        /*TMP*/int nbCol = 50;
+        /*TMP*/
+        int nbCol = 50;
         if (sheet != null) {
             Row row = sheet.getRow(0); //First row should contain the headers
             for (int i = 0; i < nbCol; i++) {
@@ -323,16 +327,16 @@ public class EventExcelService {
     }
 
     public boolean processSpreadsheetEvents(ErrorDTOList errorList, List<SpreadsheetEvent> data,
-            List<EventDTO> events, PersonDTO actor) {
-        boolean problems = false;
+                                            List<EventDTO> events, PersonDTO actor, String program) {
+        boolean hasProblems = false;
         int rowNb = 1;
         for (SpreadsheetEvent row : data) {
             try {
-                EventDTO event = processSpreadsheetEvent(row, rowNb);
+                EventDTO event = processSpreadsheetEvent(row, rowNb, program);
                 event.setActor(actor);
                 events.add(event);
             } catch (ImportException e) {
-                problems = true;
+                hasProblems = true;
                 errorList
                         .addError(new ErrorDTO(rowNb,
                                 String.format("Problem on row %s in sheet %s: %s%n", e.lineNb, e.sheetName, e.message),
@@ -340,7 +344,7 @@ public class EventExcelService {
             }
             rowNb++;
         }
-        return problems;
+        return hasProblems;
     }
 
     public boolean saveSpreadsheetEvents(ErrorDTOList errorList, List<EventDTO> events) {
@@ -354,7 +358,7 @@ public class EventExcelService {
                 errorList.addError(new ErrorDTO(i, dve.getMessage(), dve));
             } catch (Exception e) {
                 problems = true;
-                errorList.addError(new ErrorDTO(i, "General error saving SpreadsheetEventDTO's", e));
+                errorList.addError(new ErrorDTO(i, e.getMessage() + "exception saving event row", e));
             }
             i++;
         }

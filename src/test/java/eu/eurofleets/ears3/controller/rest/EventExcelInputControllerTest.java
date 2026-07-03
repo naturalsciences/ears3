@@ -2,7 +2,10 @@ package eu.eurofleets.ears3.controller.rest;
 
 //import com.fasterxml.jackson.databind.JsonNode;
 
+import eu.eurofleets.ears3.dto.ActorProgramDTO;
+import eu.eurofleets.ears3.service.ToolService;
 import eu.eurofleets.ears3.utilities.Constants;
+import org.springframework.test.web.servlet.ResultActions;
 import tools.jackson.databind.ObjectMapper;
 import eu.eurofleets.ears3.Application;
 import eu.eurofleets.ears3.dto.PersonDTO;
@@ -13,29 +16,31 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.context.annotation.ComponentScan;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.annotation.DirtiesContext.ClassMode;
 import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.TestPropertySource;
-import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.context.web.WebAppConfiguration;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
 
+import java.io.IOException;
 import java.util.*;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.not;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.springframework.web.servlet.function.RequestPredicates.param;
 
 @SpringBootTest(classes = {Application.class})
 @WebAppConfiguration
@@ -60,46 +65,48 @@ public class EventExcelInputControllerTest {
 
     @BeforeEach
     public void setup() throws Exception {
-        System.out.println(
-                org.apache.commons.io.input.BoundedInputStream.class
-                        .getProtectionDomain().getCodeSource().getLocation()
-        );
+        ToolService.clearCache();
         this.mockMvc = MockMvcBuilders.webAppContextSetup(this.wac).build();
     }
 
     PersonDTO joan = new PersonDTO("Joan", "Backers", null, null, null, "joan.backers@naturalsciences.be");
     PersonDTO notJoan = new PersonDTO("NotJoan", "NotJoan", null, null, null, "Notjoan.backers@naturalsciences.be");
 
+    private MockMultipartFile createMockFile(String filename) throws IOException {
+        return new MockMultipartFile(
+                "file",
+                filename,
+                "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", // MediaType.APPLICATION_OCTET_STREAM_VALUE,
+                new ClassPathResource(filename).getInputStream());
+    }
+
+    private ResultActions postExcel(MockMultipartFile mockMultipartFile, PersonDTO actor, String program, int expectedStatus) throws Exception {
+        ActorProgramDTO apd = new ActorProgramDTO(actor, program);
+
+        MockMultipartFile jsonPart = new MockMultipartFile(
+                "apd",                                   // must match your @RequestPart("apd") name
+                "",                                       // no filename needed for a data part
+                MediaType.APPLICATION_JSON_VALUE,
+                objectMapper.writeValueAsBytes(apd));
+
+        return this.mockMvc.perform(MockMvcRequestBuilders.multipart("/api/event/import")
+                        .file(mockMultipartFile)
+                        .file(jsonPart)
+                        .accept(MediaType.APPLICATION_JSON))
+                .andDo(print())
+                .andExpect(status().is(expectedStatus));
+    }
+
     @Test
     public void validateOkSubmitter() throws Exception {
-        MockMultipartFile mockMultipartFile = new MockMultipartFile(
-                "file",
-                "test-5problems.xlsx",
-                "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", // MediaType.APPLICATION_OCTET_STREAM_VALUE,
-                new ClassPathResource("test-5problems.xlsx").getInputStream());
-        assertNotNull(this.mockMvc);
-
-        this.mockMvc.perform(MockMvcRequestBuilders.multipart("/api/excelImport")
-                        .file(mockMultipartFile).accept(MediaType.APPLICATION_JSON)
-                        .param("person", objectMapper.writeValueAsString(this.joan)))
-                .andDo(print())
-                .andExpect(status().is(409)); //we used the 5problems excel as inputfile so it is expected to get a 409
+        MockMultipartFile mockFile = createMockFile("test-5problems.xlsx");
+        postExcel(mockFile, joan, null, 409);//we used the 5problems excel as inputfile so it is expected to get a 409
     }
 
     @Test
     public void validateErrorFile() throws Exception {
-        MockMultipartFile mockMultipartFile = new MockMultipartFile(
-                "file",
-                "test-5problems.xlsx",
-                "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", // MediaType.APPLICATION_OCTET_STREAM_VALUE,
-                new ClassPathResource("test-5problems.xlsx").getInputStream());
-        assertNotNull(this.mockMvc);
-
-        this.mockMvc.perform(MockMvcRequestBuilders.multipart("/api/excelImport")
-                        .file(mockMultipartFile).accept(MediaType.APPLICATION_JSON)
-                        .param("person", objectMapper.writeValueAsString(this.joan)))
-                .andDo(print())
-                .andExpect(status().is(409))
+        MockMultipartFile mockFile = createMockFile("test-5problems.xlsx");
+        postExcel(mockFile, joan, null, 409)
                 .andExpect(content().string(containsString("\"row\":1")))
                 .andExpect(content().string(containsString("\"row\":2")))
                 .andExpect(content().string(containsString("\"row\":3")))
@@ -113,19 +120,8 @@ public class EventExcelInputControllerTest {
 
     @Test
     public void validateErrorHourFile() throws Exception {
-        MockMultipartFile mockMultipartFile = new MockMultipartFile(
-                "file",
-                "test-hrproblems.xlsx",
-                "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", // MediaType.APPLICATION_OCTET_STREAM_VALUE,
-                new ClassPathResource("test-hrproblems.xlsx").getInputStream());
-        assertNotNull(this.mockMvc);
-
-        this.mockMvc.perform(MockMvcRequestBuilders.multipart("/api/excelImport")
-
-                        .file(mockMultipartFile).accept(MediaType.APPLICATION_JSON)
-                        .param("person", objectMapper.writeValueAsString(this.joan)))
-                .andDo(print())
-                .andExpect(status().is(409))
+        MockMultipartFile mockFile = createMockFile("test-hrproblems.xlsx");
+        postExcel(mockFile, joan, null, 409)
                 .andExpect(content().string(containsString("\"row\":1")))
                 .andExpect(content().string(containsString("\"row\":2")))
                 .andExpect(content().string(containsString("\"row\":3")))
@@ -151,23 +147,13 @@ public class EventExcelInputControllerTest {
         ProgramDTO pr = getTestProgram("11BU_operations");
         ProgramControllerTest.postProgram(this.mockMvc, pr, objectMapper);
 
-        MockMultipartFile mockMultipartFile = new MockMultipartFile(
-                "file",
-                "test-noproblems.xlsx",
-                "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", // MediaType.APPLICATION_OCTET_STREAM_VALUE,
-                new ClassPathResource("test-noproblems.xlsx").getInputStream());
-        assertNotNull(this.mockMvc);
+        MockMultipartFile mockFile = createMockFile("test-noproblems.xlsx");
+        postExcel(mockFile, joan, null, 201);
 
-        this.mockMvc.perform(MockMvcRequestBuilders.multipart("/api/excelImport")
-
-                        .file(mockMultipartFile).accept(MediaType.APPLICATION_JSON)
-                        .param("person", objectMapper.writeValueAsString(this.joan)))
-                .andDo(print())
-                .andExpect(status().is(201));
-
-        this.mockMvc.perform(MockMvcRequestBuilders.get("/api/events").accept(Constants.APPLICATION_XML_UTF8))
+        this.mockMvc
+                .perform(MockMvcRequestBuilders.get("/api/events")
+                        .accept(Constants.APPLICATION_XML_UTF8))
                 .andExpect(status().is(200))
-                .andDo(print())
                 .andExpect(content().string(containsString("<name>All persons</name>")))
                 .andExpect(content().string(containsString("<name>Belgica</name>")))
                 .andExpect(content().string(containsString("<name>Unknown sparker</name>")))
@@ -179,70 +165,60 @@ public class EventExcelInputControllerTest {
                 .andExpect(content().string(containsString("<name>Meeting</name>")))
                 .andExpect(content().string(containsString("<name>Recreation</name>")))
                 .andExpect(content().string(containsString("<name>Testing</name>")))
-                //@TODO Dit komt niet in die xslx voor
-                // .andExpect(content().string(containsString("<name>Sheltering</name>")))
+                .andExpect(content().string(not(containsString("<name>Sheltering</name>"))))
                 .andExpect(content().string(containsString("<identifier>11BU_operations</identifier>")))
                 .andExpect(content().string(containsString("<name>Belgica operations</name>")))
-                //@TODO Verify with Thomas
-                // .andExpect(content().string(containsString("<timeStamp>2023-10-04T14:30:00+02</timeStamp>")))
+                .andExpect(content().string(containsString("<timeStamp>2023-10-14T15:30:00Z</timeStamp>")))
+                .andExpect(content().string(containsString("<timeStamp>2023-10-14T16:32:00Z</timeStamp>")))
                 .andReturn();
+
+
+        postExcel(mockFile, joan, null, 409); //attempting double entry!
+    }
+
+    @Test
+    public void validatePredefinedProgram() throws Exception {
+        ProgramDTO pr = getTestProgram("11BU_operations");
+        ProgramControllerTest.postProgram(this.mockMvc, pr, objectMapper);
+
+        ProgramDTO pr2 = getTestProgram("test_program");
+        ProgramControllerTest.postProgram(this.mockMvc, pr2, objectMapper);
+
+        MockMultipartFile mockFile = createMockFile("test-noproblems.xlsx");
+
+        postExcel(mockFile, joan, "11BU_operations", 201);
+        //these are all created with an overridden program, named test_program. There cannot be a unique event clash as the programmes are different
+        postExcel(mockFile, joan, "test_program", 201);
+
     }
 
     @Test
     public void validateOkFileExtraColumn() throws Exception {
         ProgramDTO pr = getTestProgram("11BU_operations");
         ProgramControllerTest.postProgram(this.mockMvc, pr, objectMapper);
+        MockMultipartFile mockFile = createMockFile("test-noproblemsExtraColAndSwitchedCol.xlsx");
 
-        MockMultipartFile mockMultipartFile = new MockMultipartFile(
-                "file",
-                "test-noproblemsExtraColAndSwitchedCol.xlsx",
-                "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", // MediaType.APPLICATION_OCTET_STREAM_VALUE,
-                new ClassPathResource("test-noproblemsExtraColAndSwitchedCol.xlsx").getInputStream());
-        assertNotNull(this.mockMvc);
-
-        this.mockMvc.perform(MockMvcRequestBuilders.multipart("/api/excelImport")
-                        .file(mockMultipartFile).accept(MediaType.APPLICATION_JSON)
-                        .param("person", objectMapper.writeValueAsString(this.joan)))
-                .andDo(print())
-                .andExpect(status().is(201));
+        postExcel(mockFile, joan, null, 201);
     }
 
     @Test
     public void validateOkFileMissingHourColumn() throws Exception {
         ProgramDTO pr = getTestProgram("11BU_operations");
         ProgramControllerTest.postProgram(this.mockMvc, pr, objectMapper);
+        Logger.getLogger("EventExcelInputConstrollerTest").log(Level.INFO, "Posted program");
+        MockMultipartFile mockFile = createMockFile("test-missingHourCol.xlsx");
+        Logger.getLogger("EventExcelInputConstrollerTest").log(Level.INFO, "Starting to post events from file");
 
-        MockMultipartFile mockMultipartFile = new MockMultipartFile(
-                "file",
-                "test-missingHourCol.xlsx",
-                "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", // MediaType.APPLICATION_OCTET_STREAM_VALUE,
-                new ClassPathResource("test-missingHourCol.xlsx").getInputStream());
-        assertNotNull(this.mockMvc);
-
-        this.mockMvc.perform(MockMvcRequestBuilders.multipart("/api/excelImport")
-                        .file(mockMultipartFile).accept(MediaType.APPLICATION_JSON)
-                        .param("person", objectMapper.writeValueAsString(this.joan)))
-                .andDo(print())
-                .andExpect(status().is(409)); //Since we are missing a required header we expect a failure to create the Excel Event
+        postExcel(mockFile, joan, null, 409);
+        //Since we are missing a required header we expect a failure to create the Excel Event
     }
 
     @Test
     public void validateVarious() throws Exception {
         ProgramDTO pr = getTestProgram("11BU_operations");
         ProgramControllerTest.postProgram(this.mockMvc, pr, objectMapper);
-
-        MockMultipartFile mockMultipartFile = new MockMultipartFile(
-                "file",
-                "test-various.xlsx",
-                "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", // MediaType.APPLICATION_OCTET_STREAM_VALUE,
-                new ClassPathResource("test-various.xlsx").getInputStream());
-        assertNotNull(this.mockMvc);
-
-        this.mockMvc.perform(MockMvcRequestBuilders.multipart("/api/excelImport")
-                        .file(mockMultipartFile).accept(MediaType.APPLICATION_JSON)
-                        .param("person", objectMapper.writeValueAsString(this.joan)))
-                .andDo(print())
-                .andExpect(status().is(409)); //Since we are checking for various problems
+        MockMultipartFile mockFile = createMockFile("test-various.xlsx");
+        postExcel(mockFile, joan, null, 409); //various mistakes
     }
 
     /*Refactor Idea:  In order to replace the static definitions of these properties and DEFS and CATMAP, create a function based on this concept that fills in the

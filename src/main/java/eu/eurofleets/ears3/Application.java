@@ -13,28 +13,13 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.boot.web.servlet.support.SpringBootServletInitializer;
 import org.springframework.context.annotation.Bean;
 
-
-/*@Configuration
- @ComponentScan
- @EnableJpaRepositories
- @Import({RepositoryRestMvcConfiguration.class})
- @org.springframework.boot.autoconfigure.EnableAutoConfiguration
- */
-@SpringBootApplication(/* exclude = {DataSourceAutoConfiguration.class } */)//scanBasePackages={"be.naturalsciences.bmdc.dits.webservices.iso"}
-//@EnableJpaRepositories(basePackages = {"eu.eurofleets.ears3.service"})
+@SpringBootApplication
 @EnableAutoConfiguration
-//@EntityScan("eu.eurofleets.ears3.domain")
 @EnableConfigurationProperties(StorageProperties.class)
 public class Application extends SpringBootServletInitializer {
 
     public static void main(String[] args) {
-        System.setProperty("spring.config.name", "ears3");
         SpringApplication.run(Application.class, args);
-    }
-
-    @Override
-    protected SpringApplicationBuilder configure(SpringApplicationBuilder application) {
-        return application.sources(Application.class).properties("spring.config.name: ears3");
     }
     
     @Bean
