@@ -1,5 +1,6 @@
 package eu.eurofleets.ears3.service;
 
+import eu.eurofleets.ears3.domain.Harbour;
 import eu.eurofleets.ears3.domain.Organisation;
 import java.util.Collection;
 import java.util.HashMap;
@@ -16,6 +17,14 @@ import org.springframework.util.Assert;
 public class OrganisationService implements EarsService<Organisation> {
 
     private final OrganisationRepository organisationRepository;
+
+    private static final Map<String, Organisation> idCache = new HashMap<>();
+    private static final Map<String, Organisation> nameCache = new HashMap<>();
+
+    public static void clearCache() {
+        idCache.clear();
+        nameCache.clear();
+    }
 
     @Autowired
     public OrganisationService(OrganisationRepository organisationRepository) {
@@ -44,9 +53,6 @@ public class OrganisationService implements EarsService<Organisation> {
             return r;
         }
     }
-
-    private static Map<String, Organisation> idCache = new HashMap<>();
-    private static Map<String, Organisation> nameCache = new HashMap<>();
 
     public Organisation findByName(String name) {
         Assert.notNull(name, "Organisation name must not be null");

@@ -1,5 +1,6 @@
 package eu.eurofleets.ears3.service;
 
+import eu.eurofleets.ears3.domain.Project;
 import eu.eurofleets.ears3.domain.SeaArea;
 import java.util.Collection;
 import java.util.HashMap;
@@ -16,6 +17,14 @@ import org.springframework.util.Assert;
 public class SeaAreaService implements EarsService<SeaArea>{
 
     private final SeaAreaRepository seaAreaRepository;
+
+    private static final Map<String, SeaArea> idCache = new HashMap<>();
+    private static final Map<String, SeaArea> nameCache = new HashMap<>();
+
+    public static void clearCache() {
+        idCache.clear();
+        nameCache.clear();
+    }
 
     @Autowired
     public SeaAreaService(SeaAreaRepository seaAreaRepository) {
@@ -42,9 +51,6 @@ public class SeaAreaService implements EarsService<SeaArea>{
             return r;
         }
     }
-
-    private static Map<String, SeaArea> idCache = new HashMap<>();
-    private static Map<String, SeaArea> nameCache = new HashMap<>();
 
     public SeaArea findByName(String name) {
         Assert.notNull(name, "SeaArea name must not be null");

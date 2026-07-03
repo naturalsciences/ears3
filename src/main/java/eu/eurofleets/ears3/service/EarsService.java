@@ -31,4 +31,6 @@ public interface EarsService<S extends IConcept> {
 
     Iterable<S> saveAll(Collection<S> things);
 
+    //static void clearCache();
+
 }

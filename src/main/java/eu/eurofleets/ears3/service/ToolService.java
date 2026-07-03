@@ -8,16 +8,32 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.logging.Logger;
 import java.util.stream.Collectors;
+
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
 import org.apache.commons.collections4.IterableUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.Assert;
 
 @Service
 public class ToolService implements EarsService<Tool> {
 
     private final ToolRepository toolRepository;
+
+    private static final Map<String, Tool> idCache = new HashMap<>();
+    private static final Map<String, Tool> nameCache = new HashMap<>();
+
+    public static void clearCache() {
+        idCache.clear();
+        nameCache.clear();
+    }
+
+    @PersistenceContext
+    private EntityManager entityManager;
 
 
     @Autowired
@@ -46,8 +62,6 @@ public class ToolService implements EarsService<Tool> {
         }
     }
 
-    private static Map<String, Tool> idCache = new HashMap<>();
-    private static Map<String, Tool> nameCache = new HashMap<>();
 
     public Tool findByName(String name) {
         Assert.notNull(name, "Tool name must not be null");
@@ -89,22 +103,15 @@ public class ToolService implements EarsService<Tool> {
         if (tool == null) {
             return null;
         }
-        String urn = ILinkedDataTerm.getUrnFromUrl(tool.getTerm().getIdentifier());
-        Tool existingTool = findByIdentifier(tool.getTerm().getIdentifier());
-        if (existingTool == null) {
+        String identifier = tool.getTerm().getIdentifier();
+        Tool existingTool = findByIdentifier(identifier);
+        if (existingTool == null) { //create
+            String urn = ILinkedDataTerm.getUrnFromUrl(identifier);
             tool.getTerm().setUrn(urn);
-            return toolRepository.save(tool);
-        } else {
+            return toolRepository.saveAndFlush(tool);
+        } else { //find
             existingTool.setParentTool(tool.getParentTool());
-            return toolRepository.save(existingTool);
+            return toolRepository.saveAndFlush(existingTool);
         }
     }
-
-    public Tool findOrCreate(ToolDTO tool) {
-        if (tool == null) {
-            return null;
-        }
-        return findOrCreate(new Tool(tool));
-    }
-
 }

@@ -5,10 +5,13 @@
  */
 package eu.eurofleets.ears3.controller.rest;
 
+import eu.eurofleets.ears3.domain.Person;
+import eu.eurofleets.ears3.domain.PersonList;
+import eu.eurofleets.ears3.utilities.Constants;
 import tools.jackson.core.JacksonException;
+import tools.jackson.core.type.TypeReference;
 import tools.jackson.databind.ObjectMapper;
 import eu.eurofleets.ears3.Application;
-import eu.eurofleets.ears3.domain.Program;
 import eu.eurofleets.ears3.dto.CruiseDTO;
 import eu.eurofleets.ears3.dto.PersonDTO;
 import eu.eurofleets.ears3.dto.ProgramDTO;
@@ -28,6 +31,7 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 import static org.hamcrest.Matchers.not;
 import static org.hamcrest.core.StringContains.containsString;
@@ -114,7 +118,7 @@ public class ProgramControllerTest {
         public static void deleteAllPrograms(MockMvc mockMvc) throws Exception {
 
                 MvcResult mvcResult = mockMvc
-                                .perform(MockMvcRequestBuilders.get("/api/programs").accept(MediaType.APPLICATION_XML)
+                                .perform(MockMvcRequestBuilders.get("/api/programs").accept(Constants.APPLICATION_XML_UTF8)
                                                 .accept(MediaType.APPLICATION_JSON))
                                 .andReturn();
 
@@ -130,15 +134,13 @@ public class ProgramControllerTest {
         public static void deleteAllPersons(MockMvc mockMvc) throws Exception {
 
                 MvcResult mvcResult = mockMvc
-                                .perform(MockMvcRequestBuilders.get("/api/persons").accept(MediaType.APPLICATION_XML)
+                                .perform(MockMvcRequestBuilders.get("/api/persons")
                                                 .accept(MediaType.APPLICATION_JSON))
                                 .andReturn();
-                Set<PersonDTO> persons = new HashSet<PersonDTO>();
-                persons.addAll(getPersonsFromJson(mvcResult));
-                System.out.println(persons.size());
-                Set<String> idsFromJson = getIdsFromJson(mvcResult);
-                System.out.println(idsFromJson.size());
-                for (String identifier : idsFromJson) {
+//                Set<PersonDTO> persons = new HashSet<PersonDTO>();
+//                persons.addAll(getPersonsFromJson(mvcResult));
+                Set<Long> idsFromJson = getIdsFromJson(mvcResult);
+                for (Long identifier : idsFromJson) {
                         mvcResult = mockMvc
                                         .perform(MockMvcRequestBuilders
                                                         .delete(String.format("/api/person?id=%s",
@@ -148,34 +150,31 @@ public class ProgramControllerTest {
         }
 
         private static Collection<? extends PersonDTO> getPersonsFromJson(MvcResult mvcResult) {
-                /* String contentAsString = null;
-                try {
-                        contentAsString = mvcResult.getResponse().getContentAsString();
-                } catch (UnsupportedEncodingException e) {
-                        e.printStackTrace();
-                }
-                Pattern p = Pattern.compile(
-                                "\\{\"id\":\"(.*?)\",\"firstName\":\"(.*?)\",\"lastName\":\"(.*?)\",\"organisation\":\"(.*?)\",\"email\":\"(.*?)\"}");
-                Matcher m = p.matcher(contentAsString);
-                Set<PersonDTO> allMatches = new HashSet<PersonDTO>();
-                
-                while (m.find()) {
-                        PersonDTO personDTO = new PersonDTO(m.group(2), m.group(3), m.group(4), null, null, m.group(5));
-                        personDTO.setId(m.group(1));
-                        allMatches.add(personDTO);
-                }
-                return allMatches;*/
+//                String contentAsString = null;
+//                try {
+//                        contentAsString = mvcResult.getResponse().getContentAsString();
+//                } catch (UnsupportedEncodingException e) {
+//                        e.printStackTrace();
+//                }
+//                Pattern p = Pattern.compile(
+//                                "\\{\"id\":\"(.*?)\",\"firstName\":\"(.*?)\",\"lastName\":\"(.*?)\",\"organisation\":\"(.*?)\",\"email\":\"(.*?)\"}");
+//                Matcher m = p.matcher(contentAsString);
+//                Set<PersonDTO> allMatches = new HashSet<PersonDTO>();
+//
+//                while (m.find()) {
+//                        PersonDTO personDTO = new PersonDTO(m.group(2), m.group(3), m.group(4), null, null, m.group(5));
+//                       // personDTO.setId(m.group(1));
+//                        allMatches.add(personDTO);
+//                }
+//                return allMatches;
 
                 try {
                         String content = mvcResult.getResponse().getContentAsString();
                         ObjectMapper objectMapper = new ObjectMapper();
-
-                        objectMapper.readValue(content, Iterable.class);
+                        return objectMapper.readValue(content, new TypeReference<List<PersonDTO>>() {});
                 } catch (JacksonException | UnsupportedEncodingException e) {
-                        // TODO Auto-generated catch block
-                        e.printStackTrace();
+                        throw new RuntimeException("Failed to parse PersonDTO list from response", e);
                 }
-                return new ArrayList<PersonDTO>();
         }
 
         private static Set<String> getIdentifiersFromJson(MvcResult mvcResult) throws UnsupportedEncodingException {
@@ -190,17 +189,23 @@ public class ProgramControllerTest {
                 return allMatches;
         }
 
-        private static Set<String> getIdsFromJson(MvcResult mvcResult) throws UnsupportedEncodingException {
+        private static Set<Long> getIdsFromJson(MvcResult mvcResult) throws UnsupportedEncodingException {
                 String contentAsString = mvcResult.getResponse().getContentAsString();
-                System.out.println(contentAsString);
-                Pattern p = Pattern.compile("\\{\"id\":\"(.*?)\"");
-                Matcher m = p.matcher(contentAsString);
-                Set<String> allMatches = new HashSet<String>();
-
-                while (m.find()) {
-                        allMatches.add(m.group(1));
-                }
-                return allMatches;
+                ObjectMapper objectMapper = new ObjectMapper();
+                List<Person> people = objectMapper.readValue(contentAsString, new TypeReference<PersonList>() {
+                }).getPersons();
+                return people.stream().map(Person::getId).collect(Collectors.toSet());
+//                for(Person p: people){
+//
+//                }
+//                Pattern p = Pattern.compile("\\{\"id\":\"(.*?)\"");
+//                Matcher m = p.matcher(contentAsString);
+//                Set<String> allMatches = new HashSet<String>();
+//
+//                while (m.find()) {
+//                        allMatches.add(m.group(1));
+//                }
+//                return allMatches;
         }
 
         /**
@@ -212,7 +217,7 @@ public class ProgramControllerTest {
                 postProgram(this.mockMvc, pr, objectMapper);
 
                 MvcResult mvcResult = this.mockMvc
-                                .perform(MockMvcRequestBuilders.get("/api/programs").accept(MediaType.APPLICATION_XML))
+                                .perform(MockMvcRequestBuilders.get("/api/programs").accept(Constants.APPLICATION_XML_UTF8))
                                 // .andDo(print())
                                 .andExpect(status().is(200))
                                 .andExpect(content().string(containsString("<identifier>2020-MF</identifier>")))
@@ -266,7 +271,7 @@ public class ProgramControllerTest {
                 this.mockMvc
                                 .perform(MockMvcRequestBuilders
                                                 .get("/api/programs?startDate="
-                                                                + lateStart.format(DateTimeFormatter.ISO_DATE_TIME))
+                                                                + lateStart.format(DateTimeFormatter.ISO_DATE_TIME)).accept(Constants.APPLICATION_XML_UTF8)
                                                 .contentType(MediaType.APPLICATION_JSON)) // + "&endDate=" +
                                 // end.format(DateTimeFormatter.ISO_DATE_TIME)
                                 .andDo(print())
@@ -291,7 +296,7 @@ public class ProgramControllerTest {
                 ProgramDTO pr = getTestProgram1("2020-MF");
                 postProgram(this.mockMvc, pr, objectMapper);
                 this.mockMvc.perform(MockMvcRequestBuilders.get("/api/program?identifier=2020-MF")
-                                .accept(MediaType.APPLICATION_XML))
+                                .accept(Constants.APPLICATION_XML_UTF8))
                                 // .andDo(print())
                                 .andExpect(status().is(200))
                                 .andExpect(content().string(containsString("<identifier>2020-MF</identifier>")))
@@ -313,7 +318,7 @@ public class ProgramControllerTest {
 
                 this.mockMvc
                                 .perform(MockMvcRequestBuilders.post("/api/program")
-                                                .accept(MediaType.APPLICATION_XML)
+                                                .accept(Constants.APPLICATION_XML_UTF8)
                                                 .contentType(MediaType.APPLICATION_JSON)
                                                 .content(json))
                                 // .andDo(print())
@@ -351,7 +356,7 @@ public class ProgramControllerTest {
                 String json = "{\"principalInvestigators\":[{\"firstName\":\"Danae\",\"lastName\":\"Kapasakali\",\"organisation\":\"SDN:EDMO::3327\",\"email\":\"brumes@naturalsciences.be\"},{\"firstName\":\"Steven\",\"lastName\":\"Degraer\",\"organisation\":\"SDN:EDMO::3327\",\"email\":\"sdegraer@naturalsciences.be\"}],\"identifier\":\""
                                 + programUUID + "\",\"sampling\":\"deployment and retrieval of ARMS\"" +
                                 ",\"name\":\"EDEN2000: Exploring options for a nature-proof development\",\"description\":\"In the framework of the 'EDEN2000' project (2019-2022; FPS Health, Food Chain Safety and Environment) a number of studies have been drafted.\"}";
-                this.mockMvc.perform(MockMvcRequestBuilders.post("/api/program").accept(MediaType.APPLICATION_XML)
+                this.mockMvc.perform(MockMvcRequestBuilders.post("/api/program").accept(Constants.APPLICATION_XML_UTF8)
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .content(json))
                                 // .andDo(print())

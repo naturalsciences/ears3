@@ -23,6 +23,8 @@ import jakarta.xml.bind.annotation.XmlAccessType;
 import jakarta.xml.bind.annotation.XmlAccessorType;
 import jakarta.xml.bind.annotation.XmlRootElement;
 import jakarta.xml.bind.annotation.XmlTransient;
+import org.hibernate.annotations.Immutable;
+import tools.jackson.databind.annotation.JsonDeserialize;
 
 /*
  * To change this license header, choose License Headers in Project Properties.
@@ -36,6 +38,7 @@ import jakarta.xml.bind.annotation.XmlTransient;
 @Entity
 @XmlRootElement
 @XmlAccessorType(XmlAccessType.FIELD) //ignore all the getters
+@Immutable
 public class Platform implements IPlatform, Serializable {
 
     @OneToOne(optional = false)
@@ -71,6 +74,7 @@ public class Platform implements IPlatform, Serializable {
     }
 
     @Override
+    @JsonDeserialize(as = LinkedDataTerm.class)
     public ILinkedDataTerm getTerm() {
         return term;
     }
@@ -81,6 +85,7 @@ public class Platform implements IPlatform, Serializable {
     }
 
     @Override
+    @JsonDeserialize(as = LinkedDataTerm.class)
     public ILinkedDataTerm getPlatformClass() {
         return platformClass;
     }
@@ -91,6 +96,7 @@ public class Platform implements IPlatform, Serializable {
     }
 
     @Override
+    @JsonDeserialize(as = Organisation.class)
     public IOrganisation getVesselOperator() {
         return vesselOperator;
     }

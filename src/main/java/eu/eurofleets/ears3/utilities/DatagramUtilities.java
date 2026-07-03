@@ -15,6 +15,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.Reader;
 import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
 import java.net.ConnectException;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
@@ -122,7 +123,7 @@ public class DatagramUtilities<A extends Acquisition> {
                         line = line.replace(",,", ", ,");
                         line = line.replaceAll(",$", ", ");
                         String[] vals = line.split(",");
-                        A acquisitionValue = cls.newInstance();
+                        A acquisitionValue = cls.getDeclaredConstructor().newInstance();
                         if (vals.length >= 3) {
                             String dt = "20" + vals[1].substring(0, 2) + "-" + vals[1].substring(2, 4) + "-"
                                     + vals[1].substring(4, 6);
@@ -155,6 +156,8 @@ public class DatagramUtilities<A extends Acquisition> {
             } catch (InstantiationException | IllegalArgumentException | IllegalAccessException e) {
                 Logger.getLogger(DatagramUtilities.class.getName()).log(Level.SEVERE,
                         "Could't set property of " + cls.getName() + " Acquisition entity", e);
+            } catch (InvocationTargetException | NoSuchMethodException e) {
+                throw new RuntimeException(e);
             }
         }
         return result;

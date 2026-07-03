@@ -17,6 +17,8 @@ import jakarta.xml.bind.annotation.XmlAccessorType;
 import jakarta.xml.bind.annotation.XmlRootElement;
 import jakarta.xml.bind.annotation.XmlTransient;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import tools.jackson.databind.annotation.JsonDeserialize;
+
 import java.util.Objects;
 
 /*
@@ -101,6 +103,7 @@ public class Program implements IProgram, Serializable, Comparable<Program> {
     }
 
     @Override
+    @JsonDeserialize(contentAs = Person.class)
     public Collection<? extends IPerson> getPrincipalInvestigators() {
         return principalInvestigators;
     }

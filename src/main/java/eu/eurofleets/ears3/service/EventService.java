@@ -16,6 +16,8 @@ import eu.eurofleets.ears3.domain.Weather;
 import eu.eurofleets.ears3.dto.EventDTO;
 import eu.eurofleets.ears3.dto.PropertyDTO;
 import eu.eurofleets.ears3.utilities.DatagramUtilities;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 import tools.jackson.databind.ObjectMapper;
 
 import java.io.IOException;
@@ -218,6 +220,7 @@ public class EventService {
         return (result == null) ? prefix + UUID.randomUUID().toString() : result;
     }
 
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
     public Event save(EventDTO eventDTO) {
         OffsetDateTime serverTime = Instant.now().atOffset(ZoneOffset.UTC);
         if (env.getProperty("ears.read-only") == null || !env.getProperty("ears.read-only").equals("false")) {
@@ -295,7 +298,7 @@ public class EventService {
                     }
                 }
             } else { // it has an identifier, so it might be a modification OR come from another EARS
-                // instqace.
+                // instance.
                 Event existingEvent = eventRepository.findByIdentifier(identifier); // it's an existing event, so a
                 // modification
                 if (existingEvent != null) {
@@ -326,8 +329,8 @@ public class EventService {
             }
             tool.setTerm(toolLdTerm); // add the linkeddataterm to it
             tool.setParentTool(parentToolLdTerm); // add the parent linkeddataterm to it
-            tool = toolService.findOrCreate(tool); // replace it with a managed entity, either by finding it or creating
-            // it.
+            Logger.getLogger(EventService.class.getName()).log(Level.INFO, "NOW trying to retrieve the tool itself");
+            tool = toolService.findOrCreate(tool); // replace it with a managed entity, either by finding it or creating it
 
             Platform platform = platformService.findByIdentifier(eventDTO.getPlatform());
             if (platform == null) {
@@ -403,10 +406,11 @@ public class EventService {
             Logger.getLogger(EventService.class.getName()).log(Level.SEVERE, null, dve);
             String message = (dve.getMessage() != null) ? dve.getMessage() : dve.toString();
             throw new DataIntegrityViolationException(message, dve.getMostSpecificCause());
-        } catch (Exception ex) {
+        } /*catch (Exception ex) {
             Logger.getLogger(EventService.class.getName()).log(Level.SEVERE, null, ex);
+            String message = (ex.getMessage() != null) ? ex.getMessage() : ex.toString();
             return null;
-        }
+        }*/
     }
 
     /* private void sendToRemoteServer(Event event) {

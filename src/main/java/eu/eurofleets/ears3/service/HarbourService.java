@@ -1,5 +1,6 @@
 package eu.eurofleets.ears3.service;
 
+import eu.eurofleets.ears3.domain.Country;
 import eu.eurofleets.ears3.domain.Harbour;
 import java.util.Collection;
 import java.util.HashMap;
@@ -16,6 +17,14 @@ import org.springframework.util.Assert;
 public class HarbourService implements EarsService<Harbour> {
 
     private final HarbourRepository harbourRepository;
+
+    private static final Map<String, Harbour> idCache = new HashMap<>();
+    private static final Map<String, Harbour> nameCache = new HashMap<>();
+
+    public static void clearCache() {
+        idCache.clear();
+        nameCache.clear();
+    }
 
     @Autowired
     public HarbourService(HarbourRepository harbourRepository) {
@@ -45,9 +54,6 @@ public class HarbourService implements EarsService<Harbour> {
             return r;
         }
     }
-
-    private static Map<String, Harbour> idCache = new HashMap<>();
-    private static Map<String, Harbour> nameCache = new HashMap<>();
 
     @Override
     public Harbour findByName(String name) {

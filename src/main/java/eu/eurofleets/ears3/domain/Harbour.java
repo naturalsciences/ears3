@@ -18,6 +18,8 @@ import jakarta.persistence.OneToOne;
 import jakarta.xml.bind.annotation.XmlAccessType;
 import jakarta.xml.bind.annotation.XmlAccessorType;
 import jakarta.xml.bind.annotation.XmlRootElement;
+import org.hibernate.annotations.Immutable;
+import tools.jackson.databind.annotation.JsonDeserialize;
 
 /**
  *
@@ -26,6 +28,7 @@ import jakarta.xml.bind.annotation.XmlRootElement;
 @Entity
 @XmlRootElement
 @XmlAccessorType(XmlAccessType.FIELD) //ignore all the getters
+@Immutable
 public class Harbour implements IHarbour, Serializable {
 
     @OneToOne(optional = false)
@@ -45,6 +48,7 @@ public class Harbour implements IHarbour, Serializable {
     }
 
     @Override
+    @JsonDeserialize(as = LinkedDataTerm.class)
     public ILinkedDataTerm getTerm() {
         return this.term;
     }

@@ -22,6 +22,11 @@ import eu.eurofleets.ears3.dto.ProgramDTO;
 import eu.eurofleets.ears3.dto.PropertyDTO;
 import eu.eurofleets.ears3.dto.ToolDTO;
 
+import eu.eurofleets.ears3.service.ToolService;
+import eu.eurofleets.ears3.utilities.Constants;
+import org.junit.jupiter.api.AfterEach;
+import org.springframework.test.web.servlet.ResultMatcher;
+import org.springframework.transaction.annotation.Transactional;
 import tools.jackson.core.JacksonException;
 import tools.jackson.core.JsonParser;
 import tools.jackson.databind.DeserializationContext;
@@ -42,6 +47,7 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import static org.hamcrest.Matchers.not;
@@ -75,7 +81,7 @@ import org.springframework.web.context.WebApplicationContext;
 @SpringBootTest(classes = { Application.class })
 @WebAppConfiguration
 @ActiveProfiles("test")
-@DirtiesContext(classMode = ClassMode.BEFORE_EACH_TEST_METHOD) //reset the database to base state before each test method
+@DirtiesContext(classMode = ClassMode.AFTER_EACH_TEST_METHOD) //reset the database to base state before each test method
 public class EventControllerTest {
 
         @Autowired
@@ -88,6 +94,7 @@ public class EventControllerTest {
 
         @BeforeEach
         public void setup() throws Exception {
+                ToolService.clearCache();
                 this.mockMvc = MockMvcBuilders.webAppContextSetup(this.wac).build();
         }
 
@@ -234,6 +241,7 @@ public class EventControllerTest {
                                 "In-situ seafloor measurement/sampling"));
                 event.setActor(joan);
                 event.setPlatform("SDN:C17::11BE");
+                event.setLabel("Generic label");
                 List<PropertyDTO> properties = new ArrayList<>();
                 properties.add(new PropertyDTO(
                                 new LinkedDataTermDTO("http://ontologies.orr.org/fish_count", null, "fish_count"), "89",
@@ -321,20 +329,19 @@ public class EventControllerTest {
                                 .andExpect(status().is(204)).andReturn();
         }
 
-        /***
-         * Post a single event
-         * 
-         * @param mockMvc
-         * @param e
-         * @param objectMapper
-         * @return
-         * @throws Exception
-         */
         public static MvcResult postEvent(MockMvc mockMvc, EventDTO e, ObjectMapper objectMapper) throws Exception {
+                return postEvent(mockMvc,  e,  objectMapper, true );
+        }
+
+        public static MvcResult postEvent(MockMvc mockMvc, EventDTO e, ObjectMapper objectMapper,boolean expectCreated) throws Exception {
+                ResultMatcher isCreated = status().isCreated();
+                ResultMatcher isConflict =  status().isConflict();
+
+                ResultMatcher select=expectCreated?isCreated:isConflict;
                 String json = objectMapper.writeValueAsString(e);
                 return mockMvc.perform(MockMvcRequestBuilders.post("/api/event").contentType(MediaType.APPLICATION_JSON)
                                 .accept(MediaType.APPLICATION_JSON)
-                                .content(json)).andExpect(status().isCreated())
+                                .content(json)).andExpect(select)
                                 .andReturn();
         }
 
@@ -345,7 +352,7 @@ public class EventControllerTest {
         public static void assertEventCount(String url, int expected, MockMvc mockMvc, ObjectMapper objectMapper)
                         throws Exception {
                 MvcResult mvcResult = mockMvc
-                                .perform(MockMvcRequestBuilders.get(url).accept(MediaType.APPLICATION_XML)
+                                .perform(MockMvcRequestBuilders.get(url)
                                                 .accept(MediaType.APPLICATION_JSON))
                                 .andReturn();
                 // String contentAsString = mvcResult.getResponse().getContentAsString();
@@ -353,7 +360,6 @@ public class EventControllerTest {
 
                 String json = mvcResult.getResponse().getContentAsString();
                 EventList events = objectMapper.readValue(json, EventList.class);
-                // Gson gson = new Gson();
                 int count = events.getEvents().size();
                 assertEquals(expected, count);
         }
@@ -365,7 +371,7 @@ public class EventControllerTest {
         public static void assertEventDTOCount(String url, int expected, MockMvc mockMvc, ObjectMapper objectMapper)
                         throws Exception {
                 MvcResult mvcResult = mockMvc
-                                .perform(MockMvcRequestBuilders.get(url).accept(MediaType.APPLICATION_XML)
+                                .perform(MockMvcRequestBuilders.get(url).accept(MediaType.APPLICATION_JSON)
                                                 .contentType(MediaType.APPLICATION_JSON))
                                 .andReturn();
 
@@ -382,7 +388,7 @@ public class EventControllerTest {
         public static void assertSingleEventDTOTest(String url, MockMvc mockMvc, ObjectMapper objectMapper)
                         throws Exception {
                 MvcResult mvcResult = mockMvc
-                                .perform(MockMvcRequestBuilders.get(url).accept(MediaType.APPLICATION_XML)
+                                .perform(MockMvcRequestBuilders.get(url).accept(MediaType.APPLICATION_JSON)
                                                 .contentType(MediaType.APPLICATION_JSON))
                                 .andReturn();
 
@@ -396,13 +402,14 @@ public class EventControllerTest {
          */
         public static void deleteAllEvents(MockMvc mockMvc) throws Exception {
                 MvcResult mvcResult = mockMvc
-                                .perform(MockMvcRequestBuilders.get("/api/events").accept(MediaType.APPLICATION_XML)
+                                .perform(MockMvcRequestBuilders.get("/api/events").accept(Constants.APPLICATION_XML_UTF8)
                                                 .accept(MediaType.APPLICATION_JSON))
                                 .andExpect(status().isOk())
                                 .andReturn();
-
-                for (String identifier : getIdentifiersFromJson(mvcResult)) { // delete all previous events
-                        mvcResult = mockMvc
+                Set<String> ids = getIdentifiersFromJson(mvcResult);
+                Logger.getLogger("").info("Deleting events: "+String.join(",", ids));
+                for (String identifier : ids) { // delete all previous events
+                        mockMvc
                                         .perform(MockMvcRequestBuilders
                                                         .delete(String.format("/api/event?identifier=%s", identifier)))
                                         .andExpect(status().is(204)).andReturn();
@@ -412,7 +419,7 @@ public class EventControllerTest {
         @Test
         public void testHome() throws Exception {
                 MvcResult mvcResult = this.mockMvc
-                                .perform(MockMvcRequestBuilders.get("/api/events").accept(MediaType.APPLICATION_XML))
+                                .perform(MockMvcRequestBuilders.get("/api/events").accept(Constants.APPLICATION_XML_UTF8))
                                 // .andDo(print())
                                 .andExpect(status().isOk())
                                 .andExpect(content().string(containsString("events")))
@@ -436,7 +443,7 @@ public class EventControllerTest {
                 String json = objectMapper.writeValueAsString(e);
 
                 MvcResult mvcResult = this.mockMvc
-                                .perform(MockMvcRequestBuilders.post("/api/event").accept(MediaType.APPLICATION_XML)
+                                .perform(MockMvcRequestBuilders.post("/api/event").accept(Constants.APPLICATION_XML_UTF8)
                                                 .contentType(MediaType.APPLICATION_JSON).content(json))
                                 .andDo(print())
                                 .andExpect(status().isCreated())
@@ -476,8 +483,8 @@ public class EventControllerTest {
 
                 // Assert that the XML is correctly rendered
                 mvcResult = this.mockMvc
-                                .perform(MockMvcRequestBuilders.get("/api/events").accept(MediaType.APPLICATION_XML)
-                                                .accept(MediaType.APPLICATION_XML))
+                                .perform(MockMvcRequestBuilders.get("/api/events")
+                                                .accept(Constants.APPLICATION_XML_UTF8))
                                 .andExpect(status().is(200))
                                 .andExpect(content().string(
                                                 containsString("<identifier>" + eventIdentifier + "</identifier>")))
@@ -566,7 +573,7 @@ public class EventControllerTest {
                 // Assert that the JSON is correctly rendered
                 mvcResult = this.mockMvc
                                 .perform(MockMvcRequestBuilders.get("/api/event?identifier=" + eventIdentifier)
-                                                .accept(MediaType.APPLICATION_XML)
+                                                .accept(Constants.APPLICATION_XML_UTF8)
                                                 .accept(MediaType.APPLICATION_JSON))
                                 .andDo(print())
                                 .andExpect(status().is(200))
@@ -581,7 +588,7 @@ public class EventControllerTest {
 
         @Test
         public void testGetEventsCSV() throws Exception {
-                this.mockMvc.perform(MockMvcRequestBuilders.get("/api/events.csv").accept(MediaType.APPLICATION_XML)
+                this.mockMvc.perform(MockMvcRequestBuilders.get("/api/events.csv").accept(Constants.APPLICATION_XML_UTF8)
                                 .accept(MediaType.valueOf("text/csv")))
                                 // .andDo(print())
                                 .andExpect(status().is(200))
@@ -596,6 +603,7 @@ public class EventControllerTest {
 
                 // create a program and an event for it. The event has Joan as an actor
                 EventDTO e = getTestEvent();
+                String originalEmail=e.getActor().getEmail();
                 String programIdentifier = "2020-MF";
                 e.setProgram(programIdentifier);
                 ProgramDTO pr = ProgramControllerTest.getTestProgram1(programIdentifier);
@@ -616,35 +624,47 @@ public class EventControllerTest {
 
                 String firstName = "Adalbert";
                 String lastName = "Hoogendrave";
+                String adalbertEmail = "sol.invictus@hubris.org";
 
                 e.getActor().setFirstName(firstName);
                 e.getActor().setLastName(lastName);
-                e.getActor().setEmail("sol.invictus@hubris.org");
+                e.getActor().setEmail(adalbertEmail);
 
                 // temporarily store the email address and platform
-                String adalbertEmail = e.getActor().getEmail();
+
                 String platform = e.getPlatform();
 
-                // post the modified event (Adalbert)
+                // post the modified event (actor changed from Joan to Adalbert)
                 postEvent(mockMvc, e, objectMapper);
 
                 // count all events and verify there are 2.
                 assertEventCount("/api/events", 2, this.mockMvc, this.objectMapper);
 
-                // post the modified event (Adalbert) again
-                postEvent(mockMvc, e, objectMapper);
+                // post the modified event (Adalbert) again, it should fail as we are posting the same timestamp twice
+                postEvent(mockMvc, e, objectMapper,false);
 
-                // count all events and verify there are 3.
+                // count all events and verify there are 2, unchanged.
+                assertEventCount("/api/events", 2, this.mockMvc, this.objectMapper);
+
+                // post the modified event (Adalbert) again
+                postEvent(mockMvc, e, objectMapper,false);
+
+                // count all events and verify there are 2, unchanged.
+                assertEventCount("/api/events", 2, this.mockMvc, this.objectMapper);
+
+                e.setTimeStamp(OffsetDateTime.now());
+                // post the modified event (Adalbert) again
+                postEvent(mockMvc, e, objectMapper,true);
+
+                // count all events and verify there are 3, success.
                 assertEventCount("/api/events", 3, this.mockMvc, this.objectMapper);
 
-                // post the modified event (Adalbert) again
-                postEvent(mockMvc, e, objectMapper);
-
-                // count all events and verify there are 4.
-                assertEventCount("/api/events", 4, this.mockMvc, this.objectMapper);
-
                 assertEventCount(String.format("/api/events?actorEmail=%s&platformIdentifier=%s&programIdentifier=%s",
-                                adalbertEmail, platform, programIdentifier), 3, this.mockMvc, this.objectMapper);
+                                adalbertEmail, platform, programIdentifier), 2, this.mockMvc, this.objectMapper);
+                //2 by adalbert, 1 by joan
+                assertEventCount(String.format("/api/events?actorEmail=%s&platformIdentifier=%s&programIdentifier=%s",
+                        originalEmail, platform, programIdentifier), 1, this.mockMvc, this.objectMapper);
+                assertEventCount("/api/events?programIdentifier=oulematou", 0, this.mockMvc, this.objectMapper);
 
                 // delete all previous events and programs
                 deleteAllEvents(this.mockMvc);

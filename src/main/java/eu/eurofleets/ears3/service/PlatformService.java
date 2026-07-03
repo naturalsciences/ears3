@@ -17,6 +17,14 @@ public class PlatformService implements EarsService<Platform> {
 
     private final PlatformRepository platformRepository;
 
+    private static final Map<String, Platform> idCache = new HashMap<>();
+    private static final Map<String, Platform> nameCache = new HashMap<>();
+
+    public static void clearCache() {
+        idCache.clear();
+        nameCache.clear();
+    }
+
     @Autowired
     public PlatformService(PlatformRepository platformRepository) {
         this.platformRepository = platformRepository;
@@ -35,9 +43,6 @@ public class PlatformService implements EarsService<Platform> {
         Assert.notNull(identifier, "Platform identifier must not be null");
         return this.platformRepository.findByIdentifier(identifier);
     }
-
-    private static Map<String, Platform> idCache = new HashMap<>();
-    private static Map<String, Platform> nameCache = new HashMap<>();
 
     public Platform findByName(String name) {
         Assert.notNull(name, "Organisation name must not be null");

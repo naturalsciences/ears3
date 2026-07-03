@@ -1,7 +1,7 @@
 spring:
   datasource:
     driver-class-name: org.h2.Driver
-    url: jdbc:h2:mem:${random.uuid};MODE=PostgreSQL
+    url: jdbc:h2:mem:${random.uuid};MODE=PostgreSQL;DB_CLOSE_DELAY=-1
     username: ""
     password: ""
     test-on-borrow: true
@@ -26,6 +26,11 @@ logging:
     org:
       springframework:
         web: DEBUG
+      hibernate:
+        SQL: DEBUG
+        orm:
+          jdbc:
+            bind: TRACE
 java:
   util:
     logging:
@@ -40,9 +45,9 @@ server:
 
 ears:
   platform: SDN:C17::11BU
-  send-events-to: http://replace.me
+  send-events-to: http://sjdhgkljdfd.com
   navigation:
-    server: http://replace.me
+    server: http://sjdhgkljdfd.com
   csr:
     license: UN
   ontology:

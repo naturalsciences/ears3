@@ -8,13 +8,14 @@ spring:
     validationQuery: SELECT 1
 
   jpa:
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
     hibernate:
       ddl-auto: none
       naming:
         strategy: org.hibernate.cfg.EJB3NamingStrategy
-    properties:
-      hibernate:
-        dialect: org.hibernate.dialect.PostgreSQLDialect
+    defer-datasource-initialization: true
 
   mvc:
     static-path-pattern: /resources/**

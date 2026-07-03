@@ -22,6 +22,8 @@ import jakarta.xml.bind.annotation.XmlAccessType;
 import jakarta.xml.bind.annotation.XmlAccessorType;
 import jakarta.xml.bind.annotation.XmlRootElement;
 import jakarta.xml.bind.annotation.XmlTransient;
+import org.hibernate.annotations.Immutable;
+import tools.jackson.databind.annotation.JsonDeserialize;
 
 /**
  *
@@ -30,6 +32,7 @@ import jakarta.xml.bind.annotation.XmlTransient;
 @Entity
 @XmlRootElement
 @XmlAccessorType(XmlAccessType.FIELD) //ignore all the getters
+@Immutable
 public class Organisation implements IOrganisation, Serializable {
 
     @OneToOne(optional = false)
@@ -70,6 +73,7 @@ public class Organisation implements IOrganisation, Serializable {
         this.
     }*/
     @Override
+    @JsonDeserialize(as = LinkedDataTerm.class)
     public ILinkedDataTerm getTerm() {
         return term;
     }

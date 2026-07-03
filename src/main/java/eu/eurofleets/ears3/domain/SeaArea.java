@@ -12,6 +12,8 @@ import jakarta.persistence.OneToOne;
 import jakarta.xml.bind.annotation.XmlAccessType;
 import jakarta.xml.bind.annotation.XmlAccessorType;
 import jakarta.xml.bind.annotation.XmlRootElement;
+import org.hibernate.annotations.Immutable;
+import tools.jackson.databind.annotation.JsonDeserialize;
 
 /*
  * To change this license header, choose License Headers in Project Properties.
@@ -25,6 +27,7 @@ import jakarta.xml.bind.annotation.XmlRootElement;
 @Entity
 @XmlRootElement
 @XmlAccessorType(XmlAccessType.FIELD) //ignore all the getters
+@Immutable
 public class SeaArea implements ISeaArea, Serializable {
 
     @OneToOne(optional = false)
@@ -54,6 +57,7 @@ public class SeaArea implements ISeaArea, Serializable {
     }
 
     @Override
+    @JsonDeserialize(as = LinkedDataTerm.class)
     public ILinkedDataTerm getTerm() {
         return this.term;
     }

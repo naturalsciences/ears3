@@ -38,6 +38,7 @@ import jakarta.xml.bind.annotation.XmlAccessorType;
 import jakarta.xml.bind.annotation.XmlRootElement;
 import jakarta.xml.bind.annotation.XmlTransient;
 import org.hibernate.annotations.Formula;
+import tools.jackson.databind.annotation.JsonDeserialize;
 
 /*
  * To change this license header, choose License Headers in Project Properties.
@@ -231,6 +232,7 @@ public class Cruise implements ICruise, Serializable {
     }
 
     @Override
+    @JsonDeserialize(as = Platform.class)
     public IPlatform getPlatform() {
         return platform;
     }

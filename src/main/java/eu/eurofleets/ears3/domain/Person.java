@@ -18,6 +18,7 @@ import jakarta.xml.bind.annotation.XmlAccessorType;
 import jakarta.xml.bind.annotation.XmlRootElement;
 import jakarta.xml.bind.annotation.XmlTransient;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import tools.jackson.databind.annotation.JsonDeserialize;
 
 /*
  * To change this license header, choose License Headers in Project Properties.
@@ -47,8 +48,8 @@ public class Person implements IPerson, Serializable {
     private String email;
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @XmlTransient
-    @JsonIgnore
+//    @XmlTransient
+//    @JsonIgnore
     private Long id;
 
     public Person() {
@@ -97,6 +98,7 @@ public class Person implements IPerson, Serializable {
     }
 
     @Override
+    @JsonDeserialize(as = Organisation.class)
     public IOrganisation getOrganisation() {
         return organisation;
     }

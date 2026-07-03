@@ -5,6 +5,9 @@
  */
 package eu.eurofleets.ears3.controller.rest;
 
+import eu.eurofleets.ears3.service.OrganisationService;
+import eu.eurofleets.ears3.service.ToolService;
+import eu.eurofleets.ears3.utilities.Constants;
 import tools.jackson.databind.ObjectMapper;
 import eu.eurofleets.ears3.Application;
 import static eu.eurofleets.ears3.controller.rest.EventControllerTest.deleteEvent;
@@ -54,6 +57,8 @@ public class PersonControllerTest {
 
     @BeforeEach
     public void setup() throws Exception {
+        ToolService.clearCache();
+        OrganisationService.clearCache();
         this.mockMvc = MockMvcBuilders.webAppContextSetup(this.wac).build();
 
         /*   MvcResult mvcResult = this.mockMvc.perform(MockMvcRequestBuilders.post("/sync/all")) //first we need all the harbours, countries etc in the system
@@ -107,7 +112,7 @@ public class PersonControllerTest {
         MvcResult postEvent = postEvent(this.mockMvc, e, this.objectMapper);
 
         mvcResult = this.mockMvc
-                .perform(MockMvcRequestBuilders.get("/api/person?fullName=" + firstName + " " + lastName).accept(MediaType.APPLICATION_XML))
+                .perform(MockMvcRequestBuilders.get("/api/person?fullName=" + firstName + " " + lastName).accept(Constants.APPLICATION_XML_UTF8))
                 //.andDo(print())
                 .andExpect(status().is(200))
                 .andExpect(content().string(containsString(
@@ -118,7 +123,7 @@ public class PersonControllerTest {
 
     public static void assertPersonCount(MockMvc mockMvc, int testNumber) throws Exception {
         MvcResult mvcResult = mockMvc
-                .perform(MockMvcRequestBuilders.get("/api/persons").accept(MediaType.APPLICATION_XML).accept(MediaType.APPLICATION_JSON))
+                .perform(MockMvcRequestBuilders.get("/api/persons").accept(MediaType.APPLICATION_JSON))
                 .andDo(print())
                 .andExpect(status().is(200))
                 .andExpect(MockMvcResultMatchers.jsonPath("$.persons.length()").value(testNumber))

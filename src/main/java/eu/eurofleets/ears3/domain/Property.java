@@ -13,6 +13,7 @@ import jakarta.persistence.ManyToOne;
 import jakarta.xml.bind.annotation.XmlAccessType;
 import jakarta.xml.bind.annotation.XmlAccessorType;
 import jakarta.xml.bind.annotation.XmlRootElement;
+import tools.jackson.databind.annotation.JsonDeserialize;
 
 /*
  * To change this license header, choose License Headers in Project Properties.
@@ -47,6 +48,7 @@ public class Property implements IProperty, Serializable {
     }
 
     @Override
+    @JsonDeserialize(as = LinkedDataTerm.class)
     public ILinkedDataTerm getKey() {
         return key;
     }

@@ -6,6 +6,7 @@
 package eu.eurofleets.ears3.controller.rest;
 
 import eu.eurofleets.ears3.Application;
+import eu.eurofleets.ears3.utilities.Constants;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
@@ -44,7 +45,7 @@ public class SyncSchedulerTest {
     @Test
     @Disabled 
     public void testSyncDatabase() throws Exception {
-        this.mockMvc.perform(MockMvcRequestBuilders.get("/api/sync/database").accept(MediaType.APPLICATION_XML))
+        this.mockMvc.perform(MockMvcRequestBuilders.get("/api/sync/database").accept(Constants.APPLICATION_XML_UTF8))
                 //.andDo(print())
                 .andExpect(status().is(200))
                 .andReturn();
@@ -53,7 +54,7 @@ public class SyncSchedulerTest {
     @Test
     @Disabled 
     public void testSyncSeaAreas() throws Exception {
-        this.mockMvc.perform(MockMvcRequestBuilders.get("/api/sync/seas").accept(MediaType.APPLICATION_XML))
+        this.mockMvc.perform(MockMvcRequestBuilders.get("/api/sync/seas").accept(Constants.APPLICATION_XML_UTF8))
                 //.andDo(print())
                 .andExpect(status().is(200))
                 .andReturn();
@@ -62,7 +63,7 @@ public class SyncSchedulerTest {
     @Test
     @Disabled 
     public void testSyncShips() throws Exception {
-        this.mockMvc.perform(MockMvcRequestBuilders.get("/api/sync/ships").accept(MediaType.APPLICATION_XML))
+        this.mockMvc.perform(MockMvcRequestBuilders.get("/api/sync/ships").accept(Constants.APPLICATION_XML_UTF8))
                 //.andDo(print())
                 .andExpect(status().is(200))
                 .andReturn();
@@ -71,7 +72,7 @@ public class SyncSchedulerTest {
     @Test
     @Disabled 
     public void testSyncHarbours() throws Exception {
-        this.mockMvc.perform(MockMvcRequestBuilders.get("/api/sync/harbours").accept(MediaType.APPLICATION_XML))
+        this.mockMvc.perform(MockMvcRequestBuilders.get("/api/sync/harbours").accept(Constants.APPLICATION_XML_UTF8))
                 //.andDo(print())
                 .andExpect(status().is(200))
                 .andReturn();
@@ -80,7 +81,7 @@ public class SyncSchedulerTest {
     @Test
     @Disabled 
     public void testSyncAll() throws Exception {
-        this.mockMvc.perform(MockMvcRequestBuilders.get("/api/sync/all").accept(MediaType.APPLICATION_XML))
+        this.mockMvc.perform(MockMvcRequestBuilders.get("/api/sync/all").accept(Constants.APPLICATION_XML_UTF8))
                 //.andDo(print())
                 .andExpect(status().isOk())
                 .andReturn();

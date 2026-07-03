@@ -15,6 +15,7 @@ import jakarta.xml.bind.annotation.XmlAccessType;
 import jakarta.xml.bind.annotation.XmlAccessorType;
 import jakarta.xml.bind.annotation.XmlRootElement;
 import jakarta.xml.bind.annotation.XmlTransient;
+import tools.jackson.databind.annotation.JsonDeserialize;
 
 /*
  * To change this license header, choose License Headers in Project Properties.
@@ -109,6 +110,7 @@ public class LinkedDataTerm implements ILinkedDataTerm, Serializable {
     @Override
     @XmlTransient
     @JsonIgnore
+    @JsonDeserialize(as = LinkedDataTerm.class)
     public ILinkedDataTerm getTerm() {
         return this;
     }

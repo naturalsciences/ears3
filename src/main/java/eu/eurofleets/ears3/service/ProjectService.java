@@ -1,5 +1,6 @@
 package eu.eurofleets.ears3.service;
 
+import eu.eurofleets.ears3.domain.Platform;
 import eu.eurofleets.ears3.domain.Project;
 import java.util.Collection;
 import java.util.HashMap;
@@ -16,6 +17,14 @@ import org.springframework.util.Assert;
 public class ProjectService implements EarsService<Project> {
 
     private final ProjectRepository projectRepository;
+
+    private static final Map<String, Project> idCache = new HashMap<>();
+    private static final Map<String, Project> nameCache = new HashMap<>();
+
+    public static void clearCache() {
+        idCache.clear();
+        nameCache.clear();
+    }
 
     @Autowired
     public ProjectService(ProjectRepository projectRepository) {
@@ -42,9 +51,6 @@ public class ProjectService implements EarsService<Project> {
             return r;
         }
     }
-
-    private static Map<String, Project> idCache = new HashMap<>();
-    private static Map<String, Project> nameCache = new HashMap<>();
 
     public Project findByName(String name) {
         Assert.notNull(name, "Project name must not be null");

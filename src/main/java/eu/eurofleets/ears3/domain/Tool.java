@@ -19,6 +19,8 @@ import jakarta.xml.bind.annotation.XmlAccessType;
 import jakarta.xml.bind.annotation.XmlAccessorType;
 import jakarta.xml.bind.annotation.XmlRootElement;
 import jakarta.xml.bind.annotation.XmlTransient;
+import org.hibernate.annotations.Immutable;
+import tools.jackson.databind.annotation.JsonDeserialize;
 
 /*
  * To change this license header, choose License Headers in Project Properties.
@@ -33,6 +35,7 @@ import jakarta.xml.bind.annotation.XmlTransient;
 @Table(uniqueConstraints = @UniqueConstraint(columnNames = { "term_id", "parent_term_id" }))
 @XmlRootElement
 @XmlAccessorType(XmlAccessType.FIELD) //ignore all the getters
+@Immutable
 public class Tool implements ITool, Serializable {
 
     @OneToOne(optional = false)
@@ -84,6 +87,7 @@ public class Tool implements ITool, Serializable {
     }
 
     @Override
+    @JsonDeserialize(as = LinkedDataTerm.class)
     public ILinkedDataTerm getTerm() {
         return term;
     }
@@ -94,6 +98,7 @@ public class Tool implements ITool, Serializable {
     }
 
     @Override
+    @JsonDeserialize(as = LinkedDataTerm.class)
     public ILinkedDataTerm getParentTool() {
         return parentTerm;
     }
@@ -134,6 +139,8 @@ public class Tool implements ITool, Serializable {
         this.serialNumber = serialNumber;
     }
 
+
+    @JsonDeserialize(as = LinkedDataTerm.class)
     public ILinkedDataTerm getToolCategory() {
         return toolCategory;
     }

@@ -1,13 +1,7 @@
 package eu.eurofleets.ears3.domain;
 
+import be.naturalsciences.bmdc.cruise.model.*;
 import eu.eurofleets.ears3.utilities.OffsetDateTimeAdapter;
-import be.naturalsciences.bmdc.cruise.model.IEvent;
-import be.naturalsciences.bmdc.cruise.model.ILinkedDataTerm;
-import be.naturalsciences.bmdc.cruise.model.IPerson;
-import be.naturalsciences.bmdc.cruise.model.IPlatform;
-import be.naturalsciences.bmdc.cruise.model.IProgram;
-import be.naturalsciences.bmdc.cruise.model.IProperty;
-import be.naturalsciences.bmdc.cruise.model.ITool;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import java.io.Serializable;
@@ -36,6 +30,7 @@ import jakarta.xml.bind.annotation.XmlElementWrapper;
 import jakarta.xml.bind.annotation.XmlRootElement;
 import jakarta.xml.bind.annotation.XmlTransient;
 import jakarta.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
+import tools.jackson.databind.annotation.JsonDeserialize;
 
 /*
  * To change this license header, choose License Headers in Project Properties.
@@ -147,6 +142,7 @@ public class Event implements IEvent, Serializable {
     }
 
     @Override
+    @JsonDeserialize(as = Person.class)
     public IPerson getActor() {
         return actor;
     }
@@ -157,6 +153,7 @@ public class Event implements IEvent, Serializable {
     }
 
     @Override
+    @JsonDeserialize(as = LinkedDataTerm.class)
     public ILinkedDataTerm getSubject() {
         return subject;
     }
@@ -167,6 +164,7 @@ public class Event implements IEvent, Serializable {
     }
 
     @Override
+    @JsonDeserialize(as = Tool.class)
     public ITool getTool() {
         return tool;
     }
@@ -177,6 +175,7 @@ public class Event implements IEvent, Serializable {
     }
 
     @Override
+    @JsonDeserialize(as = LinkedDataTerm.class)
     public ILinkedDataTerm getToolCategory() {
         return toolCategory;
     }
@@ -187,6 +186,7 @@ public class Event implements IEvent, Serializable {
     }
 
     @Override
+    @JsonDeserialize(as = LinkedDataTerm.class)
     public ILinkedDataTerm getProcess() {
         return process;
     }
@@ -197,6 +197,7 @@ public class Event implements IEvent, Serializable {
     }
 
     @Override
+    @JsonDeserialize(as = LinkedDataTerm.class)
     public ILinkedDataTerm getAction() {
         return action;
     }
@@ -207,6 +208,7 @@ public class Event implements IEvent, Serializable {
     }
 
     @Override
+    @JsonDeserialize(contentAs = Property.class)
     public Collection<? extends IProperty> getProperties() {
         return properties;
     }
@@ -217,6 +219,7 @@ public class Event implements IEvent, Serializable {
     }
 
     @Override
+    @JsonDeserialize(as = Program.class)
     public IProgram getProgram() {
         return program;
     }
@@ -235,6 +238,7 @@ public class Event implements IEvent, Serializable {
     }
 
     @Override
+    @JsonDeserialize(as = Platform.class)
     public Platform getPlatform() {
         return platform;
     }

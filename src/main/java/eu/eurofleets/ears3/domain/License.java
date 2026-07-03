@@ -13,6 +13,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.ManyToOne;
+import tools.jackson.databind.annotation.JsonDeserialize;
 
 /**
  *
@@ -64,6 +65,7 @@ public class License implements ILicense, Serializable {
     }
 
     @Override
+    @JsonDeserialize(as = LinkedDataTerm.class)
     public ILinkedDataTerm getLicenseTerm() {
         return term;
     }

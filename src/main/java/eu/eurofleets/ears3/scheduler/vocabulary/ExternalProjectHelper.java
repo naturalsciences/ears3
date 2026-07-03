@@ -241,11 +241,7 @@ public class ExternalProjectHelper implements IExternalHelper<Project> {
                 }
             /* } catch (IOException ex) {
                 Logger.getLogger(ExternalProjectHelper.class.getName()).log(Level.SEVERE, null, ex); */
-            } catch (JAXBException ex) {
-                Logger.getLogger(ExternalProjectHelper.class.getName()).log(Level.SEVERE, null, ex);
-            } catch (XMLStreamException ex) {
-                Logger.getLogger(ExternalProjectHelper.class.getName()).log(Level.SEVERE, null, ex);
-            } catch (ParseException ex) {
+            } catch (JAXBException | XMLStreamException | ParseException ex) {
                 Logger.getLogger(ExternalProjectHelper.class.getName()).log(Level.SEVERE, null, ex);
             } catch (Exception ex) {
                 Logger.getLogger(ExternalProjectHelper.class.getName()).log(Level.SEVERE, null, ex);

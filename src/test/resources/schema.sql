@@ -249,7 +249,7 @@ ALTER TABLE thermosal
 ALTER TABLE tool
     ADD CONSTRAINT tool_pkey PRIMARY KEY (id);
 ALTER TABLE event
-    ADD CONSTRAINT event_unique UNIQUE (time_stamp, platform_id, program_id, action_id, process_id, tool_id, tool_category_id);
+    ADD CONSTRAINT event_unique UNIQUE (time_stamp, platform_id, program_id, action_id, process_id, tool_id, tool_category_id, actor_id, label);
 ALTER TABLE tool
     ADD CONSTRAINT uk5t3r8cloglmcymweq9ia322l3 UNIQUE (term_id, parent_term_id);
 ALTER TABLE platform

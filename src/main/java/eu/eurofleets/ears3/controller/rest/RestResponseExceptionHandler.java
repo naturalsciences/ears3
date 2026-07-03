@@ -46,7 +46,7 @@ public class RestResponseExceptionHandler
         } else {
             status = HttpStatus.CONFLICT;
         }
-        Logger.getLogger(RestResponseExceptionHandler.class.getName()).log(Level.INFO, "Error captured.", ex);
+        //Logger.getLogger(RestResponseExceptionHandler.class.getName()).log(Level.INFO, "Error captured.", ex);
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(getContentType(request));
 

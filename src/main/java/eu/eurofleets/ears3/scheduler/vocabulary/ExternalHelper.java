@@ -14,6 +14,8 @@ import eu.eurofleets.ears3.domain.LinkedDataTerm;
 import eu.eurofleets.ears3.domain.Platform;
 import eu.eurofleets.ears3.domain.SeaArea;
 import eu.eurofleets.ears3.domain.Tool;
+
+import java.lang.reflect.InvocationTargetException;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
@@ -79,16 +81,16 @@ public class ExternalHelper<C extends IConcept> implements IExternalHelper<C> {
                     LinkedDataTerm ldt = new LinkedDataTerm(identifier, null, prefLabel);
                     ldt.setUrn(urn);
                     try {
-                        C c = cls.newInstance();
+                        C c = cls.getDeclaredConstructor().newInstance();
                         c.setTerm(ldt);
                         if (copyAssistant != null) {
                             copyAssistant.copy(concept, c);
                         }
                         results.put(identifier, c);
-                    } catch (InstantiationException ex) {
+                    } catch (InstantiationException | NoSuchMethodException ex) {
                         Logger.getLogger(ExternalHelper.class.getName()).log(Level.SEVERE, null, ex);
-                    } catch (IllegalAccessException ex) {
-                        Logger.getLogger(ExternalHelper.class.getName()).log(Level.SEVERE, null, ex);
+                    } catch (InvocationTargetException | IllegalAccessException e) {
+                        throw new RuntimeException(e);
                     }
                 }
             }

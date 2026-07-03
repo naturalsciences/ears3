@@ -87,7 +87,7 @@ public class EventDTOControllerTest {
                 EventControllerTest.postEvent(this.mockMvc, e, objectMapper);
 
                 MvcResult mvcResult = this.mockMvc
-                                .perform(MockMvcRequestBuilders.get("/api/dto/events.json").accept(MediaType.APPLICATION_XML)
+                                .perform(MockMvcRequestBuilders.get("/api/dto/events").accept(MediaType.APPLICATION_JSON)
                                                 .contentType(MediaType.APPLICATION_JSON))
                                 // .andDo(print())
                                 .andExpect(status().is(200))
@@ -96,20 +96,20 @@ public class EventDTOControllerTest {
                 List<String> tmp = new ArrayList<>(getIdentifiersFromJson(mvcResult));
                 String identifier = tmp.get(0);
 
-                EventControllerTest.assertSingleEventDTOTest("/api/dto/event.json?identifier=" + identifier,
+                EventControllerTest.assertSingleEventDTOTest("/api/dto/event?identifier=" + identifier,
                                 this.mockMvc,
                                 this.objectMapper);
 
                 // we have 3 events after the break
                 EventControllerTest.assertEventDTOCount(
-                                "/api/dto/events.json?startDate=" +
+                                "/api/dto/events?startDate=" +
                                                 breakTime.format(DateTimeFormatter.ISO_OFFSET_DATE_TIME),
                                 3, this.mockMvc,
                                 this.objectMapper);
 
                 // we have 1 event before the break
                 EventControllerTest.assertEventDTOCount(
-                                "/api/dto/events.json?endDate="
+                                "/api/dto/events?endDate="
                                                 + breakTime.format(DateTimeFormatter.ISO_OFFSET_DATE_TIME),
                                 1, this.mockMvc,
                                 this.objectMapper);

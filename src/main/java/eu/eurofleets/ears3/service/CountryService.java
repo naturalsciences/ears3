@@ -18,6 +18,14 @@ public class CountryService implements EarsService<Country> {
 
     private final CountryRepository countryRepository;
 
+    private static final Map<String, Country> idCache = new HashMap<>();
+    private static final Map<String, Country> nameCache = new HashMap<>();
+
+    public static void clearCache() {
+        idCache.clear();
+        nameCache.clear();
+    }
+
     @Autowired
     public CountryService(CountryRepository countryRepository) {
         this.countryRepository = countryRepository;
@@ -44,9 +52,6 @@ public class CountryService implements EarsService<Country> {
             return r;
         }
     }
-
-    private static Map<String, Country> idCache = new HashMap<>();
-    private static Map<String, Country> nameCache = new HashMap<>();
 
     public Country findByName(String name) {
         Assert.notNull(name, "Country name must not be null");

@@ -5,6 +5,7 @@
  */
 package eu.eurofleets.ears3.controller.rest;
 
+import eu.eurofleets.ears3.utilities.Constants;
 import tools.jackson.databind.ObjectMapper;
 import eu.eurofleets.ears3.Application;
 import eu.eurofleets.ears3.domain.Navigation;
@@ -133,7 +134,7 @@ public class CruiseControllerTest {
                 String identifier = cruise.identifier;
                 MvcResult mvcResult = mockMvc
                                 .perform(MockMvcRequestBuilders.post("/api/cruise")
-                                                .accept(MediaType.APPLICATION_XML)
+                                                .accept(Constants.APPLICATION_XML_UTF8)
                                                 .contentType(MediaType.APPLICATION_JSON)
                                                 .content(json))
                                 // .andDo(print())
@@ -173,7 +174,7 @@ public class CruiseControllerTest {
 
                 MvcResult mvcResult = this.mockMvc
                                 .perform(MockMvcRequestBuilders.get("/api/cruise/current")
-                                                .accept(MediaType.APPLICATION_XML))
+                                                .accept(Constants.APPLICATION_XML_UTF8))
                                 // .andDo(print())
                                 .andExpect(status().is(200))
                                 .andExpect(content()
@@ -184,7 +185,7 @@ public class CruiseControllerTest {
 
                 mvcResult = this.mockMvc
                                 .perform(MockMvcRequestBuilders.get("/api/program/current")
-                                                .accept(MediaType.APPLICATION_XML))
+                                                .accept(Constants.APPLICATION_XML_UTF8))
                                 // .andDo(print())
                                 .andExpect(status().is(200))
                                 .andExpect(content().string(
@@ -212,14 +213,14 @@ public class CruiseControllerTest {
                 String json = objectMapper.writeValueAsString(cruise);
                 this.mockMvc
                                 .perform(MockMvcRequestBuilders.post("/api/cruise")
-                                                .accept(MediaType.APPLICATION_XML)
+                                                .accept(Constants.APPLICATION_XML_UTF8)
                                                 .contentType(MediaType.APPLICATION_JSON)
                                                 .content(json))
                                 .andExpect(status().isCreated()).andReturn();
                 // .andExpect(content().string(containsString("<identifier>https://edmo.seadatanet.org/report/230</identifier>"))).andReturn();
 
                 this.mockMvc.perform(MockMvcRequestBuilders.get("/api/cruise?identifier=" + cruiseId)
-                                .accept(MediaType.APPLICATION_XML))
+                                .accept(Constants.APPLICATION_XML_UTF8))
                                 // .andDo(print())
                                 .andExpect(status().is(200))
                                 .andExpect(content().string(
@@ -250,7 +251,7 @@ public class CruiseControllerTest {
                 String json = objectMapper.writeValueAsString(cruise);
                 this.mockMvc
                                 .perform(MockMvcRequestBuilders.post("/api/cruise")
-                                                .accept(MediaType.APPLICATION_XML)
+                                                .accept(Constants.APPLICATION_XML_UTF8)
                                                 .contentType(MediaType.APPLICATION_JSON)
                                                 .content(json))
                                 // .andDo(print())
@@ -335,7 +336,7 @@ public class CruiseControllerTest {
                 String licenseString = env.getProperty("ears.csr.license");
                 this.mockMvc
                                 .perform(MockMvcRequestBuilders.get("/api/cruise/csr?identifier=" + identifier)
-                                                .accept(MediaType.APPLICATION_XML))
+                                                .accept(Constants.APPLICATION_XML_UTF8))
                                 // .andDo(print())
                                 .andExpect(status().isOk())
                                 .andExpect(content().string(not(containsString("4.0"))))
@@ -354,7 +355,7 @@ public class CruiseControllerTest {
                 if (!isOffline) {
                         this.mockMvc
                                         .perform(MockMvcRequestBuilders.get("/api/cruise/csr?identifier=" + identifier)
-                                                        .accept(MediaType.APPLICATION_XML))
+                                                        .accept(Constants.APPLICATION_XML_UTF8))
                                         // .andDo(print())
                                         .andExpect(status().isOk())
                                         .andExpect(content().string(containsString("<gml:posList srsName=\"http://www.opengis.net/gml/srs/epsg.xml#4326\" srsDimension=\"2\">")))
@@ -362,7 +363,7 @@ public class CruiseControllerTest {
                 } else {
                         this.mockMvc
                                         .perform(MockMvcRequestBuilders.get("/api/cruise/csr?identifier=" + identifier)
-                                                        .accept(MediaType.APPLICATION_XML))
+                                                        .accept(Constants.APPLICATION_XML_UTF8))
                                         // .andDo(print())
                                         .andExpect(status().isOk())
                                         .andExpect(content().string(not(containsString(
