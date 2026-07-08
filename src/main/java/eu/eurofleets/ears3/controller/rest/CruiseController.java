@@ -31,6 +31,7 @@ import java.util.Set;
 import java.util.logging.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.Environment;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -214,7 +215,7 @@ public class CruiseController {
             License license = License.Licenses.valueOf(licenseString).license;
             CSRBuilder b = new CSRBuilder(cruise, license, true);
             CSRPrinter p = new CSRPrinter(b);
-            List<Event> events = eventService.findByTimeStampBetween(cruise.getStartDate(), cruise.getEndDate());
+            List<Event> events = eventService.findByTimeStampBetween(cruise.getStartDate(), cruise.getEndDate(), Pageable.unpaged()).stream().toList();
             cruise.setEvents(events);
             return p.getResult();
         } else {

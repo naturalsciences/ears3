@@ -9,6 +9,8 @@ import eu.eurofleets.ears3.dto.*;
 import eu.eurofleets.ears3.service.EventService;
 import org.apache.commons.io.output.StringBuilderWriter;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import tools.jackson.databind.ObjectMapper;
 import eu.eurofleets.ears3.excel.SpreadsheetEvent;
 import eu.eurofleets.ears3.service.EventExcelService;
@@ -96,8 +98,8 @@ public class EventExcelController {
     // properties but are not saved as properties
     @RequestMapping(method = RequestMethod.GET, value = "events.csv", produces = "text/csv; charset=utf-8")
     public String getEventsAsCSV(@RequestParam Map<String, String> allParams) throws IOException {
-        List<Event> events = this.eventService.advancedFind(allParams);
-
+        Page<Event> eventsPage = this.eventService.advancedFind(allParams, Pageable.unpaged());
+        List<Event> events = eventsPage.stream().toList();
         List<String> header = new ArrayList<>(Arrays.asList("Time stamp", "Actor", "Program", "Principal Investigator",
                 "Tool category", "Tool category code", "Tool", "Tool code", "Process", "Action", "Station", "Label",
                 "Description"));

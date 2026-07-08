@@ -31,6 +31,8 @@ import org.springframework.test.context.web.WebAppConfiguration;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
+
+import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
@@ -87,9 +89,8 @@ public class EventDTOControllerTest {
                 EventControllerTest.postEvent(this.mockMvc, e, objectMapper);
 
                 MvcResult mvcResult = this.mockMvc
-                                .perform(MockMvcRequestBuilders.get("/api/dto/events").accept(MediaType.APPLICATION_JSON)
-                                                .contentType(MediaType.APPLICATION_JSON))
-                                // .andDo(print())
+                                .perform(MockMvcRequestBuilders.get("/api/dto/events").accept(MediaType.APPLICATION_JSON))
+                                .andDo(print())
                                 .andExpect(status().is(200))
                                 .andReturn();
 

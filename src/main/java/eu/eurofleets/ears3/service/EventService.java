@@ -16,6 +16,8 @@ import eu.eurofleets.ears3.domain.Weather;
 import eu.eurofleets.ears3.dto.EventDTO;
 import eu.eurofleets.ears3.dto.PropertyDTO;
 import eu.eurofleets.ears3.utilities.DatagramUtilities;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import tools.jackson.databind.ObjectMapper;
@@ -37,6 +39,7 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+
 import org.apache.commons.collections4.IterableUtils;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -123,7 +126,7 @@ public class EventService {
         }
     }
 
-    public List<Event> advancedFind(Map<String, String> allParams) {
+    public Page<Event> advancedFind(Map<String, String> allParams, Pageable pageable) {
         String platformIdentifier = sanitizeParam(allParams, "platformIdentifier");
         String cruiseIdentifier = sanitizeParam(allParams, "cruiseIdentifier");
         String programIdentifier = sanitizeParam(allParams, "programIdentifier");
@@ -151,66 +154,71 @@ public class EventService {
             }
         }
 
-        List<Event> res = null;
+        Page<Event> res;
         if (platformIdentifier == null && programIdentifier == null && actorEmail == null && start == null
                 && end == null && cruiseIdentifier == null) {
-            res = this.findAll();
+            res = this.findAll(pageable);
         } else if (programIdentifier == null && actorEmail == null && start == null && end == null
                 && cruiseIdentifier == null) {
-            res = this.findAllByPlatformCode(platformIdentifier);
+            res = this.findAllByPlatformCode(platformIdentifier, pageable);
         } else if (cruiseIdentifier == null) {
             if (start != null && end != null) {
                 res = this.findAllByPlatformActorProgramAndDates(platformIdentifier, actorEmail, programIdentifier,
-                        start, end);
+                        start, end, pageable);
             } else {
-                res = this.findAllByPlatformActorAndProgram(platformIdentifier, actorEmail, programIdentifier);
+                res = this.findAllByPlatformActorAndProgram(platformIdentifier, actorEmail, programIdentifier, pageable);
             }
         } else {
-            res = this.findAllByCruiseProgramAndActor(cruiseIdentifier, programIdentifier, actorEmail);
+            res = this.findAllByCruiseProgramAndActor(cruiseIdentifier, programIdentifier, actorEmail, pageable);
         }
         return res;
     }
 
-    public List<Event> findAll() {
-        return IterableUtils.toList(this.eventRepository.findAll());
+    public Page<Event> findAll(Pageable pageable) {
+        return this.eventRepository.findAll(pageable);
     }
 
-    public List<Event> findByTimeStampBetween(OffsetDateTime startDate, OffsetDateTime endDate) {
-        return this.eventRepository.findByTimeStampBetween(startDate, endDate);
+    public Page<Event> findByTimeStampBetween(OffsetDateTime startDate, OffsetDateTime endDate, Pageable pageable) {
+        return this.eventRepository.findByTimeStampBetween(startDate, endDate, pageable);
     }
 
-    public List<Event> findByCruise(Cruise cruise) {
-        return findByTimeStampBetween(cruise.getStartDate(), cruise.getEndDate());
+    public Page<Event> findCreatedOrModifiedAfter(OffsetDateTime after, Pageable pageable) {
+        return this.eventRepository.findByCreatedOrModifiedAfter(after, pageable);
     }
 
-    public List<Event> findByTool(Tool tool) {
-        return this.eventRepository.findByTool(tool.getTerm().getIdentifier());
+    public Page<Event> findByCruise(Cruise cruise, Pageable pageable) {
+        return findByTimeStampBetween(cruise.getStartDate(), cruise.getEndDate(), pageable);
     }
 
-    public List<Event> findAllByPlatformCode(String platformIdentifier) {
-        Assert.notNull(platformIdentifier, "Platform code must not be null");
-        return this.eventRepository.findByPlatformCode(platformIdentifier);
-    }
-
-    public List<Event> findByCruise(String cruiseIdentifier) {
+    public Page<Event> findByCruise(String cruiseIdentifier, Pageable pageable) {
         Assert.notNull(cruiseIdentifier, "Cruise identifier code must not be null");
-        return this.eventRepository.findByCruise(cruiseIdentifier);
+        return this.eventRepository.findByCruise(cruiseIdentifier, pageable);
     }
 
-    public List<Event> findAllByPlatformActorAndProgram(String platformIdentifier, String personEmail,
-            String programIdentifier) {
+    public Page<Event> findByTool(Tool tool, Pageable pageable) {
+        return this.eventRepository.findByTool(tool.getTerm().getIdentifier(), pageable);
+    }
+
+    public Page<Event> findAllByPlatformCode(String platformIdentifier, Pageable pageable) {
+        Assert.notNull(platformIdentifier, "Platform code must not be null");
+        return this.eventRepository.findByPlatformCode(platformIdentifier, pageable);
+    }
+    public Page<Event> findAllByPlatformActorAndProgram(String platformIdentifier, String personEmail,
+                                                        String programIdentifier, Pageable pageable) {
         return this.eventRepository.findAllByPlatformActorAndProgram(platformIdentifier, personEmail,
-                programIdentifier);
+                programIdentifier, pageable);
     }
 
-    public List<Event> findAllByPlatformActorProgramAndDates(String platformIdentifier, String personEmail,
-            String programIdentifier, OffsetDateTime start, OffsetDateTime end) {
+    public Page<Event> findAllByPlatformActorProgramAndDates(String platformIdentifier, String personEmail,
+                                                             String programIdentifier, OffsetDateTime start, OffsetDateTime end, Pageable pageable) {
         return this.eventRepository.findAllByPlatformActorProgramAndDates(platformIdentifier, personEmail,
-                programIdentifier, start, end);
+                programIdentifier, start, end, pageable);
     }
 
-    public List<Event> findCreatedOrModifiedAfter(OffsetDateTime after) {
-        return this.eventRepository.findByCreatedOrModifiedAfter(after);
+
+    public Page<Event> findAllByCruiseProgramAndActor(String cruiseIdentifier, String programIdentifier,
+                                                      String actorEmail, Pageable pageable) {
+        return this.eventRepository.findAllByCruiseProgramAndActor(cruiseIdentifier, programIdentifier, actorEmail, pageable);
     }
 
     public String findUuidByToolActionProc(String toolCategory, String tool, String process, String action) {
@@ -558,10 +566,5 @@ public class EventService {
             throw new IllegalArgumentException("Cannot create/modify entities on a read-only system.");
         }
         this.eventRepository.deleteByTimeStampBetween(startDate, endDate);
-    }
-
-    public List<Event> findAllByCruiseProgramAndActor(String cruiseIdentifier, String programIdentifier,
-            String actorEmail) {
-        return this.eventRepository.findAllByCruiseProgramAndActor(cruiseIdentifier, programIdentifier, actorEmail);
     }
 }

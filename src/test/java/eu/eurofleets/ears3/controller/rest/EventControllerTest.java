@@ -6,14 +6,7 @@
 package eu.eurofleets.ears3.controller.rest;
 
 import eu.eurofleets.ears3.Application;
-import eu.eurofleets.ears3.domain.EventList;
-import eu.eurofleets.ears3.domain.LinkedDataTerm;
-import eu.eurofleets.ears3.domain.Organisation;
-import eu.eurofleets.ears3.domain.Person;
-import eu.eurofleets.ears3.domain.Platform;
-import eu.eurofleets.ears3.domain.Program;
-import eu.eurofleets.ears3.domain.Property;
-import eu.eurofleets.ears3.domain.Tool;
+import eu.eurofleets.ears3.domain.*;
 import eu.eurofleets.ears3.dto.EventDTO;
 import eu.eurofleets.ears3.dto.EventDTOList;
 import eu.eurofleets.ears3.dto.LinkedDataTermDTO;
@@ -24,12 +17,14 @@ import eu.eurofleets.ears3.dto.ToolDTO;
 
 import eu.eurofleets.ears3.service.ToolService;
 import eu.eurofleets.ears3.utilities.Constants;
+import eu.eurofleets.ears3.utilities.PageResponse;
 import org.junit.jupiter.api.AfterEach;
 import org.springframework.test.web.servlet.ResultMatcher;
 import org.springframework.transaction.annotation.Transactional;
 import tools.jackson.core.JacksonException;
 import tools.jackson.core.JsonParser;
 import tools.jackson.databind.DeserializationContext;
+import tools.jackson.databind.JavaType;
 import tools.jackson.databind.ObjectMapper;
 import tools.jackson.databind.deser.std.StdDeserializer;
 import tools.jackson.databind.module.SimpleModule;
@@ -358,13 +353,14 @@ public class EventControllerTest {
         MvcResult mvcResult = mockMvc
                 .perform(MockMvcRequestBuilders.get(url)
                         .accept(MediaType.APPLICATION_JSON))
+                .andDo(print())
                 .andReturn();
-        // String contentAsString = mvcResult.getResponse().getContentAsString();
-        // int count = StringUtils.countOccurrencesOf(contentAsString, "<event>");
 
         String json = mvcResult.getResponse().getContentAsString();
-        EventList events = objectMapper.readValue(json, EventList.class);
-        int count = events.getEvents().size();
+        JavaType type = objectMapper.getTypeFactory()
+                .constructParametricType(PageResponse.class, Event.class);
+        PageResponse<Event> pg = objectMapper.readValue(json, type);
+        long count = pg.getTotalElements();
         assertEquals(expected, count);
     }
 
@@ -377,11 +373,15 @@ public class EventControllerTest {
         MvcResult mvcResult = mockMvc
                 .perform(MockMvcRequestBuilders.get(url).accept(MediaType.APPLICATION_JSON)
                         .contentType(MediaType.APPLICATION_JSON))
+                .andDo(print())
                 .andReturn();
 
         String json = mvcResult.getResponse().getContentAsString();
-        EventDTOList events = objectMapper.readValue(json, EventDTOList.class);
-        int count = events.getEvents().size();
+
+        JavaType type = objectMapper.getTypeFactory()
+                .constructParametricType(PageResponse.class, EventDTO.class);
+        PageResponse<EventDTO> pg = objectMapper.readValue(json, type);
+        long count = pg.getTotalElements();
         assertEquals(expected, count);
     }
 
@@ -406,7 +406,7 @@ public class EventControllerTest {
      */
     public static void deleteAllEvents(MockMvc mockMvc) throws Exception {
         MvcResult mvcResult = mockMvc
-                .perform(MockMvcRequestBuilders.get("/api/events").accept(Constants.APPLICATION_XML_UTF8)
+                .perform(MockMvcRequestBuilders.get("/api/events")
                         .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andReturn();
@@ -424,13 +424,12 @@ public class EventControllerTest {
     public void testHome() throws Exception {
         MvcResult mvcResult = this.mockMvc
                 .perform(MockMvcRequestBuilders.get("/api/events").accept(Constants.APPLICATION_XML_UTF8))
-                // .andDo(print())
+                .andDo(print())
                 .andExpect(status().isOk())
                 .andExpect(content().string(containsString("events")))
                 .andReturn();
 
         String content = mvcResult.getResponse().getContentAsString();
-        assertTrue(content.contains("events"));
     }
 
     @Test
