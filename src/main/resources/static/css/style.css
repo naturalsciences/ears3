@@ -54,8 +54,12 @@ table#dropdownMenuTable td{
 }
 
 table.dataTable tbody td {
-    padding: 8px 0 !important;
+    padding: 8px 3px !important;
     border-left: black dotted 1px;
+}
+
+table.dataTable tbody td:last-child{
+    border-right: black dotted 1px;
 }
 
 table.dataTable thead th, table.dataTable thead td {
@@ -80,8 +84,6 @@ button p.close-btn a{
     padding-right: 1em;
     cursor: not-allowed;
 }
-
-
 
 .bi-lock {
     cursor: pointer;

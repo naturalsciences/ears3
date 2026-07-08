@@ -95,7 +95,7 @@ public class EventExcelService {
         JsonNode rootNode;
         ObjectMapper objectMapper;
         objectMapper = new ObjectMapper();
-        File jsonFile = new ClassPathResource("static/json/my.json").getFile();
+        File jsonFile = new ClassPathResource("static/json/custom_ldts.json").getFile();
         rootNode = objectMapper.readTree(jsonFile);
 
         CollectionType type = objectMapper.getTypeFactory()
@@ -111,7 +111,7 @@ public class EventExcelService {
         ArrayList<LinkedHashMap<String, String>> propList = objectMapper.convertValue(properties, type);
 
         for (LinkedHashMap<String, String> item : defList) {
-            LinkedDataTermDTO ldtDTO = new LinkedDataTermDTO(item.get("identifier"), item.get("transitveldidentifier"),
+            LinkedDataTermDTO ldtDTO = new LinkedDataTermDTO(item.get("identifier"), item.get("transitiveLdIdentifier"),
                     item.get("name"));
             String key = StringUtils.capitalize(StringUtils.lowerCase(item.get("name")));
             DEFS.put(key, ldtDTO);
@@ -125,7 +125,7 @@ public class EventExcelService {
         }
 
         for (LinkedHashMap<String, String> item : propList) {
-            LinkedDataTermDTO ldtDTO = new LinkedDataTermDTO(item.get("identifier"), item.get("transitveldidentifier"),
+            LinkedDataTermDTO ldtDTO = new LinkedDataTermDTO(item.get("identifier"), item.get("transitiveLdIdentifier"),
                     item.get("name"));
             PropertyDTO pDTO = new PropertyDTO(ldtDTO, item.get("value"), item.get("uom"));
             String key = StringUtils.capitalize(StringUtils.lowerCase(item.get("name")));
@@ -212,6 +212,9 @@ public class EventExcelService {
         eventDTO.setEventDefinitionId(uuid);
 
         String toolName = spreadsheetEvent.getTool();
+        if (toolName.equals("Command")) {
+            int a=5;
+        }
         eventDTO.setTool(new ToolDTO(extractLDT(toolName, rowNb), null));
         LinkedDataTermDTO toolCategory = extractToolCategory(toolName, rowNb);
         eventDTO.setToolCategory(toolCategory);
@@ -337,10 +340,7 @@ public class EventExcelService {
                 events.add(event);
             } catch (ImportException e) {
                 hasProblems = true;
-                errorList
-                        .addError(new ErrorDTO(rowNb,
-                                String.format("Problem on row %s in sheet %s: %s%n", e.lineNb, e.sheetName, e.message),
-                                e));
+                errorList.addError(new ErrorDTO(rowNb, String.format("Problem on row %s in sheet %s: %s%n", e.lineNb, e.sheetName, e.message), e));
             }
             rowNb++;
         }

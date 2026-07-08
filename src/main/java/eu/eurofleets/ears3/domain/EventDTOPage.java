@@ -9,21 +9,21 @@ import java.util.List;
 
 @XmlRootElement(name = "page")
 @XmlAccessorType(XmlAccessType.FIELD)
-public class EventPage extends IEventPage<Event> {
+public class EventDTOPage extends IEventPage<EventDTO> {
 
     @XmlElementWrapper(name = "events")
     @XmlElement(name = "event")
-    private List<Event> content = new ArrayList<>();
+    private List<EventDTO> content = new ArrayList<>();
 
-    public EventPage() {
+    public EventDTOPage() {
     }
 
-    public EventPage(Page<Event> page) {
+    public EventDTOPage(Page<EventDTO> page) {
         super(page);
         this.content = page.getContent();
     }
 
-    public List<Event> getContent() {
+    public List<EventDTO> getContent() {
         return content;
     }
 }

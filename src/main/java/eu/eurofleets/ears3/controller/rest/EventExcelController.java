@@ -49,7 +49,7 @@ public class EventExcelController {
 
     @PostMapping(value = "event/import", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE}, consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @ResponseStatus(HttpStatus.CREATED)
-    public ResponseEntity<ErrorDTOList> excelImport(@RequestPart("file") MultipartFile mpFile, @RequestPart("apd") ActorProgramDTO actorProgramDTO) {
+    public ResponseEntity<Message> excelImport(@RequestPart("file") MultipartFile mpFile, @RequestPart("apd") ActorProgramDTO actorProgramDTO) {
         ErrorDTOList errorList = new ErrorDTOList();
         try (Document document = Documents.OOXML().create()) {
             byte[] byteArr = mpFile.getBytes();
@@ -60,7 +60,9 @@ public class EventExcelController {
             boolean areTabsOk = eventExcelService.validateAllTabs(poiWb, errorList);
             boolean areHeadersOk = eventExcelService.validateHeaders(poiWb, SHEETNAME, errorList);
             if (!areHeadersOk || !areTabsOk) {
-                return new ResponseEntity<>(errorList, HttpStatus.CONFLICT);
+                Message<ErrorDTOList> msg = new Message<>(HttpStatus.CONFLICT.value(), null, errorList, "Error Creating Excel Event (headers/tabs invalid)",
+                        null);
+                return new ResponseEntity<>(msg, HttpStatus.CONFLICT);
             }
             List<SpreadsheetEvent> data = document.getSheet(SHEETNAME, SpreadsheetEvent.class);
             List<EventDTO> events = new ArrayList<>();
@@ -71,20 +73,24 @@ public class EventExcelController {
             if (!hasProblems) {
                 hasSaveProblems = eventExcelService.saveSpreadsheetEvents(errorList, events);
             }
-            if (hasProblems || hasSaveProblems) {
-                Message<ErrorDTOList> msg = new Message<>(HttpStatus.CONFLICT.value(), "Error Creating Excel Event",
-                        errorList);
-                return new ResponseEntity<>(errorList, HttpStatus.CONFLICT);
+            if (hasProblems) {
+                Message<ErrorDTOList> msg = new Message<>(HttpStatus.CONFLICT.value(), null, errorList, "Error Creating Excel Event (row issue)",
+                        null);
+                return new ResponseEntity<>(msg, HttpStatus.CONFLICT);
+            }
+            if (hasSaveProblems) {
+                Message<ErrorDTOList> msg = new Message<>(HttpStatus.CONFLICT.value(), null, errorList, "Error Creating Excel Event (saving issue)",
+                        null);
+                return new ResponseEntity<>(msg, HttpStatus.CONFLICT);
             }
         } catch (IOException e) {
-            ErrorDTO msg = new ErrorDTO("Error Creating Excel Event", null);
-            errorList.addError(msg);
-            return new ResponseEntity<>(errorList, HttpStatus.CONFLICT);
+            Message<ErrorDTOList> msg = new Message<>(HttpStatus.CONFLICT.value(), null, errorList, "Error Creating Excel Event",
+                    "IOException");
+            return new ResponseEntity<>(msg, HttpStatus.CONFLICT);
         }
-
-        ErrorDTO msg = new ErrorDTO("Successfully read Excel and created all events", null);
-        errorList.addError(msg);
-        return new ResponseEntity<>(errorList, HttpStatus.CREATED);
+        Message<String> msg = new Message<>(HttpStatus.CREATED.value(), null, null, "Successfully read Excel and created all events",
+                null);
+        return new ResponseEntity<>(msg, HttpStatus.CREATED);
     }
 
     private static String doubleOrNull(Double val) {

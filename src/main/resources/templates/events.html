@@ -1,243 +1,311 @@
 <!DOCTYPE html>
-<html lang="en"  xmlns="http://www.w3.org/1999/xhtml" 
+<html lang="en" xmlns="http://www.w3.org/1999/xhtml"
       xmlns:th="http://www.thymeleaf.org"
       xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" layout:decorate="~{fragments/f}">
-    <head th:replace="fragments/f :: head"></head>
-    <body>
-        <nav th:replace="fragments/f :: header"></nav>
-        <form  layout:fragment="head-form">
-            <div class="form-group">
+<head th:replace="fragments/f :: head"></head>
+<body>
+<nav th:replace="fragments/f :: header"></nav>
+<form layout:fragment="head-form">
+    <!--    <div class="form-group">-->
+    <!--        <select name="program" id="programField"-->
+    <!--                class="selectpicker target form-control"-->
+    <!--                data-live-search="true" title="Current program" required>-->
+    <!--        </select>-->
+    <!--    </div>-->
+    <!--    <div class="form-group">-->
+    <!--        <p>-->
+    <!--            <input name="station" id="stationField" placeholder=" " type="text" title="Current station"-->
+    <!--                   class="form-control"/><label class="txtBox" for="stationField">Current station</label>-->
+    <!--        </p>-->
+    <!--    </div>-->
+    <!--    <div class="form-group">-->
+    <!--        <p>-->
+    <!--            <input name="label" id="labelField" placeholder=" " type="text"-->
+    <!--                   title="Current event label (event or possibly tool identifier,...)" class="form-control"/><label-->
+    <!--                class="txtBox" for="labelField">Repeating event label</label>-->
+    <!--        </p>-->
+    <!--    </div>-->
+</form>
+<div class="container" layout:fragment="main">
+    <div id="search" class="form-inline mb-3 p-3 border rounded">
+        <div class="form-inline mb-2">
+            <div class="form-group mr-3 mb-2">
                 <select name="program" id="programField"
                         class="selectpicker target form-control"
                         data-live-search="true" title="Current program" required>
                 </select>
             </div>
-            <div class="form-group">
+            <div class="form-group mr-3 mb-2">
                 <p>
-                    <input name="station" id="stationField" placeholder=" " type="text" title="Current station" class="form-control" /><label class="txtBox" for="stationField">Station</label>
+                    <input name="station" id="stationField" type="text" placeholder="" title="Current station"
+                           class="form-control"/>
+                    <label for="stationField" class="txtBox">Current station</label>
                 </p>
             </div>
-            <div class="form-group">
+            <div class="form-group mr-3 mb-2">
                 <p>
-                    <input name="label" id="labelField" placeholder=" " type="text" title="Current event label (event or possibly tool identifier,...)" class="form-control" /><label class="txtBox" for="labelField">Event label</label>
-                </p>    
+                    <input name="search" id="freeTextField" type="text" placeholder=""
+                           title="Search label, description"
+                           class="form-control"
+                    />
+                    <label for="freeTextField" class="txtBox">Search label, description</label>
+                </p>
             </div>
-        </form>
-        <div class="container" layout:fragment="main">
-            <div>
-                Toggle column: <a href="#" class="toggle-vis" data-column="3">Category</a> - <a href="#" class="toggle-vis" data-column="7">Station</a> - <a href="#" class="toggle-vis" data-column="8">Label</a>
-            </div>
-            <div>
-                <input type="checkbox" id="cbOwnEvents" name="cbOwnEvents" value="My own" checked>
-                    <label for="cbOwnEvents">Display only my own events</label>
-            </div>
-            <div>
-               <a th:href="@{/api/events.csv}">Download all events</a>
-            </div>
-
-            <br />
-            <table id="eventTable" class="display dataTable" style="width:100%" role="grid">
-                <thead>
-                    <tr>
-                        <th>identifier</th>
-                        <th>date</th>
-                        <th>time</th>
-                        <th>category</th>
-                        <th>tool</th>
-                        <th>process</th>
-                        <th>action</th>
-                        <th>station</th>
-                        <th>label</th>
-                        <th></th>
-                        <th>actor</th>
-                    </tr>
-                </thead>
-            </table>
-
-            <script src="/ears3/js/ears-events.js" type="application/javascript"></script>
-            <script src="/ears3/js/jquery.dataTables.min.js" type="application/javascript"></script>
-            <script type="application/javascript">
-
-                var table;
-                $(document).ready(function () {
-                    if (localStorage.actor == null) {
-                        window.location.href = './settings';
-                    } else {
-                        var me = JSON.parse(localStorage.getItem('actor'));
-                        $("#settings-link").html(me.firstName + " " + me.lastName);
-                    }
-                    
-                    $('#cbOwnEvents').click(function(){ 
-                        $('#eventTable').DataTable().ajax.reload();
-                    }); 
-
-                    table = $('#eventTable').DataTable({
-                        responsive: true,
-                        'ajax': {
-                            'url': eventsGetLocation,
-                            'headers': {'Accept': 'application/json;'},
-                            'dataSrc':
-                                    function (data) {
-                                        var return_data = new Array();
-                                        $.each(data.events, function (indexInArray, event) {
-                                            if (typeof localStorage.actor !== 'undefined') {
-                                                let actor = JSON.parse(localStorage.actor);
-                                                var date = (event.timeStamp.split("T")[0]).replace(/^20/g,"'");
-                                                var time = (event.timeStamp.split("T")[1]).replace(/\+\d{2}:\d{2}$/g,"");
-                                                //var station = event.properties.filter(pr => pr.key.name == 'station')[0];
-                                                if (document.getElementById('cbOwnEvents').checked && event.actor.email == actor.email) {
-                                                    return_data.push({
-                                                        'identifier': event.identifier,
-                                                        'date': date,
-                                                        'time': time,
-                                                        'toolCategory': event.toolCategory.name,
-                                                        'tool': event.tool.term.name,
-                                                        'process': event.process.name,
-                                                        'action': event.action.name,
-                                                        'station': event.station,//station === undefined ? null : station.value,
-                                                        'label': event.label,
-                                                        'actor': event.actor.email
-                                                    })
-                                                } else if (!document.getElementById('cbOwnEvents').checked){
-                                                    return_data.push({
-                                                        'identifier': event.identifier,
-                                                        'date': date,
-                                                        'time': time,
-                                                        'toolCategory': event.toolCategory.name,
-                                                        'tool': event.tool.term.name,
-                                                        'process': event.process.name,
-                                                        'action': event.action.name,
-                                                        'station': event.station,//station === undefined ? null : station.value,
-                                                        'label': event.label,
-                                                        'actor': event.actor.email
-                                                    })
-                                                }
-                                            }
-                                        });
-                                        return return_data;
-                                    }
-                        }
-                        ,
-                        "columns": [
-                            {'data': 'identifier'},
-                            {'data': 'date'},
-                            {'data': 'time'},
-                            {'data': 'toolCategory'},
-                            {'data': 'tool'},
-                            {'data': 'process'},
-                            {'data': 'action'},
-                            {'data': 'station'},
-                            {'data': 'label'},
-                            {
-                                render: function (data, type, row) {
-                                    var id = row.identifier;
-                                    var actorEmail = row.actor;
-                                    var actor = JSON.parse(localStorage.actor);
-                                    if(actorEmail==actor.email){
-                                        return '<svg class="deleteEvent" fill="red" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24px" height="24px"><path d="M 10 2 L 9 3 L 5 3 C 4.4 3 4 3.4 4 4 C 4 4.6 4.4 5 5 5 L 7 5 L 17 5 L 19 5 C 19.6 5 20 4.6 20 4 C 20 3.4 19.6 3 19 3 L 15 3 L 14 2 L 10 2 z M 5 7 L 5 20 C 5 21.1 5.9 22 7 22 L 17 22 C 18.1 22 19 21.1 19 20 L 19 7 L 5 7 z M 9 9 C 9.6 9 10 9.4 10 10 L 10 19 C 10 19.6 9.6 20 9 20 C 8.4 20 8 19.6 8 19 L 8 10 C 8 9.4 8.4 9 9 9 z M 15 9 C 15.6 9 16 9.4 16 10 L 16 19 C 16 19.6 15.6 20 15 20 C 14.4 20 14 19.6 14 19 L 14 10 C 14 9.4 14.4 9 15 9 z"/></svg>'
-                                    }else { 
-                                        return '';
-                                    }
-                            }
-                            },{'data': 'actor'}
-                        ],
-                        "order": [ [1, 'desc' ], [2, 'desc'] ],
-                        "columnDefs": [
-                            {
-                                "targets": [0],
-                                "visible": false,
-                                "searchable": false
-                            },
-                            {
-                                "targets": [1],
-                                "visible": true,
-                                "searchable": true,
-                            },
-                            {
-                                "targets": [2],
-                                "visible": true,
-                                "searchable": true
-                            },
-                            {
-                                "targets": [3],
-                                "visible": true,
-                                "searchable": true
-                            },
-                            {
-                                "targets": [4],
-                                "visible": true,
-                                "searchable": true
-                            },
-                            {
-                                "targets": [5],
-                                "visible": true,
-                                "searchable": true
-                            },
-                            {
-                                "targets": [6],
-                                "visible": true,
-                                "searchable": true
-                            },
-                            {
-                                "targets": [7],
-                                "visible": true,
-                                "searchable": true
-                            },
-                            {
-                                "targets": [8],
-                                "visible": true,
-                                "searchable": true
-                            },
-                            {
-                                "targets": [9],
-                                "visible": true,
-                                "searchable": false
-                            },
-                            {
-                                "targets": [10],
-                                "visible": false,
-                                "searchable": false
-                            }
-                        ],
-                        "lengthMenu": [ [25, 50, 100, 200, -1], [25, 50, 100, 200, "All"] ] /*] ]!!!*/
-                    });
-                });
-
-                $('#eventTable').on('click', 'tbody td:not(:has(svg.deleteEvent))', function () {
-                 var identifier = table.row(this).data().identifier;
-                 window.location.href = './event/' + identifier + '/edit';
-                });
-
-                $('#eventTable').on('click', 'tbody td:has(svg.deleteEvent)', function () {
-                    var row = table.row($(this).parents('tr'));
-                    var identifier = row.data().identifier;
-                    var actorEmail = row.data().actor;
-                    var actor = JSON.parse(localStorage.actor);
-                    if(actorEmail==actor.email){
-                        if (confirm('Are you sure you want to delete this event "'+row.data().tool+'-'+row.data().process+'-'+row.data().action+'?')) {
-                            deleteEvent(identifier);
-                            row.remove().draw();
-                        }
-                    }
-                    else{
-                        alert("You can only delete your own events. The owner is "+actorEmail);
-                    }
-                });
-                $('a.toggle-vis').css("font-weight","bold");
-                $('a.toggle-vis').on( 'click', function (e) {
-                    e.preventDefault();
-                    // Get the column API object
-                    var column = table.column( $(this).attr('data-column') );
-                    // Toggle the visibility
-                    column.visible( ! column.visible() );
-                    if(column.visible()){
-                        $(this).css("font-weight","bold");
-                    }else{
-                        $(this).css("font-weight","normal");
-                    }
-                } );
-
-            </script>
         </div>
-    </body>
+        <div class="form-inline mb-2">
+            <div class="form-check mr-3 mb-2">
+                <input name="cbOwnEvents" id="cbOwnEvents" class="form-check-input" type="checkbox" checked>
+                <label for="cbOwnEvents" class="form-check-label">My own events only</label>
+            </div>
+            <div class="form-group mr-3 mb-2">
+                <p>
+                    <input id="startDateField" class="form-control" type="datetime-local"/>
+                    <label for="startDateField" class="txtBox">From</label>
+                </p>
+            </div>
+            <div class="form-group mr-3 mb-2">
+                <p>
+                    <input id="endDateField" class="form-control" type="datetime-local"/>
+                    <label for="endDateField" class="txtBox">To</label></p>
+            </div>
+        </div>
+        <div class="form-inline mb-2">
+            <div class="form-group mb-2">
+                <button type="button" id="btnClearSearch" class="btn btn-secondary btn-sm">Clear filters</button>
+            </div>
+        </div>
+    </div>
+    <div id="toggle" class="form-inline mb-3 p-3 border rounded">
+        Toggle column:&nbsp;<a href="#" class="toggle-vis" data-column="3">Category</a>&nbsp;-&nbsp;<a href="#" class="toggle-vis"
+                                                                                             data-column="7">Station</a>
+        &nbsp;-&nbsp;<a
+            href="#" class="toggle-vis" data-column="8">Label</a>
+    </div>
+    <div>
+        <a th:href="@{/api/events.csv}">Download all events</a>
+    </div>
+
+    <br/>
+    <table id="eventTable" class="display dataTable" style="width:100%" role="grid">
+        <thead>
+        <tr>
+            <th>identifier</th>
+            <th>date</th>
+            <th>time</th>
+            <th>category</th>
+            <th>tool</th>
+            <th>process</th>
+            <th>action</th>
+            <th>station</th>
+            <th>label</th>
+            <th>remove</th>
+            <th>actor</th>
+        </tr>
+        </thead>
+    </table>
+
+    <script src="/ears3/js/ears-events.js" type="application/javascript"></script>
+    <script src="/ears3/js/jquery.dataTables.min.js" type="application/javascript"></script>
+    <script type="application/javascript" th:inline="none">
+
+        let table;
+        let lastDraw = 0;
+
+        // Maps DataTables column index -> backend-sortable property name.
+        // null = column isn't sortable server-side (adjust to match your entity's actual property paths).
+        const sortableColumns = [
+            'identifier',               // 0
+            'timeStamp',                // 1 (date)
+            'timeStamp',                // 2 (time)
+            'toolCategory.name',        // 3
+            'tool.term.name',           // 4
+            'process.name',             // 5
+            'action.name',              // 6
+            'station',                  // 7
+            'label',                    // 8
+            null,                       // 9 (delete icon)
+            'actor.email'               // 10
+        ];
+
+        // Single source of truth for every filter the API supports.
+        // Add a new filter here and it's automatically included in every ajax call.
+        function collectSearchParams() {
+            const params = {};
+
+            if (document.getElementById('cbOwnEvents').checked) {
+                const actor = JSON.parse(localStorage.actor);
+                params.actorEmail = actor.email;
+            }
+
+            const freeText = document.getElementById('freeTextField').value.trim();
+            if (freeText) {
+                params.search = freeText;
+            }
+
+            const startDate = document.getElementById('startDateField').value;
+            if (startDate) {
+                params.startDate = startDate;
+            }
+
+            const endDate = document.getElementById('endDateField').value;
+            if (endDate) {
+                params.endDate = endDate;
+            }
+
+            return params;
+        }
+
+        $(document).ready(function () {
+            if (localStorage.actor == null) {
+                window.location.href = './settings';
+            } else {
+                let me = JSON.parse(localStorage.getItem('actor'));
+                $("#settings-link").html(me.firstName + " " + me.lastName);
+            }
+            let searchDebounce;
+            $('#search').on('change', 'input[type=checkbox], input[type=datetime-local]', function () {
+                table.ajax.reload();
+            });
+            $('#freeTextField').on('input', function () {
+                clearTimeout(searchDebounce);
+                searchDebounce = setTimeout(function () {
+                    table.ajax.reload();
+                }, 400);
+            });
+
+            $('#btnClearSearch').on('click', function () {
+                document.getElementById('cbOwnEvents').checked = false;
+                document.getElementById('freeTextField').value = '';
+                document.getElementById('startDateField').value = '';
+                document.getElementById('endDateField').value = '';
+                table.ajax.reload();
+            });
+
+            table = $('#eventTable').DataTable({
+                responsive: true,
+                serverSide: true,
+                processing: true,
+                searching: false,
+                ajax: {
+                    url: eventsGetLocation,
+                    headers: {'Accept': 'application/json;'},
+                    data: function (json) {
+                        lastDraw = json.draw;
+
+                        const params = {
+                            page: Math.floor(json.start / json.length),
+                            size: json.length
+                        };
+
+                        if (json.order && json.order.length) {
+                            const col = sortableColumns[json.order[0].column];
+                            if (col) {
+                                params.sort = col + ',' + json.order[0].dir;
+                            }
+                        }
+
+                        Object.assign(params, collectSearchParams());
+
+                        return params;
+                    },
+                    dataSrc: function (json) {
+                        json.draw = lastDraw;
+                        json.recordsTotal = json.totalElements;
+                        json.recordsFiltered = json.totalElements;
+
+                        return (json.content || []).map(function (event) {
+                            const date = event.timeStamp.split("T")[0].replace(/^20/, "'");
+                            const time = event.timeStamp.split("T")[1].replace(/\+\d{2}:\d{2}$/, "");
+                            return {
+                                'identifier': event.identifier,
+                                'date': date,
+                                'time': time,
+                                'toolCategory': event.toolCategory.name,
+                                'tool': event.tool.term.name,
+                                'process': event.process.name,
+                                'action': event.action.name,
+                                'station': event.station,
+                                'label': event.label,
+                                'actor': event.actor.email
+                            };
+                        });
+                    }
+                },
+                "columns": [
+                    {'data': 'identifier'},
+                    {'data': 'date'},
+                    {'data': 'time'},
+                    {'data': 'toolCategory'},
+                    {'data': 'tool'},
+                    {'data': 'process'},
+                    {'data': 'action'},
+                    {'data': 'station'},
+                    {'data': 'label'},
+                    {
+                        "orderable": false,
+                        render: function (data, type, row) {
+                            const actorEmail = row.actor;
+                            const actor = JSON.parse(localStorage.actor);
+                            if (actorEmail === actor.email) {
+                                return '<svg class="deleteEvent" fill="red" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24px" height="24px"><path d="M 10 2 L 9 3 L 5 3 C 4.4 3 4 3.4 4 4 C 4 4.6 4.4 5 5 5 L 7 5 L 17 5 L 19 5 C 19.6 5 20 4.6 20 4 C 20 3.4 19.6 3 19 3 L 15 3 L 14 2 L 10 2 z M 5 7 L 5 20 C 5 21.1 5.9 22 7 22 L 17 22 C 18.1 22 19 21.1 19 20 L 19 7 L 5 7 z M 9 9 C 9.6 9 10 9.4 10 10 L 10 19 C 10 19.6 9.6 20 9 20 C 8.4 20 8 19.6 8 19 L 8 10 C 8 9.4 8.4 9 9 9 z M 15 9 C 15.6 9 16 9.4 16 10 L 16 19 C 16 19.6 15.6 20 15 20 C 14.4 20 14 19.6 14 19 L 14 10 C 14 9.4 14.4 9 15 9 z"/></svg>';
+                            } else {
+                                return '';
+                            }
+                        }
+                    },
+                    {'data': 'actor'}
+                ],
+                "order": [[1, 'desc'], [2, 'desc']],
+                "columnDefs": [
+                    {"targets": [0], "visible": false, "searchable": false},
+                    {"targets": [1], "visible": true, "searchable": false},
+                    {"targets": [2], "visible": true, "searchable": false},
+                    {"targets": [3], "visible": true, "searchable": false},
+                    {"targets": [4], "visible": true, "searchable": false},
+                    {"targets": [5], "visible": true, "searchable": false},
+                    {"targets": [6], "visible": true, "searchable": false},
+                    {"targets": [7], "visible": true, "searchable": false},
+                    {"targets": [8], "visible": true, "searchable": false},
+                    {"targets": [9], "visible": true, "searchable": false},
+                    {"targets": [10], "visible": false, "searchable": false}
+                ],
+                "lengthMenu": [[50, 100, 200, 300], [50, 100, 200, 300]]
+            });
+        });
+
+        $('#eventTable').on('click', 'tbody td:not(:has(svg.deleteEvent))', function () {
+            var identifier = table.row(this).data().identifier;
+            window.location.href = './event/' + identifier + '/edit';
+        });
+
+        $('#eventTable').on('click', 'tbody td:has(svg.deleteEvent)', function () {
+            var row = table.row($(this).parents('tr'));
+            var identifier = row.data().identifier;
+            var actorEmail = row.data().actor;
+            var actor = JSON.parse(localStorage.actor);
+            if (actorEmail === actor.email) {
+                if (confirm('Are you sure you want to delete this event "' + row.data().tool + '-' + row.data().process + '-' + row.data().action + '?')) {
+                    deleteEvent(identifier);
+                    table.ajax.reload();
+                }
+            } else {
+                alert("You can only delete your own events. The owner is " + actorEmail);
+            }
+        });
+
+        $('a.toggle-vis').css("font-weight", "bold");
+        $('a.toggle-vis').on('click', function (e) {
+            e.preventDefault();
+            var column = table.column($(this).attr('data-column'));
+            column.visible(!column.visible());
+            if (column.visible()) {
+                $(this).css("font-weight", "bold");
+            } else {
+                $(this).css("font-weight", "normal");
+            }
+        });
+
+    </script>
+</div>
+</body>
 </html>

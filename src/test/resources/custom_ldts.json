@@ -2,137 +2,137 @@
   "defs": [
     {
       "identifier": "http://vocab.nerc.ac.uk/collection/L06/current/71/",
-      "transitveldidentifier": null,
+      "transitiveLdIdentifier": null,
       "name": "human"
     },
     {
       "identifier": "http://ontologies.ef-ears.eu/ears2/1#dev_100000",
-      "transitveldidentifier": null,
+      "transitiveLdIdentifier": null,
       "name": "All persons"
     },
     {
       "identifier": "http://ontologies.ef-ears.eu/ears2/1#dev_100001",
-      "transitveldidentifier": null,
+      "transitiveLdIdentifier": null,
       "name": "Command"
     },
     {
-      "identifier": "http://ontologies.ef-ears.eu/ears2/1#dev_1000002",
-      "transitveldidentifier": null,
+      "identifier": "http://ontologies.ef-ears.eu/ears2/1#dev_100002",
+      "transitiveLdIdentifier": null,
       "name": "Crew"
     },
     {
       "identifier": "http://ontologies.ef-ears.eu/ears2/1#dev_100003",
-      "transitveldidentifier": null,
+      "transitiveLdIdentifier": null,
       "name": "Scientists"
     },
     {
       "identifier": "http://ontologies.ef-ears.eu/ears2/1#ctg_123",
-      "transitveldidentifier": null,
+      "transitiveLdIdentifier": null,
       "name": "Sparker"
     },
     {
       "identifier": "http://ontologies.ef-ears.eu/ears2/1#dev_100004",
-      "transitveldidentifier": null,
+      "transitiveLdIdentifier": null,
       "name": "Unknown sparker"
     },
     {
       "identifier": "http://ontologies.ef-ears.eu/ears2/1#dev_3292",
-      "transitveldidentifier": null,
+      "transitiveLdIdentifier": null,
       "name": "Topas"
     },
     {
       "identifier": "http://ontologies.ef-ears.eu/ears2/1#ctg_26",
-      "transitveldidentifier": null,
+      "transitiveLdIdentifier": null,
       "name": "Research vessel"
     },
     {
       "identifier": "http://ontologies.ef-ears.eu/ears2/1#ves_1792",
-      "transitveldidentifier": null,
+      "transitiveLdIdentifier": null,
       "name": "Belgica"
     },
     {
       "identifier": "http://ontologies.ef-ears.eu/ears2/1#pro_6",
-      "transitveldidentifier": null,
+      "transitiveLdIdentifier": null,
       "name": "Calibration"
     },
     {
       "identifier": "http://ontologies.ef-ears.eu/ears2/1#pro_20",
-      "transitveldidentifier": null,
+      "transitiveLdIdentifier": null,
       "name": "Cruise"
     },
     {
       "identifier": "http://ontologies.ef-ears.eu/ears2/1#pro_22",
-      "transitveldidentifier": null,
+      "transitiveLdIdentifier": null,
       "name": "Deployment"
     },
     {
       "identifier": "http://ontologies.ef-ears.eu/ears2/1#pro_12",
-      "transitveldidentifier": null,
+      "transitiveLdIdentifier": null,
       "name": "Line"
     },
     {
       "identifier": "http://ontologies.ef-ears.eu/ears2/1#pro_28",
-      "transitveldidentifier": null,
+      "transitiveLdIdentifier": null,
       "name": "Operation"
     },
     {
       "identifier": "http://ontologies.ef-ears.eu/ears2/1#pro_23",
-      "transitveldidentifier": null,
+      "transitiveLdIdentifier": null,
       "name": "Recovery"
     },
     {
       "identifier": "http://ontologies.ef-ears.eu/ears2/1#pro_14",
-      "transitveldidentifier": null,
+      "transitiveLdIdentifier": null,
       "name": "Transit"
     },
     {
       "identifier": "http://ontologies.ef-ears.eu/ears2/1#pro_3",
-      "transitveldidentifier": null,
+      "transitiveLdIdentifier": null,
       "name": "Station"
     },
     {
       "identifier": "http://ontologies.ef-ears.eu/ears2/1#pro_100001",
-      "transitveldidentifier": null,
+      "transitiveLdIdentifier": null,
       "name": "Testing"
     },
     {
       "identifier": "http://ontologies.ef-ears.eu/ears2/1#pro_100002",
-      "transitveldidentifier": null,
+      "transitiveLdIdentifier": null,
       "name": "Exercise"
     },
     {
       "identifier": "http://ontologies.ef-ears.eu/ears2/1#pro_100003",
-      "transitveldidentifier": null,
+      "transitiveLdIdentifier": null,
       "name": "Meeting"
     },
     {
       "identifier": "http://ontologies.ef-ears.eu/ears2/1#pro_100004",
-      "transitveldidentifier": null,
+      "transitiveLdIdentifier": null,
       "name": "Recreation"
     },
     {
       "identifier": "http://ontologies.ef-ears.eu/ears2/1#pro_100005",
-      "transitveldidentifier": null,
+      "transitiveLdIdentifier": null,
       "name": "Sheltering"
     },
     {
       "identifier": "http://ontologies.ef-ears.eu/ears2/1#pro_100006",
-      "transitveldidentifier": null,
+      "transitiveLdIdentifier": null,
       "name": "Demobilisation"
     },
     {
       "identifier": "http://ontologies.ef-ears.eu/ears2/1#pro_100007",
-      "transitveldidentifier": null,
+      "transitiveLdIdentifier": null,
       "name": "Mobilisation"
     },
     {
       "identifier": "http://ontologies.ef-ears.eu/ears2/1#act_1",
-      "transitveldidentifier": null,
+      "transitiveLdIdentifier": null,
       "name": "Start"
     },
     {
       "identifier": "http://ontologies.ef-ears.eu/ears2/1#act_2",
-      "transitveldidentifier": null,
+      "transitiveLdIdentifier": null,
       "name": "End"
     }
   ],
@@ -169,47 +169,45 @@
   "properties": [
     {
       "identifier": "http://ontologies.ef-ears.eu/ears2/1#pry_100000",
-      "transitveldidentifier": null,
+      "transitiveLdIdentifier": null,
       "name": "Distance travelled",
       "value": null,
       "uom": "nm"
     },
     {
       "identifier": "http://ontologies.ef-ears.eu/ears2/1#pry_100001",
-      "transitveldidentifier": null,
+      "transitiveLdIdentifier": null,
       "name": "Time",
       "value": null,
       "uom": "h"
     },
     {
       "identifier": "http://ontologies.ef-ears.eu/ears2/1#pry_100002",
-      "transitveldidentifier": null,
+      "transitiveLdIdentifier": null,
       "name": "Status",
       "value": null,
       "uom": null
     },
     {
       "identifier": "http://ontologies.ef-ears.eu/ears2/1#pry_100003",
-      "transitveldidentifier": null,
+      "transitiveLdIdentifier": null,
       "name": "Region",
       "value": null,
       "uom": null
     },
     {
       "identifier": "http://ontologies.ef-ears.eu/ears2/1#pry_100004",
-      "transitveldidentifier": null,
+      "transitiveLdIdentifier": null,
       "name": "Weather",
       "value": null,
       "uom": null
     },
     {
       "identifier": "http://ontologies.ef-ears.eu/ears2/1#pry_100005",
-      "transitveldidentifier": null,
+      "transitiveLdIdentifier": null,
       "name": "Navigation",
       "value": null,
       "uom": null
     }
   ]
 }
-
-

@@ -20,6 +20,7 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -262,6 +263,7 @@ public class OntologyController {
     @RequestMapping(method = {RequestMethod.GET}, value = {"vessel/sparql"}, produces = MediaType.APPLICATION_JSON_VALUE)
     public String vesselSparqlEndpoint(@RequestParam(required = true, value = "q") String sparqlQuery, @RequestParam(required = false, value = "program") String program) throws IOException {
         ResultSet rs;
+        sparqlQuery = UriUtils.decode(sparqlQuery, StandardCharsets.UTF_8);
         if (program == null) {
             Query qry = QueryFactory.create(sparqlQuery);
             File ontologyFile = new File(VESSEL_ONTOLOGY_FILE_LOCATION);
@@ -272,7 +274,7 @@ public class OntologyController {
         }
         ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
         ResultSetFormatter.outputAsJSON(outputStream, rs);
-        return new String(outputStream.toByteArray());
+        return outputStream.toString();
     }
 
     public ResultSet combineOntologyModels(String sparqlQuery, String program) throws IOException {

@@ -6,6 +6,7 @@
 package eu.eurofleets.ears3.controller.rest;
 
 import eu.eurofleets.ears3.domain.Event;
+import eu.eurofleets.ears3.domain.EventDTOPage;
 import eu.eurofleets.ears3.domain.EventPage;
 import eu.eurofleets.ears3.dto.EventDTO;
 import eu.eurofleets.ears3.dto.EventDTOList;
@@ -39,11 +40,11 @@ public class EventDTOController {
     private EventService eventService;
 
     @RequestMapping(method = {RequestMethod.GET}, value = {"events"}, produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
-    public EventPage<EventDTO> getEvents(@RequestParam Map<String, String> allParams,
+    public EventDTOPage getEvents(@RequestParam Map<String, String> allParams,
                                          @PageableDefault(size = 20, sort = "id") Pageable pageable) {
         Page<Event> events = this.eventService.advancedFind(allParams, pageable);
         Page<EventDTO> eventDtos = events.map(EventDTO::new);
-        EventPage<EventDTO> pg = new EventPage<>(eventDtos);
+        EventDTOPage pg = new EventDTOPage(eventDtos);
         return pg;
     }
 

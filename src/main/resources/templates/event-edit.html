@@ -17,14 +17,14 @@
             <p>
                 <input name="station" id="stationField" placeholder=" " type="text" title="Current station"
                     class="form-control" th:value="${event.station}" /><label for="stationField"
-                    class="txtBox">Station</label>
+                    class="txtBox">Current Station</label>
             </p>
         </div>
         <div class="form-group">
             <p>
                 <input name="label" id="labelField" placeholder=" " type="text"
                     title="Current event label (event identifier,...)" class="form-control" th:value="${event.label}"
-                    th:attr="data-description=${event.description}" /><label class="txtBox" for="labelField">Event
+                    th:attr="data-description=${event.description}" /><label class="txtBox" for="labelField">Repeating event
                     label</label>
             </p>
         </div>

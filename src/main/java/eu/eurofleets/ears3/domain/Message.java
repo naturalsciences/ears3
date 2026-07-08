@@ -3,7 +3,9 @@ package eu.eurofleets.ears3.domain;
 import eu.eurofleets.ears3.dto.CruiseDTO;
 import eu.eurofleets.ears3.dto.EventDTO;
 import eu.eurofleets.ears3.dto.ProgramDTO;
+
 import java.util.List;
+
 import jakarta.xml.bind.annotation.XmlAccessType;
 import jakarta.xml.bind.annotation.XmlAccessorType;
 import jakarta.xml.bind.annotation.XmlAnyElement;
@@ -47,7 +49,7 @@ public class Message<E> {
     public Message() {
     }
 
-    public Message(String message, int code, String identifier, String exceptionType, E object) {
+    public Message(int code, String identifier, E object, String message, String exceptionType) {
         this.message = message;
         this.code = code;
         this.identifier = identifier;

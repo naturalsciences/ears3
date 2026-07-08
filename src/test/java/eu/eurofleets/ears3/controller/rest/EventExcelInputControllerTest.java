@@ -33,6 +33,7 @@ import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import static eu.eurofleets.ears3.controller.rest.EventControllerTest.assertEventCount;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.not;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -150,8 +151,13 @@ public class EventExcelInputControllerTest {
         MockMultipartFile mockFile = createMockFile("test-noproblems.xlsx");
         postExcel(mockFile, joan, null, 201);
 
+        assertEventCount("/api/events", 50, this.mockMvc, this.objectMapper); //default size of 50.
+        assertEventCount("/api/events?size=25", 25, this.mockMvc, this.objectMapper);
+        assertEventCount("/api/events?size=50&page=0", 50, this.mockMvc, this.objectMapper);
+        assertEventCount("/api/events?size=145", 145, this.mockMvc, this.objectMapper);
+
         this.mockMvc
-                .perform(MockMvcRequestBuilders.get("/api/events")
+                .perform(MockMvcRequestBuilders.get("/api/events?size=145")
                         .accept(Constants.APPLICATION_XML_UTF8))
                 .andExpect(status().is(200))
                 .andExpect(content().string(containsString("<name>All persons</name>")))
@@ -160,7 +166,6 @@ public class EventExcelInputControllerTest {
                 .andExpect(content().string(containsString("<name>Crew</name>")))
                 .andExpect(content().string(containsString("<name>Command</name>")))
                 .andExpect(content().string(containsString("<name>Scientists</name>")))
-
                 .andExpect(content().string(containsString("<name>Exercise</name>")))
                 .andExpect(content().string(containsString("<name>Meeting</name>")))
                 .andExpect(content().string(containsString("<name>Recreation</name>")))
@@ -222,7 +227,7 @@ public class EventExcelInputControllerTest {
     }
 
     /*Refactor Idea:  In order to replace the static definitions of these properties and DEFS and CATMAP, create a function based on this concept that fills in the
-     * maps from the my.json file.
+     * maps from the custom_ldts.json file.
      * for the propertiesMap, we'll have to change it to getting the empty poperty from the map, fill the current value, push that value to another (props) map
      * */
         /* @Test
@@ -235,7 +240,7 @@ public class EventExcelInputControllerTest {
                 JsonNode rootNode;
                 ObjectMapper objectMapper;
                 objectMapper = new ObjectMapper();
-                File jsonFile = new ClassPathResource("my.json").getFile();
+                File jsonFile = new ClassPathResource("custom_ldts.json").getFile();
                 rootNode = objectMapper.readTree(jsonFile);
         
                 JsonNode defs = rootNode.get("defs");
@@ -249,7 +254,7 @@ public class EventExcelInputControllerTest {
         
                 for( LinkedHashMap<String,String> item : defList ){
                         System.out.println( "het item: " + item + "\n");
-                        LinkedDataTermDTO ldtDTO = new LinkedDataTermDTO(item.get("identifier"), item.get("transitveldidentifier"), item.get("name"));
+                        LinkedDataTermDTO ldtDTO = new LinkedDataTermDTO(item.get("identifier"), item.get("transitiveLdIdentifier"), item.get("name"));
                         String key = StringUtils.capitalize(StringUtils.lowerCase( item.get("name") ) );
                         DEFS.put(key, ldtDTO);
                 }
@@ -265,7 +270,7 @@ public class EventExcelInputControllerTest {
                 //Value moet nog wel ingevuld worden in EventExcelService dan
                 for( LinkedHashMap<String, String> item : propList ){
                         System.out.println("De property: " + item + "\n");
-                        LinkedDataTermDTO ldtDTO = new LinkedDataTermDTO(item.get("identifier"), item.get("transitveldidentifier"), item.get("name"));
+                        LinkedDataTermDTO ldtDTO = new LinkedDataTermDTO(item.get("identifier"), item.get("transitiveLdIdentifier"), item.get("name"));
                         PropertyDTO pDTO = new PropertyDTO(ldtDTO, item.get("value"), item.get("uom"));
                         String key = StringUtils.capitalize(StringUtils.lowerCase(item.get("name")));
                         propertiesMap.put(key, pDTO);

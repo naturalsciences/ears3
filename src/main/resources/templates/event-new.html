@@ -9,21 +9,22 @@
     </nav>
     <form layout:fragment="head-form">
         <div class="form-group">
-            <select name="program" id="programField" class="selectpicker target form-control" data-live-search="true"
-                title="Current program" required>
+            <select name="program" id="programField"
+                    class="selectpicker target form-control"
+                    data-live-search="true" title="Current program" required>
             </select>
         </div>
         <div class="form-group">
             <p>
                 <input name="station" id="stationField" placeholder=" " type="text" title="Current station"
-                class="form-control" /><label class="txtBox" for="stationField">Station</label>
+                       class="form-control"/><label class="txtBox" for="stationField">Current station</label>
             </p>
         </div>
         <div class="form-group">
             <p>
                 <input name="label" id="labelField" placeholder=" " type="text"
-                    title="Current event label (event identifier, station,...)" class="form-control" /><label
-                    class="txtBox" for="labelField">Event label</label>
+                       title="Current event label (event or possibly tool identifier,...)" class="form-control"/><label
+                    class="txtBox" for="labelField">Repeating event label</label>
             </p>
         </div>
     </form>

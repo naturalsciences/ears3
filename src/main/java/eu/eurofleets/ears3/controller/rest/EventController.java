@@ -57,11 +57,11 @@ public class EventController {
 
     @RequestMapping(method = {RequestMethod.GET}, value = {"events"}, produces = {MediaType.APPLICATION_JSON_VALUE,
             Constants.APPLICATION_XML_UTF8_VALUE})
-    public EventPage<Event> getEvents(
+    public EventPage getEvents(
             @RequestParam Map<String, String> allParams,
             @PageableDefault(size = 50, sort = "id") Pageable pageable) {
         Page<Event> events = eventService.advancedFind(allParams, pageable);
-        return new EventPage<>(events);
+        return new EventPage(events);
     }
 
     @RequestMapping(method = {RequestMethod.GET}, value = {"event/{id}"}, produces = {

@@ -360,7 +360,7 @@ public class EventControllerTest {
         JavaType type = objectMapper.getTypeFactory()
                 .constructParametricType(PageResponse.class, Event.class);
         PageResponse<Event> pg = objectMapper.readValue(json, type);
-        long count = pg.getTotalElements();
+        long count = pg.getNumberOfElements();
         assertEquals(expected, count);
     }
 
@@ -487,7 +487,7 @@ public class EventControllerTest {
         // Assert that the XML is correctly rendered
         mvcResult = this.mockMvc
                 .perform(MockMvcRequestBuilders.get("/api/events")
-                        .accept(Constants.APPLICATION_XML_UTF8))
+                        .accept(Constants.APPLICATION_XML_UTF8)).andDo(print())
                 .andExpect(status().is(200))
                 .andExpect(content().string(
                         containsString("<identifier>" + eventIdentifier + "</identifier>")))
