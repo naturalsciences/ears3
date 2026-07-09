@@ -131,7 +131,6 @@ if (window.localStorage && typeof window.localStorage !== 'undefined') {
             $('#id_collapse_in').css('visibility', 'hidden');
             $('#id_collapse_out').css('visibility', 'visible');
         });
-        $('#id_eid').hide();
 
         var rdfBindings = getBindings(false); //asynchronous because synchronous messes up the order of the buttons
         populateAllScenarios(rdfBindings);

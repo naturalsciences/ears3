@@ -1,25 +1,36 @@
 <!DOCTYPE html>
-<html lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" layout:decorate="~{fragments/f}">
+<html lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" layout:decorate="~{fragments/f}">
 
 <head th:replace="fragments/f :: head"></head>
 
 <body>
 <nav th:replace="fragments/f :: header"></nav>
 <div class="container" layout:fragment="main">
-    <h1>Logfile submission</h1>
+    <h1 id="h1">Logfile submission</h1>
+    <form layout:fragment="head-form" id="constrain" class="form-inline mb-3 p-3 border rounded">
+        <div class="form-group">
+            <select name="program" id="programField"
+                    class="selectpicker target form-control"
+                    data-live-search="true" title="Current program" required>
+            </select>
+        </div>
+    </form>
     <div class="alert alert-light" role="alert">
         <p>
             Choose the logfile you want to upload.
         </p>
         <p>
-            This file is supposed to be a normal excel file (.xlsx)<br />
+            This file is supposed to be a normal excel file (.xlsx)<br/>
             The file size should be less then <em th:text="${maxFileSize}"></em>
         </p>
         <p>
-            An empty template with example tab can be downloaded: <a th:href="@{/excel/ship_log_template.xlsx}">Ship Log Template</a>
+            An empty template with example tab can be downloaded: <a th:href="@{/excel/ship_log_template.xlsx}">Ship Log
+            Template</a>
         </p>
         <p>
-            When every row sends an error containing <strong>ERROR: duplicate key value violates unique constraint "event_unique"</strong>, the file was probably already uploaded before.
+            When every row sends an error containing <strong>ERROR: duplicate key value violates unique constraint
+            "event_unique"</strong>, the file was probably already uploaded before.
         </p>
     </div>
     <div class="row">
@@ -27,7 +38,8 @@
             <form id="importCsvForm" method="post" enctype="multipart/form-data" th:action="@{/api/event/import}">
                 <div class="input-group mb-3">
                     <input id="actorField" type="hidden" name="person">
-                    <input id="fileId" type="file" name="file" class="form-control" style="height: auto !important;" aria-describedby="importButton" aria-label="Upload">
+                    <input id="fileId" type="file" name="file" class="form-control" style="height: auto !important;"
+                           aria-describedby="importButton" aria-label="Upload">
                     <button class="btn btn-outline-secondary" type="submit" id="importButton">Import</button>
                 </div>
             </form>
@@ -36,46 +48,49 @@
             <div id="success" class="alert alert-success d-none"> Successfully uploaded and imported !</div>
 
             <script th:inline="javascript">
+                $(document).ready(function () {
+                    if (localStorage.actor == null) {
+                        window.location.href = './settings';
+                    } else {
+                        let me = JSON.parse(localStorage.getItem('actor'));
+                        let actorField = document.getElementById("actorField");
+                        actorField.value = localStorage.getItem("actor");
+                        $("#settings-link").html(me.firstName + " " + me.lastName);
+                    }
+                    /*<![CDATA[*/
+                    var homelink = /*[[@{'/'}]]*/ '';
+                    /*]]>*/
 
-                window.onload = function(){
-                    let actorField = document.getElementById("actorField");
-                    actorField.value = localStorage.getItem("actor");
-                }
-                $(document).ready(function() {
-                  /*<![CDATA[*/
-                      var homelink = /*[[@{'/'}]]*/ '';
-                  /*]]>*/
-
-                  $("form#importCsvForm").submit(function(e){
-                      event.preventDefault();
-                      $(document.getElementById("success")).addClass("d-none");
-                      $(document.getElementById("errors")).addClass("d-none");
-                      var token = $("input[name='_csrf']").val();
-                      var header = "X-CSRF-TOKEN";
-                      var formData = new FormData(this);
-                      $.ajax({
-                          type: "POST",
-                          contentType: "application/json",
-                          url: homelink + "api/excelImport",
-                          data: formData,
-                          beforeSend: function(xhr) {
-                            xhr.setRequestHeader(header, token);
-                          },
-                          success: function(result) {
-                            //$("div#success").html(result.responseText);    //Toont message niet maar bij error wel??????
-                            $("div#success").html("Successfully Uploaded and Imported !");
-                            document.getElementById("success").classList.remove('d-none');
-                          },
-                          error: function(result){
-                            $("div#errors").html(result.responseText);
-                            $("row").prepend("Row ");
-                            document.getElementById("errors").classList.remove('d-none');
-                          },
-                          cache: false,
-                          contentType: false,
-                          processData: false
-                      });
-                  });
+                    $("form#importCsvForm").submit(function (e) {
+                        event.preventDefault();
+                        $(document.getElementById("success")).addClass("d-none");
+                        $(document.getElementById("errors")).addClass("d-none");
+                        var token = $("input[name='_csrf']").val();
+                        var header = "X-CSRF-TOKEN";
+                        var formData = new FormData(this);
+                        $.ajax({
+                            type: "POST",
+                            contentType: "application/json",
+                            url: homelink + "api/excelImport",
+                            data: formData,
+                            beforeSend: function (xhr) {
+                                xhr.setRequestHeader(header, token);
+                            },
+                            success: function (result) {
+                                //$("div#success").html(result.responseText);    //Toont message niet maar bij error wel??????
+                                $("div#success").html("Successfully Uploaded and Imported !");
+                                document.getElementById("success").classList.remove('d-none');
+                            },
+                            error: function (result) {
+                                $("div#errors").html(result.responseText);
+                                $("row").prepend("Row ");
+                                document.getElementById("errors").classList.remove('d-none');
+                            },
+                            cache: false,
+                            contentType: false,
+                            processData: false
+                        });
+                    });
                 });
             </script>
         </div>

@@ -404,7 +404,8 @@ function postEventInnerMost(event, successFunction, errorFunction) {
         url: eventPostLocation,
         data: JSON.stringify(event),
         success: function (result) {
-            $('#serverBadFeedbackBox').css('visibility', 'hidden');
+            toggleErrorMessage()
+            // $('#serverBadFeedbackBox').css('visibility', 'hidden');
             // console.log("Success: Event created with id:" + result.id + ", identifier:" + result.identifier + " and timeStamp:" + result.timeStamp);
             successFunction();
         },
@@ -417,10 +418,16 @@ function postEventInnerMost(event, successFunction, errorFunction) {
             } else {
                 message = "HTTP " + result.status + ": " + result.statusText;
             }
-            $('#serverBadFeedbackBox').css('visibility', 'visible');
-            $('#serverBadFeedbackBox').text(message);
-
+            toggleErrorMessage(message);
             errorFunction();
         }
     });
+
+    function toggleErrorMessage(message) {
+        if (!message) {
+            $('#serverBadFeedbackBox').css('visibility', 'hidden').text("");
+        } else {
+            $('#serverBadFeedbackBox').css('visibility', 'visible').text(message);
+        }
+    }
 }

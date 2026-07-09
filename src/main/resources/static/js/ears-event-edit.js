@@ -10,16 +10,16 @@ if (window.localStorage && typeof window.localStorage !== 'undefined') {
         if (localStorage.actor == null) {
             window.location.href = '/ears3/settings';
         } else {
-            var me = JSON.parse(localStorage.actor);
+            const me = JSON.parse(localStorage.actor);
             $("#settings-link").html(me.firstName + " " + me.lastName);
         }
-        var rdfBindings = getBindings(false); //asynchronous because synchronous messes up the order of the buttons
-        var toolCategory = $('#idSelect_tc').attr('value'); //comes from thymeleaf
-        var tool = $('#idSelect_t').attr('value');
-        var process = $('#idSelect_p').attr('value');
-        var action = $('#idSelect_a').attr('value');
+        const rdfBindings = getBindings(false); //asynchronous because synchronous messes up the order of the buttons
+        const toolCategory = $('#idSelect_tc').attr('value'); //comes from thymeleaf
+        const tool = $('#idSelect_t').attr('value');
+        const process = $('#idSelect_p').attr('value');
+        const action = $('#idSelect_a').attr('value');
 
-        var selectedValues = {
+        const selectedValues = {
             tc: toolCategory,
             t: tool,
             p: process,

@@ -3,34 +3,53 @@ function stripSlash(url) {
         return null;
     }
     return url.endsWith('/') ?
-            url.slice(0, -1) :
-            url;
+        url.slice(0, -1) :
+        url;
 }
 
 /**
- * Appends to the provided dropdown one provided row item  of a SPARQL JSON result of provided type entityType, if it is not yet added.
+ * Single source of truth for the four cascading dropdowns (ToolCategory, Tool,
+ * Process, Action). Every function below loops over this instead of repeating
+ * near-identical code per entity.
+ *
+ * key:          short internal id, also used as the key in selectedValues objects
+ * prefixLetter: the SPARQL binding field prefix (cu/cl, tu/tl, pu/pl, au/al)
+ * bindingKey:   the "what" argument expected by getElement()
+ * selectId/lockId/unlockId: the DOM element ids for this entity
+ */
+const ENTITIES = [
+    {key: 'tc', prefixLetter: 'c', bindingKey: 'TC', selectId: '#idSelect_tc', lockId: '#tc_lock', unlockId: '#tc_unlock'},
+    {key: 't', prefixLetter: 't', bindingKey: 'T', selectId: '#idSelect_t', lockId: '#t_lock', unlockId: '#t_unlock'},
+    {key: 'p', prefixLetter: 'p', bindingKey: 'P', selectId: '#idSelect_p', lockId: '#p_lock', unlockId: '#p_unlock'},
+    {key: 'a', prefixLetter: 'a', bindingKey: 'A', selectId: '#idSelect_a', lockId: '#a_lock', unlockId: '#a_unlock'}
+];
+
+/**
+ * Appends to the provided dropdown one provided row item of a SPARQL JSON result of provided type entityType, if it is not yet added.
  * dropdown: the jQuery element for the dropdown
  * entityType: a string representing the entity (c=toolcategory, t=tool, p=process,a=action)
- * row: the row in the SPARQL result
+ * item: the row in the SPARQL result
  * listElements: an array to keep track of what has been added already
  */
 function populateDropdownBasedOnPrevious(dropdown, entityType, item, listElements) {
     if (dropdown.attr('disabled') != 'disabled') {
-        var url = [entityType + 'u']; //the url field in the SPARQL JSON result, for the right entity
-        var label = [entityType + 'l']; //the label field in the SPARQL JSON result, for the right entity
+        var urlField = entityType + 'u'; //the url field in the SPARQL JSON result, for the right entity
+        var labelField = entityType + 'l'; //the label field in the SPARQL JSON result, for the right entity
+
         listElements.sort(function (a, b) {
-            return a[label].value.localeCompare(b[label].value)
+            return a[labelField].value.localeCompare(b[labelField].value);
         });
+
         var matches = $.grep(listElements, function (e) {
-            return item[url].value === e[url].value &&
-                    item[label].value === e[label].value;
+            return item[urlField].value === e[urlField].value &&
+                item[labelField].value === e[labelField].value;
         });
-        select_option_data = dropdown.html();
+
         if (matches.length === 0) { //item has not yet been added
-            select_option_data += '<option value="' + item[url].value + '">' + item[label].value + '</option>'
-            dropdown.html(select_option_data).selectpicker('refresh');
+            var selectOptionData = dropdown.html() +
+                '<option value="' + item[urlField].value + '">' + item[labelField].value + '</option>';
+            dropdown.html(selectOptionData).selectpicker('refresh');
             listElements.push(item);
-            //console.log("Adding "+item[url].value+" to dropdown "+dropdown.attr('id')+" with value: "+ dropdown.val());
         }
     }
 }
@@ -38,40 +57,40 @@ function populateDropdownBasedOnPrevious(dropdown, entityType, item, listElement
 function populateDropdownList(rdfBindings, entityName, dropdownId, selectedValue) {
     selectedValue = stripSlash(selectedValue);
     var ddmOptions = [];
-    var select_option_data = '';
+
     $.each(rdfBindings, function (key, item) {
-        val = getElement(entityName, item);
-        var events = $.grep(ddmOptions, function (e) {
+        var val = getElement(entityName, item);
+        var existing = $.grep(ddmOptions, function (e) {
             return (val.url === e.url && val.label === e.label) || (val.transitiveUrl === e.url && val.label === e.label);
         });
-        if (events.length === 0) {
+        if (existing.length === 0) {
             ddmOptions.push(val);
         }
     });
+
     if (/Android|webOS|iPhone|iPad|iPod|BlackBerry/i.test(navigator.userAgent)) {
         $(dropdownId).selectpicker('mobile');
     }
     if (ddmOptions.length <= 6) {
-        $(dropdownId).selectpicker({
-            liveSearch: false
-        }).selectpicker('refresh');
+        $(dropdownId).selectpicker({liveSearch: false}).selectpicker('refresh');
     }
+
     ddmOptions.sort(function (a, b) {
-        return a.label.localeCompare(b.label)
+        return a.label.localeCompare(b.label);
     });
-    var select_option_data = '';
-    select_option_data += '<option value=1></option>'
+
+    var selectOptionData = '<option value=1></option>';
     $.each(ddmOptions, function (key, unique) {
         if (unique.url === selectedValue) {
-            select_option_data += '<option value="' + unique.url + '">' + unique.label + '</option>';
+            selectOptionData += '<option value="' + unique.url + '">' + unique.label + '</option>';
         } else if (unique.transitiveUrl === selectedValue) {
-            select_option_data += '<option value="' + unique.transitiveUrl + '">' + unique.label + '</option>';
+            selectOptionData += '<option value="' + unique.transitiveUrl + '">' + unique.label + '</option>';
         } else {
-            select_option_data += '<option value="' + unique.url + '">' + unique.label + '</option>';
+            selectOptionData += '<option value="' + unique.url + '">' + unique.label + '</option>';
         }
     });
 
-    $(dropdownId).html(select_option_data).selectpicker('refresh');
+    $(dropdownId).html(selectOptionData).selectpicker('refresh');
     if (selectedValue !== null) {
         $(dropdownId).selectpicker('val', selectedValue);
         $(dropdownId).prop('disabled', true);
@@ -80,14 +99,14 @@ function populateDropdownList(rdfBindings, entityName, dropdownId, selectedValue
 }
 
 /**
- * Autoselect a value in the given dropdown when there is only one choice: if there are only two options, one is the defualt 'Select a value', the other a true value.
+ * Autoselect a value in the given dropdown when there is only one choice: if there are only two options, one is the default 'Select a value', the other a true value.
  * dropdown: the jQuery element for the dropdown
  * lockElement: the jQuery element for the lock of this element
- * unlock: Elementthe jQuery element for the unlock of this element
+ * unlockElement: the jQuery element for the unlock of this element
  */
 function autoselectDropdownWhenOnlyOneChoice(dropdown, lockElement, unlockElement, disableOnceSelected) {
     if (dropdown.attr('disabled') != 'disabled') {
-        if (dropdown.children('option').length == 2) { //
+        if (dropdown.children('option').length == 2) {
             dropdown.html(dropdown.find('option').not(':empty()').first().attr('selected', true)).selectpicker('refresh');
             if (disableOnceSelected) {
                 dropdown.prop('disabled', true);
@@ -95,241 +114,204 @@ function autoselectDropdownWhenOnlyOneChoice(dropdown, lockElement, unlockElemen
                 lockElement.css('visibility', 'visible');
                 unlockElement.css('visibility', 'hidden');
             }
-            //console.log("autoselected dropdown "+dropdown.attr('id')+" value: "+ dropdown.val());
         }
     }
 }
 
-/***
+/**
+ * Reads the currently selected value (if any) for every entity. A value of
+ * '1' or null means "nothing actually selected" and is normalized to null.
+ */
+function getSelectedValues() {
+    var selected = {};
+    ENTITIES.forEach(function (entity) {
+        var val = $(entity.selectId).val();
+        selected[entity.key] = (val != 1 && val != null) ? val : null;
+    });
+    return selected;
+}
+
+/**
+ * True if the given SPARQL binding row is compatible with the currently
+ * selected values - i.e. for every entity that has an actual selection, the
+ * row's url or transitiveUrl matches it. Entities with no selection impose no
+ * constraint.
+ */
+function rowMatchesSelection(bindings, selectedValues) {
+    return ENTITIES.every(function (entity) {
+        var selected = selectedValues[entity.key];
+        if (selected === null) {
+            return true;
+        }
+        var b = bindings[entity.key];
+        return b.url === selected || b.transitiveUrl === selected;
+    });
+}
+
+function getBindingsForRow(element) {
+    var bindings = {};
+    ENTITIES.forEach(function (entity) {
+        bindings[entity.key] = getElement(entity.bindingKey, element);
+    });
+    return bindings;
+}
+
+/**
  * Change a dropdown: repopulate it and others based on the ones currently selected/unlocked. set disableOnceSelected to true to lock it, false to keep it open.
  */
 function dropdownChanged(dropdown, disableOnceSelected) {
-    var lockElementId = dropdown.attr('id').split('_')[1] + "_lock";
-    var lockElement = $("#" + lockElementId);
-    var unlockElementId = dropdown.attr('id').split('_')[1] + "_unlock";
-    var unlockElement = $("#" + unlockElementId);
-    var cu = '';
-    var tu = '';
-    var pu = '';
-    var au = '';
-        
-    var selected_tc=$("#idSelect_tc").val();
-    var selected_t=$("#idSelect_t").val();
-    var selected_p=$("#idSelect_p").val();
-    var selected_a=$("#idSelect_a").val();
+    const lockElementId = dropdown.attr('id').split('_')[1] + "_lock";
+    const lockElement = $("#" + lockElementId);
+    const unlockElementId = dropdown.attr('id').split('_')[1] + "_unlock";
+    const unlockElement = $("#" + unlockElementId);
 
-    if (selected_tc != 1 && selected_tc != null) { //if an actual value is selected here others need to be constrained by it and the condition changes
-        cu = "(binding_tc.url == '" + selected_tc + "' || binding_tc.transitiveUrl == '" + selected_tc + "') && ";
-    }
-    if (selected_t != 1 && selected_t != null) {
-        tu = "(binding_t.url == '" + selected_t + "' || binding_t.transitiveUrl == '" + selected_t + "') && ";
-    }
-    if (selected_p != 1 && selected_p != null) {
-        pu = "(binding_p.url == '" + selected_p + "' || binding_p.transitiveUrl == '" + selected_p + "') && ";
-    }
-    if (selected_a != 1 && selected_a != null) {
-        au = "(binding_a.url == '" + selected_a + "' || binding_a.transitiveUrl == '" + selected_a + "') && ";
-    }
+    const selectedValues = getSelectedValues();
+    const emptyOption = '<option value=1></option>';
+    const accumulated = {};
 
-    let condition = "(".concat(cu, tu, pu, au, ")").replace(/&&([^'&&']*)$/, '' + '$1');
-    var tc = [];
-    var t = [];
-    var p = [];
-    var a = [];
-    var select_option_data = '<option value=1></option>';
-    if ($('#idSelect_tc').attr('disabled') != 'disabled') {
-        $('#idSelect_tc').html(select_option_data);
-    } //clear it when no choice is made
-    if ($('#idSelect_t').attr('disabled') != 'disabled') {
-        $('#idSelect_t').html(select_option_data);
-    }
-    if ($('#idSelect_p').attr('disabled') != 'disabled') {
-        $('#idSelect_p').html(select_option_data);
-    }
-    if ($('#idSelect_a').attr('disabled') != 'disabled') {
-        $('#idSelect_a').html(select_option_data);
-    } 
-    var rdfBindings = getBindings(false);
-    $(rdfBindings).each(function (index, element) {
-        var binding_tc = getElement('TC', element);
-        var binding_t = getElement('T', element);
-        var binding_p = getElement('P', element);
-        var binding_a = getElement('A', element);
-        if (eval(condition)){
-              populateDropdownBasedOnPrevious($('#idSelect_tc'), 'c', element, tc); 
-              populateDropdownBasedOnPrevious($('#idSelect_t'), 't', element, t); 
-              populateDropdownBasedOnPrevious($('#idSelect_p'), 'p', element, p); 
-              populateDropdownBasedOnPrevious($('#idSelect_a'), 'a', element, a); 
+    ENTITIES.forEach(function (entity) {
+        accumulated[entity.key] = [];
+        if ($(entity.selectId).attr('disabled') != 'disabled') {
+            $(entity.selectId).html(emptyOption); //clear it when no choice is made
         }
     });
-    autoselectDropdownWhenOnlyOneChoice($('#idSelect_tc'), $('#tc_lock'), $('#tc_unlock'), disableOnceSelected);
-    autoselectDropdownWhenOnlyOneChoice($('#idSelect_t'), $('#t_lock'), $('#t_unlock'), disableOnceSelected);
-    autoselectDropdownWhenOnlyOneChoice($('#idSelect_p'), $('#p_lock'), $('#p_unlock'), disableOnceSelected);
-    autoselectDropdownWhenOnlyOneChoice($('#idSelect_a'), $('#a_lock'), $('#a_unlock'), disableOnceSelected);
+
+    const rdfBindings = getBindings(false);
+    $(rdfBindings).each(function (index, element) {
+        const bindings = getBindingsForRow(element);
+        if (rowMatchesSelection(bindings, selectedValues)) {
+            ENTITIES.forEach(function (entity) {
+                populateDropdownBasedOnPrevious($(entity.selectId), entity.prefixLetter, element, accumulated[entity.key]);
+            });
+        }
+    });
+
+    ENTITIES.forEach(function (entity) {
+        autoselectDropdownWhenOnlyOneChoice($(entity.selectId), $(entity.lockId), $(entity.unlockId), disableOnceSelected);
+    });
 }
 
 function unlockTc(rdfBindings) {
-    populateDropdownList(rdfBindings, "TC", "#idSelect_tc", null);
-    populateDropdownList(rdfBindings, "T", "#idSelect_t", null);
-    populateDropdownList(rdfBindings, "P", "#idSelect_p", null);
-    populateDropdownList(rdfBindings, "A", "#idSelect_a", null);
-
-    $('#idSelect_tc').prop('disabled', false);
-    $('#idSelect_tc').selectpicker('refresh');
-    $('#idSelect_t').prop('disabled', false);
-    $('#idSelect_t').selectpicker('refresh');
-    $('#idSelect_p').prop('disabled', false);
-    $('#idSelect_p').selectpicker('refresh');
-    $('#idSelect_a').prop('disabled', false);
-    $('#idSelect_a').selectpicker('refresh');
+    ENTITIES.forEach(function (entity) {
+        populateDropdownList(rdfBindings, entity.bindingKey, entity.selectId, null);
+        $(entity.selectId).prop('disabled', false);
+        $(entity.selectId).selectpicker('refresh');
+        $(entity.lockId).css('visibility', 'hidden');
+        $(entity.unlockId).css('visibility', 'visible');
+    });
     $('#id_form_process').hide();
+}
+
+/**
+ * Handles clicking the unlock icon for a non-root entity (t, p, or a).
+ * If every other entity is already unlocked, this is equivalent to a full
+ * reset (unlockTc). Otherwise, this entity is reset and re-enabled, and
+ * every entity downstream of it (later in the ENTITIES list) is unlocked too,
+ * since their valid options depend on this one.
+ */
+function handleDependentUnlockClick(entity, rdfBindings) {
+    const others = ENTITIES.filter(function (e) {
+        return e.key !== entity.key;
+    });
+    const allOthersEnabled = others.every(function (e) {
+        return $(e.selectId).attr('disabled') != 'disabled';
+    });
+
+    if (allOthersEnabled) {
+        unlockTc(rdfBindings);
+        return;
+    }
+
+    $(entity.selectId).val("1"); //clear the selection
+    $(entity.selectId).prop('disabled', false);
+    dropdownChanged($(entity.selectId), false);
+    $(entity.selectId).selectpicker('refresh');
+    $(entity.lockId).css('visibility', 'hidden');
+    $(entity.unlockId).css('visibility', 'visible');
+
+    const downstream = ENTITIES.slice(ENTITIES.indexOf(entity) + 1);
+    downstream.forEach(function (e) {
+        $(e.selectId).prop('disabled', false);
+        $(e.selectId).selectpicker('refresh');
+        $(e.lockId).css('visibility', 'hidden');
+        $(e.unlockId).css('visibility', 'visible');
+    });
+
     $('#id_eid').hide();
-    $('#tc_lock').css('visibility', 'hidden');
-    $('#t_lock').css('visibility', 'hidden');
-    $('#p_lock').css('visibility', 'hidden');
-    $('#a_lock').css('visibility', 'hidden');
-    $('#tc_unlock').css('visibility', 'visible');
-    $('#t_unlock').css('visibility', 'visible');
-    $('#p_unlock').css('visibility', 'visible');
-    $('#a_unlock').css('visibility', 'visible');
 }
 
 function initDropdowns(rdfBindings, selectedValues) {
     populateDropdownLists(rdfBindings, selectedValues);
-    //on change dropdown list
+
     $("#idSelect_tc, #idSelect_t, #idSelect_p, #idSelect_a").change(function () {
         dropdownChanged($(this), true);
     });
-    //if reset tc
+
     $("#cell_tc_unlock").click(function () {
         unlockTc(rdfBindings);
     });
-
     $("#cell_t_unlock").click(function () {
-        if (($('#idSelect_tc').attr('disabled') != 'disabled') && ($('#idSelect_p').attr('disabled') != 'disabled') && ($('#idSelect_a').attr('disabled') != 'disabled')) {
-            //if all others are not disabled, ie are selectable, unlock everything.
-            unlockTc(rdfBindings);
-        } else {
-            $("#idSelect_t").val("1"); //clear the selection
-            $('#idSelect_t').prop('disabled', false);
-            dropdownChanged($("#idSelect_t"), false);
-
-            $('#idSelect_t').selectpicker('refresh');
-            $('#t_lock').css('visibility', 'hidden');
-            $('#t_unlock').css('visibility', 'visible');
-
-            $('#idSelect_p').prop('disabled', false);
-            $('#idSelect_p').selectpicker('refresh');
-            $('#p_lock').css('visibility', 'hidden');
-            $('#p_unlock').css('visibility', 'visible');
-
-            $('#idSelect_a').prop('disabled', false);
-            $('#idSelect_a').selectpicker('refresh');
-            $('#a_lock').css('visibility', 'hidden');
-            $('#a_unlock').css('visibility', 'visible');
-
-            $('#id_eid').hide();
-            
-          //  dropdownChanged($("#idSelect_tc"), false);
-        }
+        handleDependentUnlockClick(ENTITIES[1], rdfBindings);
     });
     $("#cell_p_unlock").click(function () {
-        if (($('#idSelect_tc').attr('disabled') != 'disabled') && ($('#idSelect_t').attr('disabled') != 'disabled') && ($('#idSelect_a').attr('disabled') != 'disabled')) {
-            unlockTc(rdfBindings);
-        } else {
-            $("#idSelect_p").val("1"); //clear the selection
-            $('#idSelect_p').prop('disabled', false);
-            dropdownChanged($("#idSelect_p"), false);
-            
-            $('#idSelect_p').selectpicker('refresh');
-            $('#p_lock').css('visibility', 'hidden');
-            $('#p_unlock').css('visibility', 'visible');
-
-            $('#idSelect_a').prop('disabled', false);
-            $('#idSelect_a').selectpicker('refresh');
-            $('#a_lock').css('visibility', 'hidden');
-            $('#a_unlock').css('visibility', 'visible');
-
-            $('#id_eid').hide();    
-            
-           // dropdownChanged($("#idSelect_p"), false);
-        }
+        handleDependentUnlockClick(ENTITIES[2], rdfBindings);
     });
     $("#cell_a_unlock").click(function () {
-        if (($('#idSelect_tc').attr('disabled') != 'disabled') && ($('#idSelect_t').attr('disabled') != 'disabled') && ($('#idSelect_p').attr('disabled') != 'disabled')) {
-            unlockTc(rdfBindings);
-        } else {
-            $("#idSelect_a").val("1"); //clear the selection
-            $('#idSelect_a').prop('disabled', false);
-            dropdownChanged($("#idSelect_a"), false);
-            
-            $('#idSelect_a').selectpicker('refresh');
-            $('#a_lock').css('visibility', 'hidden');
-            $('#a_unlock').css('visibility', 'visible');
-
-            $('#id_eid').hide();
-            
-           // dropdownChanged($("#idSelect_a"), false);
-        }
+        handleDependentUnlockClick(ENTITIES[3], rdfBindings);
     });
+
     $('#dropdownForm').submit(function (e) {
         e.preventDefault();
-        var eventSubmitDate = new Date(Date.now());
-        var identifier = $('#dropdownForm').attr("data-identifier"); //in case of editing an event, this is set
-        var date = $('#dateField').val(); //in case of editing an event, this is set
-        var time = $('#timeField').val(); //in case of editing an event, this is set
-        var timeZone = $('#timeZoneField').val(); //in case of editing an event, this is set
-        if (date !== undefined && time !== undefined) {
-            var timeStamp = date + 'T' + time + timeZone;
-        } else {
-            var timeStamp = null;
-        }
-        if (($("#idSelect_tc").val() != 1) && ($("#idSelect_t").val() != 1) && ($("#idSelect_p").val() != 1) && ($("#idSelect_a").val() != 1)) {
-            /*var condition = '';
-            var startCondition = "(";
-            cu = "element.cu.value  == " + "'" + $("#idSelect_tc").val() + "'" + "  && ";
-            tu = "element.tu.value  == " + "'" + $("#idSelect_t").val() + "'" + "  && ";
-            pu = "element.pu.value  == " + "'" + $("#idSelect_p").val() + "'" + "  && ";
-            au = "element.au.value  == " + "'" + $("#idSelect_a").val() + "'" + "  && ";
-            var endCondition = ")";
-            condition = startCondition.concat(cu, tu, pu, au, endCondition).replace(/&&([^'&&']*)$/, '' + '$1');*/
-            
-            var selected_tc=$("#idSelect_tc").val();
-            var selected_t=$("#idSelect_t").val();
-            var selected_p=$("#idSelect_p").val();
-            var selected_a=$("#idSelect_a").val();
-          
-            var rdfBindings = getBindings(false);
-            $(rdfBindings).each(function (index, element) {
-                var binding_tc = getElement('TC', element);
-                var binding_t = getElement('T', element);
-                var binding_p = getElement('P', element);
-                var binding_a = getElement('A', element);
-                
-                if ((binding_tc.url === selected_tc || binding_tc.transitiveUrl === selected_tc) && (binding_t.url === selected_t || binding_t.transitiveUrl === selected_t) && (binding_p.url === selected_p || binding_p.transitiveUrl === selected_p) && (binding_a.url === selected_a || binding_a.transitiveUrl === selected_a)){
-                //if (selected_tc) {
-                    let event = new EarsEvent(element);
-                    event.identifier = identifier;
-                    event.timeStamp = timeStamp;
-                    postEventInner(event, function () {
-                        $("#btnSubmitDropdownChoice").removeClass("btn-warning").addClass("btn-success");
-                        setTimeout(function () {
-                            $("#btnSubmitDropdownChoice").removeClass("btn-success");
-                        }, stayGreenForThisPeriod);
-                        $("#btnSubmitDropdownChoice").removeClass("btn-warning").addClass("btn-success");
-                        $("#collapseOne").addClass("show");
-                        addEVtoLocalStorage(event);
-                        populateAllScenarios(rdfBindings);
-                    },
-                            function () {
-                                $("#btnSubmitDropdownChoice").removeClass("btn-success").addClass("btn-warning");
-                            });
-                return false;
-                }
-            });
-        } else {
+
+        const identifier = $('#dropdownForm').attr("data-identifier"); //in case of editing an event, this is set
+        const date = $('#dateField').val(); //in case of editing an event, this is set
+        const time = $('#timeField').val(); //in case of editing an event, this is set
+        const timeZone = $('#timeZoneField').val(); //in case of editing an event, this is set
+        const timeStamp = (date !== undefined && time !== undefined) ? (date + 'T' + time + timeZone) : null;
+
+        const allSelected = ENTITIES.every(function (entity) {
+            return $(entity.selectId).val() != 1;
+        });
+
+        if (!allSelected) {
             $("#btnSubmitDropdownChoice").removeClass("btn-success").addClass("btn-warning");
+            toggleErrorMessage("Please select a category, tool, process and action.");
+            return;
         }
+
+        const selectedValues = {};
+        ENTITIES.forEach(function (entity) {
+            selectedValues[entity.key] = $(entity.selectId).val();
+        });
+
+        const rdfBindings = getBindings(false);
+        $(rdfBindings).each(function (index, element) {
+            var bindings = getBindingsForRow(element);
+
+            var matches = ENTITIES.every(function (entity) {
+                var b = bindings[entity.key];
+                return b.url === selectedValues[entity.key] || b.transitiveUrl === selectedValues[entity.key];
+            });
+
+            if (matches) {
+                let event = new EarsEvent(element);
+                event.identifier = identifier;
+                event.timeStamp = timeStamp;
+                postEventInner(event, function () {
+                    $("#btnSubmitDropdownChoice").removeClass("btn-warning").addClass("btn-success");
+                    setTimeout(function () {
+                        $("#btnSubmitDropdownChoice").removeClass("btn-success");
+                    }, stayGreenForThisPeriod);
+                    $("#collapseOne").addClass("show");
+                    addEVtoLocalStorage(event);
+                    unlockTc(rdfBindings)
+                    populateAllScenarios(rdfBindings);
+                }, function () {
+                    $("#btnSubmitDropdownChoice").removeClass("btn-success").addClass("btn-warning");
+                });
+                return false; // stop $.each, we found our match
+            }
+        });
     });
 }
 
@@ -343,46 +325,31 @@ function getElement(what, item) {
     switch (what) {
         case 'TC':
             return {url: stripSlash(item.cu.value), transitiveUrl: stripSlash(item.ctu.value), label: item.cl.value};
-            break;
         case 'T':
             return {url: stripSlash(item.tu.value), transitiveUrl: stripSlash(item.ttu.value), label: item.tl.value};
-            break;
         case 'P':
             return {url: stripSlash(item.pu.value), transitiveUrl: null, label: item.pl.value};
-            break;
         case 'A':
             return {url: stripSlash(item.au.value), transitiveUrl: null, label: item.al.value};
-            break;
         default:
             return null;
     }
 }
 
 function populateDropdownLists(rdfBindings, selectedValues) {
-    if (selectedValues !== undefined && selectedValues !== null) {
-        populateDropdownList(rdfBindings, "TC", "#idSelect_tc", selectedValues.tc);
-        populateDropdownList(rdfBindings, "T", "#idSelect_t", selectedValues.t);
-        populateDropdownList(rdfBindings, "P", "#idSelect_p", selectedValues.p);
-        populateDropdownList(rdfBindings, "A", "#idSelect_a", selectedValues.a);
+    var hasSelection = selectedValues !== undefined && selectedValues !== null;
 
-        $('#tc_unlock').css('visibility', 'hidden');
-        $('#t_unlock').css('visibility', 'hidden');
-        $('#p_unlock').css('visibility', 'hidden');
-        $('#a_unlock').css('visibility', 'hidden');
+    ENTITIES.forEach(function (entity) {
+        var value = hasSelection ? selectedValues[entity.key] : null;
+        populateDropdownList(rdfBindings, entity.bindingKey, entity.selectId, value);
+        $(entity.lockId).css('visibility', hasSelection ? 'visible' : 'hidden');
+    });
 
-        $('#tc_lock').css('visibility', 'visible');
-        $('#t_lock').css('visibility', 'visible');
-        $('#p_lock').css('visibility', 'visible');
-        $('#a_lock').css('visibility', 'visible');
-    } else {
-        populateDropdownList(rdfBindings, "TC", "#idSelect_tc", null);
-        populateDropdownList(rdfBindings, "T", "#idSelect_t", null);
-        populateDropdownList(rdfBindings, "P", "#idSelect_p", null);
-        populateDropdownList(rdfBindings, "A", "#idSelect_a", null);
-
-        $('#tc_lock').css('visibility', 'hidden');
-        $('#t_lock').css('visibility', 'hidden');
-        $('#p_lock').css('visibility', 'hidden');
-        $('#a_lock').css('visibility', 'hidden');
+    // Matches original behaviour: unlock icons are only touched (hidden) when
+    // there IS a selection; with no selection their visibility is left as-is.
+    if (hasSelection) {
+        ENTITIES.forEach(function (entity) {
+            $(entity.unlockId).css('visibility', 'hidden');
+        });
     }
 }

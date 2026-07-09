@@ -1,36 +1,17 @@
 <!DOCTYPE html>
 <html lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org"
-    xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" layout:decorate="~{fragments/f}">
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" layout:decorate="~{fragments/f}">
 
 <head th:replace="fragments/f :: head"></head>
 
 <body>
-    <!-- <nav th:replace="fragments/f :: header"></nav> -->
-        <nav th:replace="fragments/f :: header">
-    </nav>
-    <!--<form layout:fragment="head-form">
-        <div class="form-group">
-            <select name="program" id="programField" class="selectpicker target form-control" data-live-search="true"
-                title="Current program" required>
-            </select>
-        </div>
-        <div class="form-group">
-            <p>
-                <input name="station" id="stationField" placeholder=" " type="text" title="Current station"
-                    class="form-control" /><label class="txtBox" for="stationField">Station</label>
-            </p>
-        </div>
-        <div class="form-group">
-            <p>
-                <input name="label" id="labelField" placeholder=" " type="text"
-                    title="Current event label (event identifier, station,...)" class="form-control" /><label
-                    class="txtBox" for="labelField">Event label</label>
-            </p>
-        </div>
-    </form>-->
+<nav th:replace="fragments/f :: header">
+</nav>
 
-    <div class="container" layout:fragment="main">
-        <a href = "mailto:info@bmdc.be?subject=Problem regarding EARS on RV Belgica&body=
+<div class="container" layout:fragment="main">
+    <h1>EARS Web App User
+        Guide</h1>
+    <a href="mailto:info@bmdc.be?subject=Problem regarding EARS on RV Belgica&body=
             Please adapt the following mail message template to describe your situation.%0D%0A
             Describe the bug%0D%0A
                 &emsp;A clear and concise description of what the bug is.%0D%0A
@@ -44,70 +25,64 @@
             Priority%0D%0A
                 &emsp;What is the impact of this bug on the user%0D%0A
             Screenshots">
-            <svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" fill="red" class="bi bi-exclamation-diamond-fill" viewBox="0 0 16 16">
-                <path d="M9.05.435c-.58-.58-1.52-.58-2.1 0L.436 6.95c-.58.58-.58 1.519 0 2.098l6.516 6.516c.58.58 1.519.58 2.098 0l6.516-6.516c.58-.58.58-1.519 0-2.098L9.05.435zM8 4c.535 0 .954.462.9.995l-.35 3.507a.552.552 0 0 1-1.1 0L7.1 4.995A.905.905 0 0 1 8 4zm.002 6a1 1 0 1 1 0 2 1 1 0 0 1 0-2z"></path>
-              </svg>&ensp;Report issue
-        </a>
-        <ul>
-        <li><a href="#ears-web-app-users-guide"
-        id="toc-ears-web-app-users-guide">EARS Web App User's Guide</a>
-        <ul>
+        <svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" fill="red" class="bi bi-exclamation-diamond-fill"
+             viewBox="0 0 16 16">
+            <path d="M9.05.435c-.58-.58-1.52-.58-2.1 0L.436 6.95c-.58.58-.58 1.519 0 2.098l6.516 6.516c.58.58 1.519.58 2.098 0l6.516-6.516c.58-.58.58-1.519 0-2.098L9.05.435zM8 4c.535 0 .954.462.9.995l-.35 3.507a.552.552 0 0 1-1.1 0L7.1 4.995A.905.905 0 0 1 8 4zm.002 6a1 1 0 1 1 0 2 1 1 0 0 1 0-2z"></path>
+        </svg>&ensp;Report issue
+    </a>
+    <h2>Contents</h2>
+    <ul>
         <li><a href="#what-is-ears" id="toc-what-is-ears">What is
-        EARS</a>
-        <ul>
-        <li><a href="#terminology" id="toc-terminology">Terminology</a>
-        <ul>
-        <li><a href="#general" id="toc-general">General</a></li>
-        <li><a href="#event" id="toc-event">Event</a></li>
-        </ul></li>
-        </ul></li>
+            EARS</a>
+            <ul>
+                <li><a href="#terminology" id="toc-terminology">Terminology</a>
+                    <ul>
+                        <li><a href="#general" id="toc-general">General</a></li>
+                        <li><a href="#event" id="toc-event">Event</a></li>
+                    </ul>
+                </li>
+            </ul>
+        </li>
         <li><a href="#access-to-ears" id="toc-access-to-ears">Access to
-        EARS</a></li>
+            EARS</a></li>
         <li><a href="#using-ears" id="toc-using-ears">Using EARS</a>
-        <ul>
-        <li><a href="#general-1" id="toc-general-1">General</a></li>
-        <li><a href="#event-creation" id="toc-event-creation">Event
-        creation</a></li>
-        <li><a href="#accessing-the-logged-events"
-        id="toc-accessing-the-logged-events">Accessing the logged
-        events</a></li>
-        <li><a href="#show-current-navigation-information"
-        id="toc-show-current-navigation-information">Show current
-        navigation information</a></li>
-        <li><a href="#export" id="toc-export">Export</a></li>
-        <li><a href="#all-events" id="toc-all-events">ALL
-        events</a></li>
-        <li><a href="#events-linked-to-a-cruise"
-        id="toc-events-linked-to-a-cruise">Events linked to a
-        cruise</a></li>
-        <li><a href="#points-of-attention-and-tips"
-        id="toc-points-of-attention-and-tips">Points of attention and
-        tips</a></li>
-        </ul></li>
+            <ul>
+                <li><a href="#general-1" id="toc-general-1">General</a></li>
+                <li><a href="#event-creation" id="toc-event-creation">Event
+                    creation</a></li>
+                <li><a href="#accessing-the-logged-events"
+                       id="toc-accessing-the-logged-events">Accessing the logged
+                    events</a></li>
+                <li><a href="#show-current-navigation-information"
+                       id="toc-show-current-navigation-information">Show current
+                    navigation information</a></li>
+                <li><a href="#export" id="toc-export">Export</a></li>
+                <li><a href="#all-events" id="toc-all-events">ALL
+                    events</a></li>
+                <li><a href="#events-linked-to-a-cruise"
+                       id="toc-events-linked-to-a-cruise">Events linked to a
+                    cruise</a></li>
+                <li><a href="#points-of-attention-and-tips"
+                       id="toc-points-of-attention-and-tips">Points of attention and
+                    tips</a></li>
+            </ul>
+        </li>
         <li><a href="#example-of-logged-parameters-and-units"
-        id="toc-example-of-logged-parameters-and-units">Example of
-        logged parameters and units</a></li>
-        </ul></li>
-        </ul>
-        <div class="manual">
-            <h1 id="ears-web-app-users-guide">EARS Web App User's
-            Guide</h1>
-            <p><img src="/ears3/images/manual/image1.png" /></p>
-            <p><img src="/ears3/images/manual/image2.png" /> </p>
-            <p>This document contains information, which is proprietary
-            to the EUROFLEETS+ consortium. Neither this document nor the
-            information contained herein shall be used, duplicated or
-            communicated by any means to any third party, in whole or in
-            parts, except with prior written consent of the EUROFLEETS+
-            Coordinator. </p>
-            <h2 id="what-is-ears">What is EARS</h2>
-            <p>EARS stands for “Eurofleets Automatic Reporting System”
-            and is a tool allowing to log events such as sampling
+               id="toc-example-of-logged-parameters-and-units">Example of
+            logged parameters and units</a></li>
+    </ul>
+
+    <div class="manual">
+        <p><img width="200px" src="/ears3/images/manual/image1.png"/></p>
+        <h2 id="what-is-ears">What is EARS</h2>
+        <p>EARS stands for "Event Activity Recording System" asd was initially developed under the name
+            “Eurofleets Automatic Reporting System”
+            It is a tool allowing to log events such as sampling
             events, gear deployments or instrument manipulations and to
             couple the events with the underway data (i.e. navigation,
             thermosalinometry and meteorology parameters). The concept
             is as follows: the user defines the event e.g. <em>start of
-            sampling with Niskin bottles</em> and <em>submits</em> the
+                sampling with Niskin bottles</em> and <em>submits</em> the
             event while the sampling takes place. The event is logged
             with its exact date and time and coupled with the
             acquisition data of the same time (e.g. latitude and
@@ -117,60 +92,66 @@
             value for each. In addition, events can be edited
             afterwards, including time, or missed events can be added
             and edited retroactively at the end of the cruise.</p>
-            <p>The software has been developed mainly by RBINS-BMDC in
+        <p>The software has been developed mainly by RBINS-BMDC in
             the framework of the Eurofleets projects 2 and +.</p>
-            <h3 id="terminology">Terminology</h3>
-            <h4 id="general">General</h4>
-            <ul>
+        <h3 id="terminology">Terminology</h3>
+        <h4 id="general">General</h4>
+        <ul>
             <li><strong>Cruise</strong> or <strong>campaign</strong>: a
-            scientific journey of a research vessel, with a start and
-            end harbour, led by a chief scientist.</li>
+                scientific journey of a research vessel, with a start and
+                end harbour, led by a chief scientist.
+            </li>
             <li><strong>Program</strong>: a specific scientific research
-            project performed during a cruise, led by a principal
-            investigator. This can be a repeated activity across many
-            campaigns (even for many years), or specific to a single
-            cruise. In this case you can use the same name for both
-            cruise and program.</li>
-            </ul>
-            <h4 id="event">Event</h4>
-            <p>An event is some action that happens at specific time
+                project performed during a cruise, led by a principal
+                investigator. This can be a repeated activity across many
+                campaigns (even for many years), or specific to a single
+                cruise. In this case you can use the same name for both
+                cruise and program.
+            </li>
+        </ul>
+        <h4 id="event">Event</h4>
+        <p>An event is some action that happens at specific time
             with a scientific device. The person executing it and the
             research program are also taken into account.</p>
-            <p>Events are composed of the following terms:</p>
-            <ul>
+        <p>Events are composed of the following terms:</p>
+        <ul>
             <li><strong>Tool category</strong>: groups of sensors,
-            instruments or sampling devices (e.g. sediment profile
-            imagers, beam trawls)</li>
+                instruments or sampling devices (e.g. sediment profile
+                imagers, beam trawls)
+            </li>
             <li><strong>Tool</strong>: the specific equipment performing
-            the event (e.g. sampling gear, instrument, sensor,
-            observational device, research vessel). Tools can belong to
-            one or more tool categories (e.g. Kongsberg (Simrad) TOPAS
-            PS018 sub-bottom profiler is both a sub-bottom profilers and
-            a chirper)</li>
+                the event (e.g. sampling gear, instrument, sensor,
+                observational device, research vessel). Tools can belong to
+                one or more tool categories (e.g. Kongsberg (Simrad) TOPAS
+                PS018 sub-bottom profiler is both a sub-bottom profilers and
+                a chirper)
+            </li>
             <li><strong>Process</strong>: a general activity a tool can
-            do and consists of a sequence of punctuated actions
-            (including malfunctions and deliberate actions)
-            (e.g. Track)</li>
+                do and consists of a sequence of punctuated actions
+                (including malfunctions and deliberate actions)
+                (e.g. Track)
+            </li>
             <li><strong>Action</strong>: a step in an ongoing process,
-            and can be deliberate (e.g. Start) or incidentally
-            (e.g. Failure)</li>
-            </ul>
-            <h2 id="access-to-ears">Access to EARS</h2>
-            <p>The application is only accessible onboard the vessel
+                and can be deliberate (e.g. Start) or incidentally
+                (e.g. Failure)
+            </li>
+        </ul>
+        <h2 id="access-to-ears">Access to EARS</h2>
+        <p>The application is only accessible onboard the vessel
             from a local IP address.</p>
-            <p>The url at any RV is as follows: <a
-            href="/ears3">http://&lt;IP-ADDRESS&gt;:&lt;PORT&gt;/ears3</a>
+        <p>The url at any RV is as follows: <a
+                href="/ears3">http://&lt;IP-ADDRESS&gt;:&lt;PORT&gt;/ears3</a>
             and is specific to each EF+ Research Vessel. Ask your local
             electronician for the correct location.</p>
-            <p>The EARS web application can be used with any internet
+        <p>The EARS web application can be used with any internet
             browser. At the moment, the application does not work
             properly with the Chrome browser.</p>
-            <p>Note that the figures included in this document are taken
+        <p>Note that the figures included in this document are taken
             from the instance running on the RV Belgica and the shown ip
             address will not be the same on another vessel.</p>
-            <h2 id="using-ears">Using EARS</h2>
-            <h3 id="general-1">General</h3>
-            <p>On first use, the user’s <a href="/ears3/settings">first
+        <h2 id="using-ears">Using EARS</h2>
+        <h3 id="general-1">General</h3>
+        <p>On first use, the user’s <a href="/ears3/settings">first
             and last name as wel as a valid email address</a> are
             requested, as well as their affiliation. The list of
             organizations is extensive and (for now) unsorted. Start
@@ -179,15 +160,15 @@
             name. These settings can ben changed at any moment by
             clicking on the provided first and last name in the
             navigation bar.</p>
-            <p><img src="/ears3/images/manual/image3.png" /></p>
-            <p><img src="/ears3/images/manual/image4.png" /></p>
-            <h3 id="event-creation">Event creation</h3>
-            <p>Before the user can start submitting a <a
-            href="/ears3/event/new">new event</a>, the <strong>Current
+        <p><img src="/ears3/images/manual/image3.png"/></p>
+        <p><img src="/ears3/images/manual/image4.png"/></p>
+        <h3 id="event-creation">Event creation</h3>
+        <p>Before the user can start submitting a <a
+                href="/ears3/event/new">new event</a>, the <strong>Current
             program</strong> needs to be selected. If you try to create
             an event without program, an error is shown.</p>
-            <p><img src="/ears3/images/manual/image5.png" /></p>
-            <p>Drop-down lists show the available tool categories,
+        <p><img src="/ears3/images/manual/image5.png"/></p>
+        <p>Drop-down lists show the available tool categories,
             tools, processes and actions. A combination of these
             selections describes an event. The contents of the drop-down
             lists are pre-defined in EARS. In case the equipment is not
@@ -195,37 +176,38 @@
             beforehand to a data manager who can pre-define it before
             the cruise and make it available on the vessel EARS
             server.</p>
-            <p><img src="/ears3/images/manual/image6.png" /></p>
-            <p>To create a new event, define first the station name (ex:
+        <p><img src="/ears3/images/manual/image6.png"/></p>
+        <p>To create a new event, define first the station name (ex:
             MOW1) as well as a label for the event (ex: st1 bodem). Both
             are optional but are strongly recommended. In a next step
             both are copied to the event’s text boxes, where they can be
             further edited if needed. This way you don’t have to
             repeatedly type them for each event.</p>
-            <p>To create the event, four terms need to be selected. They
+        <p>To create the event, four terms need to be selected. They
             can be selected in any order.</p>
-            <ul>
+        <ul>
             <li>Select the Category: e.g. discrete water sampler,
-            sediment grabs</li>
+                sediment grabs
+            </li>
             <li>Select the Tool: e.g. Niskin bottle, Van Veen grab</li>
             <li>Select the Process: e.g. Sampling</li>
             <li>Select the Action: e.g. Start</li>
-            </ul>
-            <p>Once you select a term, the other terms available become
+        </ul>
+        <p>Once you select a term, the other terms available become
             more limited. For instance, if you first select
             <em>Sampling</em>, only devices capable of sampling become
             available.</p>
-            <p><img src="/ears3/images/manual/image7.png" /></p>
-            <p>When the four terms are selected, click on the
+        <p><img src="/ears3/images/manual/image7.png"/></p>
+        <p>When the four terms are selected, click on the
             <em>Submit</em> button. A pop-up window will appear
             confirming the station name and the event label. A
             <strong>Description</strong> can be added as well from the
             pop-up window. Click again on <em>Submit</em> when done.
             When the submit button turns to green, the event is created
             and logged in the vessel database of EARS.</p>
-            <p><img src="/ears3/images/manual/image8.png" /></p>
-            <p><img src="/ears3/images/manual/image9.png" /></p>
-            <p>When a new event is created, a shortcut scenario button
+        <p><img src="/ears3/images/manual/image8.png"/></p>
+        <p><img src="/ears3/images/manual/image9.png"/></p>
+        <p>When a new event is created, a shortcut scenario button
             is automatically created in the <em>Common scenarios</em>
             panel with the selected terms. This scenario button can be
             used as shortcut to log events with the same terms (tool
@@ -235,34 +217,34 @@
             the desired scenario, define the station, label and
             description if needed and click on the <em>Submit</em>
             button.</p>
-            <p>It is possible to discard a scenario by clicking
+        <p>It is possible to discard a scenario by clicking
             <strong>x</strong> on the scenario button. This does not
             delete the events generated from it.</p>
-            <p><img src="/ears3/images/manual/image10.png" /></p>
-            <h3 id="accessing-the-logged-events">Accessing the logged
+        <p><img src="/ears3/images/manual/image10.png"/></p>
+        <h3 id="accessing-the-logged-events">Accessing the logged
             events</h3>
-            <p>The <a href="/ears3/events">Events</a> tab of the web
+        <p>The <a href="/ears3/events">Events</a> tab of the web
             application allows to access the list of logged events. The
             user can:</p>
-            <ul>
+        <ul>
             <li>Select and display the events details</li>
             <li>Edit the event</li>
             <li>Delete an event</li>
-            </ul>
-            <p>The logged times are in UTC.</p>
-            <p><img src="/ears3/images/manual/image11.png" /></p>
-            <p>To display the event details, click on the desired event.
+        </ul>
+        <p>The logged times are in UTC.</p>
+        <p><img src="/ears3/images/manual/image11.png"/></p>
+        <p>To display the event details, click on the desired event.
             The event description will open, displaying the station,
             label, date, time and its features. You can immediately
             modify the event if needed.</p>
-            <p>The <em>Current program</em> needs first to be
+        <p>The <em>Current program</em> needs first to be
             re-defined. Then, the event station, label, date and time
             fields can be updated directly. To update the terms (tool,
             tool category, process or action), first unlock the
             corresponding red lock. When ready, click on
             <em>Submit</em>.</p>
-            <p><img src="/ears3/images/manual/image12.png" /></p>
-            <p>Events can be edited or created at any time during the
+        <p><img src="/ears3/images/manual/image12.png"/></p>
+        <p>Events can be edited or created at any time during the
             cruise. However, it is strongly recommended to log the
             events while the action is actually performed. Missed events
             can still be added or updated retroactively during the
@@ -270,213 +252,216 @@
             only accessible on board of the vessel. This means that it
             is not possible to make any updates when you have left the
             vessel after the cruise.</p>
-            <h3 id="show-current-navigation-information">Show current
+        <h3 id="show-current-navigation-information">Show current
             navigation information</h3>
-            <p>This function is not directly related to the EARS web
+        <p>This function is not directly related to the EARS web
             application, but can be useful.</p>
-            <p>For complementary information on the vessel navigation,
+        <p>For complementary information on the vessel navigation,
             it is possible to get access to the near real-time en-route
             data that gives information on:</p>
-            <ul>
+        <ul>
             <li>Time</li>
             <li>Current position of the ship
-            <ul>
-            <li>Longitude</li>
-            <li>Latitude</li>
-            </ul></li>
+                <ul>
+                    <li>Longitude</li>
+                    <li>Latitude</li>
+                </ul>
+            </li>
             <li>Heading</li>
             <li>Speed over water (sow)</li>
             <li>Depth</li>
             <li>Course over ground (cog)</li>
             <li>Speed over ground (sog).</li>
-            </ul>
-            <p>On <a
-            href="/ears3Nav/nav/getLast/xml">/ears3Nav/nav/getLast/xml</a>,
+        </ul>
+        <p>On <a
+                href="/ears3Nav/nav/getLast/xml">/ears3Nav/nav/getLast/xml</a>,
             the latest navigational information is shown in xml format
             as illustrated below. You can also use the <a
-            href="/ears3Nav/nav/getLast/json">/ears3Nav/nav/getLast/json</a>
+                    href="/ears3Nav/nav/getLast/json">/ears3Nav/nav/getLast/json</a>
             or <a
-            href="/ears3Nav/nav/getLast/datagram">/ears3Nav/nav/getLast/datagram</a>
+                    href="/ears3Nav/nav/getLast/datagram">/ears3Nav/nav/getLast/datagram</a>
             endpoints to view the data as json and csv respectively.</p>
-            <p><img src="/ears3/images/manual/image13.png" /></p>
-            <h3 id="export">Export</h3>
-            <h3 id="all-events">ALL events</h3>
-            <p>To export logged events, go to <a
-            href="/ears3/events">Events</a> and click on “Download all
+        <p><img src="/ears3/images/manual/image13.png"/></p>
+        <h3 id="export">Export</h3>
+        <h3 id="all-events">ALL events</h3>
+        <p>To export logged events, go to <a
+                href="/ears3/events">Events</a> and click on “Download all
             events”. All events created so far in EARS are exported in a
             csv file. After opening the csv file (with excel for
             instance), you may select events of your cruise by filtering
             by the cruise’s period.</p>
-            <h3 id="events-linked-to-a-cruise">Events linked to a
+        <h3 id="events-linked-to-a-cruise">Events linked to a
             cruise</h3>
-            <p>When you select the <a
-            href="/ears3/cruises"><em>Cruises</em></a> tab, you can
+        <p>When you select the <a
+                href="/ears3/cruises"><em>Cruises</em></a> tab, you can
             export all events from the selected cruise. Please verify
             after exporting the data, that the export was
             successful!</p>
-            <p><img src="/ears3/images/manual/image14.png" /></p>
-            <h3 id="points-of-attention-and-tips">Points of attention
+        <p><img src="/ears3/images/manual/image14.png"/></p>
+        <h3 id="points-of-attention-and-tips">Points of attention
             and tips</h3>
-            <p>Points of attention:</p>
-            <ul>
+        <p>Points of attention:</p>
+        <ul>
             <li><p>Time in EARS is in UTC. This is important to couple
-            the events with navigation and acquisition data. Always
-            enter the time in UTC.</p></li>
+                the events with navigation and acquisition data. Always
+                enter the time in UTC.</p></li>
             <li><p>Any creation or editing action is only successfully
-            executed when the <em>Submit</em> button (or <em>Common
-            scenario button</em>) turns <span
-            style="background-color:green">green</span> for a couple of
-            seconds. When this does not happen, verify that all fields
-            are filled in (e.g. <em>program</em>, <em>station</em>,
-            <em>label</em>).</p></li>
-            </ul>
-            <p>Tips:</p>
-            <ul>
+                executed when the <em>Submit</em> button (or <em>Common
+                    scenario button</em>) turns <span
+                        style="background-color:green">green</span> for a couple of
+                seconds. When this does not happen, verify that all fields
+                are filled in (e.g. <em>program</em>, <em>station</em>,
+                <em>label</em>).</p></li>
+        </ul>
+        <p>Tips:</p>
+        <ul>
             <li>If the needed tool/scenario is not existing yet in EARS,
-            select a similar one and add a meaningful label or
-            description with the correct tool/scenario. Do not forget to
-            request the tool to BMDC for next time.</li>
-            </ul>
-            <p>A more complete manual can be found on: <a
-            href="https://github.com/naturalsciences/ears/releases/download/v3.0.3/Eurofleets+_D3.9_manual_ears3_client_webapp.pdf">https://github.com/naturalsciences/ears/releases/download/v3.0.3/Eurofleets+_D3.9_manual_ears3_client_webapp.pdf</a></p>
-            <h2 id="example-of-logged-parameters-and-units">Example of
+                select a similar one and add a meaningful label or
+                description with the correct tool/scenario. Do not forget to
+                request the tool to BMDC for next time.
+            </li>
+        </ul>
+        <p>A more complete manual can be found on: <a
+                href="https://github.com/naturalsciences/ears/releases/download/v3.0.3/Eurofleets+_D3.9_manual_ears3_client_webapp.pdf">https://github.com/naturalsciences/ears/releases/download/v3.0.3/Eurofleets+_D3.9_manual_ears3_client_webapp.pdf</a>
+        </p>
+        <h2 id="example-of-logged-parameters-and-units">Example of
             logged parameters and units</h2>
-            <div class="manualTable">
+        <div class="manualTable">
             <table>
-            <thead>
-            <tr class="header">
-            <th>Parameter</th>
-            <th>Unit</th>
-            </tr>
-            </thead>
-            <tbody>
-            <tr class="odd">
-            <td>Time stamp</td>
-            <td></td>
-            </tr>
-            <tr class="even">
-            <td>Actor</td>
-            <td></td>
-            </tr>
-            <tr class="odd">
-            <td>Program</td>
-            <td></td>
-            </tr>
-            <tr class="even">
-            <td>Principal Investigator</td>
-            <td></td>
-            </tr>
-            <tr class="odd">
-            <td>Tool category</td>
-            <td></td>
-            </tr>
-            <tr class="even">
-            <td>Tool category code</td>
-            <td></td>
-            </tr>
-            <tr class="odd">
-            <td>Tool</td>
-            <td></td>
-            </tr>
-            <tr class="even">
-            <td>Tool code</td>
-            <td></td>
-            </tr>
-            <tr class="odd">
-            <td>Process</td>
-            <td></td>
-            </tr>
-            <tr class="even">
-            <td>Action</td>
-            <td></td>
-            </tr>
-            <tr class="odd">
-            <td>Station</td>
-            <td></td>
-            </tr>
-            <tr class="even">
-            <td>Label</td>
-            <td></td>
-            </tr>
-            <tr class="odd">
-            <td>Description</td>
-            <td></td>
-            </tr>
-            <tr class="even">
-            <td>Acquisition Timestamp</td>
-            <td></td>
-            </tr>
-            <tr class="odd">
-            <td>Latitude</td>
-            <td>decimal degrees</td>
-            </tr>
-            <tr class="even">
-            <td>Longitude</td>
-            <td>decimal degrees</td>
-            </tr>
-            <tr class="odd">
-            <td>Depth</td>
-            <td>meters</td>
-            </tr>
-            <tr class="even">
-            <td>Heading</td>
-            <td>degrees</td>
-            </tr>
-            <tr class="odd">
-            <td>Course over Ground</td>
-            <td>degrees</td>
-            </tr>
-            <tr class="even">
-            <td>Speed over Ground</td>
-            <td>knots</td>
-            </tr>
-            <tr class="odd">
-            <td>Surface water temperature</td>
-            <td>degrees celsius</td>
-            </tr>
-            <tr class="even">
-            <td>Salinity</td>
-            <td>PSU</td>
-            </tr>
-            <tr class="odd">
-            <td>Conductivity</td>
-            <td>Siemens/meter</td>
-            </tr>
-            <tr class="even">
-            <td>Sigma T</td>
-            <td>Kilograms per cubic metre</td>
-            </tr>
-            <tr class="odd">
-            <td>Wind speed</td>
-            <td>Metres per second</td>
-            </tr>
-            <tr class="even">
-            <td>Wind direction</td>
-            <td>Degrees</td>
-            </tr>
-            <tr class="odd">
-            <td>Air temperature</td>
-            <td>Degrees Celsius</td>
-            </tr>
-            <tr class="even">
-            <td>Humidity</td>
-            <td>Percent</td>
-            </tr>
-            <tr class="odd">
-            <td>Air pressure</td>
-            <td>Hectopascals</td>
-            </tr>
-            <tr class="even">
-            <td>Solar Radiation</td>
-            <td>Watts/square meter</td>
-            </tr>
-            </tbody>
+                <thead>
+                <tr class="header">
+                    <th>Parameter</th>
+                    <th>Unit</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr class="odd">
+                    <td>Time stamp</td>
+                    <td></td>
+                </tr>
+                <tr class="even">
+                    <td>Actor</td>
+                    <td></td>
+                </tr>
+                <tr class="odd">
+                    <td>Program</td>
+                    <td></td>
+                </tr>
+                <tr class="even">
+                    <td>Principal Investigator</td>
+                    <td></td>
+                </tr>
+                <tr class="odd">
+                    <td>Tool category</td>
+                    <td></td>
+                </tr>
+                <tr class="even">
+                    <td>Tool category code</td>
+                    <td></td>
+                </tr>
+                <tr class="odd">
+                    <td>Tool</td>
+                    <td></td>
+                </tr>
+                <tr class="even">
+                    <td>Tool code</td>
+                    <td></td>
+                </tr>
+                <tr class="odd">
+                    <td>Process</td>
+                    <td></td>
+                </tr>
+                <tr class="even">
+                    <td>Action</td>
+                    <td></td>
+                </tr>
+                <tr class="odd">
+                    <td>Station</td>
+                    <td></td>
+                </tr>
+                <tr class="even">
+                    <td>Label</td>
+                    <td></td>
+                </tr>
+                <tr class="odd">
+                    <td>Description</td>
+                    <td></td>
+                </tr>
+                <tr class="even">
+                    <td>Acquisition Timestamp</td>
+                    <td></td>
+                </tr>
+                <tr class="odd">
+                    <td>Latitude</td>
+                    <td>decimal degrees</td>
+                </tr>
+                <tr class="even">
+                    <td>Longitude</td>
+                    <td>decimal degrees</td>
+                </tr>
+                <tr class="odd">
+                    <td>Depth</td>
+                    <td>meters</td>
+                </tr>
+                <tr class="even">
+                    <td>Heading</td>
+                    <td>degrees</td>
+                </tr>
+                <tr class="odd">
+                    <td>Course over Ground</td>
+                    <td>degrees</td>
+                </tr>
+                <tr class="even">
+                    <td>Speed over Ground</td>
+                    <td>knots</td>
+                </tr>
+                <tr class="odd">
+                    <td>Surface water temperature</td>
+                    <td>degrees celsius</td>
+                </tr>
+                <tr class="even">
+                    <td>Salinity</td>
+                    <td>PSU</td>
+                </tr>
+                <tr class="odd">
+                    <td>Conductivity</td>
+                    <td>Siemens/meter</td>
+                </tr>
+                <tr class="even">
+                    <td>Sigma T</td>
+                    <td>Kilograms per cubic metre</td>
+                </tr>
+                <tr class="odd">
+                    <td>Wind speed</td>
+                    <td>Metres per second</td>
+                </tr>
+                <tr class="even">
+                    <td>Wind direction</td>
+                    <td>Degrees</td>
+                </tr>
+                <tr class="odd">
+                    <td>Air temperature</td>
+                    <td>Degrees Celsius</td>
+                </tr>
+                <tr class="even">
+                    <td>Humidity</td>
+                    <td>Percent</td>
+                </tr>
+                <tr class="odd">
+                    <td>Air pressure</td>
+                    <td>Hectopascals</td>
+                </tr>
+                <tr class="even">
+                    <td>Solar Radiation</td>
+                    <td>Watts/square meter</td>
+                </tr>
+                </tbody>
             </table>
-            </div>
         </div>
-
-        <script src="/ears3/js/settings-in-menu.js" type="application/javascript"></script>
     </div>
+
+    <script src="/ears3/js/settings-in-menu.js" type="application/javascript"></script>
+</div>
 </body>
 
 </html>

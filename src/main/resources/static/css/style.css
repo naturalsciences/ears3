@@ -1,12 +1,8 @@
-body{
-    font-size:100%;
+body {
+    font-size: 100%;
 }
 
-#id_eid {
-    display: none;
-}
-
-.navbar, .container{
+.navbar, .container {
     padding-left: 4px;
     padding-top: 4px;
 }
@@ -15,21 +11,21 @@ table, tr, td {
     border: none;
 }
 
-table#cruiseTable ul{
+table#cruiseTable ul {
     padding-left: 15px;
 }
 
-table#recentEventDefinitionTable{
+table#recentEventDefinitionTable {
     border-collapse: collapse;
-    width:100%;
-    table-layout:fixed;
+    width: 100%;
+    table-layout: fixed;
 }
 
 table#recentEventDefinitionTable td {
     border-bottom: lightgrey thin solid;
-    max-width:50%;
-    min-width:50%;
-    width:50%;
+    max-width: 50%;
+    min-width: 50%;
+    width: 50%;
     vertical-align: middle;
 }
 
@@ -39,17 +35,17 @@ table#recentEventDefinitionTable tr {
 
 table#recentEventDefinitionTable button {
     vertical-align: top;
-    height:100%;
-    max-width:80%;
+    height: 100%;
+    max-width: 80%;
     padding-top: 0;
 }
 
-table#recentEventDefinitionTable p{
+table#recentEventDefinitionTable p {
     font-size: 80%;
 }
 
-table#dropdownMenuTable td{
-    line-height:35px;
+table#dropdownMenuTable td {
+    line-height: 35px;
     padding-left: 0;
 }
 
@@ -58,7 +54,7 @@ table.dataTable tbody td {
     border-left: black dotted 1px;
 }
 
-table.dataTable tbody td:last-child{
+table.dataTable tbody td:last-child {
     border-right: black dotted 1px;
 }
 
@@ -67,11 +63,11 @@ table.dataTable thead th, table.dataTable thead td {
     cursor: auto !important;
 }
 
-#eventTable tbody tr{
+#eventTable tbody tr {
     cursor: pointer !important;
 }
 
-button p.close-btn{
+button p.close-btn {
     text-align: right;
     font-weight: bolder;
     font-size: 200%;
@@ -79,7 +75,7 @@ button p.close-btn{
     border-bottom: lightgrey solid;
 }
 
-button p.close-btn a{
+button p.close-btn a {
     display: block; /*as big as the parent p*/
     padding-right: 1em;
     cursor: not-allowed;
@@ -94,36 +90,37 @@ button p.close-btn a{
     margin-bottom: 0.5em;
 }
 
-#propertyPopup ul{
+#propertyPopup ul {
     list-style: none;
-    padding-left:0;
+    padding-left: 0;
 }
 
 #propertyPopup label.txtBox {
-    width:80px;
-    clear:left;
-    text-align:left;
-    padding-right:16px;
+    width: 80px;
+    clear: left;
+    text-align: left;
+    padding-right: 16px;
 }
 
 #propertyPopup input {
-    width:30ch;
+    width: 30ch;
 }
 
 #propertyPopup input, #propertyPopup label {
-    float:left;
+    float: left;
 }
 
-#propertyPopup button{
-    float:left;
-    clear:left;
+#propertyPopup button {
+    float: left;
+    clear: left;
     margin-top: 20px;
 }
+
 /*To have the label moving to the input's edge'*/
-div.form-group p{
-    margin:0;
-    position:relative;
-    display:inline-block;
+div.form-group p {
+    margin: 0;
+    position: relative;
+    display: inline-block;
 }
 
 div.form-group label {
@@ -132,48 +129,52 @@ div.form-group label {
     padding-bottom: 2px;
     padding-left: 10px;
     pointer-events: none;
-    position:absolute;
-    left:6px;
-    top:4px;
+    position: absolute;
+    left: 6px;
+    top: 4px;
     transition: 0.2s;
     transition-timing-function: ease;
     transition-timing-function: cubic-bezier(0.25, 0.1, 0.25, 1);
-    opacity:0.5;
+    opacity: 0.5;
     background: #fff;
 }
 
 div.form-group input {
-    padding:10px;
+    padding: 10px;
 }
 
 div.form-group input:focus + label.txtBox, input:not(:placeholder-shown) + label.txtBox {
-    opacity:1;
+    opacity: 1;
     transform: scale(0.75) translateY(-86%) translateX(-14px);
 }
+
 /*To have the label moving to the input's edge'*/
 
-.dateField{
+.dateField {
     width: 12ch;
 }
-.timeField{
+
+.timeField {
     width: 10ch;
 }
-.timeZoneField{
+
+.timeZoneField {
     width: 8ch;
 }
-select#idSelect_tc+button, select#idSelect_t+button,select#idSelect_p+button,select#idSelect_a+button{
-    padding-left:0;
-    padding-right:2px;
+
+select#idSelect_tc + button, select#idSelect_t + button, select#idSelect_p + button, select#idSelect_a + button {
+    padding-left: 0;
+    padding-right: 2px;
 }
 
 .manual {
-    text-align:justify;
+    text-align: justify;
     width: 98%;
     align-content: center;
     align-items: center;
 }
 
-.manual p{
+.manual p {
     padding-left: 1%;
     text-align: justify;
     align-items: center;
@@ -182,8 +183,8 @@ select#idSelect_tc+button, select#idSelect_t+button,select#idSelect_p+button,sel
     justify-self: center;
 }
 
-.manual img{
-    width: 95%;
+.manual img {
+    width: 50%;
     padding-left: 2.5%;
 }
 
@@ -194,33 +195,37 @@ select#idSelect_tc+button, select#idSelect_t+button,select#idSelect_p+button,sel
     justify-content: center;
     justify-self: center;
 }
+
 .manualTable table {
     width: 80%;
     border: 1px solid;
     border-color: lightgray;
 }
 
-.manualTable th, .manualTable tr, .manualTable td{
+.manualTable th, .manualTable tr, .manualTable td {
     width: 50%;
     border: 1px solid;
     border-color: lightgray;
 }
 
-.manualTable th{
+.manualTable th {
     font-size: larger;
 }
 
-.manualTable td{
+.manualTable td {
     padding-left: 15px;
 }
 
 error {
-  display: block;
-  margin-bottom: 0.5em;
+    display: block;
+    margin-bottom: 0.5em;
 }
 
 error > message {
-  margin-left: 1em;
-  font-size:small;
+    margin-left: 1em;
+    font-size: small;
 }
 
+div.accordion {
+    padding-bottom: 1rem;
+}
