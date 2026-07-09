@@ -11,6 +11,12 @@
     <div id="search" class="form-inline mb-3 p-3 border rounded">
         <div class="form-inline mb-2">
             <div class="form-group mr-3 mb-2">
+                <select name="cruise" id="cruiseField"
+                        class="selectpicker target form-control"
+                        data-live-search="true" title="Filter cruise">
+                </select>
+            </div>
+            <div class="form-group mr-3 mb-2">
                 <select name="program" id="programField"
                         class="selectpicker target form-control"
                         data-live-search="true" title="Filter program">
@@ -86,7 +92,7 @@
         </thead>
     </table>
 
-    <script src="/ears3/js/ears-events.js" type="application/javascript"></script>
+    <script src="/ears3/js/ears-events-api.js" type="application/javascript"></script>
     <script src="/ears3/js/jquery.dataTables.min.js" type="application/javascript"></script>
     <script type="application/javascript" th:inline="none">
 
@@ -110,18 +116,41 @@
         ];
 
         // Single source of truth for every filter the API supports.
+        // API supports: (platformIdentifier->not included as the boat is fixed) cruiseIdentifier programIdentifier actorEmail startDate endDate search
         // Add a new filter here and it's automatically included in every ajax call.
         function collectSearchParams() {
+
             const params = {};
 
-            if (document.getElementById('cbOwnEvents').checked) {
-                const actor = JSON.parse(localStorage.actor);
-                params.actorEmail = actor.email;
+            const cruiseIdentifier = document.getElementById('cruiseField').value;
+            if (cruiseIdentifier) {
+                const cruise = cruiseLookup[cruiseIdentifier];
+                if (cruise) {
+                    params.startDate = cruise.startDate.replace('Z', '');
+                    params.endDate = cruise.endDate.replace('Z', '');
+                    document.getElementById('startDateField').value = params.startDate;
+                    document.getElementById('endDateField').value = params.endDate;
+                }
+            }
+
+            const program = document.getElementById('programField').value;
+            if (program) {
+                params.program = program;
+            }
+
+            const station = document.getElementById('stationField').value.trim();
+            if (station) {
+                params.station = station;
             }
 
             const freeText = document.getElementById('freeTextField').value.trim();
             if (freeText) {
                 params.search = freeText;
+            }
+
+            if (document.getElementById('cbOwnEvents').checked) {
+                const actor = JSON.parse(localStorage.actor);
+                params.actorEmail = actor.email;
             }
 
             const startDate = document.getElementById('startDateField').value;
@@ -133,22 +162,15 @@
             if (endDate) {
                 params.endDate = endDate;
             }
-
             return params;
         }
 
         $(document).ready(function () {
-            if (localStorage.actor == null) {
-                window.location.href = './settings';
-            } else {
-                let me = JSON.parse(localStorage.getItem('actor'));
-                $("#settings-link").html(me.firstName + " " + me.lastName);
-            }
             let searchDebounce;
-            $('#search').on('change', 'input[type=checkbox], input[type=datetime-local]', function () {
+            $('#search').on('change', 'select, input[type=checkbox], input[type=datetime-local]', function () { //program, checkbox and datetime
                 table.ajax.reload();
             });
-            $('#freeTextField').on('input', function () {
+            $('#search').on('change', 'input[type=text]', function () { //station text box and free text searh box
                 clearTimeout(searchDebounce);
                 searchDebounce = setTimeout(function () {
                     table.ajax.reload();
@@ -156,8 +178,11 @@
             });
 
             $('#btnClearSearch').on('click', function () {
-                document.getElementById('cbOwnEvents').checked = false;
+                document.getElementById('cruiseField').value = '';
+                document.getElementById('programField').value = '';
+                document.getElementById('stationField').value = '';
                 document.getElementById('freeTextField').value = '';
+                document.getElementById('cbOwnEvents').checked = false;
                 document.getElementById('startDateField').value = '';
                 document.getElementById('endDateField').value = '';
                 table.ajax.reload();

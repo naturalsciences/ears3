@@ -1,22 +1,3 @@
-function stripSlash(url) {
-    if (url === null) {
-        return null;
-    }
-    return url.endsWith('/') ?
-        url.slice(0, -1) :
-        url;
-}
-
-/**
- * Single source of truth for the four cascading dropdowns (ToolCategory, Tool,
- * Process, Action). Every function below loops over this instead of repeating
- * near-identical code per entity.
- *
- * key:          short internal id, also used as the key in selectedValues objects
- * prefixLetter: the SPARQL binding field prefix (cu/cl, tu/tl, pu/pl, au/al)
- * bindingKey:   the "what" argument expected by getElement()
- * selectId/lockId/unlockId: the DOM element ids for this entity
- */
 const ENTITIES = [
     {key: 'tc', prefixLetter: 'c', bindingKey: 'TC', selectId: '#idSelect_tc', lockId: '#tc_lock', unlockId: '#tc_unlock'},
     {key: 't', prefixLetter: 't', bindingKey: 'T', selectId: '#idSelect_t', lockId: '#t_lock', unlockId: '#t_unlock'},
@@ -32,9 +13,9 @@ const ENTITIES = [
  * listElements: an array to keep track of what has been added already
  */
 function populateDropdownBasedOnPrevious(dropdown, entityType, item, listElements) {
-    if (dropdown.attr('disabled') != 'disabled') {
-        var urlField = entityType + 'u'; //the url field in the SPARQL JSON result, for the right entity
-        var labelField = entityType + 'l'; //the label field in the SPARQL JSON result, for the right entity
+    if (dropdown.attr('disabled') !== 'disabled') {
+        const urlField = entityType + 'u'; //the url field in the SPARQL JSON result, for the right entity
+        const labelField = entityType + 'l'; //the label field in the SPARQL JSON result, for the right entity
 
         listElements.sort(function (a, b) {
             return a[labelField].value.localeCompare(b[labelField].value);
@@ -42,12 +23,12 @@ function populateDropdownBasedOnPrevious(dropdown, entityType, item, listElement
 
         var matches = $.grep(listElements, function (e) {
             return item[urlField].value === e[urlField].value &&
-                item[labelField].value === e[labelField].value;
+                    item[labelField].value === e[labelField].value;
         });
 
         if (matches.length === 0) { //item has not yet been added
-            var selectOptionData = dropdown.html() +
-                '<option value="' + item[urlField].value + '">' + item[labelField].value + '</option>';
+            const selectOptionData = dropdown.html() +
+                    '<option value="' + item[urlField].value + '">' + item[labelField].value + '</option>';
             dropdown.html(selectOptionData).selectpicker('refresh');
             listElements.push(item);
         }
@@ -56,11 +37,11 @@ function populateDropdownBasedOnPrevious(dropdown, entityType, item, listElement
 
 function populateDropdownList(rdfBindings, entityName, dropdownId, selectedValue) {
     selectedValue = stripSlash(selectedValue);
-    var ddmOptions = [];
+    let ddmOptions = [];
 
     $.each(rdfBindings, function (key, item) {
-        var val = getElement(entityName, item);
-        var existing = $.grep(ddmOptions, function (e) {
+        let val = getElement(entityName, item);
+        let existing = $.grep(ddmOptions, function (e) {
             return (val.url === e.url && val.label === e.label) || (val.transitiveUrl === e.url && val.label === e.label);
         });
         if (existing.length === 0) {
@@ -79,7 +60,7 @@ function populateDropdownList(rdfBindings, entityName, dropdownId, selectedValue
         return a.label.localeCompare(b.label);
     });
 
-    var selectOptionData = '<option value=1></option>';
+    let selectOptionData = '<option value=1></option>';
     $.each(ddmOptions, function (key, unique) {
         if (unique.url === selectedValue) {
             selectOptionData += '<option value="' + unique.url + '">' + unique.label + '</option>';
@@ -105,8 +86,8 @@ function populateDropdownList(rdfBindings, entityName, dropdownId, selectedValue
  * unlockElement: the jQuery element for the unlock of this element
  */
 function autoselectDropdownWhenOnlyOneChoice(dropdown, lockElement, unlockElement, disableOnceSelected) {
-    if (dropdown.attr('disabled') != 'disabled') {
-        if (dropdown.children('option').length == 2) {
+    if (dropdown.attr('disabled') !== 'disabled') {
+        if (dropdown.children('option').length === 2) {
             dropdown.html(dropdown.find('option').not(':empty()').first().attr('selected', true)).selectpicker('refresh');
             if (disableOnceSelected) {
                 dropdown.prop('disabled', true);
@@ -123,10 +104,10 @@ function autoselectDropdownWhenOnlyOneChoice(dropdown, lockElement, unlockElemen
  * '1' or null means "nothing actually selected" and is normalized to null.
  */
 function getSelectedValues() {
-    var selected = {};
+    let selected = {};
     ENTITIES.forEach(function (entity) {
-        var val = $(entity.selectId).val();
-        selected[entity.key] = (val != 1 && val != null) ? val : null;
+        const val = $(entity.selectId).val();
+        selected[entity.key] = (val !== '1' && val != null) ? val : null;
     });
     return selected;
 }
@@ -139,17 +120,17 @@ function getSelectedValues() {
  */
 function rowMatchesSelection(bindings, selectedValues) {
     return ENTITIES.every(function (entity) {
-        var selected = selectedValues[entity.key];
+        let selected = selectedValues[entity.key];
         if (selected === null) {
             return true;
         }
-        var b = bindings[entity.key];
+        let b = bindings[entity.key];
         return b.url === selected || b.transitiveUrl === selected;
     });
 }
 
 function getBindingsForRow(element) {
-    var bindings = {};
+    let bindings = {};
     ENTITIES.forEach(function (entity) {
         bindings[entity.key] = getElement(entity.bindingKey, element);
     });
@@ -165,9 +146,9 @@ function dropdownChanged(dropdown, disableOnceSelected) {
     const unlockElementId = dropdown.attr('id').split('_')[1] + "_unlock";
     const unlockElement = $("#" + unlockElementId);
 
-    const selectedValues = getSelectedValues();
+    let selectedValues = getSelectedValues();
     const emptyOption = '<option value=1></option>';
-    const accumulated = {};
+    let accumulated = {};
 
     ENTITIES.forEach(function (entity) {
         accumulated[entity.key] = [];
@@ -176,9 +157,9 @@ function dropdownChanged(dropdown, disableOnceSelected) {
         }
     });
 
-    const rdfBindings = getBindings(false);
+    let rdfBindings = getBindings(false);
     $(rdfBindings).each(function (index, element) {
-        const bindings = getBindingsForRow(element);
+        var bindings = getBindingsForRow(element);
         if (rowMatchesSelection(bindings, selectedValues)) {
             ENTITIES.forEach(function (entity) {
                 populateDropdownBasedOnPrevious($(entity.selectId), entity.prefixLetter, element, accumulated[entity.key]);
@@ -210,10 +191,10 @@ function unlockTc(rdfBindings) {
  * since their valid options depend on this one.
  */
 function handleDependentUnlockClick(entity, rdfBindings) {
-    const others = ENTITIES.filter(function (e) {
+    let others = ENTITIES.filter(function (e) {
         return e.key !== entity.key;
     });
-    const allOthersEnabled = others.every(function (e) {
+    let allOthersEnabled = others.every(function (e) {
         return $(e.selectId).attr('disabled') != 'disabled';
     });
 
@@ -269,8 +250,8 @@ function initDropdowns(rdfBindings, selectedValues) {
         const timeZone = $('#timeZoneField').val(); //in case of editing an event, this is set
         const timeStamp = (date !== undefined && time !== undefined) ? (date + 'T' + time + timeZone) : null;
 
-        const allSelected = ENTITIES.every(function (entity) {
-            return $(entity.selectId).val() != 1;
+        let allSelected = ENTITIES.every(function (entity) {
+            return $(entity.selectId).val() !== '1';
         });
 
         if (!allSelected) {
@@ -279,16 +260,16 @@ function initDropdowns(rdfBindings, selectedValues) {
             return;
         }
 
-        const selectedValues = {};
+        let selectedValues = {};
         ENTITIES.forEach(function (entity) {
             selectedValues[entity.key] = $(entity.selectId).val();
         });
 
-        const rdfBindings = getBindings(false);
+        let rdfBindings = getBindings(false);
         $(rdfBindings).each(function (index, element) {
-            var bindings = getBindingsForRow(element);
+            let bindings = getBindingsForRow(element);
 
-            var matches = ENTITIES.every(function (entity) {
+            let matches = ENTITIES.every(function (entity) {
                 var b = bindings[entity.key];
                 return b.url === selectedValues[entity.key] || b.transitiveUrl === selectedValues[entity.key];
             });
@@ -304,8 +285,8 @@ function initDropdowns(rdfBindings, selectedValues) {
                     }, stayGreenForThisPeriod);
                     $("#collapseOne").addClass("show");
                     addEVtoLocalStorage(event);
-                    unlockTc(rdfBindings)
                     populateAllScenarios(rdfBindings);
+                    unlockTc(rdfBindings); // reset tc/t/p/a so the next event starts from a clean slate
                 }, function () {
                     $("#btnSubmitDropdownChoice").removeClass("btn-success").addClass("btn-warning");
                 });
@@ -337,15 +318,15 @@ function getElement(what, item) {
 }
 
 function populateDropdownLists(rdfBindings, selectedValues) {
-    var hasSelection = selectedValues !== undefined && selectedValues !== null;
+    const hasSelection = selectedValues !== undefined && selectedValues !== null;
 
     ENTITIES.forEach(function (entity) {
-        var value = hasSelection ? selectedValues[entity.key] : null;
+        const value = hasSelection ? selectedValues[entity.key] : null;
         populateDropdownList(rdfBindings, entity.bindingKey, entity.selectId, value);
         $(entity.lockId).css('visibility', hasSelection ? 'visible' : 'hidden');
     });
 
-    // Matches original behaviour: unlock icons are only touched (hidden) when
+    // unlock icons are only touched (hidden) when
     // there IS a selection; with no selection their visibility is left as-is.
     if (hasSelection) {
         ENTITIES.forEach(function (entity) {

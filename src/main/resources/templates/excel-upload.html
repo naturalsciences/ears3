@@ -49,14 +49,9 @@
 
             <script th:inline="javascript">
                 $(document).ready(function () {
-                    if (localStorage.actor == null) {
-                        window.location.href = './settings';
-                    } else {
-                        let me = JSON.parse(localStorage.getItem('actor'));
-                        let actorField = document.getElementById("actorField");
-                        actorField.value = localStorage.getItem("actor");
-                        $("#settings-link").html(me.firstName + " " + me.lastName);
-                    }
+                    let actorField = document.getElementById("actorField");
+                    actorField.value = localStorage.getItem("actor");
+
                     /*<![CDATA[*/
                     var homelink = /*[[@{'/'}]]*/ '';
                     /*]]>*/

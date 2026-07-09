@@ -133,6 +133,7 @@ public class EventService {
         String actorEmail = sanitizeParam(allParams, "actorEmail");
         String startDate = sanitizeParam(allParams, "startDate");
         String endDate = sanitizeParam(allParams, "endDate");
+        String freeSearch = sanitizeParam(allParams, "search");
         OffsetDateTime start = null;
         OffsetDateTime end = null;
 
