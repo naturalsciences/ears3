@@ -51,7 +51,7 @@ public abstract interface EventRepository
     String ALL_Q = "from Event e left join e.platform pl left join e.program p left join e.actor pe left join pl.term l where (COALESCE(cast(?1 as string), l.identifier) = l.identifier or COALESCE(cast(?1 as string), l.urn) = l.urn) and COALESCE(cast(?2 as string), pe.email) = pe.email and COALESCE(cast(?3 as string), p.identifier) = p.identifier";
     @Query(value = SELECT + ALL_Q + ORDER_BY,
             countQuery = COUNT + ALL_Q)
-    public abstract Page<Event> findAllByPlatformActorAndProgram(String platformCode, String actorEmail, String programIdentifier, Pageable pageable);
+    public abstract Page<Event> findAllByPlatformActorAndProgram(String platformIdentifier, String actorEmail, String programIdentifier, Pageable pageable);
 
     String TIME_Q = "from Event e where e.creationTime >= ?1 or e.modificationTime >= ?1";
     @Query(value = SELECT + TIME_Q + ORDER_BY,

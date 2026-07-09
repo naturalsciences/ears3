@@ -8,7 +8,10 @@ package eu.eurofleets.ears3.service;
 import eu.eurofleets.ears3.domain.Organisation;
 import eu.eurofleets.ears3.domain.Person;
 import eu.eurofleets.ears3.dto.PersonDTO;
+
+import java.time.LocalDate;
 import java.util.List;
+
 import org.apache.commons.collections4.IterableUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -40,6 +43,7 @@ public class PersonService {
     /**
      * *
      * Find one or more persons by a full name, ie. 'firstName lastName'
+     *
      * @param person
      * @return
      */
@@ -68,6 +72,15 @@ public class PersonService {
         return findByNameAndOrganisation(person.getFirstName(), person.getLastName(),
                 (Organisation) person.getOrganisation());
     }
+
+    public List<Person> findByActiveInPeriod(LocalDate periodStart, LocalDate periodEnd) {
+        return this.personRepository.findByActiveInPeriod(periodStart, periodEnd);
+    }
+
+    public List<Person> findByActiveInYear(int year) {
+        return this.personRepository.findByActiveInPeriod(LocalDate.of(year, 1, 1), LocalDate.of(year, 12, 31));
+    }
+
 
     public Person findOrCreate(Person person) {
         if (person == null) {

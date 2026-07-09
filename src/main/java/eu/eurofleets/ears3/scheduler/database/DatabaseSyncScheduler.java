@@ -5,6 +5,7 @@
  */
 package eu.eurofleets.ears3.scheduler.database;
 
+import org.springframework.web.bind.annotation.GetMapping;
 import tools.jackson.databind.ObjectMapper;
 import eu.eurofleets.ears3.service.CountryService;
 import eu.eurofleets.ears3.service.HarbourService;
@@ -76,7 +77,7 @@ public class DatabaseSyncScheduler {
     private ObjectMapper objectMapper;
 
     //@Operation(hidden = true, summary = "Synchronize the database of events, programs and cruises with an external EARS instance.")
-    @RequestMapping(method = {RequestMethod.GET}, path = "database")
+    @GetMapping(path = "database")
     @Async("asyncExecutor")
     public CompletableFuture<String> syncDatabase() throws MalformedURLException, IOException {
         log.log(Level.INFO, "Syncing database");

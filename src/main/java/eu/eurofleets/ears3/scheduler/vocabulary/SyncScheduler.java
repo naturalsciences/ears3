@@ -38,6 +38,7 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
@@ -118,7 +119,7 @@ public class SyncScheduler {
         VESSEL_OPERATORS.put("SDN:C17::33H4", "SDN:EDMO::3706");
     }
 
-    @RequestMapping(method = {RequestMethod.GET}, path = "ships")
+    @GetMapping(path = "ships")
     @Async("asyncExecutor")
     public CompletableFuture<String> syncShips() {
         log.log(Level.INFO, "Syncing ships");
@@ -157,7 +158,7 @@ public class SyncScheduler {
         return CompletableFuture.completedFuture("Finished syncing ships");
     }
 
-    @RequestMapping(method = {RequestMethod.GET}, path = "organisations")
+    @GetMapping(path = "organisations")
     @Async("asyncExecutor")
     public CompletableFuture<String> syncOrganisations() throws Exception {
         log.log(Level.INFO, "Syncing organisations");
@@ -184,7 +185,7 @@ public class SyncScheduler {
         return CompletableFuture.completedFuture("Finished syncing organisations");
     }
 
-    @RequestMapping(method = {RequestMethod.GET}, path = "harbours")
+    @GetMapping(path = "harbours")
     @Async("asyncExecutor")
     public CompletableFuture<String> syncHarbours() {
         log.log(Level.INFO, "Syncing harbours");
@@ -210,35 +211,35 @@ public class SyncScheduler {
         return CompletableFuture.completedFuture("Finished syncing harbours");
     }
 
-    @RequestMapping(method = {RequestMethod.GET}, path = "seas")
+    @GetMapping(path = "seas")
     @Async("asyncExecutor")
     public CompletableFuture<String> syncSeas() {
         sync(SeaArea.class, new ExternalHelper<>(SeaArea.class, new SeaAreaCopyAssistant()));
         return CompletableFuture.completedFuture("Finished syncing sea areas");
     }
 
-    @RequestMapping(method = {RequestMethod.GET}, path = "countries")
+    @GetMapping(path = "countries")
     @Async("asyncExecutor")
     public CompletableFuture<String> syncCountries() {
         sync(Country.class, new ExternalHelper<>(Country.class, null));
         return CompletableFuture.completedFuture("Finished syncing countries");
     }
 
-    @RequestMapping(method = {RequestMethod.GET}, path = "tools")
+    @GetMapping(path = "tools")
     @Async("asyncExecutor")
     public CompletableFuture<String> syncTools() {
         sync(Tool.class, new ExternalHelper<>(Tool.class, null));
         return CompletableFuture.completedFuture("Finished syncing tools");
     }
 
-    @RequestMapping(method = {RequestMethod.GET}, path = "projects")
+    @GetMapping(path = "projects")
     @Async("asyncExecutor")
     public CompletableFuture<String> syncProjects() {
         sync(Project.class, new ExternalProjectHelper());
         return CompletableFuture.completedFuture("Finished syncing projects");
     }
 
-    @RequestMapping(method = {RequestMethod.GET}, path = "all")
+    @GetMapping(path = "all")
     @Async("asyncExecutor")
     public CompletableFuture<String> sync() throws Exception {
         synchronizeExternal();

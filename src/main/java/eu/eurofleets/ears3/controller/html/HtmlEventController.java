@@ -19,7 +19,7 @@ public class HtmlEventController {
     @Autowired
     private EventService eventService;
 
-    @RequestMapping(method = {RequestMethod.GET}, value = {"/event/new", "/index", "", "/", "../"}, produces = {"text/html; charset=utf-8"})
+    @GetMapping(value = {"/event/new", "/index", "", "/", "../"}, produces = {"text/html; charset=utf-8"})
     public String event() {
         return "event-new";
     }
@@ -37,7 +37,7 @@ public class HtmlEventController {
         return "event-edit";
     }
 
-    @RequestMapping(method = {RequestMethod.GET}, value = {"/settings"}, produces = {"text/html; charset=utf-8"})
+    @GetMapping(value = {"/settings"}, produces = {"text/html; charset=utf-8"})
     public String settings() {
         return "settings";
     }

@@ -119,7 +119,7 @@ public class EventService {
 
     public static String sanitizeParam(Map<String, String> allParams, String name) {
         String get = allParams.get(name);
-        if (get == null || get.equals("") || get.equals(" ")) {
+        if (get == null || get.trim().isEmpty()) {
             return null;
         } else {
             return get;
@@ -130,10 +130,11 @@ public class EventService {
         String platformIdentifier = sanitizeParam(allParams, "platformIdentifier");
         String cruiseIdentifier = sanitizeParam(allParams, "cruiseIdentifier");
         String programIdentifier = sanitizeParam(allParams, "programIdentifier");
+        String station = sanitizeParam(allParams, "station");
+        String freeSearch = sanitizeParam(allParams, "search");
         String actorEmail = sanitizeParam(allParams, "actorEmail");
         String startDate = sanitizeParam(allParams, "startDate");
         String endDate = sanitizeParam(allParams, "endDate");
-        String freeSearch = sanitizeParam(allParams, "search");
         OffsetDateTime start = null;
         OffsetDateTime end = null;
 

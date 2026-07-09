@@ -4,10 +4,7 @@ import eu.eurofleets.ears3.domain.Platform;
 import eu.eurofleets.ears3.service.PlatformService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.Environment;
-import org.springframework.web.bind.annotation.CrossOrigin;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.http.MediaType;
 
 @RestController
@@ -21,7 +18,7 @@ public class PlatformController {
     @Autowired
     private Environment env;
 
-    @RequestMapping(method = {RequestMethod.GET}, value = {"platform/current"}, produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
+    @GetMapping(value = {"platform/current"}, produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
     public Platform getCurrentPlatform() {
         String identifier = env.getProperty("ears.platform");
         Platform p = platformService.findByIdentifier(identifier);

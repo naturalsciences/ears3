@@ -102,7 +102,7 @@ public class EventExcelController {
     }
 
     // properties but are not saved as properties
-    @RequestMapping(method = RequestMethod.GET, value = "events.csv", produces = "text/csv; charset=utf-8")
+    @GetMapping(value = "events.csv", produces = "text/csv; charset=utf-8")
     public String getEventsAsCSV(@RequestParam Map<String, String> allParams) throws IOException {
         Page<Event> eventsPage = this.eventService.advancedFind(allParams, Pageable.unpaged());
         List<Event> events = eventsPage.stream().toList();

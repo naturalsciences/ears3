@@ -35,14 +35,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.CrossOrigin;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestHeader;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseStatus;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.util.UriUtils;
 //import com.sun.jersey.spi.container.servlet.ServletContainer;
@@ -178,17 +171,17 @@ public class OntologyController {
 
     }
 
-    @RequestMapping(method = {RequestMethod.GET}, value = {"vessel"})
+    @GetMapping(value = {"vessel"})
     public ResponseEntity getVesselOntology() {
         return getFile(VESSEL_ONTOLOGY_FILE_LOCATION, "vessel");
     }
 
-    @RequestMapping(method = {RequestMethod.GET}, value = {"vessel/date"}, produces = {MediaType.TEXT_PLAIN_VALUE})
+    @GetMapping(value = {"vessel/date"}, produces = {MediaType.TEXT_PLAIN_VALUE})
     public ResponseEntity<StringMessage> getVesselOntologyDate() {
         return getFileDate(VESSEL_ONTOLOGY_FILE_LOCATION, "vessel");
     }
 
-    @RequestMapping(method = {RequestMethod.GET}, value = {"program"})
+    @GetMapping(value = {"program"})
     public ResponseEntity getProgramOntology(@RequestParam("programIdentifier") String programIdentifier) {
         if (programIdentifier == null) {
             StringMessage m = new StringMessage("Cannot return reponse as the get parameter 'name' is not provided.", 500, null, null);
@@ -204,7 +197,7 @@ public class OntologyController {
         }
     }
 
-    @RequestMapping(method = {RequestMethod.GET}, value = {"program/date"}, produces = {MediaType.TEXT_PLAIN_VALUE})
+    @GetMapping(value = {"program/date"}, produces = {MediaType.TEXT_PLAIN_VALUE})
     public ResponseEntity<StringMessage> getProgramOntologyDate(@RequestParam("programIdentifier") String programIdentifier) {
         if (programIdentifier == null) {
             StringMessage m = new StringMessage("Cannot return date as the get parameter 'name' is not provided.", 500, null, null);
@@ -220,7 +213,7 @@ public class OntologyController {
         }
     }
 
-    @RequestMapping(method = {RequestMethod.GET}, value = {"authenticate"}, produces = MediaType.TEXT_PLAIN_VALUE)
+    @GetMapping(value = {"authenticate"}, produces = MediaType.TEXT_PLAIN_VALUE)
     public String canAuthenticate(@RequestHeader("Authorization") String authorization) {
         if (authorization != null) {
             if (authorization != null && authorization.startsWith("Basic")) {
@@ -260,7 +253,7 @@ public class OntologyController {
         return jenaModel;
     }
 
-    @RequestMapping(method = {RequestMethod.GET}, value = {"vessel/sparql"}, produces = MediaType.APPLICATION_JSON_VALUE)
+    @GetMapping(value = {"vessel/sparql"}, produces = MediaType.APPLICATION_JSON_VALUE)
     public String vesselSparqlEndpoint(@RequestParam(required = true, value = "q") String sparqlQuery, @RequestParam(required = false, value = "program") String program) throws IOException {
         ResultSet rs;
         sparqlQuery = UriUtils.decode(sparqlQuery, StandardCharsets.UTF_8);
@@ -328,7 +321,7 @@ public class OntologyController {
         return qe.execSelect();
     }
 
-    @RequestMapping(method = {RequestMethod.GET}, value = {"program/sparql"}, produces = MediaType.APPLICATION_JSON_VALUE)
+    @GetMapping(value = {"program/sparql"}, produces = MediaType.APPLICATION_JSON_VALUE)
     public String programSparqlEndpoint(@RequestParam(required = true, value = "q") String sparqlQuery, @RequestParam(required = true, value = "programIdentifier") String programIdentifier) throws IOException {
         sparqlQuery = UriUtils.decode(sparqlQuery, "UTF8");
         Query qry = QueryFactory.create(sparqlQuery);

@@ -19,16 +19,7 @@ import java.util.Set;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.CrossOrigin;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseStatus;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
 @RestController
@@ -42,7 +33,7 @@ public class ProgramController {
     @Autowired
     private CruiseService cruiseService;
 
-    @RequestMapping(method = { RequestMethod.GET }, value = { "programs" }, produces = {
+    @GetMapping(value = { "programs" }, produces = {
             "application/xml; charset=utf-8", "application/json;charset=UTF-8" })
     public ProgramList getPrograms() {
         Set<Program> res = this.programService.findAll();
@@ -54,7 +45,7 @@ public class ProgramController {
     }
 
     // @Operation(summary = "Find programs by cruiseIdentifier")
-    @RequestMapping(method = { RequestMethod.GET }, value = { "programs" }, params = {
+    @GetMapping(value = { "programs" }, params = {
             "cruiseIdentifier" }, produces = { "application/xml; charset=utf-8", "application/json;charset=UTF-8" })
     public ProgramList getPrograms(@RequestParam(required = false, defaultValue = "") String cruiseIdentifier) {
         Set<Program> res;
@@ -70,19 +61,19 @@ public class ProgramController {
         return new ProgramList(res);
     }
 
-    @RequestMapping(method = { RequestMethod.GET }, value = { "programs" }, params = { "startDate" }, produces = {
+    @GetMapping(value = { "programs" }, params = { "startDate" }, produces = {
             "application/xml; charset=utf-8", "application/json;charset=UTF-8" })
     public ProgramList getProgramsByStartDate(@RequestParam(required = true, defaultValue = "") String startDate) {
         return getPrograms(startDate, null);
     }
 
-    @RequestMapping(method = { RequestMethod.GET }, value = { "programs" }, params = { "endDate" }, produces = {
+    @GetMapping(value = { "programs" }, params = { "endDate" }, produces = {
             "application/xml; charset=utf-8", "application/json;charset=UTF-8" })
     public ProgramList getProgramsByEndDate(@RequestParam(required = false, defaultValue = "") String endDate) {
         return getPrograms(null, endDate);
     }
 
-    @RequestMapping(method = { RequestMethod.GET }, value = { "programs" }, params = { "startDate",
+    @GetMapping(value = { "programs" }, params = { "startDate",
             "endDate" }, produces = { "application/xml; charset=utf-8", "application/json;charset=UTF-8" })
     public ProgramList getPrograms(@RequestParam(required = false, defaultValue = "") String startDate,
             @RequestParam(required = false, defaultValue = "") String endDate) { // @DateTimeFormat(iso = ISO.DATE_TIME)
@@ -118,7 +109,7 @@ public class ProgramController {
         return new ProgramList(res);
     }
 
-    @RequestMapping(method = { RequestMethod.GET }, value = { "program/{id}" }, produces = {
+    @GetMapping(value = { "program/{id}" }, produces = {
             "application/xml; charset=utf-8", "application/json;charset=UTF-8" })
     public Program getProgramById(@PathVariable(value = "id") String id) {
         Program program = this.programService.findById(Long.parseLong(id));
@@ -129,13 +120,13 @@ public class ProgramController {
         }
     }
 
-    @RequestMapping(method = { RequestMethod.GET }, value = { "program/current" }, produces = {
+    @GetMapping(value = { "program/current" }, produces = {
             "application/xml; charset=utf-8", "application/json;charset=UTF-8" })
     public ProgramList getCurrent() {
         return new ProgramList(this.programService.findCurrent());
     }
 
-    @RequestMapping(method = { RequestMethod.GET }, value = { "program" }, params = { "identifier" }, produces = {
+    @GetMapping(value = { "program" }, params = { "identifier" }, produces = {
             "application/xml; charset=utf-8", "application/json;charset=UTF-8" })
     public Program getProgramByidentifier(@RequestParam(required = true, value = "identifier") String identifier) {
         Program program = this.programService.findByIdentifier(identifier);

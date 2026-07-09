@@ -35,16 +35,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.CrossOrigin;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseStatus;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
 @RestController
@@ -64,14 +55,14 @@ public class CruiseController {
     @Autowired
     private Environment env;
 
-    @RequestMapping(method = { RequestMethod.GET }, value = { "alive" }, produces = { "text/plain" })
+    @GetMapping(value = { "alive" }, produces = { "text/plain" })
     public String getAlive() {
         return "";
     }
 
     public static Logger logger = Logger.getLogger(CruiseController.class.getSimpleName());
 
-    // @RequestMapping(method = {RequestMethod.GET}, value = {"cruises"}, produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
+    // @GetMapping(value = {"cruises"}, produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
     private CruiseList getCruises(String platformCode) {
         Collection<Cruise> res;
         if (platformCode == null || "".equals(platformCode)) {
@@ -83,7 +74,7 @@ public class CruiseController {
         return new CruiseList(res);
     }
 
-    @RequestMapping(method = { RequestMethod.GET }, value = { "cruises" }, produces = {
+    @GetMapping(value = { "cruises" }, produces = {
             MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE })
     public CruiseList getCruisesAt(@RequestParam(required = false, defaultValue = "") String platformIdentifier,
             @RequestParam(required = false) OffsetDateTime startDate,
@@ -109,7 +100,7 @@ public class CruiseController {
         return new CruiseList(res);
     }
 
-    @RequestMapping(method = { RequestMethod.GET }, value = { "cruise/{id}" }, produces = {
+    @GetMapping(value = { "cruise/{id}" }, produces = {
             MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE })
     public Cruise getCruiseById(@PathVariable(value = "id") String id) {
         Cruise cruise = this.cruiseService.findById(Long.parseLong(id));
@@ -120,7 +111,7 @@ public class CruiseController {
         }
     }
 
-    @RequestMapping(method = { RequestMethod.GET }, value = { "cruise" }, params = { "identifier" }, produces = {
+    @GetMapping(value = { "cruise" }, params = { "identifier" }, produces = {
             MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE })
     public Cruise getCruiseByidentifier(@RequestParam(required = true, value = "identifier") String identifier) {
         Cruise cruise = this.cruiseService.findByIdentifier(identifier);
@@ -131,13 +122,13 @@ public class CruiseController {
         }
     }
 
-    @RequestMapping(method = { RequestMethod.GET }, value = { "cruise/current" }, produces = {
+    @GetMapping(value = { "cruise/current" }, produces = {
             MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE })
     public CruiseList getCurrent() {
         return new CruiseList(this.cruiseService.findCurrent());
     }
 
-    @RequestMapping(method = { RequestMethod.GET }, value = { "cruise/csr" }, params = { "identifier" }, produces = {
+    @GetMapping(value = { "cruise/csr" }, params = { "identifier" }, produces = {
             "application/xml; charset=utf-8" })
     public String getCSRByName(@RequestParam(required = true, value = "identifier") String identifier)
             throws IllegalCSRArgumentException {

@@ -2,6 +2,8 @@ package eu.eurofleets.ears3.service;
 
 import eu.eurofleets.ears3.domain.Organisation;
 import eu.eurofleets.ears3.domain.Person;
+
+import java.time.LocalDate;
 import java.util.List;
 import jakarta.transaction.Transactional;
 import org.springframework.data.jpa.repository.Query;
@@ -27,5 +29,21 @@ public abstract interface PersonRepository
 
     @Query("select p from Person p where p.firstName||' '||p.lastName = ?1")
     public List<Person> findByFullName(String fullName);
+
+    @Query(value = """
+            SELECT q.* FROM (SELECT p.* FROM person p
+                             JOIN program_principal_investigators ppi ON ppi.principal_investigators_id = p.id
+                             JOIN "program" prg ON prg.id = ppi.program_id
+                             JOIN cruise_programs cp ON cp.program_id = prg.id
+                             JOIN cruise c ON c.id = cp.cruise_id
+                             WHERE c.start_date <= ?2 AND c.end_date >= ?1
+                             UNION
+                             SELECT p.* FROM person p
+                             JOIN cruise_chief_scientists ccs ON ccs.chief_scientist_id = p.id
+                             JOIN cruise c ON c.id = ccs.cruise_id
+                             WHERE c.start_date <= ?2 AND c.end_date >= ?1) as q
+                             ORDER BY q.last_name,q.first_name
+            """, nativeQuery = true)
+    public List<Person> findByActiveInPeriod(LocalDate periodStart, LocalDate periodEnd);
 
 }

@@ -31,16 +31,7 @@ import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.CrossOrigin;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseStatus;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
 @RestController()
@@ -55,7 +46,7 @@ public class EventController {
     @Autowired
     private Environment env;
 
-    @RequestMapping(method = {RequestMethod.GET}, value = {"events"}, produces = {MediaType.APPLICATION_JSON_VALUE,
+    @GetMapping(value = {"events"}, produces = {MediaType.APPLICATION_JSON_VALUE,
             Constants.APPLICATION_XML_UTF8_VALUE})
     public EventPage getEvents(
             @RequestParam Map<String, String> allParams,
@@ -64,14 +55,14 @@ public class EventController {
         return new EventPage(events);
     }
 
-    @RequestMapping(method = {RequestMethod.GET}, value = {"event/{id}"}, produces = {
+    @GetMapping(value = {"event/{id}"}, produces = {
             MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
     public Event getEventById(@PathVariable(value = "id") String id) {
         return this.eventService.findById(Long.parseLong(id));
 
     }
 
-    @RequestMapping(method = {RequestMethod.GET}, value = {"event"}, params = {"identifier"}, produces = {
+    @GetMapping(value = {"event"}, params = {"identifier"}, produces = {
             MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
     public Event getEventByIdentifier(@RequestParam(required = true, value = "identifier") String identifier) {
         return this.eventService.findByIdentifier(identifier);

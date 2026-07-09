@@ -3,37 +3,47 @@
       xmlns:th="http://www.thymeleaf.org"
       xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" layout:decorate="~{fragments/f}">
 <head th:replace="fragments/f :: head"></head>
+
 <body>
 <nav th:replace="fragments/f :: header"></nav>
 <div class="container" layout:fragment="main">
-    <div>
-        <form class="form-group">
-            <div class="form-group">
-                <p><input name="firstName" type="text" class="form-control" id="firstNameField" placeholder=" "
-                          required>
-                    <label class="txtBox" for="firstNameField">First name</label></p>
-            </div>
-            <div class="form-group">
-                <p>
-                    <input name="lastName" type="text" class="form-control" id="lastNameField" placeholder=" " required>
-                    <label class="txtBox" for="lastNameField">Last name</label></p>
-            </div>
-            <div class="form-group">
-                <p>
-                    <input name="email" type="email" class="form-control" id="emailField"
-                           placeholder=" " required>
-                    <label class="txtBox" for="emailField">Email</label></p>
-            </div>
-            <div class="form-group">
-
-                <select name="organisation" id="organisationField"
-                        class="selectpicker target edmo form-control"
-                        data-live-search="true" title="Organisation">
-                </select>
-            </div>
-            <button id="id_Submit" type="submit" class="btn btn-primary  btn-block">Save</button>
-        </form>
+    <h1 id="h1">Actor settings</h1>
+    <div class="form-inline mb-3 p-3 border rounded">
+        <select name="cruise" id="actorField"
+                class="selectpicker target form-control"
+                data-live-search="true" title="Actor">
+        </select>
     </div>
+    <form class="form-group mb-3 p-3 border rounded">
+        <h2>I'm not yet in the actor list!</h2>
+        <p>To get yourself in the list, add your details below and create a first event. From now on you'll stay in the
+            actor list.</p>
+        <div class="form-group">
+            <p><input name="firstName" type="text" class="form-control" id="firstNameField" placeholder=" "
+                      required>
+                <label class="txtBox" for="firstNameField">First name</label></p>
+        </div>
+        <div class="form-group">
+            <p>
+                <input name="lastName" type="text" class="form-control" id="lastNameField" placeholder=" " required>
+                <label class="txtBox" for="lastNameField">Last name</label></p>
+        </div>
+        <div class="form-group">
+            <p>
+                <input name="email" type="email" class="form-control" id="emailField"
+                       placeholder=" " required>
+                <label class="txtBox" for="emailField">Email</label></p>
+        </div>
+        <div class="form-group">
+
+            <select name="organisation" id="organisationField"
+                    class="selectpicker target edmo form-control"
+                    data-live-search="true" title="Organisation">
+            </select>
+        </div>
+        <button id="id_Submit" type="submit" class="btn btn-primary btn-block">Save</button>
+    </form>
+
 
     <script type="application/javascript">
         $(document).ready(function () {
@@ -54,18 +64,21 @@
 
                     }
                 });
+                $('#actorField').change(function() {
+                    const fullName = $('#actorField').val()
+                    const me = actorLookup[fullName]
+                    localStorage.actor = JSON.stringify(me);
+                    window.location.href = "event/new";
+                });
                 if (typeof localStorage.actor !== 'undefined') {
                     let actor = JSON.parse(localStorage.actor);
-                    $("#firstNameLabel").html(actor.firstName);
-                    $("#lastNameLabel").html(actor.lastName);
-                    $("#programLabel").html(actor.program);
                     $("#firstNameField").val(actor.firstName);
                     $("#lastNameField").val(actor.lastName);
                     $("#emailField").val(actor.email);
                     $("#settings-link").html(actor.firstName + " " + actor.lastName);
                 }
                 $('form').submit(function () {
-                    var me = {
+                    const me = {
                         firstName: $("#firstNameField").val(),
                         lastName: $("#lastNameField").val(),
                         email: $("#emailField").val(),
@@ -73,8 +86,7 @@
                         phoneNumber: null,
                         faxNumber: null
                     };
-                    var authentication_json = JSON.stringify(me);
-                    localStorage.actor = authentication_json;
+                    localStorage.actor = JSON.stringify(me);
                     window.location.href = "event/new";
 
                     return false;

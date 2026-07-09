@@ -47,13 +47,13 @@
             <div class="form-group mr-3 mb-2">
                 <p>
                     <input id="startDateField" class="form-control" type="datetime-local"/>
-                    <label for="startDateField" class="txtBox">From</label>
+                    <label for="startDateField" class="txtBox">From (UTC)</label>
                 </p>
             </div>
             <div class="form-group mr-3 mb-2">
                 <p>
                     <input id="endDateField" class="form-control" type="datetime-local"/>
-                    <label for="endDateField" class="txtBox">To</label></p>
+                    <label for="endDateField" class="txtBox">To (UTC)</label></p>
             </div>
         </div>
         <div class="form-inline mb-2">
@@ -126,10 +126,8 @@
             if (cruiseIdentifier) {
                 const cruise = cruiseLookup[cruiseIdentifier];
                 if (cruise) {
-                    params.startDate = cruise.startDate.replace('Z', '');
-                    params.endDate = cruise.endDate.replace('Z', '');
-                    document.getElementById('startDateField').value = params.startDate;
-                    document.getElementById('endDateField').value = params.endDate;
+                    document.getElementById('startDateField').value = cruise.startDate.replace('Z', '');
+                    document.getElementById('endDateField').value = cruise.endDate.replace('Z', '');
                 }
             }
 
@@ -155,12 +153,12 @@
 
             const startDate = document.getElementById('startDateField').value;
             if (startDate) {
-                params.startDate = startDate;
+                params.startDate = startDate + "Z";
             }
 
             const endDate = document.getElementById('endDateField').value;
             if (endDate) {
-                params.endDate = endDate;
+                params.endDate = endDate + "Z";
             }
             return params;
         }
