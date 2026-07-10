@@ -145,7 +145,7 @@ function buildProgramSort(actorFullName) {
  * from $(document).ready(...) on any page that includes the program field.
  */
 function populateProgramField() {
-    const me = localStorage.actor ? JSON.parse(localStorage.actor) : null;
+    const me = getCurrentActor()
     const actorFullName = me ? (me.firstName + " " + me.lastName) : null;
 
     const earsProgramRegex = buildYearWindowRegex();
@@ -261,5 +261,15 @@ function buildYearWindowRegex(baseDate) {
     return new RegExp('(' + years.join('|') + ')');
 }
 
+function getCurrentActor() {
+    if (localStorage.actor && typeof localStorage.actor !== 'undefined' && localStorage.actor !== 'undefined') {
+        return JSON.parse(localStorage.actor);
+    } else return null;
+}
 
+function setCurrentActor(actor) {
+    if (actor && typeof actor !== 'undefined' && actor !== 'undefined') {
+        localStorage.actor = JSON.stringify(actor);
+    }
+}
 

@@ -54,33 +54,32 @@
             </ul>
         </div>
         <script>
-            (function () {
-                function isLocalStorageSupported() {
-                    try {
-                        if (!window.localStorage) {
-                            return false;
-                        }
-                        const testKey = '__ears_storage_test__';
-                        window.localStorage.setItem(testKey, '1');
-                        window.localStorage.removeItem(testKey);
-                        return true;
-                    } catch (e) {
+            function isLocalStorageSupported() {
+                try {
+                    if (!window.localStorage) {
                         return false;
                     }
+                    const testKey = '__ears_storage_test__';
+                    window.localStorage.setItem(testKey, '1');
+                    window.localStorage.removeItem(testKey);
+                    return true;
+                } catch (e) {
+                    return false;
                 }
+            }
 
-                if (!isLocalStorageSupported()) {
-                    window.location.replace('/ears3/unsupported-browser');
+            if (!isLocalStorageSupported()) {
+                window.location.replace('/ears3/unsupported-browser');
+            }
+            const actor = getCurrentActor()
+            if (!actor) {
+                if (window.location.pathname !== '/ears3/settings') {
+                    window.location.href = '/ears3/settings';
                 }
-                if (localStorage.actor == null) {
-                    if (window.location.pathname !== '/ears3/settings') {
-                        window.location.href = '/ears3/settings';
-                    }
-                } else {
-                    const me = JSON.parse(localStorage.actor);
-                    document.getElementById("settings-link").innerHTML = me.firstName + " " + me.lastName;
-                }
-            })();
+            } else {
+                document.getElementById("settings-link").innerHTML = actor.firstName + " " + actor.lastName;
+            }
+
         </script>
     </div>
 </nav>
