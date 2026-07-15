@@ -22,6 +22,7 @@ import eu.eurofleets.ears3.utilities.Constants;
 import org.apache.commons.io.output.StringBuilderWriter;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.env.Environment;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -43,8 +44,8 @@ public class EventController {
     @Autowired
     private EventService eventService;
 
-    @Autowired
-    private Environment env;
+    @Value("${ears.platform}")
+    public String platformUrn;
 
     @GetMapping(value = {"events"}, produces = {MediaType.APPLICATION_JSON_VALUE,
             Constants.APPLICATION_XML_UTF8_VALUE})
@@ -72,13 +73,7 @@ public class EventController {
     @ResponseStatus(HttpStatus.CREATED)
     public ResponseEntity<Message<EventDTO>> createEvent(@RequestBody EventDTO eventDTO) {
         if (eventDTO.getPlatform() == null) {
-            String property = env.getProperty("ears.platform");
-            if (property != null) {
-                eventDTO.setPlatform(property);
-            } else {
-                throw new IllegalArgumentException(
-                        "No platform has been provided in the POST body and no platform has been set in the web service configuration.");
-            }
+            eventDTO.setPlatform(platformUrn);
         }
         Event event = this.eventService.save(eventDTO);
         if (event != null) {
@@ -89,7 +84,6 @@ public class EventController {
         } else {
             throw new ResponseStatusException(HttpStatus.CONFLICT, "Could not create Event.");
         }
-        // return new ResponseEntity<Event>(, HttpStatus.CREATED);event
     }
 
     @DeleteMapping(value = {"event"}, params = {"identifier"}, produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})

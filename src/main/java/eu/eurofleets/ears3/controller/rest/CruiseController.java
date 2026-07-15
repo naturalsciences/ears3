@@ -17,6 +17,7 @@ import eu.eurofleets.ears3.service.CruiseService;
 import eu.eurofleets.ears3.service.EventService;
 import eu.eurofleets.ears3.service.SeaAreaService;
 import eu.eurofleets.ears3.utilities.DatagramUtilities;
+
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.time.Instant;
@@ -29,7 +30,9 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.logging.Logger;
+
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.env.Environment;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
@@ -52,10 +55,16 @@ public class CruiseController {
     @Autowired
     private EventService eventService;
 
-    @Autowired
-    private Environment env;
+    @Value("${ears.platform}")
+    public String platformUrn;
 
-    @GetMapping(value = { "alive" }, produces = { "text/plain" })
+    @Value("${ears.navigation.server}")
+    public String navServer;
+
+    @Value("${ears.csr.license}")
+    public String licenseString;
+
+    @GetMapping(value = {"alive"}, produces = {"text/plain"})
     public String getAlive() {
         return "";
     }
@@ -74,12 +83,12 @@ public class CruiseController {
         return new CruiseList(res);
     }
 
-    @GetMapping(value = { "cruises" }, produces = {
-            MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE })
+    @GetMapping(value = {"cruises"}, produces = {
+            MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
     public CruiseList getCruisesAt(@RequestParam(required = false, defaultValue = "") String platformIdentifier,
-            @RequestParam(required = false) OffsetDateTime startDate,
-            @RequestParam(required = false) OffsetDateTime endDate,
-            @RequestParam(required = false) OffsetDateTime atDate) {
+                                   @RequestParam(required = false) OffsetDateTime startDate,
+                                   @RequestParam(required = false) OffsetDateTime endDate,
+                                   @RequestParam(required = false) OffsetDateTime atDate) {
         if (startDate == null && endDate == null && atDate == null) {
             return getCruises(platformIdentifier);
         }
@@ -100,8 +109,8 @@ public class CruiseController {
         return new CruiseList(res);
     }
 
-    @GetMapping(value = { "cruise/{id}" }, produces = {
-            MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE })
+    @GetMapping(value = {"cruise/{id}"}, produces = {
+            MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
     public Cruise getCruiseById(@PathVariable(value = "id") String id) {
         Cruise cruise = this.cruiseService.findById(Long.parseLong(id));
         if (cruise != null) {
@@ -111,8 +120,8 @@ public class CruiseController {
         }
     }
 
-    @GetMapping(value = { "cruise" }, params = { "identifier" }, produces = {
-            MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE })
+    @GetMapping(value = {"cruise"}, params = {"identifier"}, produces = {
+            MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
     public Cruise getCruiseByidentifier(@RequestParam(required = true, value = "identifier") String identifier) {
         Cruise cruise = this.cruiseService.findByIdentifier(identifier);
         if (cruise != null) {
@@ -122,14 +131,14 @@ public class CruiseController {
         }
     }
 
-    @GetMapping(value = { "cruise/current" }, produces = {
-            MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE })
+    @GetMapping(value = {"cruise/current"}, produces = {
+            MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
     public CruiseList getCurrent() {
         return new CruiseList(this.cruiseService.findCurrent());
     }
 
-    @GetMapping(value = { "cruise/csr" }, params = { "identifier" }, produces = {
-            "application/xml; charset=utf-8" })
+    @GetMapping(value = {"cruise/csr"}, params = {"identifier"}, produces = {
+            "application/xml; charset=utf-8"})
     public String getCSRByName(@RequestParam(required = true, value = "identifier") String identifier)
             throws IllegalCSRArgumentException {
         Cruise cruise = this.cruiseService.findByIdentifier(identifier);
@@ -146,7 +155,6 @@ public class CruiseController {
             }
 
             List<Coordinate> coordinates = new ArrayList<>();
-            String navServer = env.getProperty("ears.navigation.server");
             try {
                 DatagramUtilities<Navigation> datagramUtilities = new DatagramUtilities<>(Navigation.class, navServer);
 
@@ -202,7 +210,6 @@ public class CruiseController {
             }
             cruise.setSeaAreas(set);
 
-            String licenseString = env.getProperty("ears.csr.license");
             License license = License.Licenses.valueOf(licenseString).license;
             CSRBuilder b = new CSRBuilder(cruise, license, true);
             CSRPrinter p = new CSRPrinter(b);
@@ -214,17 +221,11 @@ public class CruiseController {
         }
     }
 
-    @PostMapping(value = { "cruise" }, produces = { MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE })
+    @PostMapping(value = {"cruise"}, produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
     @ResponseStatus(HttpStatus.CREATED)
     public ResponseEntity<Message<CruiseDTO>> createCruise(@RequestBody CruiseDTO cruiseDTO) {
         if (cruiseDTO.platform == null) {
-            String property = env.getProperty("ears.platform");
-            if (property != null) {
-                cruiseDTO.platform = property;
-            } else {
-                throw new IllegalArgumentException(
-                        "No platform has been provided in the POST body and no platform has been set in the web service configuration.");
-            }
+            cruiseDTO.platform = platformUrn;
         }
         Cruise cruise = this.cruiseService.save(cruiseDTO);
         return new ResponseEntity<Message<CruiseDTO>>(
@@ -232,7 +233,7 @@ public class CruiseController {
                 HttpStatus.CREATED);
     }
 
-    @DeleteMapping(value = { "cruise" }, params = { "identifier" }, produces = { MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE })
+    @DeleteMapping(value = {"cruise"}, params = {"identifier"}, produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public String removeCruiseByIdentifier(@RequestParam(required = true) String identifier) {
         this.cruiseService.deleteByIdentifier(identifier);

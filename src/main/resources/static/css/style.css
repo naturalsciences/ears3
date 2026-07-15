@@ -229,3 +229,8 @@ error > message {
 div.accordion {
     padding-bottom: 1rem;
 }
+
+div#toggle ul > li {
+    display: inline-block;
+    margin-right: 1em;
+}

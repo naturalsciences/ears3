@@ -8,18 +8,41 @@
 <nav th:replace="fragments/f :: header"></nav>
 <div class="container" layout:fragment="main">
     <h1 id="h1">Events</h1>
-    <div id="search" class="form-inline mb-3 p-3 border rounded">
+    <div id="search" class="mb-3 p-3 border rounded">
+        <h2>Filter Events
+            <a th:href="@{/api/events.csv}"
+               class="btn btn-secondary btn-sm"
+               title="Download CSV">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor"
+                     class="bi bi-box-arrow-down"
+                     viewBox="0 0 16 16">
+                    <path fill-rule="evenodd"
+                          d="M3.5 10a.5.5 0 0 1-.5-.5v-8a.5.5 0 0 1 .5-.5h9a.5.5 0 0 1 .5.5v8a.5.5 0 0 1-.5.5h-2a.5.5 0 0 0 0 1h2A1.5 1.5 0 0 0 14 9.5v-8A1.5 1.5 0 0 0 12.5 0h-9A1.5 1.5 0 0 0 2 1.5v8A1.5 1.5 0 0 0 3.5 11h2a.5.5 0 0 0 0-1z"/>
+                    <path fill-rule="evenodd"
+                          d="M7.646 15.854a.5.5 0 0 0 .708 0l3-3a.5.5 0 0 0-.708-.708L8.5 14.293V5.5a.5.5 0 0 0-1 0v8.793l-2.146-2.147a.5.5 0 0 0-.708.708z"/>
+                </svg>
+            </a>
+            <button type="button" id="btnClearSearch" class="btn btn-secondary btn-sm">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor"
+                     class="bi bi-funnel-fill"
+                     viewBox="0 0 16 16">
+                    <path d="M1.5 1.5A.5.5 0 0 1 2 1h12a.5.5 0 0 1 .5.5v2a.5.5 0 0 1-.128.334L10 8.692V13.5a.5.5 0 0 1-.342.474l-3 1A.5.5 0 0 1 6 14.5V8.692L1.628 3.834A.5.5 0 0 1 1.5 3.5z"/>
+                </svg>
+            </button>
+        </h2>
         <div class="form-inline mb-2">
             <div class="form-group mr-3 mb-2">
                 <select name="cruise" id="cruiseField"
                         class="selectpicker target form-control"
                         data-live-search="true" title="Filter cruise">
+                    <option value="">Any cruise</option>
                 </select>
             </div>
             <div class="form-group mr-3 mb-2">
                 <select name="program" id="programField"
                         class="selectpicker target form-control"
                         data-live-search="true" title="Filter program">
+                    <option value="">Any program</option>
                 </select>
             </div>
             <div class="form-group mr-3 mb-2">
@@ -56,38 +79,35 @@
                     <label for="endDateField" class="txtBox">To (UTC)</label></p>
             </div>
         </div>
-        <div class="form-inline mb-2">
-            <div class="form-group mb-2">
-                <button type="button" id="btnClearSearch" class="btn btn-secondary btn-sm">Clear filters</button>
-            </div>
-        </div>
     </div>
-    <div id="toggle" class="form-inline mb-3 p-3 border rounded">
-        Toggle column:&nbsp;<a href="#" class="toggle-vis" data-column="3">Category</a>&nbsp;-&nbsp;<a href="#"
-                                                                                                       class="toggle-vis"
-                                                                                                       data-column="7">Station</a>
-        &nbsp;-&nbsp;<a
-            href="#" class="toggle-vis" data-column="8">Label</a>
+    <div id="toggle" class="mb-3 p-3 border rounded">
+        <h2>Toggle columns</h2>
+        <ul>
+            <li><a href="#" class="toggle-vis" data-column="2">Cruise</a></li>
+            <li><a href="#" class="toggle-vis" data-column="3">Program</a></li>
+            <li><a href="#" class="toggle-vis" data-column="4">Tool category</a></li>
+            <li><a href="#" class="toggle-vis" data-column="8">Station</a></li>
+            <li><a href="#" class="toggle-vis" data-column="9">Label</a></li>
+            <li><a href="#" class="toggle-vis" data-column="10">Description</a></li>
+            <li><a href="#" class="toggle-vis" data-column="11">Actor</a></li>
+        </ul>
     </div>
-    <div>
-        <a th:href="@{/api/events.csv}">Download all events</a>
-    </div>
-
-    <br/>
     <table id="eventTable" class="display dataTable" style="width:100%" role="grid">
         <thead>
         <tr>
-            <th>identifier</th>
             <th>date</th>
             <th>time</th>
+            <th>cruise</th>
+            <th>program</th>
             <th>category</th>
             <th>tool</th>
             <th>process</th>
             <th>action</th>
             <th>station</th>
             <th>label</th>
-            <th>remove</th>
+            <th>description</th>
             <th>actor</th>
+            <th>remove</th>
         </tr>
         </thead>
     </table>
@@ -102,17 +122,19 @@
         // Maps DataTables column index -> backend-sortable property name.
         // null = column isn't sortable server-side (adjust to match your entity's actual property paths).
         const sortableColumns = [
-            'identifier',               // 0
-            'timeStamp',                // 1 (date)
-            'timeStamp',                // 2 (time)
-            'toolCategory.name',        // 3
-            'tool.term.name',           // 4
-            'process.name',             // 5
-            'action.name',              // 6
-            'station',                  // 7
-            'label',                    // 8
+            'timeStamp',                // 0 (date)
+            'timeStamp',                // 1 (time)
+            'cruise',                   // 2
+            'program',                  // 3
+            'toolCategory.name',        // 4
+            'tool.term.name',           // 5
+            'process.name',             // 6
+            'action.name',              // 7
+            'station',                  // 8
+            'label',                    // 9
+            'description',              // 10
+            'actor.email',              // 11
             null,                       // 9 (delete icon)
-            'actor.email'               // 10
         ];
 
         // Single source of truth for every filter the API supports.
@@ -168,7 +190,7 @@
             $('#search').on('change', 'select, input[type=checkbox], input[type=datetime-local]', function () { //program, checkbox and datetime
                 table.ajax.reload();
             });
-            $('#search').on('change', 'input[type=text]', function () { //station text box and free text searh box
+            $('#search').on('change', 'input[type=text]', function () { //station text box and free text search box
                 clearTimeout(searchDebounce);
                 searchDebounce = setTimeout(function () {
                     table.ajax.reload();
@@ -176,8 +198,8 @@
             });
 
             $('#btnClearSearch').on('click', function () {
-                document.getElementById('cruiseField').value = '';
-                document.getElementById('programField').value = '';
+                $('#cruiseField').selectpicker('val', '');
+                $('#programField').selectpicker('val', '');
                 document.getElementById('stationField').value = '';
                 document.getElementById('freeTextField').value = '';
                 document.getElementById('cbOwnEvents').checked = false;
@@ -222,30 +244,35 @@
                             const date = event.timeStamp.split("T")[0].replace(/^20/, "'");
                             const time = event.timeStamp.split("T")[1].replace(/\+\d{2}:\d{2}$/, "");
                             return {
-                                'identifier': event.identifier,
                                 'date': date,
                                 'time': time,
+                                'cruise': event.program.identifier + '_cruise',
+                                'program': event.program.identifier,
                                 'toolCategory': event.toolCategory.name,
                                 'tool': event.tool.term.name,
                                 'process': event.process.name,
                                 'action': event.action.name,
                                 'station': event.station,
                                 'label': event.label,
-                                'actor': event.actor.email
+                                'description': event.description,
+                                'actor': (event.actor.firstName + " " + event.actor.lastName).trim()
                             };
                         });
                     }
                 },
                 "columns": [
-                    {'data': 'identifier'},
                     {'data': 'date'},
                     {'data': 'time'},
+                    {'data': 'cruise'},
+                    {'data': 'program'},
                     {'data': 'toolCategory'},
                     {'data': 'tool'},
                     {'data': 'process'},
                     {'data': 'action'},
                     {'data': 'station'},
                     {'data': 'label'},
+                    {'data': 'description'},
+                    {'data': 'actor'},
                     {
                         "orderable": false,
                         render: function (data, type, row) {
@@ -257,12 +284,10 @@
                                 return '';
                             }
                         }
-                    },
-                    {'data': 'actor'}
+                    }
                 ],
                 "order": [[1, 'desc'], [2, 'desc']],
                 "columnDefs": [
-                    {"targets": [0], "visible": false, "searchable": false},
                     {"targets": [1], "visible": true, "searchable": false},
                     {"targets": [2], "visible": true, "searchable": false},
                     {"targets": [3], "visible": true, "searchable": false},
@@ -272,7 +297,9 @@
                     {"targets": [7], "visible": true, "searchable": false},
                     {"targets": [8], "visible": true, "searchable": false},
                     {"targets": [9], "visible": true, "searchable": false},
-                    {"targets": [10], "visible": false, "searchable": false}
+                    {"targets": [10], "visible": true, "searchable": false},
+                    {"targets": [11], "visible": true, "searchable": false},
+                    {"targets": [12], "visible": true, "searchable": false}
                 ],
                 "lengthMenu": [[50, 100, 200, 300], [50, 100, 200, 300]]
             });

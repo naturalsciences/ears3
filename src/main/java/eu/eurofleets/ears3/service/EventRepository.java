@@ -4,85 +4,141 @@ import eu.eurofleets.ears3.domain.Event;
 
 import java.time.OffsetDateTime;
 import java.util.Date;
-import java.util.List;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
-import org.springframework.data.repository.CrudRepository;
-import org.springframework.data.repository.PagingAndSortingRepository;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
 @Repository
 @Transactional
-public abstract interface EventRepository
-        extends JpaRepository<Event, Long> {
+public interface EventRepository extends JpaRepository<Event, Long> {
 
-    static final String SELECT = "select e ";
-    static final String COUNT = "select count(e) ";
-    static final String ORDER_BY = " order by e.timeStamp";
+    String SELECT = "select e from Event e ";
+    String WHERE = " where ";
+    String AND = " and ";
+    String COUNT = "select count(e) from Event e ";
+    String ORDER_BY = " order by e.timeStamp";
 
-    @Query(value = "select e from Event e where e.identifier = ?1")
-    public abstract Event findByIdentifier(String identifier);
 
-    String TIMESTAMP_BETWEEN_Q = " from Event e where e.timeStamp between ?1 and ?2";
-    @Query(value = SELECT + TIMESTAMP_BETWEEN_Q + ORDER_BY,
-            countQuery = COUNT + TIMESTAMP_BETWEEN_Q)
-    public abstract Page<Event> findByTimeStampBetween(OffsetDateTime paramDate1, OffsetDateTime paramDate2, Pageable pageable);
+    String TIMESTAMP_WHERE = "e.timeStamp between :startDate and :endDate ";
+    String TIME_WHERE = "e.creationTime >= :after or e.modificationTime >= :after ";
+    String TEXT_WHERE = "COALESCE(:label, e.label, '') = COALESCE(e.label, '') "
+            + "and COALESCE(:station, e.station, '') = COALESCE(e.station, '') "
+            + "and COALESCE(:description, e.description, '') = COALESCE(e.description, '') ";
+    String PLATFORM_WHERE = "(COALESCE(:platformIdentifier, l.identifier, '') = COALESCE(l.identifier, '') or COALESCE(:platformIdentifier, l.urn, '') = COALESCE(l.urn, '')) ";
+    String CRUISE_WHERE = "(COALESCE(:cruiseIdentifier, c.identifier, '') = COALESCE(c.identifier, '') or COALESCE(:cruiseIdentifier, c.name, '') = COALESCE(c.name, ''))";
+    String PROGRAM_WHERE = "COALESCE(:programIdentifier, p.identifier, '') = COALESCE(p.identifier, '') ";
+    String ACTOR_WHERE = "COALESCE(:actorEmail, pe.email, '') = COALESCE(pe.email, '') ";
 
-    String TOOL_Q = "from Event e left join e.tool t left join t.term l where l.identifier= ?1 or l.urn= ?1";
-    @Query(value = SELECT + TOOL_Q + ORDER_BY,
-            countQuery = COUNT + TOOL_Q)
-    public abstract Page<Event> findByTool(String identifier, Pageable pageable);
+    @Query(value = "select e from Event e where e.identifier = :identifier")
+    Event findByIdentifier(@Param("identifier") String identifier);
 
-    String PLATFORM_CODE_Q = "from Event e inner join e.platform p left join p.term l where l.identifier= ?1 or l.urn= ?1";
-    @Query(value = SELECT + PLATFORM_CODE_Q + ORDER_BY,
-            countQuery = COUNT + PLATFORM_CODE_Q)
-    public abstract Page<Event> findByPlatformCode(String platformIdentifier, Pageable pageable);
+    @Query(value = SELECT + WHERE + TEXT_WHERE + ORDER_BY,
+            countQuery = COUNT + WHERE + TEXT_WHERE)
+    Page<Event> findByText(@Param("label") String label,
+                           @Param("station") String station,
+                           @Param("description") String description,
+                           Pageable pageable);
 
-    String CRUISE_Q = "from Event e inner join Cruise c on e.timeStamp between c.startDate and c.endDate";
-    @Query(value = SELECT + CRUISE_Q + ORDER_BY,
-            countQuery = COUNT + CRUISE_Q)
-    public abstract Page<Event> findByCruise(String platformCode, Pageable pageable);
+    @Query(value = SELECT + WHERE + TIMESTAMP_WHERE + ORDER_BY,
+            countQuery = COUNT + WHERE + TIMESTAMP_WHERE)
+    Page<Event> findByTimeStampBetween(@Param("startDate") OffsetDateTime startDate,
+                                       @Param("endDate") OffsetDateTime endDate,
+                                       Pageable pageable);
 
-    String ALL_Q = "from Event e left join e.platform pl left join e.program p left join e.actor pe left join pl.term l where (COALESCE(cast(?1 as string), l.identifier) = l.identifier or COALESCE(cast(?1 as string), l.urn) = l.urn) and COALESCE(cast(?2 as string), pe.email) = pe.email and COALESCE(cast(?3 as string), p.identifier) = p.identifier";
-    @Query(value = SELECT + ALL_Q + ORDER_BY,
-            countQuery = COUNT + ALL_Q)
-    public abstract Page<Event> findAllByPlatformActorAndProgram(String platformIdentifier, String actorEmail, String programIdentifier, Pageable pageable);
 
-    String TIME_Q = "from Event e where e.creationTime >= ?1 or e.modificationTime >= ?1";
-    @Query(value = SELECT + TIME_Q + ORDER_BY,
-            countQuery = COUNT + TIME_Q)
-    public abstract Page<Event> findByCreatedOrModifiedAfter(OffsetDateTime after, Pageable pageable);
+    String PLATFORM_ACTOR_PROGRAM_Q = "left join e.platform pl left join e.program p left join e.actor pe left join pl.term l "
+            + WHERE + PLATFORM_WHERE + AND + ACTOR_WHERE + AND + PROGRAM_WHERE + AND + TEXT_WHERE;
 
-    String PLATFORM_ACTOR_PROGRAM_DATES_Q = ALL_Q + " and e.timeStamp between ?4 and ?5";
+    @Query(value = SELECT + PLATFORM_ACTOR_PROGRAM_Q + ORDER_BY,
+            countQuery = COUNT + PLATFORM_ACTOR_PROGRAM_Q)
+    Page<Event> findAllByPlatformActorProgram(@Param("platformIdentifier") String platformIdentifier,
+                                              @Param("actorEmail") String actorEmail,
+                                              @Param("programIdentifier") String programIdentifier,
+                                              @Param("label") String label,
+                                              @Param("station") String station,
+                                              @Param("description") String description,
+                                              Pageable pageable);
+
+    String PLATFORM_ACTOR_PROGRAM_DATES_Q = PLATFORM_ACTOR_PROGRAM_Q + AND + TIMESTAMP_WHERE;
+
     @Query(value = SELECT + PLATFORM_ACTOR_PROGRAM_DATES_Q + ORDER_BY,
             countQuery = COUNT + PLATFORM_ACTOR_PROGRAM_DATES_Q)
-    public abstract Page<Event> findAllByPlatformActorProgramAndDates(String platformIdentifier, String actorEmail, String programIdentifier, OffsetDateTime start, OffsetDateTime end, Pageable pageable);
+    Page<Event> findAllByPlatformActorProgramDates(@Param("platformIdentifier") String platformIdentifier,
+                                                   @Param("actorEmail") String actorEmail,
+                                                   @Param("programIdentifier") String programIdentifier,
+                                                   @Param("startDate") OffsetDateTime startDate,
+                                                   @Param("endDate") OffsetDateTime endDate,
+                                                   @Param("label") String label,
+                                                   @Param("station") String station,
+                                                   @Param("description") String description,
+                                                   Pageable pageable);
 
-    String CRUISE_PROGRAM_ACTOR_Q = "from Event e left join e.program p left join e.actor pe inner join Cruise c on e.timeStamp between c.startDate and c.endDate where COALESCE(cast(?1 as string), c.identifier) = c.identifier and COALESCE(cast(?3 as string), pe.email) = pe.email and COALESCE(cast(?2 as string), p.identifier) = p.identifier";
+    String CRUISE_Q = "inner join Cruise c on e.timeStamp between c.startDate and c.endDate" + WHERE + CRUISE_WHERE;
+
+    String PROGRAM_Q = "left join e.program p left join e.actor pe ";
+    String CRUISE_PROGRAM_ACTOR_Q = PROGRAM_Q + CRUISE_Q + AND + ACTOR_WHERE + AND + PROGRAM_WHERE + AND + TEXT_WHERE;
+
     @Query(value = SELECT + CRUISE_PROGRAM_ACTOR_Q + ORDER_BY,
             countQuery = COUNT + CRUISE_PROGRAM_ACTOR_Q)
-    public abstract Page<Event> findAllByCruiseProgramAndActor(String cruiseIdentifier, String programIdentifier, String actorEmail, Pageable pageable);
+    Page<Event> findAllByCruiseProgramActor(@Param("cruiseIdentifier") String cruiseIdentifier,
+                                            @Param("programIdentifier") String programIdentifier,
+                                            @Param("actorEmail") String actorEmail,
+                                            @Param("label") String label,
+                                            @Param("station") String station,
+                                            @Param("description") String description,
+                                            Pageable pageable);
+
 
     @Modifying
     @Transactional
-    @Query("delete from Event e where e.identifier=?1")
-    public void deleteByIdentifier(String identifier);
+    @Query("delete from Event e where e.identifier=:identifier")
+    void deleteByIdentifier(@Param("identifier") String identifier);
 
+    // NOTE: uses java.util.Date while every other date-bearing method in this
+    // file uses OffsetDateTime. Left as-is - changing it changes this
+    // method's public signature, which may affect other callers.
     @Modifying
     @Transactional
-    @Query("delete from Event e where e.timeStamp between ?1 and ?2")
-    public abstract void deleteByTimeStampBetween(Date paramDate1, Date paramDate2);
+    @Query("delete from Event e where e.timeStamp between :startDate and :endDate")
+    void deleteByTimeStampBetween(@Param("startDate") Date startDate, @Param("endDate") Date endDate);
 
     /**
-     * @Todo: LIMIT is not acceptable in JPQL /  Either the repository needs to use a Pageable interface, or I use the native Query here
+     * @Todo: LIMIT is not acceptable in JPQL / Either the repository needs to use a Pageable interface, or I use the native Query here
      */
-    //@Query("select distinct eventDefinitionId from event left join LinkedDataTerm ldp on ldp.id = event.processId left join LinkedDataTerm lda on lda.id = event.actionId left join tool t on t.id = event.toolId left join LinkedDataTerm ldt  on ldt.id = t.termId where ldp.name = ?3 and lda.name = ?4 and ldt.name=?2 limit 1")
-    @Query(value = "select distinct event_definition_id from event left join linked_data_term ldp on ldp.id = event.process_id left join linked_data_term lda on lda.id = event.action_id left join tool t on t.id = event.tool_id left join linked_data_term ldt on ldt.id = t.term_id where ldp.name = :process and lda.name = :action and ldt.name= :tool limit 1;", nativeQuery = true)
-    String findUUIDByToolActionProc(String tool, String process, String action);
-    //String findUUIDByToolActionProc(String toolCategory, String tool, String process, String action);
+    @Query(value = "select distinct event_definition_id from event "
+            + "left join linked_data_term ldp on ldp.id = event.process_id "
+            + "left join linked_data_term lda on lda.id = event.action_id "
+            + "left join tool t on t.id = event.tool_id "
+            + "left join linked_data_term ldt on ldt.id = t.term_id "
+            + "where ldp.name = :process and lda.name = :action and ldt.name= :tool limit 1;", nativeQuery = true)
+    String findUUIDByToolActionProc(@Param("tool") String tool, @Param("process") String process, @Param("action") String action);
+
+
+    /*No longer used*/
+    String TOOL_Q = "left join e.tool t left join t.term l where l.identifier= :identifier or l.urn= :identifier";
+
+    @Query(value = SELECT + TOOL_Q + ORDER_BY,
+            countQuery = COUNT + TOOL_Q)
+    Page<Event> findByTool(@Param("identifier") String identifier, Pageable pageable);
+
+    String PLATFORM_CODE_Q = "inner join e.platform p left join p.term l where l.identifier= :platformIdentifier or l.urn= :platformIdentifier";
+
+    @Query(value = SELECT + PLATFORM_CODE_Q + ORDER_BY,
+            countQuery = COUNT + PLATFORM_CODE_Q)
+    Page<Event> findByPlatformCode(@Param("platformIdentifier") String platformIdentifier, Pageable pageable);
+
+    @Query(value = SELECT + WHERE + TIME_WHERE + ORDER_BY,
+            countQuery = COUNT + WHERE + TIME_WHERE)
+    Page<Event> findByCreatedOrModifiedAfter(@Param("after") OffsetDateTime after, Pageable pageable);
+
+    @Query(value = SELECT + CRUISE_Q + ORDER_BY,
+            countQuery = COUNT + CRUISE_Q)
+    Page<Event> findByCruise(@Param("cruiseIdentifier") String cruiseIdentifier, Pageable pageable);
+
 }

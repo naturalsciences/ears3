@@ -16,31 +16,22 @@ import eu.eurofleets.ears3.domain.Weather;
 import eu.eurofleets.ears3.dto.EventDTO;
 import eu.eurofleets.ears3.dto.PropertyDTO;
 import eu.eurofleets.ears3.utilities.DatagramUtilities;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
-import tools.jackson.databind.ObjectMapper;
 
 import java.io.IOException;
 import java.net.MalformedURLException;
-import java.time.Duration;
-import java.time.Instant;
-import java.time.LocalDate;
-import java.time.OffsetDateTime;
-import java.time.OffsetTime;
-import java.time.ZoneOffset;
-import java.time.format.DateTimeFormatter;
+import java.time.*;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
-import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-
-import org.apache.commons.collections4.IterableUtils;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.Environment;
@@ -54,6 +45,8 @@ import org.springframework.web.server.ResponseStatusException;
 public class EventService {
 
     private final EventRepository eventRepository;
+    private final String navServer;
+    private final Boolean readOnly;
 
     @Autowired
     private LinkedDataTermService ldtService;
@@ -81,19 +74,18 @@ public class EventService {
     private DatagramUtilities<Weather> weatherUtil;
     public static Logger log = Logger.getLogger(EventService.class.getSimpleName());
 
-    @Autowired
-    private final Environment env;
 
     @Autowired
-    public EventService(EventRepository eventRepository, Environment env) {
-
+    public EventService(EventRepository eventRepository,
+                        @Value("${ears.navigation.server}") String navServer,
+                        @Value("${ears.read-only}") Boolean readOnly) {
         this.eventRepository = eventRepository;
-        this.env = env;
-        String navigationServer = env.getProperty("ears.navigation.server");
+        this.navServer = navServer;
+        this.readOnly = readOnly;
         try {
-            navUtil = new DatagramUtilities<>(Navigation.class, navigationServer);
-            thermosalUtil = new DatagramUtilities<>(Thermosal.class, navigationServer);
-            weatherUtil = new DatagramUtilities<>(Weather.class, navigationServer);
+            navUtil = new DatagramUtilities<>(Navigation.class, navServer);
+            thermosalUtil = new DatagramUtilities<>(Thermosal.class, navServer);
+            weatherUtil = new DatagramUtilities<>(Weather.class, navServer);
         } catch (MalformedURLException ex) {
             Logger.getLogger(EventService.class.getName()).log(Level.SEVERE, null, ex);
         }
@@ -126,54 +118,82 @@ public class EventService {
         }
     }
 
+    // Sentinel bounds used when only one of startDate/endDate is given.
+// OffsetDateTime.MIN/MAX overflow the DB column's range and throw - see resolveDateRange.
+// Fixed at midnight UTC rather than "now" - the exact time-of-day has no
+// bearing on a "far enough in the past/future" bound, so there's no reason
+// for it to vary per-request.
+    private static final OffsetDateTime EARLY_SENTINEL =
+            OffsetDateTime.of(LocalDate.parse("1900-01-01"), LocalTime.MIDNIGHT, ZoneOffset.UTC);
+    private static final OffsetDateTime LATE_SENTINEL =
+            OffsetDateTime.of(LocalDate.parse("2100-01-01"), LocalTime.MIDNIGHT, ZoneOffset.UTC);
+
+    private record DateRange(OffsetDateTime start, OffsetDateTime end) {
+    }
+
+    /**
+     * Parses the optional startDate/endDate params. If only one is given, the
+     * other is filled in with a sentinel far enough in the past/future to be a
+     * no-op bound. Returns (null, null) if neither is given.
+     */
+    private DateRange resolveDateRange(String startDate, String endDate) {
+        if (startDate == null && endDate == null) {
+            return new DateRange(null, null);
+        }
+        OffsetDateTime start = startDate != null ? OffsetDateTime.parse(startDate) : EARLY_SENTINEL;
+        OffsetDateTime end = endDate != null ? OffsetDateTime.parse(endDate) : LATE_SENTINEL;
+        return new DateRange(start, end);
+    }
+
     public Page<Event> advancedFind(Map<String, String> allParams, Pageable pageable) {
+        if (allParams.isEmpty()) {
+            return this.findAll(pageable);
+        }
         String platformIdentifier = sanitizeParam(allParams, "platformIdentifier");
         String cruiseIdentifier = sanitizeParam(allParams, "cruiseIdentifier");
         String programIdentifier = sanitizeParam(allParams, "programIdentifier");
+        String actorEmail = sanitizeParam(allParams, "actorEmail");
+
         String station = sanitizeParam(allParams, "station");
         String freeSearch = sanitizeParam(allParams, "search");
-        String actorEmail = sanitizeParam(allParams, "actorEmail");
-        String startDate = sanitizeParam(allParams, "startDate");
-        String endDate = sanitizeParam(allParams, "endDate");
-        OffsetDateTime start = null;
-        OffsetDateTime end = null;
 
-        DateTimeFormatter parser = DateTimeFormatter.ofPattern("yyyy-MM-dd");
-        OffsetDateTime early = LocalDate.parse("1900-01-01", parser).atTime(OffsetTime.now());
-        OffsetDateTime late = LocalDate.parse("2100-01-01", parser).atTime(OffsetTime.now());
-        //OffsetDateTime.MAX  and OffsetDateTime.MIN lead to exceptions.
+        String label = freeSearch;
+        String description = freeSearch;
 
-        if (startDate != null) {
-            start = OffsetDateTime.parse(startDate);
-            if (endDate == null) {
-                end = late;
-            }
-        }
-        if (endDate != null) {
-            end = OffsetDateTime.parse(endDate);
-            if (startDate == null) {
-                start = early;
-            }
+        if (platformIdentifier == null) {
+            platformIdentifier = "SDN:C17::11BU"; //TODO get from settings
         }
 
-        Page<Event> res;
-        if (platformIdentifier == null && programIdentifier == null && actorEmail == null && start == null
-                && end == null && cruiseIdentifier == null) {
-            res = this.findAll(pageable);
-        } else if (programIdentifier == null && actorEmail == null && start == null && end == null
-                && cruiseIdentifier == null) {
-            res = this.findAllByPlatformCode(platformIdentifier, pageable);
-        } else if (cruiseIdentifier == null) {
-            if (start != null && end != null) {
-                res = this.findAllByPlatformActorProgramAndDates(platformIdentifier, actorEmail, programIdentifier,
-                        start, end, pageable);
-            } else {
-                res = this.findAllByPlatformActorAndProgram(platformIdentifier, actorEmail, programIdentifier, pageable);
-            }
+        DateRange dateRange = resolveDateRange(
+                sanitizeParam(allParams, "startDate"),
+                sanitizeParam(allParams, "endDate"));
+        OffsetDateTime start = dateRange.start();
+        OffsetDateTime end = dateRange.end();
+
+        boolean hasCruise = cruiseIdentifier != null;
+
+        boolean hasProgram = programIdentifier != null;
+        boolean hasActor = actorEmail != null;
+        boolean hasDates = start != null;
+
+        boolean hasText = station != null || freeSearch != null;
+
+        if (hasCruise) {
+            // A platform and time period are implicit when searching by cruise.
+            return this.findAllByCruiseProgramActor(cruiseIdentifier, programIdentifier, actorEmail, label, station, description, pageable);
+        }
+        if (hasText && !hasProgram && !hasActor && !hasDates) {
+            return this.findByText(freeSearch, station, freeSearch, pageable);
+        }
+        if (hasDates) {
+            return this.findAllByPlatformActorProgramDates(platformIdentifier, actorEmail, programIdentifier, start, end, label, station, description, pageable);
         } else {
-            res = this.findAllByCruiseProgramAndActor(cruiseIdentifier, programIdentifier, actorEmail, pageable);
+            return this.findAllByPlatformActorProgram(platformIdentifier, actorEmail, programIdentifier, label, station, description, pageable);
         }
-        return res;
+    }
+
+    private Page<Event> findByText(String label, String station, String description, Pageable pageable) {
+        return this.eventRepository.findByText(label, station, description, pageable);
     }
 
     public Page<Event> findAll(Pageable pageable) {
@@ -184,43 +204,22 @@ public class EventService {
         return this.eventRepository.findByTimeStampBetween(startDate, endDate, pageable);
     }
 
-    public Page<Event> findCreatedOrModifiedAfter(OffsetDateTime after, Pageable pageable) {
-        return this.eventRepository.findByCreatedOrModifiedAfter(after, pageable);
+    public Page<Event> findAllByPlatformActorProgram(String platformIdentifier, String personEmail,
+                                                     String programIdentifier, String label, String station, String description, Pageable pageable) {
+        return this.eventRepository.findAllByPlatformActorProgram(platformIdentifier, personEmail,
+                programIdentifier, label, station, description, pageable);
     }
 
-    public Page<Event> findByCruise(Cruise cruise, Pageable pageable) {
-        return findByTimeStampBetween(cruise.getStartDate(), cruise.getEndDate(), pageable);
-    }
-
-    public Page<Event> findByCruise(String cruiseIdentifier, Pageable pageable) {
-        Assert.notNull(cruiseIdentifier, "Cruise identifier code must not be null");
-        return this.eventRepository.findByCruise(cruiseIdentifier, pageable);
-    }
-
-    public Page<Event> findByTool(Tool tool, Pageable pageable) {
-        return this.eventRepository.findByTool(tool.getTerm().getIdentifier(), pageable);
-    }
-
-    public Page<Event> findAllByPlatformCode(String platformIdentifier, Pageable pageable) {
-        Assert.notNull(platformIdentifier, "Platform code must not be null");
-        return this.eventRepository.findByPlatformCode(platformIdentifier, pageable);
-    }
-    public Page<Event> findAllByPlatformActorAndProgram(String platformIdentifier, String personEmail,
-                                                        String programIdentifier, Pageable pageable) {
-        return this.eventRepository.findAllByPlatformActorAndProgram(platformIdentifier, personEmail,
-                programIdentifier, pageable);
-    }
-
-    public Page<Event> findAllByPlatformActorProgramAndDates(String platformIdentifier, String personEmail,
-                                                             String programIdentifier, OffsetDateTime start, OffsetDateTime end, Pageable pageable) {
-        return this.eventRepository.findAllByPlatformActorProgramAndDates(platformIdentifier, personEmail,
-                programIdentifier, start, end, pageable);
+    public Page<Event> findAllByPlatformActorProgramDates(String platformIdentifier, String personEmail,
+                                                          String programIdentifier, OffsetDateTime start, OffsetDateTime end, String label, String station, String description, Pageable pageable) {
+        return this.eventRepository.findAllByPlatformActorProgramDates(platformIdentifier, personEmail,
+                programIdentifier, start, end, label, station, description, pageable);
     }
 
 
-    public Page<Event> findAllByCruiseProgramAndActor(String cruiseIdentifier, String programIdentifier,
-                                                      String actorEmail, Pageable pageable) {
-        return this.eventRepository.findAllByCruiseProgramAndActor(cruiseIdentifier, programIdentifier, actorEmail, pageable);
+    public Page<Event> findAllByCruiseProgramActor(String cruiseIdentifier, String programIdentifier,
+                                                   String actorEmail, String label, String station, String description, Pageable pageable) {
+        return this.eventRepository.findAllByCruiseProgramActor(cruiseIdentifier, programIdentifier, actorEmail, label, station, description, pageable);
     }
 
     public String findUuidByToolActionProc(String toolCategory, String tool, String process, String action) {
@@ -233,7 +232,7 @@ public class EventService {
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     public Event save(EventDTO eventDTO) {
         OffsetDateTime serverTime = Instant.now().atOffset(ZoneOffset.UTC);
-        if (env.getProperty("ears.read-only") == null || !env.getProperty("ears.read-only").equals("false")) {
+        if (readOnly == null || readOnly) {
             throw new IllegalArgumentException("Cannot create/modify entities on a read-only system.");
         }
         if (eventDTO.getActor() == null) {
@@ -539,7 +538,7 @@ public class EventService {
     }
 
     public void deleteById(Long id) {
-        if (env.getProperty("ears.read-only") == null || !env.getProperty("ears.read-only").equals("false")) {
+        if (readOnly == null || readOnly) {
             throw new IllegalArgumentException("Cannot create/modify entities on a read-only system.");
         }
         Event event = this.eventRepository.findById(id).orElse(null);
@@ -551,7 +550,7 @@ public class EventService {
     }
 
     public void deleteByIdentifier(String identifier) {
-        if (env.getProperty("ears.read-only") == null || !env.getProperty("ears.read-only").equals("false")) {
+        if (readOnly == null || readOnly) {
             throw new IllegalArgumentException("Cannot create/modify entities on a read-only system.");
         }
         Event event = this.eventRepository.findByIdentifier(identifier);
@@ -563,10 +562,33 @@ public class EventService {
 
     }
 
+    /*No longer used*/
     public void deleteByTimeStampBetween(Date startDate, Date endDate) {
-        if (env.getProperty("ears.read-only") == null || !env.getProperty("ears.read-only").equals("false")) {
+        if (readOnly == null || readOnly) {
             throw new IllegalArgumentException("Cannot create/modify entities on a read-only system.");
         }
         this.eventRepository.deleteByTimeStampBetween(startDate, endDate);
+    }
+
+    public Page<Event> findCreatedOrModifiedAfter(OffsetDateTime after, Pageable pageable) {
+        return this.eventRepository.findByCreatedOrModifiedAfter(after, pageable);
+    }
+
+    public Page<Event> findByCruise(Cruise cruise, Pageable pageable) {
+        return findByTimeStampBetween(cruise.getStartDate(), cruise.getEndDate(), pageable);
+    }
+
+    public Page<Event> findByCruise(String cruiseIdentifier, Pageable pageable) {
+        Assert.notNull(cruiseIdentifier, "Cruise identifier code must not be null");
+        return this.eventRepository.findByCruise(cruiseIdentifier, pageable);
+    }
+
+    public Page<Event> findByTool(Tool tool, Pageable pageable) {
+        return this.eventRepository.findByTool(tool.getTerm().getIdentifier(), pageable);
+    }
+
+    public Page<Event> findAllByPlatformCode(String platformIdentifier, Pageable pageable) {
+        Assert.notNull(platformIdentifier, "Platform code must not be null");
+        return this.eventRepository.findByPlatformCode(platformIdentifier, pageable);
     }
 }

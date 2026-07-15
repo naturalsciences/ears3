@@ -31,18 +31,22 @@ public abstract interface PersonRepository
     public List<Person> findByFullName(String fullName);
 
     @Query(value = """
-            SELECT q.* FROM (SELECT p.* FROM person p
+            SELECT q.* FROM (SELECT 'pics' as engagement_type,count(*) as count, p.* FROM person p
                              JOIN program_principal_investigators ppi ON ppi.principal_investigators_id = p.id
                              JOIN "program" prg ON prg.id = ppi.program_id
                              JOIN cruise_programs cp ON cp.program_id = prg.id
                              JOIN cruise c ON c.id = cp.cruise_id
-                             WHERE c.start_date <= ?2 AND c.end_date >= ?1
+                             WHERE c.start_date >= ?2 AND c.end_date <= ?1
                              UNION
-                             SELECT p.* FROM person p
+                             SELECT 'pics' as engagement_type,count(*) as count, p.* FROM person p
                              JOIN cruise_chief_scientists ccs ON ccs.chief_scientist_id = p.id
                              JOIN cruise c ON c.id = ccs.cruise_id
-                             WHERE c.start_date <= ?2 AND c.end_date >= ?1) as q
-                             ORDER BY q.last_name,q.first_name
+                             WHERE c.start_date >= ?2 AND c.end_date <= ?1
+                             UNION
+                             SELECT 'a' as engagement_type,count(*) as count, p.* FROM person p
+                             JOIN event e ON e.actor_id = p.id
+                             WHERE e."time_stamp" >= ?1 AND e."time_stamp" <= ?2 ) as q
+                             ORDER BY q.engagement_type, q.last_name, q.first_name
             """, nativeQuery = true)
     public List<Person> findByActiveInPeriod(LocalDate periodStart, LocalDate periodEnd);
 

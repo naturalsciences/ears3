@@ -37,8 +37,10 @@ public class ProgramService {
     
     @Autowired
     private Environment env;
+
     @Value("${ears.platform}")
     public String platformUrn;
+
     private static String DEFAULT_PROGRAM = "11BU_operations";
 
     @Autowired

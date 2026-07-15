@@ -46,6 +46,10 @@ public class EventExcelService {
     private Validator validator;
 
     private final EventRepository eventRepository;
+    private final Boolean readOnly;
+    private final String navServer;
+    private final String platformUrn;
+
     @Autowired
     private ProgramService programService;
 
@@ -57,31 +61,31 @@ public class EventExcelService {
     private DatagramUtilities<Weather> weatherUtil;
     public static Logger log = Logger.getLogger(EventService.class.getSimpleName());
 
-    @Autowired
-    private final Environment env;
-
     private static List<String> allowedTabs = Arrays.asList("events");
     private List<String> requiredHeaders = Arrays.stream(SpreadsheetEvent.FIELDS.values()).map(Enum::name)
             .collect(Collectors.toList());
 
-    @Value("${ears.platform}")
-    public String platformUrn;
 
     private static Map<String, LinkedDataTermDTO> DEFS = new HashMap<>();
     private static Map<String, LinkedDataTermDTO> CATMAP = new HashMap<>();
     private static Map<String, PropertyDTO> PROPMAPDEF = new HashMap<>();
 
     @Autowired
-    public EventExcelService(EventRepository eventRepository, Environment env) {
+    public EventExcelService(EventRepository eventRepository,
+                             @Value("${ears.navigation.server}") String navServer,
+                             @Value("${ears.read-only}") Boolean readOnly,
+                             @Value("${ears.platform}") String platformUrn) {
+        this.eventRepository = eventRepository;
+        this.navServer = navServer;
+        this.readOnly = readOnly;
+        this.platformUrn = platformUrn;
+
         ValidatorFactory factory = Validation.buildDefaultValidatorFactory();
         this.validator = factory.getValidator();
-        this.eventRepository = eventRepository;
-        this.env = env;
-        String navigationServer = env.getProperty("ears.navigation.server");
         try {
-            navUtil = new DatagramUtilities<>(Navigation.class, navigationServer);
-            thermosalUtil = new DatagramUtilities<>(Thermosal.class, navigationServer);
-            weatherUtil = new DatagramUtilities<>(Weather.class, navigationServer);
+            navUtil = new DatagramUtilities<>(Navigation.class, navServer);
+            thermosalUtil = new DatagramUtilities<>(Thermosal.class, navServer);
+            weatherUtil = new DatagramUtilities<>(Weather.class, navServer);
             initializeHashmaps();
         } catch (MalformedURLException ex) {
             Logger.getLogger(EventService.class.getName()).log(Level.SEVERE, null, ex);
@@ -213,7 +217,7 @@ public class EventExcelService {
 
         String toolName = spreadsheetEvent.getTool();
         if (toolName.equals("Command")) {
-            int a=5;
+            int a = 5;
         }
         eventDTO.setTool(new ToolDTO(extractLDT(toolName, rowNb), null));
         LinkedDataTermDTO toolCategory = extractToolCategory(toolName, rowNb);
