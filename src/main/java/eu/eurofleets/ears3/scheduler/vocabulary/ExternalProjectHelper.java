@@ -7,18 +7,13 @@ package eu.eurofleets.ears3.scheduler.vocabulary;
 
 import eu.seadatanet.org.edmerp.Citation;
 import eu.seadatanet.org.edmerp.DataIdent;
-import eu.seadatanet.org.edmerp.Extent;
 import eu.seadatanet.org.edmerp.Metadata;
 import eu.seadatanet.org.edmerp.ResAltTitle;
 import eu.seadatanet.org.edmerp.RespParty;
-import eu.seadatanet.org.edmerp.TempExtent;
 import eu.eurofleets.ears3.domain.LinkedDataTerm;
 import eu.eurofleets.ears3.domain.Project;
-import java.io.IOException;
 import java.io.Reader;
 import java.io.StringReader;
-import java.io.UnsupportedEncodingException;
-import java.nio.charset.Charset;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -35,24 +30,8 @@ import jakarta.xml.bind.Unmarshaller;
 import javax.xml.stream.XMLInputFactory;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
-//import org.apache.http.HttpEntity;
-//import org.apache.http.HttpHeaders;
-//import org.apache.http.client.methods.CloseableHttpResponse;
-
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.entity.ContentType;
-import org.apache.http.entity.StringEntity;
-/* import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.impl.client.HttpClientBuilder; */
-import org.apache.http.util.EntityUtils;
-
 import org.springframework.web.client.RestClient;
 import org.springframework.http.HttpHeaders;
-import org.springframework.http.MediaType;
-//import org.springframework.web.client.RestClient;
-
-import java.nio.charset.StandardCharsets;
-
 /**
  *
  * @author Thomas Vandenberghe
