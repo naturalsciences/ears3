@@ -6,9 +6,11 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 
 import eu.eurofleets.ears3.domain.*;
 import eu.eurofleets.ears3.utilities.OffsetDateTimeAdapter;
+
 import java.time.OffsetDateTime;
 import java.util.Collection;
 import java.util.HashSet;
+
 import jakarta.xml.bind.annotation.XmlAccessType;
 import jakarta.xml.bind.annotation.XmlAccessorType;
 import jakarta.xml.bind.annotation.XmlRootElement;
@@ -19,6 +21,7 @@ import jakarta.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
+
 /**
  *
  * @author Thomas Vandenberghe
@@ -29,32 +32,33 @@ public class EventDTO {
 
     private String identifier;
     private String eventDefinitionId;
-    private String label;
-    private String description;
-    private String station;
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ssX")
     @XmlJavaTypeAdapter(value = OffsetDateTimeAdapter.class)
     private OffsetDateTime timeStamp;
-    private PersonDTO actor;
     private LinkedDataTermDTO subject;
-    private ToolDTO tool;
     private LinkedDataTermDTO toolCategory;
+    private ToolDTO tool;
     private LinkedDataTermDTO process;
     private LinkedDataTermDTO action;
     private Collection<PropertyDTO> properties;
     private String program;
     private String platform;
+    private PersonDTO actor;
+    private String label;
+    private String station;
+    private String description;
+    private String remarks;
+
     private Collection<NavigationDTO> navigation;
     private Collection<ThermosalDTO> thermosal;
     private Collection<WeatherDTO> weather;
-    private String remarks;
 
     public EventDTO() {
     }
 
     public EventDTO(String identifier, String eventDefinitionId, OffsetDateTime timeStamp, PersonDTO actor,
-            LinkedDataTermDTO subject, ToolDTO tool, LinkedDataTermDTO toolCategory, LinkedDataTermDTO process,
-            LinkedDataTermDTO action, Collection<PropertyDTO> properties, String program, String platform, String remarks) {
+                    LinkedDataTermDTO subject, ToolDTO tool, LinkedDataTermDTO toolCategory, LinkedDataTermDTO process,
+                    LinkedDataTermDTO action, Collection<PropertyDTO> properties, String program, String platform, String remarks) {
         this.identifier = identifier;
         this.eventDefinitionId = eventDefinitionId;
         this.timeStamp = timeStamp;
@@ -248,7 +252,12 @@ public class EventDTO {
         this.station = station;
     }
 
-    public String getRemarks(){ return remarks; }
-    public void setRemarks( String remarks ){ this.remarks = remarks; }
+    public String getRemarks() {
+        return remarks;
+    }
+
+    public void setRemarks(String remarks) {
+        this.remarks = remarks;
+    }
 
 }

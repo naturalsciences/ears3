@@ -83,31 +83,32 @@
     <div id="toggle" class="mb-3 p-3 border rounded">
         <h2>Toggle columns</h2>
         <ul>
-            <li><a href="#" class="toggle-vis" data-column="2">Cruise</a></li>
-            <li><a href="#" class="toggle-vis" data-column="3">Program</a></li>
-            <li><a href="#" class="toggle-vis" data-column="4">Tool category</a></li>
-            <li><a href="#" class="toggle-vis" data-column="8">Station</a></li>
-            <li><a href="#" class="toggle-vis" data-column="9">Label</a></li>
-            <li><a href="#" class="toggle-vis" data-column="10">Description</a></li>
-            <li><a href="#" class="toggle-vis" data-column="11">Actor</a></li>
+            <li><a href="#" class="toggle-vis" data-column="3">Cruise</a></li>
+            <li><a href="#" class="toggle-vis" data-column="4">Program</a></li>
+            <li><a href="#" class="toggle-vis" data-column="5">Category</a></li>
+            <li><a href="#" class="toggle-vis" data-column="9">Station</a></li>
+            <li><a href="#" class="toggle-vis" data-column="10">Label</a></li>
+            <li><a href="#" class="toggle-vis" data-column="11">Note</a></li>
+            <li><a href="#" class="toggle-vis" data-column="12">Actor</a></li>
         </ul>
     </div>
     <table id="eventTable" class="display dataTable" style="width:100%" role="grid">
         <thead>
         <tr>
-            <th>date</th>
-            <th>time</th>
-            <th>cruise</th>
-            <th>program</th>
-            <th>category</th>
-            <th>tool</th>
-            <th>process</th>
-            <th>action</th>
-            <th>station</th>
-            <th>label</th>
-            <th>description</th>
-            <th>actor</th>
-            <th>remove</th>
+            <th>identifier</th>
+            <th>Date</th>
+            <th>Time</th>
+            <th>Cruise</th>
+            <th>Program</th>
+            <th>Category</th>
+            <th>Tool</th>
+            <th>Process</th>
+            <th>Action</th>
+            <th>Station</th>
+            <th>Label</th>
+            <th>Note</th>
+            <th>Actor</th>
+            <th>Delete</th>
         </tr>
         </thead>
     </table>
@@ -122,19 +123,20 @@
         // Maps DataTables column index -> backend-sortable property name.
         // null = column isn't sortable server-side (adjust to match your entity's actual property paths).
         const sortableColumns = [
-            'timeStamp',                // 0 (date)
-            'timeStamp',                // 1 (time)
-            'cruise',                   // 2
-            'program',                  // 3
-            'toolCategory.name',        // 4
-            'tool.term.name',           // 5
-            'process.name',             // 6
-            'action.name',              // 7
-            'station',                  // 8
-            'label',                    // 9
-            'description',              // 10
-            'actor.email',              // 11
-            null,                       // 9 (delete icon)
+            'identifier',               // 0
+            'timeStamp',                // 1 (date)
+            'timeStamp',                // 2 (time)
+            'cruise',                   // 3
+            'program',                  // 4
+            'toolCategory.name',        // 5
+            'tool.term.name',           // 6
+            'process.name',             // 7
+            'action.name',              // 8
+            'station',                  // 9
+            'label',                    // 10
+            'description',              // 11
+            'actor.email',              // 12
+            null,                       // 13 (delete icon)
         ];
 
         // Single source of truth for every filter the API supports.
@@ -209,7 +211,8 @@
             });
 
             table = $('#eventTable').DataTable({
-                responsive: true,
+                responsive: false,
+                autoWidth: false,
                 serverSide: true,
                 processing: true,
                 searching: false,
@@ -244,6 +247,7 @@
                             const date = event.timeStamp.split("T")[0].replace(/^20/, "'");
                             const time = event.timeStamp.split("T")[1].replace(/\+\d{2}:\d{2}$/, "");
                             return {
+                                'identifier': event.identifier,
                                 'date': date,
                                 'time': time,
                                 'cruise': event.program.identifier + '_cruise',
@@ -261,6 +265,7 @@
                     }
                 },
                 "columns": [
+                    {'data': 'identifier'},
                     {'data': 'date'},
                     {'data': 'time'},
                     {'data': 'cruise'},
@@ -276,9 +281,9 @@
                     {
                         "orderable": false,
                         render: function (data, type, row) {
-                            const actorEmail = row.actor;
+                            const actorName = row.actor;
                             const actor = JSON.parse(localStorage.actor);
-                            if (actorEmail === actor.email) {
+                            if (actorName === (actor.firstName + " " + actor.lastName).trim()) {
                                 return '<svg class="deleteEvent" fill="red" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24px" height="24px"><path d="M 10 2 L 9 3 L 5 3 C 4.4 3 4 3.4 4 4 C 4 4.6 4.4 5 5 5 L 7 5 L 17 5 L 19 5 C 19.6 5 20 4.6 20 4 C 20 3.4 19.6 3 19 3 L 15 3 L 14 2 L 10 2 z M 5 7 L 5 20 C 5 21.1 5.9 22 7 22 L 17 22 C 18.1 22 19 21.1 19 20 L 19 7 L 5 7 z M 9 9 C 9.6 9 10 9.4 10 10 L 10 19 C 10 19.6 9.6 20 9 20 C 8.4 20 8 19.6 8 19 L 8 10 C 8 9.4 8.4 9 9 9 z M 15 9 C 15.6 9 16 9.4 16 10 L 16 19 C 16 19.6 15.6 20 15 20 C 14.4 20 14 19.6 14 19 L 14 10 C 14 9.4 14.4 9 15 9 z"/></svg>';
                             } else {
                                 return '';
@@ -288,18 +293,20 @@
                 ],
                 "order": [[1, 'desc'], [2, 'desc']],
                 "columnDefs": [
-                    {"targets": [1], "visible": true, "searchable": false},
-                    {"targets": [2], "visible": true, "searchable": false},
-                    {"targets": [3], "visible": true, "searchable": false},
-                    {"targets": [4], "visible": true, "searchable": false},
-                    {"targets": [5], "visible": true, "searchable": false},
-                    {"targets": [6], "visible": true, "searchable": false},
-                    {"targets": [7], "visible": true, "searchable": false},
-                    {"targets": [8], "visible": true, "searchable": false},
-                    {"targets": [9], "visible": true, "searchable": false},
-                    {"targets": [10], "visible": true, "searchable": false},
-                    {"targets": [11], "visible": true, "searchable": false},
-                    {"targets": [12], "visible": true, "searchable": false}
+                    {"targets": [0], "visible": false, "searchable": false},
+                    {"targets": [1], "visible": true, "searchable": false, width: '60px'},
+                    {"targets": [2], "visible": true, "searchable": false, width: '60px'},
+                    {"targets": [3], "visible": true, "searchable": false, width: '80px'},
+                    {"targets": [4], "visible": true, "searchable": false, width: '80px'},
+                    {"targets": [5], "visible": true, "searchable": false, width: '80px'},
+                    {"targets": [6], "visible": true, "searchable": false, width: '140px'},
+                    {"targets": [7], "visible": true, "searchable": false, width: '80px'},
+                    {"targets": [8], "visible": true, "searchable": false, width: '80px'},
+                    {"targets": [9], "visible": true, "searchable": false, width: '40px'},
+                    {"targets": [10], "visible": true, "searchable": false, width: '40px'},
+                    {"targets": [11], "visible": true, "searchable": false, width: '40px'},
+                    {"targets": [12], "visible": true, "searchable": false, width: '40px'},
+                    {"targets": [13], "visible": true, "searchable": false, width: '40px'},
                 ],
                 "lengthMenu": [[50, 100, 200, 300], [50, 100, 200, 300]]
             });
@@ -311,17 +318,19 @@
         });
 
         $('#eventTable').on('click', 'tbody td:has(svg.deleteEvent)', function () {
-            var row = table.row($(this).parents('tr'));
-            var identifier = row.data().identifier;
-            var actorEmail = row.data().actor;
-            var actor = JSON.parse(localStorage.actor);
-            if (actorEmail === actor.email) {
-                if (confirm('Are you sure you want to delete this event "' + row.data().tool + '-' + row.data().process + '-' + row.data().action + '?')) {
+            const row = table.row($(this).parents('tr'));
+            const data = row.data();
+            const identifier = data.identifier;
+
+            const actorName = data.actor;
+            const actor = JSON.parse(localStorage.actor);
+            if (actorName === (actor.firstName + " " + actor.lastName).trim()) {
+                if (confirm(actorName + ', are you sure you want to delete this event "' + data.tool + '-' + data.process + '-' + data.action + ' at ' + data.date + '/' + data.time + '"?')) {
                     deleteEvent(identifier);
                     table.ajax.reload();
                 }
             } else {
-                alert("You can only delete your own events. The owner is " + actorEmail);
+                alert("You can only delete your own events. The owner is " + actorName + ". Please don't mess with other persons' events.");
             }
         });
 

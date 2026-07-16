@@ -49,22 +49,38 @@ table#dropdownMenuTable td {
     padding-left: 0;
 }
 
-table.dataTable tbody td {
-    padding: 8px 3px !important;
-    border-left: black dotted 1px;
+table#eventTable {
+    table-layout: fixed;
+    width: 100%;
 }
 
-table.dataTable tbody td:last-child {
+table#eventTable tbody td {
+    padding: 8px 3px !important;
+    border-left: black dotted 1px;
+    font-size: small;
+}
+
+table#eventTable tbody td:last-child {
     border-right: black dotted 1px;
 }
 
-table.dataTable thead th, table.dataTable thead td {
+#eventTable td.nowrap-col,
+#eventTable th.nowrap-col {
+    white-space: nowrap;
+}
+
+table#eventTable thead th, table.dataTable thead td {
     padding: 10px 2px !important;
     cursor: auto !important;
 }
 
-#eventTable tbody tr {
+table#eventTable tbody tr {
     cursor: pointer !important;
+}
+
+table#eventTable td:has(svg.deleteEvent) {
+    text-align: center;
+    vertical-align: middle;
 }
 
 button p.close-btn {
