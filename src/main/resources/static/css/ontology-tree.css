@@ -1,0 +1,9 @@
+/*
+ * Color-codes tree nodes by concept kind, matching the color scheme used in
+ * AsConceptNode.getHtmlDisplayName() in the original NetBeans ontology editor.
+ */
+#ontologyTree .jstree-default .toolcategory > .jstree-anchor { color: #0B486B; }
+#ontologyTree .jstree-default .tool > .jstree-anchor         { color: #02779E; }
+#ontologyTree .jstree-default .process > .jstree-anchor      { color: #DC4B40; }
+#ontologyTree .jstree-default .action > .jstree-anchor       { color: #F59E03; }
+#ontologyTree .jstree-default .property > .jstree-anchor     { color: #EB540A; }

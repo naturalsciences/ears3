@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" layout:decorate="~{fragments/f}">
+
+<head th:replace="fragments/f :: head"></head>
+
+<body>
+<nav th:replace="fragments/f :: header"></nav>
+<div class="container-fluid" layout:fragment="main">
+    <h1>Ontology Editor</h1>
+    <div id="ontologyPublish" class="mb-3 p-3 border rounded">
+        <h2>Ontology File</h2>
+
+        <p><strong>Live:</strong>
+            <a href="/ears3/api/ontology/live">Download</a>
+        </p>
+        <p><strong>Staged:</strong>
+            <span id="stagedInfo">loading&hellip;</span>
+            <a href="/ears3/api/ontology">Download</a>
+        </p>
+
+        <div class="form-inline mb-2">
+            <input type="file" id="rdfFile" class="form-control-file mr-2"/>
+            <button id="btnStageFromFile" class="btn btn-secondary btn-sm">Stage from file</button>
+            <span th:if="${importEnabled}">
+                <button id="btnStageFromDb" class="btn btn-secondary btn-sm ml-2">Stage from database</button>
+            </span>
+            <span th:if="${importEnabled}">
+                <button id="btnIngest" class="btn btn-danger btn-sm">Ingest file into database</button>
+            </span>
+        </div>
+
+    </div>
+
+    <div class="row">
+        <div class="col-md-6">
+            <div id="ontologyTree"></div>
+        </div>
+        <div class="col-md-6">
+            <div id="propertyPanel" class="p-3 border rounded">
+                <p class="text-muted">Select a node to view/edit its properties.</p>
+            </div>
+        </div>
+    </div>
+
+    <link rel="stylesheet" th:href="@{/css/jstree-themes/default/style.min.css}"/>
+    <link rel="stylesheet" th:href="@{/css/ontology-tree.css}"/>
+    <script src="/ears3/js/jstree.min.js" type="application/javascript"></script>
+
+    <script type="application/javascript" th:inline="none">
+        const editingEnabled = /*[[${editingEnabled}]]*/ false;
+
+        const importEnabled = /*[[${importEnabled}]]*/ true;
+        let selectedNode = null;
+
+        function hierarchyRefOf(node) {
+            return node.original.data.hierarchyRef;
+        }
+
+        // ---------------------------------------------------------------
+        // Publish / stage / activate panel
+        // ---------------------------------------------------------------
+
+        function refreshFileInfo() {
+            $.get('/ears3/api/ontology/info', function (d) {
+                $('#stagedInfo').text(d ? (d.filename + ' (' + d.lastModified + ')') : 'none');
+            });
+        }
+
+        $('#btnStageFromFile').on('click', function () {
+            const fileInput = document.getElementById('rdfFile');
+            if (!fileInput.files.length) {
+                alert('This will overwrite the staged tree with the uploaded tree.');
+                return;
+            }
+            const fd = new FormData();
+            fd.append('file', fileInput.files[0]);
+            $.ajax({
+                url: '/ears3/api/ontology/stage-from-file', method: 'POST',
+                data: fd, processData: false, contentType: false,
+                success: refreshFileInfo,
+                error: function (xhr) {
+                    alert('Staging failed: ' + xhr.responseText);
+                }
+            });
+        });
+
+        /*functionally identical with downloading the live tree and staging it from file. */
+        $('#btnStageFromDb').on('click', function () {
+            if (!confirm('This will overwrite the staged tree with a new tree based on the database. This operation is functionally identical with downloading the live tree and staging it from file.')) {
+                return;
+            }
+            $.post('/ears3/api/ontology/stage-from-db')
+                .done(refreshFileInfo)
+                .fail(function (xhr) {
+                    alert('Staging failed: ' + xhr.responseText);
+                });
+        });
+
+        $('#btnIngest').on('click', function () {
+            $.post('/ears3/api/ontology/ingest')
+                .done(refreshFileInfo)
+                .fail(function (xhr) {
+                    alert('Ingest failed: ' + xhr.responseText);
+                });
+        });
+
+        // ---------------------------------------------------------------
+        // Tree
+        // ---------------------------------------------------------------
+
+        $(document).ready(function () {
+            refreshFileInfo();
+
+            $('#ontologyTree').jstree({
+                core: {
+                    check_callback: true,
+                    data: function (node, callback) {
+                        if (node.id === '#') {
+                            $.get('/ears3/api/ontology/tree/roots', function (roots) {
+                                callback.call(this, roots);
+                            });
+                        } else {
+                            $.ajax({
+                                url: '/ears3/api/ontology/tree/children',
+                                method: 'POST',
+                                contentType: 'application/json',
+                                data: JSON.stringify(hierarchyRefOf(node)),
+                                success: function (children) {
+                                    callback.call(this, children);
+                                }
+                            });
+                        }
+                    }
+                },
+                types: {
+                    toolcategory: {icon: false},
+                    tool: {icon: false},
+                    process: {icon: false},
+                    action: {icon: false},
+                    property: {icon: false, valid_children: []}
+                },
+                contextmenu: {
+                    items: function (node) {
+                        const items = {};
+                        items.createChild = {
+                            label: 'Create child...',
+                            _disabled: !editingEnabled || node.type !== 'toolcategory',
+                            action: function () {
+                                const label = prompt('Label for the new tool:');
+                                if (!label) {
+                                    return;
+                                }
+                                $.ajax({
+                                    url: '/ears3/api/ontology/tree/nodes',
+                                    method: 'POST',
+                                    contentType: 'application/json',
+                                    data: JSON.stringify({
+                                        parentRef: hierarchyRefOf(node),
+                                        parentType: node.type,
+                                        newPrefLabel: label
+                                    }),
+                                    success: function () {
+                                        $('#ontologyTree').jstree('refresh_node', node);
+                                    },
+                                    error: function (xhr) {
+                                        alert('Create failed: ' + xhr.responseText);
+                                    }
+                                });
+                            }
+                        };
+                        items.delete = {
+                            label: 'Delete',
+                            _disabled: !editingEnabled || node.data.isGeneric,
+                            action: function () {
+                                if (!confirm('Are you sure you want to delete "' + node.text + '"?')) {
+                                    return;
+                                }
+                                $.ajax({
+                                    url: '/ears3/api/ontology/tree/nodes?type=' + node.type,
+                                    method: 'DELETE',
+                                    contentType: 'application/json',
+                                    data: JSON.stringify(hierarchyRefOf(node)),
+                                    success: function () {
+                                        $('#ontologyTree').jstree('delete_node', node);
+                                    },
+                                    error: function (xhr) {
+                                        alert('Delete failed: ' + xhr.responseText);
+                                    }
+                                });
+                            }
+                        };
+                        items.copyAsText = {
+                            label: 'Copy as text',
+                            action: function () {
+                                navigator.clipboard.writeText(node.text);
+                            }
+                        };
+                        items.copyAsIdentifier = {
+                            label: 'Copy identifier',
+                            action: function () {
+                                navigator.clipboard.writeText(node.data.identifier);
+                            }
+                        };
+                        return items;
+                    }
+                },
+                plugins: ['types', 'contextmenu']
+            });
+
+            $('#ontologyTree').on('changed.jstree', function (e, data) {
+                if (data.selected.length === 0) {
+                    return;
+                }
+                selectedNode = data.instance.get_node(data.selected[0]);
+                renderPropertyPanel(selectedNode);
+            });
+        });
+
+        function renderPropertyPanel(node) {
+            const readOnly = !editingEnabled ? 'disabled' : '';
+            let html = '<h5>' + node.text + '</h5>';
+            html += '<div class="form-group"><label>Label</label>'
+                + '<input class="form-control" id="pfPrefLabel" ' + readOnly + '/></div>';
+            html += '<div class="form-group"><label>Definition</label>'
+                + '<textarea class="form-control" id="pfDefinition" rows="3" ' + readOnly + '></textarea></div>';
+            if (node.type === 'tool') {
+                html += '<div class="form-group"><label>Tool identifier</label>'
+                    + '<input class="form-control" id="pfToolIdentifier"/></div>';
+                html += '<div class="form-group"><label>Serial number</label>'
+                    + '<input class="form-control" id="pfSerialNumber"/></div>';
+            }
+            if (editingEnabled) {
+                html += '<button class="btn btn-primary btn-sm mt-2" id="btnSaveProps">Save</button>';
+            } else {
+                html += '<p class="text-muted">Editing is disabled on this instance.</p>';
+            }
+            $('#propertyPanel').html(html);
+            $('#pfPrefLabel').val(node.text);
+
+            $('#btnSaveProps').on('click', function () {
+                $.ajax({
+                    url: '/ears3/api/ontology/tree/nodes/properties',
+                    method: 'PUT',
+                    contentType: 'application/json',
+                    data: JSON.stringify({
+                        ref: node.data.hierarchyRef,
+                        type: node.type,
+                        prefLabel: $('#pfPrefLabel').val(),
+                        definition: $('#pfDefinition').val(),
+                        toolIdentifier: $('#pfToolIdentifier').length ? $('#pfToolIdentifier').val() : null,
+                        serialNumber: $('#pfSerialNumber').length ? $('#pfSerialNumber').val() : null
+                    }),
+                    success: function (updated) {
+                        $('#ontologyTree').jstree('rename_node', node, updated.text);
+                    },
+                    error: function (xhr) {
+                        alert('Save failed: ' + xhr.responseText);
+                    }
+                });
+            });
+        }
+    </script>
+</div>
+</body>
+</html>

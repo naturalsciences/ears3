@@ -1,5 +1,6 @@
 package eu.eurofleets.ears3.controller.ontology;
 
+import eu.eurofleets.ears3.domain.Message;
 import eu.eurofleets.ears3.rdf.OntologyHeaderReader;
 import eu.eurofleets.ears3.rdf.OntologySparqlService;
 import eu.eurofleets.ears3.rdf.StagedRdfService;
@@ -27,35 +28,35 @@ import java.io.IOException;
  * Stage/activate workflow for the distributable ontology RDF file, plus the
  * download / date / SPARQL functionality ported from the legacy
  * eu.eurofleets.ears3.controller.rest.OntologyController.
- *
+ * <p>
  * PORTED, faithfully:
- *  - SPARQL query execution (/sparql) - same Jena Query/QueryExecution/
- *    ResultSetFormatter.outputAsJSON pipeline as vesselSparqlEndpoint()'s simple
- *    (non-"program"-combining) path.
- *  - HTTP Basic Auth gate on publish operations (/stage, /activate), reusing the
- *    same ears.ontology.username / ears.ontology.password properties.
- *  - Scope validation on /stage: rejects a file whose header scope is present and
- *    not VESSEL, exactly matching the old uploadOntology()'s leniency (a file with
- *    no scope annotation at all is still allowed through).
- *  - /authenticate diagnostic endpoint, for any existing client scripts that probe it.
- *
+ * - SPARQL query execution (/sparql) - same Jena Query/QueryExecution/
+ * ResultSetFormatter.outputAsJSON pipeline as vesselSparqlEndpoint()'s simple
+ * (non-"program"-combining) path.
+ * - HTTP Basic Auth gate on publish operations (/stage, /activate), reusing the
+ * same ears.ontology.username / ears.ontology.password properties.
+ * - Scope validation on /stage: rejects a file whose header scope is present and
+ * not VESSEL, exactly matching the old uploadOntology()'s leniency (a file with
+ * no scope annotation at all is still allowed through).
+ * - /authenticate diagnostic endpoint, for any existing client scripts that probe it.
+ * <p>
  * REPLACED:
- *  - The date lookup no longer calls the external IOntologyModel.getStaticStuff(),
- *    which built a full in-memory RDF tree just to read two annotation values. See
- *    OntologyHeaderReader - a streaming, early-exit reader that only ever parses
- *    the small <owl:Ontology> header block.
- *
+ * - The date lookup no longer calls the external IOntologyModel.getStaticStuff(),
+ * which built a full in-memory RDF tree just to read two annotation values. See
+ * OntologyHeaderReader - a streaming, early-exit reader that only ever parses
+ * the small <owl:Ontology> header block.
+ * <p>
  * DROPPED, per instruction: all "program" ontology endpoints (program/upload,
  * program, program/date, program/sparql) and the vessel+program model-combining
  * logic in the old vesselSparqlEndpoint(). Program ontologies are no longer kept
  * as separate trees - there is now only ever the one (vessel) ontology.
- *
+ * <p>
  * /stage and /activate are additionally gated by OntologyEditingGuard.
  * assertImportAllowed() (the instance-wide kill switch discussed earlier) - Basic
  * Auth is a per-request identity check on top of that, not a replacement for it.
  */
 @RestController
-@RequestMapping("/api/ontology/rdf")
+@RequestMapping("/api/ontology")
 public class OntologyRdfController {
 
     private final StagedRdfService rdfService;
@@ -74,8 +75,8 @@ public class OntologyRdfController {
     private boolean populateDbOnActivate;
 
     public OntologyRdfController(StagedRdfService rdfService, OntologyEditingGuard guard,
-                                  OntologyBasicAuthService basicAuth, OntologySparqlService sparqlService,
-                                  OntologyRdfImportService importService) {
+                                 OntologyBasicAuthService basicAuth, OntologySparqlService sparqlService,
+                                 OntologyRdfImportService importService) {
         this.rdfService = rdfService;
         this.guard = guard;
         this.basicAuth = basicAuth;
@@ -83,38 +84,42 @@ public class OntologyRdfController {
         this.importService = importService;
     }
 
-    // ------------------------------------------------------------------
-    // Download - equivalent of legacy GET /ontology/vessel
-    // ------------------------------------------------------------------
-
-    /** Serves the currently active RDF file - point your SPARQL engine at this same file on disk. */
-    @GetMapping(value = "/live", produces = "application/rdf+xml")
-    public ResponseEntity<InputStreamResource> getLive() throws IOException {
+    /**
+     * Serves/downloads the currently active RDF file. This file is used by the SPARQL engine as well.
+     */
+    @GetMapping(value = {"/staged", ""})
+    public ResponseEntity<InputStreamResource> getStaged() throws IOException {
         return ResponseEntity.ok()
-                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + rdfService.liveFilename() + "\"")
+                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + rdfService.stagedFilename() + "\"")
                 .contentType(MediaType.parseMediaType("application/rdf+xml"))
-                .body(new InputStreamResource(rdfService.openLive()));
+                .body(new InputStreamResource(rdfService.openStaged()));
     }
 
-    @GetMapping("/live/info")
+    @GetMapping(value = {"/staged/info", "/info"})
     public FileInfo liveInfo() {
-        return rdfService.liveInfo();
-    }
-
-    @GetMapping("/staged/info")
-    public FileInfo stagedInfo() {
         return rdfService.stagedInfo();
     }
 
-    @GetMapping(value = "/live/date", produces = MediaType.TEXT_PLAIN_VALUE)
+    @GetMapping(value = {"/staged/date", "date"}, produces = MediaType.TEXT_PLAIN_VALUE)
     public ResponseEntity<String> liveDate() throws IOException {
-        OntologyHeaderReader.OntologyHeader header = rdfService.liveHeader();
+        OntologyHeaderReader.OntologyHeader header = rdfService.stagedHeader();
         String best = header.bestDate();
         if (best == null) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND,
                     "The live ontology has neither a dc:modified nor an owl:versionInfo annotation.");
         }
         return ResponseEntity.ok(best);
+    }
+
+    /**
+     * Serves/downloads the RDF straight from the database
+     */
+    @GetMapping(value = "/live")
+    public ResponseEntity<InputStreamResource> getLive() throws IOException {
+        return ResponseEntity.ok()
+                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + rdfService.stagedFilename() + "\"")
+                .contentType(MediaType.parseMediaType("application/rdf+xml"))
+                .body(new InputStreamResource(rdfService.openStaged()));
     }
 
     // ------------------------------------------------------------------
@@ -127,9 +132,9 @@ public class OntologyRdfController {
      * and validates the file is actually VESSEL-scoped before it's even staged,
      * porting the checks that used to live in uploadOntology()/uploadVesselOntology().
      */
-    @PostMapping("/stage")
-    public void stage(@RequestHeader(value = "Authorization", required = false) String authorization,
-                       @RequestParam("file") MultipartFile file) throws IOException {
+    @PostMapping("/stage-from-file")
+    public ResponseEntity<Message> stageRDFFromFile(@RequestHeader(value = "Authorization", required = false) String authorization,
+                                                    @RequestParam("file") MultipartFile file) throws IOException {
         guard.assertImportAllowed();
         basicAuth.assertAuthorized(authorization);
 
@@ -143,46 +148,64 @@ public class OntologyRdfController {
         }
 
         String scope = header.scope();
-        if (scope != null && !scope.equals("Vessel")) {
+        if (scope != null && !scope.equals("VESSEL")) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
                     "Cannot stage file: not recognized as a Vessel ontology "
-                    + "(found scope=" + scope + "). Program ontologies are no longer supported.");
+                            + "(found scope=" + scope + "). Program ontologies are no longer supported.");
         }
-
+        rdfService.archiveStaged();
         rdfService.stage(new ByteArrayInputStream(bytes));
+        Message m = new Message(202, null, null, "File correctly saved", null);
+        return new ResponseEntity<>(m, HttpStatus.ACCEPTED);
     }
 
-    /** Master-only: build straight from the database into staging. Still requires a separate activate() call. */
-    @PostMapping("/generate")
-    public void generate() throws IOException {
-        guard.assertEditingAllowed();
-        byte[] rdfBytes = buildRdfFromDatabase();
-        rdfService.stageFromBytes(rdfBytes);
-    }
+    @PostMapping("/stage-from-db")
+    public ResponseEntity<Message> stageRDFFromDB(@RequestHeader(value = "Authorization", required = false) String authorization) throws IOException {
 
-    /**
-     * The conscious "publish"/"activate" moment - same endpoint, same behavior, on
-     * either side of the fleet. Requires Basic Auth, same as staging.
-     */
-    @PostMapping("/activate")
-    public void activate(@RequestHeader(value = "Authorization", required = false) String authorization)
-            throws IOException {
         guard.assertImportAllowed();
         basicAuth.assertAuthorized(authorization);
-        rdfService.activate();
 
-        if (populateDbOnActivate && guard.getMode() == OntologyEditingGuard.Mode.ACTIVE) {
-            try (var in = rdfService.openLive()) {
-                importService.importFullReplacement(in);
-            }
-        }
-        // On a PASSIVE instance the database is never touched here, regardless of the
-        // populate-db-on-activate flag - the file itself remains the sole source of truth.
+        //byte[] rdfBytes = buildRdfFromDatabase();
+        //rdfService.stageFromBytes(rdfBytes);
+
+        rdfService.archiveStaged();
+
+        Message m = new Message(500, null, null, "Not implemented", null);
+        return new ResponseEntity<>(m, HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
-    // ------------------------------------------------------------------
-    // Auth diagnostic - faithful recreation of legacy GET /ontology/authenticate
-    // ------------------------------------------------------------------
+    @PostMapping("/ingest")
+    public ResponseEntity<Message> populateDBFromRDF(@RequestHeader(value = "Authorization", required = false) String authorization,
+                                                     @RequestParam("file") MultipartFile file)
+            throws IOException {
+
+        guard.assertImportAllowed();
+        basicAuth.assertAuthorized(authorization);
+
+        byte[] bytes = file.getBytes();
+        OntologyHeaderReader.OntologyHeader header;
+        try {
+            header = OntologyHeaderReader.read(new ByteArrayInputStream(bytes));
+        } catch (Exception e) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                    "Cannot read the uploaded file as an ontology RDF/XML file.", e);
+        }
+
+        String scope = header.scope();
+        if (scope != null && !scope.equals("VESSEL")) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                    "Cannot stage file: not recognized as a Vessel ontology "
+                            + "(found scope=" + scope + "). Program ontologies are no longer supported.");
+        }
+        rdfService.archiveStaged();
+        rdfService.stage(new ByteArrayInputStream(bytes));
+
+        try (var in = rdfService.openStaged()) {
+            importService.importFullReplacement(in);
+        }
+        Message m = new Message(202, null, null, "File correctly saved", null);
+        return new ResponseEntity<>(m, HttpStatus.ACCEPTED);
+    }
 
     @GetMapping(value = "/authenticate", produces = MediaType.TEXT_PLAIN_VALUE)
     public String canAuthenticate(@RequestHeader(value = "Authorization", required = false) String authorization) {
@@ -199,17 +222,5 @@ public class OntologyRdfController {
         return sparqlService.executeSelectAsJson(sparqlQuery);
     }
 
-    /**
-     * Wraps EARSOntologyCreator (the standalone library) to build the RDF bytes from
-     * the current ontology_* tables. Left as a stub: needs adapter classes (see
-     * conversation notes) implementing IToolCategory/ITool/IProcess/IAction/
-     * IProperty/IGenericEventDefinition/ISpecificEventDefinition around
-     * ToolCategoryDefinition/ToolDefinition/etc, then a straightforward
-     * creator.setToolCategoryCollection(...) / createOntoFile(...) call sequence.
-     */
-    private byte[] buildRdfFromDatabase() {
-        throw new UnsupportedOperationException(
-                "Wire this up to EARSOntologyCreator once the IToolCategory/ITool/... adapter "
-                + "classes around the JPA entities are written - see project README.");
-    }
+
 }

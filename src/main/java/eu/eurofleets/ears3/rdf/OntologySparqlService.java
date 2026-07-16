@@ -54,7 +54,7 @@ public class OntologySparqlService {
         OntModel model = ModelFactory.createOntologyModel(OntModelSpec.OWL_MEM);
         model.getDocumentManager().setProcessImports(false); // self-contained file assumption, see StagedRdfService
 
-        try (InputStream in = rdfService.openLive()) {
+        try (InputStream in = rdfService.openStaged()) {
             model.read(in, null);
         }
 

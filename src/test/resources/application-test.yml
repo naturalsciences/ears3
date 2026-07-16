@@ -53,22 +53,17 @@ ears:
   ontology:
     username: earsontology
     password: REPLACEME
-    mode: ${EARS_ONTOLOGY_MODE:PASSIVE}
-    # Gates tree edits + "generate from DB". Master only. Safe default: false.
-    editing-enabled: ${EARS_ONTOLOGY_EDITING_ENABLED:false}
-    # Gates staging + activating RDF. Safe to leave true everywhere.
+    # Gates tree edits. Master only.
+    editing-enabled: ${EARS_ONTOLOGY_EDITING_ENABLED:true}
+    # Gates stage RDF from database, ingest from rdf file to database
     import-enabled: ${EARS_ONTOLOGY_IMPORT_ENABLED:true}
     rdf:
-      # Active RDF file - point SPARQL engine here.
-      live-path: ${EARS_ONTOLOGY_RDF_LIVE_PATH:/var/ears/ontology/live.rdf}
-      # Staging slot, filled by /stage or /generate, consumed by /activate.
-      staged-path: ${EARS_ONTOLOGY_RDF_STAGED_PATH:/var/ears/ontology/staged.rdf}
+      # The location of the staged RDF file. Staged is either generated from file or from the db.
+      # Live is in the db, and a live rdf is generated in real-time from the database.
+      staged-path: ${EARS_ONTOLOGY_RDF_STAGED_PATH:/var/ears/ontology/earsv2-onto-vessel.rdf}
       # Timestamped backup of outgoing live file on each activate(), for
       # manual rollback. No UI yet at POC stage.
       archive-dir: ${EARS_ONTOLOGY_RDF_ARCHIVE_DIR:/var/ears/ontology/archive}
-      # POC opt-in, ACTIVE mode only: also repopulate ontology_* tables on
-      # activate() so the tree UI has data on master. No-op on PASSIVE.
-      populate-db-on-activate: ${EARS_ONTOLOGY_POPULATE_DB_ON_ACTIVATE:false}
   read-only: false
   program:
     regex: "202[6-9]"

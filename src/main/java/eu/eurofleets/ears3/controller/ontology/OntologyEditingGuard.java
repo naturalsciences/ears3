@@ -29,20 +29,11 @@ import org.springframework.web.server.ResponseStatusException;
 @Component
 public class OntologyEditingGuard {
 
-    public enum Mode { ACTIVE, PASSIVE }
-
-    @Value("${ears.ontology.mode:PASSIVE}")
-    private Mode mode;
-
     @Value("${ears.ontology.editing-enabled:false}")
     private boolean editingEnabled;
 
     @Value("${ears.ontology.import-enabled:true}")
     private boolean importEnabled;
-
-    public Mode getMode() {
-        return mode;
-    }
 
     public boolean isEditingEnabled() {
         return editingEnabled;
