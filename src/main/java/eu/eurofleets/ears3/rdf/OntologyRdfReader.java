@@ -13,8 +13,7 @@ import org.apache.jena.rdf.model.StmtIterator;
 import org.apache.jena.util.iterator.ExtendedIterator;
 
 import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -22,13 +21,13 @@ import java.util.stream.Collectors;
  * mirroring the individual/asConcept shape that EARSOntologyCreator writes
  * (makeConceptAssertions/saveConcept): term metadata lives on a linked skos:Concept
  * individual reached via :asConcept, not on the entity individual itself.
- *
+ * <p>
  * ASSUMPTION (see conversation notes): the file being read is self-contained
  * (produced with EARSOntologyCreator.LoadOnto.PASTE, or equivalent), not relying on
  * a live owl:imports fetch at read time - which matches an offline-safe "carry the
  * file to the ship" workflow. setProcessImports(false) enforces this: imports are
  * never resolved over the network here.
- *
+ * <p>
  * This reader is currently only wired up as an OPTIONAL convenience (see
  * OntologyRdfImportService) for a master/ACTIVE instance that wants its local
  * database populated from an existing file. It is NOT used on a PASSIVE ship
@@ -50,42 +49,40 @@ public class OntologyRdfReader {
         model.read(rdfInput, null);
     }
 
-    public List<RawConcept> readToolCategories() {
+    public Set<RawConcept> readToolCategories() {
         return readIndividualsOfClass("ToolCategory");
     }
 
-    public List<RawConcept> readTools() {
+    public Set<RawConcept> readTools() {
         return readIndividualsOfClass("Tool");
     }
 
-    public List<RawConcept> readProcesses() {
+    public Set<RawConcept> readProcesses() {
         return readIndividualsOfClass("Process");
     }
 
-    /** Action's OWL class is named "ProcessStep" in EARSOntologyCreator.saveActions(). */
-    public List<RawConcept> readActions() {
+    public Set<RawConcept> readActions() {
         return readIndividualsOfClass("ProcessStep");
     }
 
-    /** Property's OWL class is named "EventProperty" in EARSOntologyCreator.saveProperties(). */
-    public List<RawConcept> readProperties() {
+    public Set<RawConcept> readProperties() {
         return readIndividualsOfClass("EventProperty");
     }
 
-    public List<RawConcept> readGenericEventDefinitions() {
+    public Set<RawConcept> readGenericEventDefinitions() {
         return readIndividualsOfClass("GenericEventDefinition");
     }
 
-    public List<RawConcept> readSpecificEventDefinitions() {
+    public Set<RawConcept> readSpecificEventDefinitions() {
         return readIndividualsOfClass("SpecificEventDefinition");
     }
 
-    private List<RawConcept> readIndividualsOfClass(String className) {
+    private Set<RawConcept> readIndividualsOfClass(String className) {
         OntClass ontClass = model.getOntClass(EARS_NS + className);
         if (ontClass == null) {
-            return List.of();
+            return Set.of();
         }
-        List<RawConcept> result = new ArrayList<>();
+        Set<RawConcept> result = new HashSet<>();
         ExtendedIterator<? extends OntResource> it = ontClass.listInstances();
         while (it.hasNext()) {
             Individual ind = (Individual) it.next();
@@ -160,7 +157,9 @@ public class OntologyRdfReader {
                 .collect(Collectors.toList());
     }
 
-    /** Flat, uninterpreted read of one individual - resolved into real JPA entities in a second pass. */
+    /**
+     * Flat, uninterpreted read of one individual - resolved into real JPA entities in a second pass.
+     */
     public static class RawConcept {
         public String uri;
         public String identifier;
@@ -182,5 +181,16 @@ public class OntologyRdfReader {
         public List<String> hasProperty = List.of();
         public List<String> realizedBy = List.of();
         public List<String> triggersHostedEvent = List.of();
+
+        @Override
+        public boolean equals(Object o) {
+            if (!(o instanceof RawConcept that)) return false;
+            return Objects.equals(uri, that.uri) && Objects.equals(identifier, that.identifier);
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(uri, identifier);
+        }
     }
 }

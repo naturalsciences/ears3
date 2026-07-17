@@ -77,13 +77,6 @@ public class OntologyRdfImportService {
 
     @Transactional
     public void importFullReplacement(InputStream rdfInput) {
-        // GenericEventDefinition/SpecificEventDefinition share the JOINED-inheritance
-        // ontology_event_definition table; deleteAllInBatch() on either would make
-        // Hibernate 7 generate a CTE-based multi-table delete ("with ... as materialized")
-        // that H2 can't parse (works on real Postgres, but not in tests). Deleting the
-        // shared parent row directly relies on the ON DELETE CASCADE already declared on
-        // every child/join table (ontology_generic_event_definition, ontology_specific_event_definition,
-        // ontology_event_triggers, ontology_event_properties) and is portable across both.
         entityManager.createNativeQuery("delete from ontology_event_definition").executeUpdate();
         propertyRepo.deleteAllInBatch();
         actionRepo.deleteAllInBatch();
@@ -186,7 +179,14 @@ public class OntologyRdfImportService {
     }
 
     private void applyCommon(EarsTermDefinitionBase e, RawConcept rc) {
-        e.setIdentifier(rc.identifier != null ? rc.identifier : rc.uri);
+        // rc.uri is the EarsTerm individual's own RDF node - guaranteed unique per
+        // resource. rc.identifier is the dc:identifier of whatever :asConcept points
+        // to, which is a NERC-vocab-style Concept - and more than one EarsTerm
+        // (e.g. two Tool instances on board with different labels/toolIdentifier)
+        // can legitimately share the same Concept, so that value is NOT safe as the
+        // unique `identifier` column here. Keep it, non-unique, in substituteIdentifier.
+        e.setIdentifier(rc.uri);
+        e.setSubstituteIdentifier(rc.identifier);
         e.setPrefLabel(rc.prefLabel);
         e.setAltLabel(rc.altLabel);
         e.setDefinition(rc.definition);

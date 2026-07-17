@@ -8,7 +8,7 @@
 
 <body>
 <nav th:replace="fragments/f :: header"></nav>
-<div  sec:authorize="hasAnyRole('ADMIN', 'ADMIN_TREE')" class="container-fluid" layout:fragment="main">
+<div sec:authorize="hasAnyRole('ADMIN', 'ADMIN_TREE')" class="container-fluid" layout:fragment="main">
     <h1>Ontology Editor</h1>
     <div id="ontologyPublish" class="mb-3 p-3 border rounded">
         <h3>Ontology File</h3>
@@ -114,8 +114,17 @@
             const fd = new FormData();
             fd.append('file', fileInput.files[0]);
             $.ajax({
-                url: '/ears3/api/ontology/ingest', method: 'POST',
-                data: fd, processData: false, contentType: false,
+                url: '/ears3/api/ontology/ingest',
+                method: 'POST',
+                data: fd,
+                processData: false,
+                contentType: false,
+                beforeSend: function (xhr) {
+                    xhr.setRequestHeader(
+                        $('meta[name="_csrf_header"]').attr('content'),
+                        $('meta[name="_csrf"]').attr('content')
+                    );
+                },
                 success: refreshFileInfo,
                 error: function (xhr) {
                     alert('Ingest failed: ' + xhr.responseText);

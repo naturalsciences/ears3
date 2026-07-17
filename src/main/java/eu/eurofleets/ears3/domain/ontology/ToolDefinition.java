@@ -1,10 +1,8 @@
 package eu.eurofleets.ears3.domain.ontology;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.JoinTable;
-import jakarta.persistence.ManyToMany;
-import jakarta.persistence.Table;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import jakarta.persistence.*;
+import jakarta.xml.bind.annotation.XmlTransient;
 
 import java.util.HashSet;
 import java.util.Set;
