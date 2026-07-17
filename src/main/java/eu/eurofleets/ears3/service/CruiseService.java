@@ -107,7 +107,7 @@ public class CruiseService {
     }
 
     public Cruise save(CruiseDTO dto) {
-        if (env.getProperty("ears.read-only") == null || !env.getProperty("ears.read-only").equals("false")) {
+        if (env.getProperty("app.read-only") == null || !env.getProperty("app.read-only").equals("false")) {
             throw new IllegalArgumentException("Cannot create/modify entities on a read-only system.");
         }
         String json = null;
@@ -279,21 +279,21 @@ public class CruiseService {
      * }
      */
     public void deleteById(String id) {
-        if (env.getProperty("ears.read-only") == null || !env.getProperty("ears.read-only").equals("false")) {
+        if (env.getProperty("app.read-only") == null || !env.getProperty("app.read-only").equals("false")) {
             throw new IllegalArgumentException("Cannot create/modify entities on a read-only system.");
         }
         this.cruiseRepository.deleteById(Long.valueOf(id));
     }
 
     public void deleteByDate(Date startDate, Date endDate) {
-        if (env.getProperty("ears.read-only") == null || !env.getProperty("ears.read-only").equals("false")) {
+        if (env.getProperty("app.read-only") == null || !env.getProperty("app.read-only").equals("false")) {
             throw new IllegalArgumentException("Cannot create/modify entities on a read-only system.");
         }
         this.cruiseRepository.deleteByDate(startDate, endDate);
     }
 
     public void deleteByIdentifier(String identifier) {
-        if (env.getProperty("ears.read-only") == null || !env.getProperty("ears.read-only").equals("false")) {
+        if (env.getProperty("app.read-only") == null || !env.getProperty("app.read-only").equals("false")) {
             throw new IllegalArgumentException("Cannot create/modify entities on a read-only system.");
         }
         this.cruiseRepository.deleteByIdentifier(identifier);

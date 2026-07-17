@@ -81,7 +81,7 @@ public class DatabaseSyncScheduler {
     @Async("asyncExecutor")
     public CompletableFuture<String> syncDatabase() throws MalformedURLException, IOException {
         log.log(Level.INFO, "Syncing database");
-        String vesselAddress = env.getProperty("ears.vessel-address");
+        String vesselAddress = env.getProperty("app.vessel-address");
         OffsetDateTime after = Instant.now().minus(1, ChronoUnit.DAYS).atOffset(ZoneOffset.UTC);
         //EventDTOList events = objectMapper.readValue(new URL(vesselAddress + "/dto/events?after=" + after.format(DateTimeFormatter.ISO_OFFSET_DATE_TIME)), EventDTOList.class);
         //TODO

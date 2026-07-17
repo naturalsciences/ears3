@@ -64,9 +64,8 @@ WHERE {
 } 
 ORDER BY DESC(?eid)`;
 
-const jsonVesselRdfLocation = "/ears3/ontology/vessel/sparql?q=" + encodeURIComponent(conceptHierarchySPARQL);
-const jsonProgramRdfLocation = "/ears3/ontology/program/sparql?q=" + encodeURIComponent(conceptHierarchySPARQL);
-const eventPropertyRdfLocation = "/ears3/ontology/vessel/sparql?q=" + encodeURIComponent(eventPropertySPARQL); //TODO modify to use eventPropertyIncludeGEVSPARQL
+const jsonVesselRdfLocation = "/ears3/api/ontology/sparql?q=" + encodeURIComponent(conceptHierarchySPARQL);
+const eventPropertyRdfLocation = "/ears3/api/ontology/sparql?q=" + encodeURIComponent(eventPropertySPARQL); //TODO modify to use eventPropertyIncludeGEVSPARQL
 const stayGreenForThisPeriod = 5000;
 
 class EarsEvent {

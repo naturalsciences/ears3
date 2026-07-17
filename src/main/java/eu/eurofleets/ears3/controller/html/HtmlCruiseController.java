@@ -27,7 +27,7 @@ public class HtmlCruiseController {
     @Autowired
     private CruiseService cruiseService;
 
-    @Value("${ears.platform}")
+    @Value("${app.platform}")
     public String platformUrn;
 
     @RequestMapping(method = RequestMethod.GET)

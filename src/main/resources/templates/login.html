@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <title>Login</title>
+    <link rel="stylesheet" type="text/css" th:href="@{/css/bootstrap.min.css}">
+</head>
+<body>
+<div class="container" style="max-width: 400px; margin-top: 100px;">
+    <h1 class="mb-4">Admin login</h1>
+    <div class="alert alert-danger" th:if="${error}">Incorrect password.</div>
+
+    <form th:action="@{/login}" method="post">
+        <input type="hidden" name="redirect" th:value="${redirect}"/>
+        <div class="form-group mb-3">
+            <label for="username">Username</label>
+            <input type="text" class="form-control" id="username" name="username" autofocus required>
+            <label for="password">Password</label>
+            <input type="password" class="form-control" id="password" name="password" required/>
+        </div>
+        <button type="submit" class="btn btn-primary">Log in</button>
+    </form>
+    <a th:href="@{/logout}"
+       class="btn btn-secondary btn-sm">Logout
+    </a>
+</div>
+</body>
+</html>

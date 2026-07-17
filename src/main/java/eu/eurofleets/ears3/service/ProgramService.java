@@ -38,7 +38,7 @@ public class ProgramService {
     @Autowired
     private Environment env;
 
-    @Value("${ears.platform}")
+    @Value("${app.platform}")
     public String platformUrn;
 
     private static String DEFAULT_PROGRAM = "11BU_operations";
@@ -65,14 +65,14 @@ public class ProgramService {
     }
 
     public Program save(Program program) {
-        if (env.getProperty("ears.read-only") == null || !env.getProperty("ears.read-only").equals("false")) {
+        if (env.getProperty("app.read-only") == null || !env.getProperty("app.read-only").equals("false")) {
             throw new IllegalArgumentException("Cannot create/modify entities on a read-only system.");
         }
         return this.programRepository.save(program);
     }
 
     public Program save(ProgramDTO dto) {
-        if (env.getProperty("ears.read-only") == null || !env.getProperty("ears.read-only").equals("false")) {
+        if (env.getProperty("app.read-only") == null || !env.getProperty("app.read-only").equals("false")) {
             throw new IllegalArgumentException("Cannot create/modify entities on a read-only system.");
         }
         if (dto.identifier == null) {
@@ -132,21 +132,21 @@ public class ProgramService {
     }
 
     public void delete(Program program) {
-        if (env.getProperty("ears.read-only") == null || !env.getProperty("ears.read-only").equals("false")) {
+        if (env.getProperty("app.read-only") == null || !env.getProperty("app.read-only").equals("false")) {
             throw new IllegalArgumentException("Cannot create/modify entities on a read-only system.");
         }
         this.programRepository.delete(program);
     }
 
     public void deleteById(long id) {
-        if (env.getProperty("ears.read-only") == null || !env.getProperty("ears.read-only").equals("false")) {
+        if (env.getProperty("app.read-only") == null || !env.getProperty("app.read-only").equals("false")) {
             throw new IllegalArgumentException("Cannot create/modify entities on a read-only system.");
         }
         this.programRepository.deleteById(id);
     }
 
     public void deleteByIdentifier(String identifier) {
-        if (env.getProperty("ears.read-only") == null || !env.getProperty("ears.read-only").equals("false")) {
+        if (env.getProperty("app.read-only") == null || !env.getProperty("app.read-only").equals("false")) {
             throw new IllegalArgumentException("Cannot create/modify entities on a read-only system.");
         }
         this.programRepository.deleteByIdentifier(identifier);

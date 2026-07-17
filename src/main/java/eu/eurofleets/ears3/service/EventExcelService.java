@@ -72,9 +72,9 @@ public class EventExcelService {
 
     @Autowired
     public EventExcelService(EventRepository eventRepository,
-                             @Value("${ears.navigation.server}") String navServer,
-                             @Value("${ears.read-only}") Boolean readOnly,
-                             @Value("${ears.platform}") String platformUrn) {
+                             @Value("${app.navigation.server}") String navServer,
+                             @Value("${app.read-only}") Boolean readOnly,
+                             @Value("${app.platform}") String platformUrn) {
         this.eventRepository = eventRepository;
         this.navServer = navServer;
         this.readOnly = readOnly;

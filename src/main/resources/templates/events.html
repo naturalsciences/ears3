@@ -9,7 +9,7 @@
 <div class="container" layout:fragment="main">
     <h1 id="h1">Events</h1>
     <div id="search" class="mb-3 p-3 border rounded">
-        <h2>Filter Events
+        <h3>Filter Events
             <a th:href="@{/api/events.csv}"
                class="btn btn-secondary btn-sm"
                title="Download CSV">
@@ -29,7 +29,7 @@
                     <path d="M1.5 1.5A.5.5 0 0 1 2 1h12a.5.5 0 0 1 .5.5v2a.5.5 0 0 1-.128.334L10 8.692V13.5a.5.5 0 0 1-.342.474l-3 1A.5.5 0 0 1 6 14.5V8.692L1.628 3.834A.5.5 0 0 1 1.5 3.5z"/>
                 </svg>
             </button>
-        </h2>
+        </h3>
         <div class="form-inline mb-2">
             <div class="form-group mr-3 mb-2">
                 <select name="cruise" id="cruiseField"
@@ -81,7 +81,7 @@
         </div>
     </div>
     <div id="toggle" class="mb-3 p-3 border rounded">
-        <h2>Toggle columns</h2>
+        <h3>Toggle columns</h3>
         <ul>
             <li><a href="#" class="toggle-vis" data-column="3">Cruise</a></li>
             <li><a href="#" class="toggle-vis" data-column="4">Program</a></li>

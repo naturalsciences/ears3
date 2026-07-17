@@ -43,7 +43,21 @@ server:
     context-path: /ears3
 
 
-ears:
+app:
+  security:
+    users:
+      - username: admin
+        password: REPLACEME
+        roles:
+          - ADMIN
+      - username: admin-tree
+        password: REPLACEME
+        roles:
+          - ADMIN_TREE
+      - username: admin-event
+        password: REPLACEME
+        roles:
+          - ADMIN_EVENT
   platform: SDN:C17::11BU
   send-events-to: http://replace.me
   navigation:
@@ -51,8 +65,6 @@ ears:
   csr:
     license: UN
   ontology:
-    username: earsontology
-    password: REPLACEME
     # Gates tree edits. Master only.
     editing-enabled: ${EARS_ONTOLOGY_EDITING_ENABLED:true}
     # Gates stage RDF from database, ingest from rdf file to database

@@ -299,7 +299,7 @@ public class CruiseControllerTest {
          */
         @Test
         public void testProperties() throws Exception {
-                String licenseString = env.getProperty("ears.csr.license");
+                String licenseString = env.getProperty("app.csr.license");
                 if (licenseString == null) {
                         fail();
                 }
@@ -324,7 +324,7 @@ public class CruiseControllerTest {
                 // cruise.endDate = OffsetDateTime.now().plusDays(5);
                 postCruise(mockMvc, cruise, objectMapper);
 
-                String navServer = env.getProperty("ears.navigation.server");
+                String navServer = env.getProperty("app.navigation.server");
                 boolean isOffline = false;
                 DatagramUtilities<Navigation> datagramUtilities = new DatagramUtilities<>(Navigation.class, navServer);
                 try {
@@ -333,7 +333,7 @@ public class CruiseControllerTest {
                         isOffline = true;
                 }
 
-                String licenseString = env.getProperty("ears.csr.license");
+                String licenseString = env.getProperty("app.csr.license");
                 this.mockMvc
                                 .perform(MockMvcRequestBuilders.get("/api/cruise/csr?identifier=" + identifier)
                                                 .accept(Constants.APPLICATION_XML_UTF8))

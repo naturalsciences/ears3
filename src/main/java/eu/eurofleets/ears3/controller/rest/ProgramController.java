@@ -151,14 +151,14 @@ public class ProgramController {
     @DeleteMapping(value = { "program" }, params = { "identifier" }, produces = { "application/xml; charset=utf-8",
             "application/json;charset=UTF-8" })
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public String removeProgramByIdentifier(@RequestParam(required = true) String identifier) {
+    public String deleteProgramByIdentifier(@RequestParam(required = true) String identifier) {
         this.programService.deleteByIdentifier(identifier);
         return "";
     }
 
     @DeleteMapping(value = { "program/{id}" }, produces = { "application/xml" })
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public String removeProgramById(@PathVariable(required = true) String id) {
+    public String deleteProgramById(@PathVariable(required = true) String id) {
         this.programService.deleteById(Long.valueOf(id));
         return "";
     }

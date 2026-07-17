@@ -16,7 +16,7 @@ public class PlatformController {
     @Autowired
     private PlatformService platformService;
 
-    @Value("${ears.platform}")
+    @Value("${app.platform}")
     public String platformUrn;
 
     @GetMapping(value = {"platform/current"}, produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})

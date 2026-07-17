@@ -1,15 +1,17 @@
 <!DOCTYPE html>
-<html lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org"
+<html lang="en" xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
       xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" layout:decorate="~{fragments/f}">
 
 <head th:replace="fragments/f :: head"></head>
 
 <body>
 <nav th:replace="fragments/f :: header"></nav>
-<div class="container-fluid" layout:fragment="main">
+<div  sec:authorize="hasAnyRole('ADMIN', 'ADMIN_TREE')" class="container-fluid" layout:fragment="main">
     <h1>Ontology Editor</h1>
     <div id="ontologyPublish" class="mb-3 p-3 border rounded">
-        <h2>Ontology File</h2>
+        <h3>Ontology File</h3>
 
         <p><strong>Live:</strong>
             <a href="/ears3/api/ontology/live">Download</a>
@@ -19,15 +21,19 @@
             <a href="/ears3/api/ontology">Download</a>
         </p>
 
+
         <div class="form-inline mb-2">
-            <input type="file" id="rdfFile" class="form-control-file mr-2"/>
-            <button id="btnStageFromFile" class="btn btn-secondary btn-sm">Stage from file</button>
-            <span th:if="${importEnabled}">
+            <div class="form-group mr-3 mb-2">
+                <input type="file" id="rdfFile" class="form-control-file mr-2"/>
+                <button id="btnStageFromFile" class="btn btn-secondary btn-sm">Stage from file</button>
+                <br/>
+                <div sec:authorize="hasRole('ADMIN')">
+                    <button id="btnIngest" class="btn btn-danger btn-sm">Ingest file into database and stage</button>
+                </div>
+            </div>
+            <div sec:authorize="hasRole('ADMIN')" class="form-group mr-3 mb-2">
                 <button id="btnStageFromDb" class="btn btn-secondary btn-sm ml-2">Stage from database</button>
-            </span>
-            <span th:if="${importEnabled}">
-                <button id="btnIngest" class="btn btn-danger btn-sm">Ingest file into database</button>
-            </span>
+            </div>
         </div>
 
     </div>
@@ -57,10 +63,6 @@
             return node.original.data.hierarchyRef;
         }
 
-        // ---------------------------------------------------------------
-        // Publish / stage / activate panel
-        // ---------------------------------------------------------------
-
         function refreshFileInfo() {
             $.get('/ears3/api/ontology/info', function (d) {
                 $('#stagedInfo').text(d ? (d.filename + ' (' + d.lastModified + ')') : 'none');
@@ -70,7 +72,10 @@
         $('#btnStageFromFile').on('click', function () {
             const fileInput = document.getElementById('rdfFile');
             if (!fileInput.files.length) {
-                alert('This will overwrite the staged tree with the uploaded tree.');
+                alert('You must select an RDF file first!');
+                return;
+            }
+            if (!confirm('This will overwrite the staged tree with the uploaded tree. Are you sure?')) {
                 return;
             }
             const fd = new FormData();
@@ -98,11 +103,24 @@
         });
 
         $('#btnIngest').on('click', function () {
-            $.post('/ears3/api/ontology/ingest')
-                .done(refreshFileInfo)
-                .fail(function (xhr) {
+            const fileInput = document.getElementById('rdfFile');
+            if (!fileInput.files.length) {
+                alert('You must select an RDF file first!');
+                return;
+            }
+            if (!confirm('This will overwrite the database with the information in the RDF file! Are you sure?')) {
+                return;
+            }
+            const fd = new FormData();
+            fd.append('file', fileInput.files[0]);
+            $.ajax({
+                url: '/ears3/api/ontology/ingest', method: 'POST',
+                data: fd, processData: false, contentType: false,
+                success: refreshFileInfo,
+                error: function (xhr) {
                     alert('Ingest failed: ' + xhr.responseText);
-                });
+                }
+            });
         });
 
         // ---------------------------------------------------------------

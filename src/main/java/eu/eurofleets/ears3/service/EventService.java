@@ -77,8 +77,8 @@ public class EventService {
 
     @Autowired
     public EventService(EventRepository eventRepository,
-                        @Value("${ears.navigation.server}") String navServer,
-                        @Value("${ears.read-only}") Boolean readOnly) {
+                        @Value("${app.navigation.server}") String navServer,
+                        @Value("${app.read-only}") Boolean readOnly) {
         this.eventRepository = eventRepository;
         this.navServer = navServer;
         this.readOnly = readOnly;
@@ -424,7 +424,7 @@ public class EventService {
 
     /* private void sendToRemoteServer(Event event) {
         //TODO
-        String remoteServer = env.getProperty("ears.send-events-to") + "/ears3/api/event";
+        String remoteServer = env.getProperty("app.send-events-to") + "/ears3/api/event";
         if (remoteServer != null && !remoteServer.equals("")) {
             try {
                 String json = objectMapper.writeValueAsString(new EventDTO(event));

@@ -10,6 +10,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 import org.thymeleaf.extras.java8time.dialect.Java8TimeDialect;
+import org.thymeleaf.extras.springsecurity6.dialect.SpringSecurityDialect;
 import org.thymeleaf.spring6.SpringTemplateEngine;
 import org.thymeleaf.spring6.templateresolver.SpringResourceTemplateResolver;
 
@@ -27,6 +28,7 @@ public class ThymeleafConfiguration {
         templateEngine.setTemplateResolver(thymeleafTemplateResolver());
         templateEngine.addDialect(new Java8TimeDialect());
         templateEngine.addDialect(new LayoutDialect());
+        templateEngine.addDialect(new SpringSecurityDialect());
         return templateEngine;
     }
 

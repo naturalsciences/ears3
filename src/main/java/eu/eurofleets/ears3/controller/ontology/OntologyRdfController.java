@@ -61,7 +61,6 @@ public class OntologyRdfController {
 
     private final StagedRdfService rdfService;
     private final OntologyEditingGuard guard;
-    private final OntologyBasicAuthService basicAuth;
     private final OntologySparqlService sparqlService;
     private final OntologyRdfImportService importService;
 
@@ -71,15 +70,14 @@ public class OntologyRdfController {
      * tree-browsing UI has something to show. Defaults to false. Never applies on
      * a PASSIVE ship instance regardless of this flag - see assertion in activate().
      */
-    @Value("${ears.ontology.rdf.populate-db-on-activate:false}")
+    @Value("${app.ontology.rdf.populate-db-on-activate:false}")
     private boolean populateDbOnActivate;
 
     public OntologyRdfController(StagedRdfService rdfService, OntologyEditingGuard guard,
-                                 OntologyBasicAuthService basicAuth, OntologySparqlService sparqlService,
+                                 OntologySparqlService sparqlService,
                                  OntologyRdfImportService importService) {
         this.rdfService = rdfService;
         this.guard = guard;
-        this.basicAuth = basicAuth;
         this.sparqlService = sparqlService;
         this.importService = importService;
     }
@@ -133,10 +131,9 @@ public class OntologyRdfController {
      * porting the checks that used to live in uploadOntology()/uploadVesselOntology().
      */
     @PostMapping("/stage-from-file")
-    public ResponseEntity<Message> stageRDFFromFile(@RequestHeader(value = "Authorization", required = false) String authorization,
-                                                    @RequestParam("file") MultipartFile file) throws IOException {
+    public ResponseEntity<Message> stageRDFFromFile(@RequestParam("file") MultipartFile file) throws IOException {
         guard.assertImportAllowed();
-        basicAuth.assertAuthorized(authorization);
+        //basicAuth.assertAuthorized(authorization);
 
         byte[] bytes = file.getBytes();
         OntologyHeaderReader.OntologyHeader header;
@@ -160,10 +157,10 @@ public class OntologyRdfController {
     }
 
     @PostMapping("/stage-from-db")
-    public ResponseEntity<Message> stageRDFFromDB(@RequestHeader(value = "Authorization", required = false) String authorization) throws IOException {
+    public ResponseEntity<Message> stageRDFFromDB() throws IOException {
 
         guard.assertImportAllowed();
-        basicAuth.assertAuthorized(authorization);
+        //basicAuth.assertAuthorized(authorization);
 
         //byte[] rdfBytes = buildRdfFromDatabase();
         //rdfService.stageFromBytes(rdfBytes);
@@ -175,12 +172,11 @@ public class OntologyRdfController {
     }
 
     @PostMapping("/ingest")
-    public ResponseEntity<Message> populateDBFromRDF(@RequestHeader(value = "Authorization", required = false) String authorization,
-                                                     @RequestParam("file") MultipartFile file)
+    public ResponseEntity<Message> populateDBFromRDF(@RequestParam("file") MultipartFile file)
             throws IOException {
 
         guard.assertImportAllowed();
-        basicAuth.assertAuthorized(authorization);
+        //basicAuth.assertAuthorized(authorization);
 
         byte[] bytes = file.getBytes();
         OntologyHeaderReader.OntologyHeader header;
@@ -198,18 +194,13 @@ public class OntologyRdfController {
                             + "(found scope=" + scope + "). Program ontologies are no longer supported.");
         }
         rdfService.archiveStaged();
-        rdfService.stage(new ByteArrayInputStream(bytes));
+        rdfService.tmp(new ByteArrayInputStream(bytes));
 
-        try (var in = rdfService.openStaged()) {
+        try (var in = rdfService.openTmp()) {
             importService.importFullReplacement(in);
         }
         Message m = new Message(202, null, null, "File correctly saved", null);
         return new ResponseEntity<>(m, HttpStatus.ACCEPTED);
-    }
-
-    @GetMapping(value = "/authenticate", produces = MediaType.TEXT_PLAIN_VALUE)
-    public String canAuthenticate(@RequestHeader(value = "Authorization", required = false) String authorization) {
-        return Boolean.toString(basicAuth.isAuthorized(authorization));
     }
 
     // ------------------------------------------------------------------

@@ -12,17 +12,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.*;
 
 /**
  *
  * @author Thomas Vandenberghe
  */
 @Controller
-@RequestMapping(value = "")
+@RequestMapping(value = "person")
 public class HtmlPersonController {
 
     @Autowired
@@ -33,7 +30,7 @@ public class HtmlPersonController {
         return "persons";
     }
 
-    @GetMapping("person/new")
+    @GetMapping("/new")
     public String showSignUpForm(Person program) {
         return "person-new";
     }
@@ -48,7 +45,7 @@ public class HtmlPersonController {
         return "redirect:/event";
     }
 
-    @GetMapping("person/edit/{id}")
+    @GetMapping("/edit/{id}")
     public String showUpdateForm(@PathVariable("id") long id, Model model) {
         Person program = personService.findById(id);
 
@@ -56,7 +53,7 @@ public class HtmlPersonController {
         return "program-update";
     }
 
-    @PostMapping("person/update/{id}")
+    @PostMapping("/update/{id}")
     public String updateUser(@PathVariable("id") long id, @Valid Person program,
             BindingResult result, Model model) {
         if (result.hasErrors()) {
@@ -65,15 +62,13 @@ public class HtmlPersonController {
         }
 
         personService.save(program);
-     //   model.addAttribute("persons", personService.findAll());
         return "redirect:/index";
     }
 
-    @GetMapping("/delete/{id}")
+    @DeleteMapping("/delete/{id}")
     public String deletePerson(@PathVariable("id") long id, Model model) {
         Person person = personService.findById(id);
         personService.delete(person);
-    //    model.addAttribute("programs", personService.findAll());
         return "index";
     }
 }

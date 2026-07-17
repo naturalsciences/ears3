@@ -44,7 +44,7 @@ public class EventController {
     @Autowired
     private EventService eventService;
 
-    @Value("${ears.platform}")
+    @Value("${app.platform}")
     public String platformUrn;
 
     @GetMapping(value = {"events"}, produces = {MediaType.APPLICATION_JSON_VALUE,

@@ -1,5 +1,6 @@
 package eu.eurofleets.ears3.rdf;
 
+import org.apache.commons.io.FileUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
@@ -31,10 +32,10 @@ import java.time.format.DateTimeFormatter;
 @Service
 public class StagedRdfService {
 
-    @Value("${ears.ontology.rdf.staged-path}")
+    @Value("${app.ontology.rdf.staged-path}")
     private String stagedPathStr;
 
-    @Value("${ears.ontology.rdf.archive-dir}")
+    @Value("${app.ontology.rdf.archive-dir}")
     private String archiveDirStr;
 
     private Path staged() {
@@ -45,12 +46,23 @@ public class StagedRdfService {
         return Paths.get(archiveDirStr);
     }
 
+    private Path tmp(){
+        return Paths.get(FileUtils.getTempDirectory().getAbsolutePath(),"earsv2-onto-vessel.rdf");
+    }
+
     /**
      * Receiving a file - shore resetting from a known-good export, or a ship receiving shore's emailed file.
      */
     public void stage(InputStream rdfInput) throws IOException {
         Files.createDirectories(staged().getParent());
         Files.copy(rdfInput, staged(), StandardCopyOption.REPLACE_EXISTING);
+    }
+
+    /**
+     * Receiving a file - shore resetting from a known-good export, or a ship receiving shore's emailed file.
+     */
+    public void tmp(InputStream rdfInput) throws IOException {
+        Files.copy(rdfInput, tmp(), StandardCopyOption.REPLACE_EXISTING);
     }
 
     /**
@@ -83,6 +95,11 @@ public class StagedRdfService {
     public InputStream openStaged() throws IOException {
         return Files.newInputStream(staged());
     }
+
+    public InputStream openTmp() throws IOException {
+        return Files.newInputStream(tmp());
+    }
+
 
     /**
      * Filename to use for Content-Disposition when serving the live file for download.

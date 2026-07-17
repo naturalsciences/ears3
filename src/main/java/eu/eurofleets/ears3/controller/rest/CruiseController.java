@@ -55,13 +55,13 @@ public class CruiseController {
     @Autowired
     private EventService eventService;
 
-    @Value("${ears.platform}")
+    @Value("${app.platform}")
     public String platformUrn;
 
-    @Value("${ears.navigation.server}")
+    @Value("${app.navigation.server}")
     public String navServer;
 
-    @Value("${ears.csr.license}")
+    @Value("${app.csr.license}")
     public String licenseString;
 
     @GetMapping(value = {"alive"}, produces = {"text/plain"})
@@ -239,13 +239,4 @@ public class CruiseController {
         this.cruiseService.deleteByIdentifier(identifier);
         return "";
     }
-    /*
-    @RequestMapping(method = {org.springframework.web.bind.annotation.RequestMethod.GET}, value = {"removeCruise"}, params = {"startDate", "endDate"}, produces = {"application/xml"})
-    public Message removeCruiseByDateRange(@RequestParam(required = true, value = "startDate") String startDate, @RequestParam(required = true, value = "endDate") String endDate)
-            throws ParseException {
-        this.cruiseService.removeCruise(DateUtilities.parseDate(startDate), DateUtilities.parseDate(endDate));
-    
-        Message res = new Message("0", "Cruises deleted");
-        return res;
-    }*/
 }
