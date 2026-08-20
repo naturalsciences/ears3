@@ -49,33 +49,28 @@ public class SecurityConfig {
     SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
 
         http.authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/", "/css/**", "/js/**", "/images/**","/api/**")
-                        .permitAll()
-
-                        .requestMatchers(HttpMethod.GET, "/api/event/**")
-                        .permitAll()
-
-                        .requestMatchers(HttpMethod.POST, "/api/event/**")
-                        .permitAll()
-
+                        // Specific rules FIRST - first match wins in Spring Security.
+                        .requestMatchers(HttpMethod.GET, "/api/event/**").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/api/event/**").permitAll()
                         .requestMatchers(HttpMethod.DELETE, "/api/event/**")
                         .hasAnyRole("ADMIN", "ADMIN_EVENT")
 
                         .requestMatchers("/ontology")
                         .hasAnyRole("ADMIN", "ADMIN_TREE")
-
                         .requestMatchers("/api/stage-from-file")
                         .hasAnyRole("ADMIN", "ADMIN_TREE")
-
                         .requestMatchers("/api/stage-from-db")
                         .hasAnyRole("ADMIN")
-
                         .requestMatchers("/api/ingest")
                         .hasAnyRole("ADMIN")
 
-                        .anyRequest()
-                        .permitAll()
+                        // Broad catch-alls LAST, and no longer swallowing all of /api/**.
+                        .requestMatchers("/", "/css/**", "/js/**", "/images/**").permitAll()
+
+                        .anyRequest().permitAll()
                 )
+
+                .csrf(csrf -> csrf.ignoringRequestMatchers("/api/**"))
 
                 .formLogin(login -> login
                         .loginPage("/login")

@@ -109,10 +109,10 @@ public class CruiseController {
         return new CruiseList(res);
     }
 
-    @GetMapping(value = {"cruise/{id}"}, produces = {
+    @GetMapping(value = {"cruise/{id:[0-9]+}"}, produces = {
             MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
-    public Cruise getCruiseById(@PathVariable(value = "id") String id) {
-        Cruise cruise = this.cruiseService.findById(Long.parseLong(id));
+    public Cruise getCruiseById(@PathVariable(value = "id") Integer id) {
+        Cruise cruise = this.cruiseService.findById(id);
         if (cruise != null) {
             return cruise;
         } else {

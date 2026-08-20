@@ -41,8 +41,6 @@ server:
   port: 8081
   servlet:
     context-path: /ears3
-
-
 app:
   security:
     users:
@@ -65,7 +63,7 @@ app:
   csr:
     license: UN
   ontology:
-    # Gates tree edits. Master only.
+    # Gates tree edits. Master only. This overrides the rights of an admin.
     editing-enabled: ${EARS_ONTOLOGY_EDITING_ENABLED:true}
     # Gates stage RDF from database, ingest from rdf file to database
     import-enabled: ${EARS_ONTOLOGY_IMPORT_ENABLED:true}

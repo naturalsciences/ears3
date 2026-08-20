@@ -13,6 +13,8 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 
@@ -20,8 +22,9 @@ import org.springframework.web.bind.annotation.RequestMethod;
  *
  * @author Thomas Vandenberghe
  */
-@Controller
-@RequestMapping(value = "cruises")
+@CrossOrigin(origins = "*", maxAge = 3600)
+@Controller()
+@RequestMapping(value = "")
 public class HtmlCruiseController {
 
     @Autowired
@@ -30,13 +33,10 @@ public class HtmlCruiseController {
     @Value("${app.platform}")
     public String platformUrn;
 
-    @RequestMapping(method = RequestMethod.GET)
-    public String showTableWithValues(Model model) {
-        //list with Persons
+    @GetMapping(value = "cruises", produces = {"text/html; charset=utf-8"})
+    public String cruises(Model model) {
         Set<Cruise> cruises = cruiseService.findAllByPlatformIdentifier(platformUrn);
-
         model.addAttribute("cruises", cruises);
-
         return "cruises";
     }
 

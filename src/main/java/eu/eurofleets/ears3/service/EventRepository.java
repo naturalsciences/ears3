@@ -27,9 +27,7 @@ public interface EventRepository extends JpaRepository<Event, Long> {
 
     String TIMESTAMP_WHERE = "e.timeStamp between :startDate and :endDate ";
     String TIME_WHERE = "e.creationTime >= :after or e.modificationTime >= :after ";
-    String TEXT_WHERE = "COALESCE(:label, e.label, '') = COALESCE(e.label, '') "
-            + "and COALESCE(:station, e.station, '') = COALESCE(e.station, '') "
-            + "and COALESCE(:description, e.description, '') = COALESCE(e.description, '') ";
+    String TEXT_WHERE = "COALESCE(:station, e.station, '') = COALESCE(e.station, '') and (COALESCE(:label, e.label, '') = COALESCE(e.label, '') or COALESCE(:description, e.description, '') = COALESCE(e.description, '')) ";
     String PLATFORM_WHERE = "(COALESCE(:platformIdentifier, l.identifier, '') = COALESCE(l.identifier, '') or COALESCE(:platformIdentifier, l.urn, '') = COALESCE(l.urn, '')) ";
     String CRUISE_WHERE = "(COALESCE(:cruiseIdentifier, c.identifier, '') = COALESCE(c.identifier, '') or COALESCE(:cruiseIdentifier, c.name, '') = COALESCE(c.name, ''))";
     String PROGRAM_WHERE = "COALESCE(:programIdentifier, p.identifier, '') = COALESCE(p.identifier, '') ";

@@ -13,6 +13,7 @@ import be.naturalsciences.bmdc.cruise.model.IProject;
 import be.naturalsciences.bmdc.cruise.model.ISeaArea;
 import be.naturalsciences.bmdc.cruise.model.ITool;
 import com.fasterxml.jackson.annotation.JsonFormat;
+
 import java.io.Serializable;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
@@ -23,6 +24,8 @@ import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
 import java.util.StringJoiner;
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
@@ -45,6 +48,7 @@ import tools.jackson.databind.annotation.JsonDeserialize;
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
+
 /**
  *
  * @author Thomas Vandenberghe
@@ -80,9 +84,9 @@ public class Cruise implements ICruise, Serializable {
     @JoinTable(
             name = "cruise_chief_scientists",
             joinColumns = {
-                @JoinColumn(name = "cruise_id")},
+                    @JoinColumn(name = "cruise_id")},
             inverseJoinColumns = {
-                @JoinColumn(name = "chief_scientist_id")}
+                    @JoinColumn(name = "chief_scientist_id")}
     )
     private Collection<Person> chiefScientists;
     @ManyToMany()
@@ -92,9 +96,9 @@ public class Cruise implements ICruise, Serializable {
             name = "cruise_programs",
             //TODO add uniqueconstraint
             joinColumns = {
-                @JoinColumn(name = "cruise_id")},
+                    @JoinColumn(name = "cruise_id")},
             inverseJoinColumns = {
-                @JoinColumn(name = "program_id")}
+                    @JoinColumn(name = "program_id")}
     )
     private Collection<Program> programs;
     @ManyToOne(optional = false)
@@ -106,9 +110,9 @@ public class Cruise implements ICruise, Serializable {
     @JoinTable(
             name = "cruise_p02",
             joinColumns = {
-                @JoinColumn(name = "cruise_id")},
+                    @JoinColumn(name = "cruise_id")},
             inverseJoinColumns = {
-                @JoinColumn(name = "p02_id")}
+                    @JoinColumn(name = "p02_id")}
     )
 
     private Collection<LinkedDataTerm> P02;
@@ -117,6 +121,8 @@ public class Cruise implements ICruise, Serializable {
 
     @Transient
     @Formula("(select e from event e left join cruise c where e.timeStamp >= c.startDate and e.timeStamp <= c.endDate and e.platform=c.platform)")
+    @JsonIgnore
+    @XmlTransient
     private Collection<Event> events; //the events associated with this cruise. Stored in the database, but not via a PK-FK relation.
     @XmlTransient
     @Transient
@@ -510,7 +516,11 @@ public class Cruise implements ICruise, Serializable {
     public String getChiefScientistsString() {
         StringJoiner sj = new StringJoiner(", ");
         for (Person chiefScientist : chiefScientists) {
-            sj.add(chiefScientist.getFirstNameLastName());
+            if (!chiefScientist.getLastName().contains("Unknown")) {
+                sj.add(chiefScientist.getFirstNameLastName());
+            } else {
+                sj.add("Unknown");
+            }
         }
         return sj.toString();
     }

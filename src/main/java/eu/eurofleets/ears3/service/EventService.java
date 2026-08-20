@@ -25,11 +25,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.time.*;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Date;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -219,6 +215,16 @@ public class EventService {
 
     public Page<Event> findAllByCruiseProgramActor(String cruiseIdentifier, String programIdentifier,
                                                    String actorEmail, String label, String station, String description, Pageable pageable) {
+//        for (Event e : result.getContent()) {
+//
+//            Optional<Cruise> cruise = cruiseService.findAtDate(e.getTimeStamp(), platformUrn)
+//                    .stream()
+//                    .findFirst();
+//            if (cruise.isPresent()) {
+//                e.setCruise(cruise.get());
+//            }
+//
+//        }
         return this.eventRepository.findAllByCruiseProgramActor(cruiseIdentifier, programIdentifier, actorEmail, label, station, description, pageable);
     }
 

@@ -80,7 +80,7 @@ class EarsEvent {
                 firstName: actor.firstName,
                 lastName: actor.lastName,
                 email: actor.email,
-                organisation: actor.organisation.term.identifier
+                organisation: actor.organisation
             };
         }
 

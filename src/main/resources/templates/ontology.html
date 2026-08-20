@@ -53,14 +53,25 @@
     <link rel="stylesheet" th:href="@{/css/ontology-tree.css}"/>
     <script src="/ears3/js/jstree.min.js" type="application/javascript"></script>
 
-    <script type="application/javascript" th:inline="none">
-        const editingEnabled = /*[[${editingEnabled}]]*/ false;
+    <script type="application/javascript" th:inline="javascript">
+        const editingEnabled = [[${editingEnabled}]];
 
-        const importEnabled = /*[[${importEnabled}]]*/ true;
+        const importEnabled = [[${importEnabled}]];
         let selectedNode = null;
 
+        // Every mutating call below (POST/PUT/DELETE) needs this - Spring Security's
+        // CSRF filter rejects them with 403 otherwise, regardless of authorizeHttpRequests.
+        $.ajaxSetup({
+            beforeSend: function (xhr) {
+                xhr.setRequestHeader(
+                    $('meta[name="_csrf_header"]').attr('content'),
+                    $('meta[name="_csrf"]').attr('content')
+                );
+            }
+        });
+
         function hierarchyRefOf(node) {
-            return node.original.data.hierarchyRef;
+            return node.data.hierarchyRef;
         }
 
         function refreshFileInfo() {
@@ -119,12 +130,6 @@
                 data: fd,
                 processData: false,
                 contentType: false,
-                beforeSend: function (xhr) {
-                    xhr.setRequestHeader(
-                        $('meta[name="_csrf_header"]').attr('content'),
-                        $('meta[name="_csrf"]').attr('content')
-                    );
-                },
                 success: refreshFileInfo,
                 error: function (xhr) {
                     alert('Ingest failed: ' + xhr.responseText);
@@ -245,25 +250,103 @@
         });
 
         function renderPropertyPanel(node) {
-            const readOnly = !editingEnabled ? 'disabled' : '';
-            let html = '<h5>' + node.text + '</h5>';
-            html += '<div class="form-group"><label>Label</label>'
-                + '<input class="form-control" id="pfPrefLabel" ' + readOnly + '/></div>';
-            html += '<div class="form-group"><label>Definition</label>'
-                + '<textarea class="form-control" id="pfDefinition" rows="3" ' + readOnly + '></textarea></div>';
-            if (node.type === 'tool') {
-                html += '<div class="form-group"><label>Tool identifier</label>'
-                    + '<input class="form-control" id="pfToolIdentifier"/></div>';
-                html += '<div class="form-group"><label>Serial number</label>'
-                    + '<input class="form-control" id="pfSerialNumber"/></div>';
-            }
-            if (editingEnabled) {
-                html += '<button class="btn btn-primary btn-sm mt-2" id="btnSaveProps">Save</button>';
-            } else {
-                html += '<p class="text-muted">Editing is disabled on this instance.</p>';
-            }
+            const readOnly = editingEnabled ? '' : 'disabled';
+            const toolFields = node.type === 'tool'
+                ? `
+            <hr>
+
+            <div class="mb-3">
+                <label class="form-label" for="pfToolIdentifier">
+                    Tool identifier
+                </label>
+                <input class="form-control"
+                       id="pfToolIdentifier"
+                       ${readOnly}>
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label" for="pfSerialNumber">
+                    Serial number
+                </label>
+                <input class="form-control"
+                       id="pfSerialNumber"
+                       ${readOnly}>
+            </div>
+          `
+                : '';
+
+            const saveSection = editingEnabled
+                ? `
+            <button class="btn btn-primary btn-sm mt-2"
+                    id="btnSaveProps">
+                Save
+            </button>
+          `
+                : `
+            <p class="text-muted mt-3">
+                Editing is disabled on this instance.
+            </p>
+          `;
+
+            const html = `
+                <h5 id="ppTitle"></h5>
+                <div class="mb-3">
+                    <label class="form-label" for="ppPrefLabel">
+                        Label
+                    </label>
+                    <input class="form-control"
+                           id="ppPrefLabel"
+                           ${readOnly}>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label" for="ppAltLabel">
+                        Alt label
+                    </label>
+                    <input class="form-control"
+                           id="ppAltLabel"
+                           ${readOnly}>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label" for="ppDefinition">
+                        Definition
+                    </label>
+                    <textarea class="form-control"
+                              id="ppDefinition"
+                              rows="3"
+                              ${readOnly}></textarea>
+                </div>
+                <hr>
+                <dl class="row">
+                    <dt class="col-sm-3">
+                        Kind
+                    </dt>
+                    <dd class="col-sm-9"
+                        id="ppKind"></dd>
+                    <dt class="col-sm-3">
+                        URI
+                    </dt>
+                    <dd class="col-sm-9"
+                        id="ppUri"></dd>
+                    <dt class="col-sm-3">
+                        Status
+                    </dt>
+                    <dd class="col-sm-9"
+                        id="ppStatus"></dd>
+                </dl>
+                ${toolFields}
+                ${saveSection}
+            `;
+
             $('#propertyPanel').html(html);
-            $('#pfPrefLabel').val(node.text);
+            $('#ppPrefLabel').val(node.text);
+            $('#ppAltLabel').val('no alt label yet');
+            $('#ppDefinition').val('no definition yet');
+            $('#ppTitle').text(node.text);
+            $('#ppKind').text(node.type);
+            $('#ppUri').text(node.data.identifier);
+            $('#ppStatus').text(node.data.status);
+            $('#pfToolIdentifier').val(node.data.toolIdentifier ?? '');
+            $('#pfSerialNumber').val(node.data.serialNumber ?? '');
 
             $('#btnSaveProps').on('click', function () {
                 $.ajax({

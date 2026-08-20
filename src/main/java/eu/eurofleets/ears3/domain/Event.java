@@ -11,18 +11,8 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.StringJoiner;
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.Inheritance;
-import jakarta.persistence.InheritanceType;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.JoinTable;
-import jakarta.persistence.ManyToMany;
-import jakarta.persistence.ManyToOne;
-import jakarta.persistence.OneToMany;
+
+import jakarta.persistence.*;
 import jakarta.xml.bind.annotation.XmlAccessType;
 import jakarta.xml.bind.annotation.XmlAccessorType;
 import jakarta.xml.bind.annotation.XmlElement;
@@ -30,6 +20,8 @@ import jakarta.xml.bind.annotation.XmlElementWrapper;
 import jakarta.xml.bind.annotation.XmlRootElement;
 import jakarta.xml.bind.annotation.XmlTransient;
 import jakarta.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
+import org.hibernate.annotations.Formula;
+import org.hibernate.annotations.JoinFormula;
 import tools.jackson.databind.annotation.JsonDeserialize;
 
 /*
@@ -82,6 +74,10 @@ public class Event implements IEvent, Serializable {
     private LinkedDataTerm action;
     @ManyToOne(optional = false)
     private Platform platform;
+
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinFormula("(SELECT c.id FROM cruise c WHERE c.platform_id = e1_0.platform_id AND c.start_date <= e1_0.time_stamp AND c.end_date >= e1_0.time_stamp LIMIT 1)")
+    private Cruise cruise;
 
     @OneToMany()
     @XmlElementWrapper(name = "properties")
@@ -355,4 +351,7 @@ public class Event implements IEvent, Serializable {
         return null;
     }
 
+    public Cruise getCruise() {
+        return cruise;
+    }
 }

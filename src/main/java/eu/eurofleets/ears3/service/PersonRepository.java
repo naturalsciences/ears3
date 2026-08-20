@@ -36,16 +36,17 @@ public abstract interface PersonRepository
                              JOIN "program" prg ON prg.id = ppi.program_id
                              JOIN cruise_programs cp ON cp.program_id = prg.id
                              JOIN cruise c ON c.id = cp.cruise_id
-                             WHERE c.start_date >= ?2 AND c.end_date <= ?1
+                             WHERE c.start_date >= ?1 AND c.end_date <= ?2
                              UNION
                              SELECT 'pics' as engagement_type, p.* FROM person p
                              JOIN cruise_chief_scientists ccs ON ccs.chief_scientist_id = p.id
                              JOIN cruise c ON c.id = ccs.cruise_id
-                             WHERE c.start_date >= ?2 AND c.end_date <= ?1
+                             WHERE c.start_date >= ?1 AND c.end_date <= ?2
                              UNION
                              SELECT 'a' as engagement_type, p.* FROM person p
                              JOIN event e ON e.actor_id = p.id
                              WHERE e."time_stamp" >= ?1 AND e."time_stamp" <= ?2 ) as q
+                             WHERE lower(last_name) not like '%unknown%'
                              ORDER BY q.engagement_type, q.last_name, q.first_name
             """, nativeQuery = true)
     public List<Person> findByActiveInPeriod(LocalDate periodStart, LocalDate periodEnd);

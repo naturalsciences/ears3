@@ -9,10 +9,11 @@
 <div class="container" layout:fragment="main">
     <h1 id="h1">Events</h1>
     <div id="search" class="mb-3 p-3 border rounded">
-        <h3>Filter Events
+        <h4>Filter Events
             <a th:href="@{/api/events.csv}"
+               id="csvDownloadLink"
                class="btn btn-secondary btn-sm"
-               title="Download CSV">
+               title="Download Filtered CSV">
                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor"
                      class="bi bi-box-arrow-down"
                      viewBox="0 0 16 16">
@@ -22,20 +23,24 @@
                           d="M7.646 15.854a.5.5 0 0 0 .708 0l3-3a.5.5 0 0 0-.708-.708L8.5 14.293V5.5a.5.5 0 0 0-1 0v8.793l-2.146-2.147a.5.5 0 0 0-.708.708z"/>
                 </svg>
             </a>
-            <button type="button" id="btnClearSearch" class="btn btn-secondary btn-sm">
+            <button type="button" id="btnClearSearch"
+                    class="btn btn-secondary btn-sm"
+                    title="Clear all filters">
                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor"
                      class="bi bi-funnel-fill"
                      viewBox="0 0 16 16">
                     <path d="M1.5 1.5A.5.5 0 0 1 2 1h12a.5.5 0 0 1 .5.5v2a.5.5 0 0 1-.128.334L10 8.692V13.5a.5.5 0 0 1-.342.474l-3 1A.5.5 0 0 1 6 14.5V8.692L1.628 3.834A.5.5 0 0 1 1.5 3.5z"/>
+                    <line id="filterStrike" x1="1" y1="15" x2="15" y2="1" stroke="red" stroke-width="1.5"
+                          stroke-linecap="round" style="display:none;"/>
                 </svg>
             </button>
-        </h3>
+        </h4>
         <div class="form-inline mb-2">
             <div class="form-group mr-3 mb-2">
                 <select name="cruise" id="cruiseField"
                         class="selectpicker target form-control"
                         data-live-search="true" title="Filter cruise">
-                    <option value="">Any cruise</option>
+                    <option value="reset">Any cruise</option>
                 </select>
             </div>
             <div class="form-group mr-3 mb-2">
@@ -69,19 +74,23 @@
             </div>
             <div class="form-group mr-3 mb-2">
                 <p>
-                    <input id="startDateField" class="form-control" type="datetime-local"/>
+                    <input id="startDateField" class="form-control" type="date"/>
+                    <input id="startTimeField" class="form-control" type="time" value="08:00"/>
                     <label for="startDateField" class="txtBox">From (UTC)</label>
                 </p>
             </div>
             <div class="form-group mr-3 mb-2">
                 <p>
-                    <input id="endDateField" class="form-control" type="datetime-local"/>
-                    <label for="endDateField" class="txtBox">To (UTC)</label></p>
+                    <input id="endDateField" class="form-control" type="date"/>
+                    <input id="endTimeField" class="form-control" type="time" value="18:00"/>
+                    <label for="endDateField" class="txtBox">To (UTC)</label>
+                </p>
             </div>
+
         </div>
     </div>
     <div id="toggle" class="mb-3 p-3 border rounded">
-        <h3>Toggle columns</h3>
+        <h4>Toggle columns</h4>
         <ul>
             <li><a href="#" class="toggle-vis" data-column="3">Cruise</a></li>
             <li><a href="#" class="toggle-vis" data-column="4">Program</a></li>
@@ -115,6 +124,7 @@
 
     <script src="/ears3/js/ears-events-api.js" type="application/javascript"></script>
     <script src="/ears3/js/jquery.dataTables.min.js" type="application/javascript"></script>
+
     <script type="application/javascript" th:inline="none">
 
         let table;
@@ -139,25 +149,39 @@
             null,                       // 13 (delete icon)
         ];
 
+        function updateCsvLink() {
+            const base = document.getElementById('csvDownloadLink').getAttribute('data-base')
+                || document.getElementById('csvDownloadLink').href;
+            const params = collectSearchParams(); // page/size/sort aren't relevant for a full CSV export
+            const query = new URLSearchParams(params).toString();
+            document.getElementById('csvDownloadLink').href = query ? base.split('?')[0] + '?' + query : base.split('?')[0];
+        }
+
+        function hasActiveFilters() {
+            return !!(
+                document.getElementById('cruiseField').value ||
+                document.getElementById('programField').value ||
+                document.getElementById('stationField').value.trim() ||
+                document.getElementById('freeTextField').value.trim() ||
+                document.getElementById('cbOwnEvents').checked ||
+                document.getElementById('startDateField').value ||
+                document.getElementById('endDateField').value
+            );
+        }
+
+        function updateFilterIcon() {
+            document.getElementById('filterStrike').style.display = hasActiveFilters() ? '' : 'none';
+        }
+
         // Single source of truth for every filter the API supports.
         // API supports: (platformIdentifier->not included as the boat is fixed) cruiseIdentifier programIdentifier actorEmail startDate endDate search
         // Add a new filter here and it's automatically included in every ajax call.
         function collectSearchParams() {
-
             const params = {};
-
-            const cruiseIdentifier = document.getElementById('cruiseField').value;
-            if (cruiseIdentifier) {
-                const cruise = cruiseLookup[cruiseIdentifier];
-                if (cruise) {
-                    document.getElementById('startDateField').value = cruise.startDate.replace('Z', '');
-                    document.getElementById('endDateField').value = cruise.endDate.replace('Z', '');
-                }
-            }
 
             const program = document.getElementById('programField').value;
             if (program) {
-                params.program = program;
+                params.programIdentifier = program;
             }
 
             const station = document.getElementById('stationField').value.trim();
@@ -177,26 +201,52 @@
 
             const startDate = document.getElementById('startDateField').value;
             if (startDate) {
-                params.startDate = startDate + "Z";
+                params.startDate = startDate + "T" + document.getElementById('startTimeField').value + "Z";
             }
 
             const endDate = document.getElementById('endDateField').value;
             if (endDate) {
-                params.endDate = endDate + "Z";
+                params.endDate = endDate + "T" + document.getElementById('endTimeField').value + "Z";
             }
             return params;
         }
 
         $(document).ready(function () {
             let searchDebounce;
-            $('#search').on('change', 'select, input[type=checkbox], input[type=datetime-local]', function () { //program, checkbox and datetime
+            $('#search').on('change', 'select, input[type=checkbox], input[type=date], input[type=time]', function () { //program, checkbox and datetime
                 table.ajax.reload();
+                updateCsvLink();
+                updateFilterIcon();
             });
             $('#search').on('change', 'input[type=text]', function () { //station text box and free text search box
                 clearTimeout(searchDebounce);
                 searchDebounce = setTimeout(function () {
                     table.ajax.reload();
+                    updateCsvLink();
+                    updateFilterIcon();
                 }, 400);
+            });
+
+            $('#cruiseField').on('change', function () {
+                const cruiseIdentifier = this.value;
+                if (cruiseIdentifier === 'reset') {
+                    document.getElementById('startDateField').value = '';
+                    document.getElementById('startTimeField').value = '08:00';
+                    document.getElementById('endDateField').value = '';
+                    document.getElementById('endTimeField').value = '18:00';
+                } else {
+                    const cruise = cruiseLookup[cruiseIdentifier];
+                    if (cruise) {
+                        const [startDate, startTime] = cruise.startDate.replace('Z', '').split('T');
+                        const [endDate, endTime] = cruise.endDate.replace('Z', '').split('T');
+                        document.getElementById('startDateField').value = startDate;
+                        document.getElementById('startTimeField').value = startTime.slice(0, 5);
+                        document.getElementById('endDateField').value = endDate;
+                        document.getElementById('endTimeField').value = endTime.slice(0, 5);
+                    }
+                }
+                updateCsvLink();
+                updateFilterIcon();
             });
 
             $('#btnClearSearch').on('click', function () {
@@ -206,8 +256,12 @@
                 document.getElementById('freeTextField').value = '';
                 document.getElementById('cbOwnEvents').checked = false;
                 document.getElementById('startDateField').value = '';
+                document.getElementById('startTimeField').value = '08:00';
                 document.getElementById('endDateField').value = '';
+                document.getElementById('endTimeField').value = '18:00';
                 table.ajax.reload();
+                updateCsvLink();
+                updateFilterIcon();
             });
 
             table = $('#eventTable').DataTable({
@@ -244,14 +298,14 @@
                         json.recordsFiltered = json.totalElements;
 
                         return (json.content || []).map(function (event) {
-                            const date = event.timeStamp.split("T")[0].replace(/^20/, "'");
+                            const date = event.timeStamp.split("T")[0].split("-").reverse().join("/").replace(/\/20/, "/'");
                             const time = event.timeStamp.split("T")[1].replace(/\+\d{2}:\d{2}$/, "");
                             return {
                                 'identifier': event.identifier,
                                 'date': date,
                                 'time': time,
-                                'cruise': event.program.identifier + '_cruise',
-                                'program': event.program.identifier,
+                                'cruise': event.cruise?.identifier ?? null,
+                                'program': event.program?.identifier ?? null,
                                 'toolCategory': event.toolCategory.name,
                                 'tool': event.tool.term.name,
                                 'process': event.process.name,
@@ -310,10 +364,12 @@
                 ],
                 "lengthMenu": [[50, 100, 200, 300], [50, 100, 200, 300]]
             });
+            updateCsvLink();
+            updateFilterIcon();
         });
 
         $('#eventTable').on('click', 'tbody td:not(:has(svg.deleteEvent))', function () {
-            var identifier = table.row(this).data().identifier;
+            const identifier = table.row(this).data().identifier;
             window.location.href = './event/' + identifier + '/edit';
         });
 
@@ -337,7 +393,7 @@
         $('a.toggle-vis').css("font-weight", "bold");
         $('a.toggle-vis').on('click', function (e) {
             e.preventDefault();
-            var column = table.column($(this).attr('data-column'));
+            const column = table.column($(this).attr('data-column'));
             column.visible(!column.visible());
             if (column.visible()) {
                 $(this).css("font-weight", "bold");
