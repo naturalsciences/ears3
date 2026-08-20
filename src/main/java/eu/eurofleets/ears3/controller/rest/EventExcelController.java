@@ -106,9 +106,9 @@ public class EventExcelController {
     public String getEventsAsCSV(@RequestParam Map<String, String> allParams) throws IOException {
         Page<Event> eventsPage = this.eventService.advancedFind(allParams, Pageable.unpaged());
         List<Event> events = eventsPage.stream().toList();
-        List<String> header = new ArrayList<>(Arrays.asList("Time stamp", "Actor", "Program", "Principal Investigator",
-                "Tool category", "Tool category code", "Tool", "Tool code", "Process", "Action", "Station", "Label",
-                "Description"));
+        List<String> header = new ArrayList<>(Arrays.asList("Date", "Time", "Actor", "Program", "Program name", "Principal Investigator",
+                "Tool category", "Tool category code", "Tool", "Tool code", "Process", "Action", "Label", "Station",
+                "Description", "Remarks"));
         Map<String, String> properties = new TreeMap<>();
         for (Event event : events) {
             for (IProperty property : event.getProperties()) {
@@ -135,16 +135,18 @@ public class EventExcelController {
             csvWriter.writeNext(entry, true);
             for (Event event : events) {
                 IProgram program = event.getProgram();
-                String niceProgram = null;
+                String programName = null;
+                String programId = null;
                 if (program != null) { // can't be null but test anyway
-                    niceProgram = program.getIdentifier() + (program.getName() != null && !program.getName().isEmpty()
-                            ? " (" + program.getName() + ")"
-                            : "");
+                    programId = program.getIdentifier();
+                    programName = program.getName();
                 }
                 List<String> elements = new ArrayList<>(Arrays.asList(
-                        event.getTimeStamp().format(DateTimeFormatter.ISO_OFFSET_DATE_TIME),
+                        event.getTimeStamp().format(DateTimeFormatter.ISO_DATE),
+                        event.getTimeStamp().format(DateTimeFormatter.ISO_TIME),
                         event.getActor().getFirstName() + " " + event.getActor().getLastName(),
-                        niceProgram,
+                        programId,
+                        programName,
                         event.getPrincipalInvestigators(),
                         event.getToolCategory().getName(),
                         ILinkedDataTerm.getBodcUrnFromTerm(event.getToolCategory()),
@@ -153,9 +155,10 @@ public class EventExcelController {
                         ILinkedDataTerm.getBodcUrnFromTerm(event.getTool().getTerm()),
                         event.getProcess().getName(),
                         event.getAction().getName(),
-                        event.getStation(),
                         event.getLabel(),
-                        event.getDescription()));
+                        event.getStation(),
+                        event.getDescription(),
+                        event.getRemarks()));
 
                 for (String propertyUrl : properties.keySet()) {
                     List<String> propertyValues = event.getPropertyValues(propertyUrl);

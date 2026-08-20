@@ -22,7 +22,7 @@ import jakarta.validation.constraints.NotBlank;
 public class SpreadsheetEvent {
 
     public enum FIELDS {
-        Date, Hour, Actor, eventDefinitionId, Program, Tool, Process, Action, Label, Station, Description,
+        Date, Hour, Actor, Program, Tool, Process, Action, Label, Station, Description,
         Remarks, Dist, Time, Status, Region, Weather, Navigation
     };
 
@@ -42,10 +42,6 @@ public class SpreadsheetEvent {
     @FieldName("Actor")
     @FieldConverter(StringConverter.class)
     String actor;
-
-    @FieldName("eventDefinitionId")
-    @FieldConverter(StringConverter.class)
-    String eventDefinitionId;
 
     @FieldName("Program")
     @FieldConverter(StringConverter.class)
@@ -149,20 +145,6 @@ public class SpreadsheetEvent {
      */
     public void setActor(String actor) {
         this.actor = actor;
-    }
-
-    /**
-     * @return the eventDefinitionId
-     */
-    public String getEventDefinitionId() {
-        return eventDefinitionId;
-    }
-
-    /**
-     * @param eventDefinitionId the eventDefinitionId to set
-     */
-    public void setEventDefinitionId(String eventDefinitionId) {
-        this.eventDefinitionId = eventDefinitionId;
     }
 
     /**
@@ -368,7 +350,6 @@ public class SpreadsheetEvent {
         result = prime * result + ((date == null) ? 0 : date.hashCode());
         result = prime * result + ((hour == null) ? 0 : hour.hashCode());
         result = prime * result + ((actor == null) ? 0 : actor.hashCode());
-        result = prime * result + ((eventDefinitionId == null) ? 0 : eventDefinitionId.hashCode());
         result = prime * result + ((program == null) ? 0 : program.hashCode());
         result = prime * result + ((tool == null) ? 0 : tool.hashCode());
         result = prime * result + ((process == null) ? 0 : process.hashCode());
@@ -409,11 +390,6 @@ public class SpreadsheetEvent {
             if (other.actor != null)
                 return false;
         } else if (!actor.equals(other.actor))
-            return false;
-        if (eventDefinitionId == null) {
-            if (other.eventDefinitionId != null)
-                return false;
-        } else if (!eventDefinitionId.equals(other.eventDefinitionId))
             return false;
         if (program == null) {
             if (other.program != null)

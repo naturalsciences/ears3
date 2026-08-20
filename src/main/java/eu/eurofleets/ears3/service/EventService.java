@@ -231,8 +231,11 @@ public class EventService {
     public String findUuidByToolActionProc(String toolCategory, String tool, String process, String action) {
         //String result = eventRepository.findUUIDByToolActionProc(toolCategory, tool, process, action);
         String result = eventRepository.findUUIDByToolActionProc(tool, process, action);
+        if (result == null) {
+            result = UUID.randomUUID().toString(); //this uuid will be saved for the first time and subsequent lookups will find findUUIDByToolActionProc
+        }
         String prefix = "ears:sev::";
-        return (result == null) ? prefix + UUID.randomUUID().toString() : result;
+        return prefix + result;
     }
 
     @Transactional(propagation = Propagation.REQUIRES_NEW)

@@ -8,87 +8,125 @@
 <nav th:replace="fragments/f :: header"></nav>
 <div class="container" layout:fragment="main">
     <h1 id="h1">Logfile submission</h1>
-    <form layout:fragment="head-form" id="constrain" class="form-inline mb-3 p-3 border rounded">
-        <div class="form-group">
-            <select name="program" id="programField"
-                    class="selectpicker target form-control"
-                    data-live-search="true" title="Current program" required>
-            </select>
-        </div>
-    </form>
-    <div class="alert alert-light" role="alert">
-        <p>
-            Choose the logfile you want to upload.
-        </p>
-        <p>
-            This file is supposed to be a normal excel file (.xlsx)<br/>
-            The file size should be less then <em th:text="${maxFileSize}"></em>
-        </p>
-        <p>
-            An empty template with example tab can be downloaded: <a th:href="@{/excel/ship_log_template.xlsx}">Ship Log
-            Template</a>
-        </p>
-        <p>
-            When every row sends an error containing <strong>ERROR: duplicate key value violates unique constraint
-            "event_unique"</strong>, the file was probably already uploaded before.
-        </p>
+    <div class="form-inline mb-3 p-3 border rounded">
+        <form layout:fragment="head-form" id="constrain">
+            <div class="form-group">
+                <select name="program" id="programField"
+                        class="selectpicker target form-control"
+                        data-live-search="true" title="Current program" required>
+                </select>
+            </div>
+        </form>
     </div>
-    <div class="row">
-        <div class="col">
-            <form id="importCsvForm" method="post" enctype="multipart/form-data" th:action="@{/api/event/import}">
-                <div class="input-group mb-3">
-                    <input id="actorField" type="hidden" name="person">
-                    <input id="fileId" type="file" name="file" class="form-control" style="height: auto !important;"
-                           aria-describedby="importButton" aria-label="Upload">
-                    <button class="btn btn-outline-secondary" type="submit" id="importButton">Import</button>
-                </div>
-            </form>
+    <div class="form-inline mb-3 p-3 border rounded">
+        <form id="importCsvForm" method="post" enctype="multipart/form-data" th:action="@{/api/event/import}">
+            <div class="input-group mb-3">
+                <input id="actorField" type="hidden" name="person">
+                <input id="fileId" type="file" name="file" class="form-control" style="height: auto !important;"
+                       aria-describedby="importButton" aria-label="Upload">
+                <button class="btn btn-primary btn-lg btn-block" type="submit" id="importButton">Import</button>
+            </div>
+        </form>
 
-            <div id="errors" class="alert alert-danger d-none"></div>
-            <div id="success" class="alert alert-success d-none"> Successfully uploaded and imported !</div>
+        <div id="errors" class="alert alert-danger d-none"></div>
+        <div id="success" class="alert alert-success d-none"> Successfully uploaded and imported !</div>
 
-            <script th:inline="javascript">
-                $(document).ready(function () {
-                    let actorField = document.getElementById("actorField");
-                    actorField.value = localStorage.getItem("actor");
+        <script th:inline="javascript">
+            $(document).ready(function () {
+                const actorRaw = localStorage.getItem("actor");
+                const actor = actorRaw ? JSON.parse(actorRaw) : null;
+                const program = $("#programField").val() === "" ? null : $("#programField").val();
 
-                    /*<![CDATA[*/
-                    var homelink = /*[[@{'/'}]]*/ '';
-                    /*]]>*/
+                /*<![CDATA[*/
+                var homelink = /*[[@{'/'}]]*/ '';
+                /*]]>*/
 
-                    $("form#importCsvForm").submit(function (e) {
-                        event.preventDefault();
-                        $(document.getElementById("success")).addClass("d-none");
-                        $(document.getElementById("errors")).addClass("d-none");
-                        var token = $("input[name='_csrf']").val();
-                        var header = "X-CSRF-TOKEN";
-                        var formData = new FormData(this);
-                        $.ajax({
-                            type: "POST",
-                            contentType: "application/json",
-                            url: homelink + "api/excelImport",
-                            data: formData,
-                            beforeSend: function (xhr) {
-                                xhr.setRequestHeader(header, token);
-                            },
-                            success: function (result) {
-                                //$("div#success").html(result.responseText);    //Toont message niet maar bij error wel??????
-                                $("div#success").html("Successfully Uploaded and Imported !");
-                                document.getElementById("success").classList.remove('d-none');
-                            },
-                            error: function (result) {
-                                $("div#errors").html(result.responseText);
-                                $("row").prepend("Row ");
-                                document.getElementById("errors").classList.remove('d-none');
-                            },
-                            cache: false,
-                            contentType: false,
-                            processData: false
-                        });
+                $("form#importCsvForm").submit(function (e) {
+                    e.preventDefault();
+                    $(document.getElementById("success")).addClass("d-none");
+                    $(document.getElementById("errors")).addClass("d-none");
+                    var token = $("input[name='_csrf']").val();
+                    var header = "X-CSRF-TOKEN";
+                    var formData = new FormData(this);
+
+                    const actorProgramDTO = {
+                        actor: actor,
+                        program: program
+                    };
+                    formData.append("apd", new Blob([JSON.stringify(actorProgramDTO)], {type: "application/json"}));
+
+                    $.ajax({
+                        type: "POST",
+                        url: homelink + "api/event/import",
+                        data: formData,
+                        beforeSend: function (xhr) {
+                            xhr.setRequestHeader(header, token);
+                        },
+                        success: function (result) {
+                            $("div#success").html("Successfully Uploaded and Imported !");
+                            document.getElementById("success").classList.remove('d-none');
+                        },
+                        error: function (result) {
+                            const pretty = JSON.stringify(JSON.parse(result.responseText), null, 2); //render the json nicely
+                            $("div#errors").html(pretty);
+                            document.getElementById("errors").classList.remove('d-none');
+                        },
+                        cache: false,
+                        contentType: false,
+                        processData: false
                     });
                 });
-            </script>
-        </div>
+            });
+        </script>
+    </div>
+    <div class="alert alert-light" role="alert">
+        <ul>
+            <li>
+                Choose the logfile you want to upload via the form above.
+            </li>
+            <li>
+                This file should be a normal excel file (.xlsx)<br/>
+            </li>
+            <li>
+                The file size should be less than <em th:text="${maxFileSize}"></em>
+            </li>
+            <li>
+                An empty template with example tab can be downloaded from: <a
+                    th:href="@{/excel/ship_log_template.xlsx}">Ship Log Template</a>
+            </li>
+            <li>However, since the tool/process/action names must exactly correspond, we strongly advise you to do as
+                follows:
+            </li>
+            <li>
+                <ul>
+                    <li>Create the events that should be repeated over the whole cruise by hand on the <a
+                            th:href="@{/event/new}">new
+                        events page</a>.
+                    </li>
+                    <li>Then download the events as csv in the 'Filter Events' pane.</li>
+                    <li>Open it with Excel/LibreOffice and save it as an xlsx file.</li>
+                    <li>Make sure the worksheet is named 'events'.</li>
+                    <li>Now repeat the events as much as needed over the whole cruise.</li>
+                    <li>Do not complete (or just remove) the following columns, as the info is not essential for a full
+                        event (it's built from what you provide):
+                        <ul>
+                            <li>Program name</li>
+                            <li>Principal Investigator</li>
+                            <li>Tool category</li>
+                            <li>Tool category code</li>
+                            <li>Tool code</li>
+                            <li>Acquisition Timestamp</li>
+                            <li>and all subsequent acquisition info (EARS gets this for you!)</E></li>
+                        </ul>
+                    </li>
+                    <li>At the end of the cruise, upload this excel file via the above form.</li>
+                </ul>
+            </li>
+            <li>
+                When every row sends an error containing <strong>ERROR: duplicate key value violates unique constraint
+                "event_unique"</strong>, the file was probably already uploaded before.
+            </li>
+        </ul>
     </div>
 </div>
 </body>

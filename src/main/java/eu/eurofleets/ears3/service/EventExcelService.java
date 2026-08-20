@@ -17,7 +17,6 @@ import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.core.env.Environment;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
@@ -59,16 +58,15 @@ public class EventExcelService {
     private DatagramUtilities<Navigation> navUtil;
     private DatagramUtilities<Thermosal> thermosalUtil;
     private DatagramUtilities<Weather> weatherUtil;
+
     public static Logger log = Logger.getLogger(EventService.class.getSimpleName());
 
-    private static List<String> allowedTabs = Arrays.asList("events");
-    private List<String> requiredHeaders = Arrays.stream(SpreadsheetEvent.FIELDS.values()).map(Enum::name)
+    private static final List<String> ALLOWED_TABS = List.of("events");
+    private static final List<String> REQUIRED_HEADERS = Arrays.stream(SpreadsheetEvent.FIELDS.values()).map(Enum::name)
             .collect(Collectors.toList());
-
-
-    private static Map<String, LinkedDataTermDTO> DEFS = new HashMap<>();
-    private static Map<String, LinkedDataTermDTO> CATMAP = new HashMap<>();
-    private static Map<String, PropertyDTO> PROPMAPDEF = new HashMap<>();
+    private static final Map<String, LinkedDataTermDTO> DEFS = new HashMap<>();
+    private static final Map<String, LinkedDataTermDTO> CATMAP = new HashMap<>();
+    private static final Map<String, PropertyDTO> PROPMAPDEF = new HashMap<>();
 
     @Autowired
     public EventExcelService(EventRepository eventRepository,
@@ -178,9 +176,10 @@ public class EventExcelService {
         return zdt;
     }
 
-    private EventDTO processSpreadsheetEvent(SpreadsheetEvent spreadsheetEvent, int rowNb, String programIdentifier) throws ImportException {
+    private EventDTO processSpreadsheetEvent(SpreadsheetEvent spreadsheetEvent, int rowNb, PersonDTO actor, String programIdentifier) throws ImportException {
         EventDTO eventDTO = new EventDTO();
         eventDTO.setIdentifier(null);
+        eventDTO.setActor(actor);
         ArrayList<String> errorSummaryForRow = new ArrayList<>();
         Set<ConstraintViolation<SpreadsheetEvent>> errors = validator.validate(spreadsheetEvent);
         if (!errors.isEmpty()) {
@@ -282,7 +281,7 @@ public class EventExcelService {
     //public boolean validateAllTabs(Document document) {
     public boolean validateAllTabs(Workbook document, ErrorDTOList errorList) {
         boolean areTabsOk = true;
-        for (String sheetName : getAllowedTabs()) {
+        for (String sheetName : ALLOWED_TABS) {
             Sheet sheet = document.getSheet(sheetName);
             if (sheet == null) {
                 areTabsOk = false;
@@ -293,16 +292,11 @@ public class EventExcelService {
         return areTabsOk;
     }
 
-    private List<String> getAllowedTabs() {
-        return allowedTabs;
-    }
-
     public boolean validateHeaders(Workbook document, String sheetName, ErrorDTOList errorList) {
         boolean areHeadersOk = true;
-        List<String> requiredHeaders = getRequiredHeaders();
         Sheet sheet = document.getSheet(sheetName);
         Set<String> sheetHeaders = findColumnHeadersForSheet(sheet);
-        for (String requiredHeader : requiredHeaders) {
+        for (String requiredHeader : REQUIRED_HEADERS) {
             if (!sheetHeaders.contains(requiredHeader)) {
                 areHeadersOk = false;
                 errorList.addError(new ErrorDTO(0,
@@ -329,18 +323,17 @@ public class EventExcelService {
         return headers;
     }
 
-    private List<String> getRequiredHeaders() {
-        return requiredHeaders;
+    private List<String> getREQUIRED_HEADERS() {
+        return REQUIRED_HEADERS;
     }
 
     public boolean processSpreadsheetEvents(ErrorDTOList errorList, List<SpreadsheetEvent> data,
                                             List<EventDTO> events, PersonDTO actor, String program) {
         boolean hasProblems = false;
         int rowNb = 1;
-        for (SpreadsheetEvent row : data) {
+        for (SpreadsheetEvent spreadsheetEvent : data) {
             try {
-                EventDTO event = processSpreadsheetEvent(row, rowNb, program);
-                event.setActor(actor);
+                EventDTO event = processSpreadsheetEvent(spreadsheetEvent, rowNb, actor, program);
                 events.add(event);
             } catch (ImportException e) {
                 hasProblems = true;
