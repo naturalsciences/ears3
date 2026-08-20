@@ -221,7 +221,7 @@ function handleDependentUnlockClick(entity, rdfBindings) {
     $('#id_eid').hide();
 }
 
-function initDropdowns(rdfBindings, selectedValues) {
+function initDropdowns(rdfBindings, selectedValues, onEventSubmitted) {
     populateDropdownLists(rdfBindings, selectedValues);
 
     $("#idSelect_tc, #idSelect_t, #idSelect_p, #idSelect_a").change(function () {
@@ -287,6 +287,9 @@ function initDropdowns(rdfBindings, selectedValues) {
                     addEVtoLocalStorage(event);
                     populateAllScenarios(rdfBindings);
                     unlockTc(rdfBindings); // reset tc/t/p/a so the next event starts from a clean slate
+                    if (typeof onEventSubmitted === 'function') {
+                        onEventSubmitted(event);
+                    }
                 }, function () {
                     $("#btnSubmitDropdownChoice").removeClass("btn-success").addClass("btn-warning");
                 });

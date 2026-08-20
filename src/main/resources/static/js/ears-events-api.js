@@ -193,7 +193,7 @@ function getBindings(async) {
 }
 
 function deleteEvent(identifier) {
-    $.ajax({
+    return $.ajax({
         type: "DELETE",
         async: true,
         url: eventPostLocation + "?identifier=" + identifier,

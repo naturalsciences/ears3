@@ -49,7 +49,6 @@ public class SecurityConfig {
     SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
 
         http.authorizeHttpRequests(auth -> auth
-                        // Specific rules FIRST - first match wins in Spring Security.
                         .requestMatchers(HttpMethod.GET, "/api/event/**").permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/event/**").permitAll()
                         .requestMatchers(HttpMethod.DELETE, "/api/event/**")

@@ -22,12 +22,12 @@ public interface EventRepository extends JpaRepository<Event, Long> {
     String WHERE = " where ";
     String AND = " and ";
     String COUNT = "select count(e) from Event e ";
-    String ORDER_BY = " order by e.timeStamp";
+    //String ORDER_BY = " order by e.timeStamp";
 
 
     String TIMESTAMP_WHERE = "e.timeStamp between :startDate and :endDate ";
     String TIME_WHERE = "e.creationTime >= :after or e.modificationTime >= :after ";
-    String TEXT_WHERE = "COALESCE(:station, e.station, '') = COALESCE(e.station, '') and (COALESCE(:label, e.label, '') = COALESCE(e.label, '') or COALESCE(:description, e.description, '') = COALESCE(e.description, '')) ";
+    String TEXT_WHERE = "LOWER(COALESCE(:station, e.station, '')) = LOWER(COALESCE(e.station, '')) and (LOWER(COALESCE(:label, e.label, '')) =  LOWER(COALESCE(e.label, '')) or LOWER(COALESCE(:description, e.description, '')) = LOWER(COALESCE(e.description, ''))) ";
     String PLATFORM_WHERE = "(COALESCE(:platformIdentifier, l.identifier, '') = COALESCE(l.identifier, '') or COALESCE(:platformIdentifier, l.urn, '') = COALESCE(l.urn, '')) ";
     String CRUISE_WHERE = "(COALESCE(:cruiseIdentifier, c.identifier, '') = COALESCE(c.identifier, '') or COALESCE(:cruiseIdentifier, c.name, '') = COALESCE(c.name, ''))";
     String PROGRAM_WHERE = "COALESCE(:programIdentifier, p.identifier, '') = COALESCE(p.identifier, '') ";
@@ -36,14 +36,14 @@ public interface EventRepository extends JpaRepository<Event, Long> {
     @Query(value = "select e from Event e where e.identifier = :identifier")
     Event findByIdentifier(@Param("identifier") String identifier);
 
-    @Query(value = SELECT + WHERE + TEXT_WHERE + ORDER_BY,
+    @Query(value = SELECT + WHERE + TEXT_WHERE /*+ ORDER_BY*/,
             countQuery = COUNT + WHERE + TEXT_WHERE)
     Page<Event> findByText(@Param("label") String label,
                            @Param("station") String station,
                            @Param("description") String description,
                            Pageable pageable);
 
-    @Query(value = SELECT + WHERE + TIMESTAMP_WHERE + ORDER_BY,
+    @Query(value = SELECT + WHERE + TIMESTAMP_WHERE /*+ ORDER_BY*/,
             countQuery = COUNT + WHERE + TIMESTAMP_WHERE)
     Page<Event> findByTimeStampBetween(@Param("startDate") OffsetDateTime startDate,
                                        @Param("endDate") OffsetDateTime endDate,
@@ -51,9 +51,10 @@ public interface EventRepository extends JpaRepository<Event, Long> {
 
 
     String PLATFORM_ACTOR_PROGRAM_Q = "left join e.platform pl left join e.program p left join e.actor pe left join pl.term l "
+            + "left join e.cruise cr " //to ensure proper inclusion of events that are not associated with a cruise when sorting
             + WHERE + PLATFORM_WHERE + AND + ACTOR_WHERE + AND + PROGRAM_WHERE + AND + TEXT_WHERE;
 
-    @Query(value = SELECT + PLATFORM_ACTOR_PROGRAM_Q + ORDER_BY,
+    @Query(value = SELECT + PLATFORM_ACTOR_PROGRAM_Q /*+ ORDER_BY*/,
             countQuery = COUNT + PLATFORM_ACTOR_PROGRAM_Q)
     Page<Event> findAllByPlatformActorProgram(@Param("platformIdentifier") String platformIdentifier,
                                               @Param("actorEmail") String actorEmail,
@@ -65,7 +66,7 @@ public interface EventRepository extends JpaRepository<Event, Long> {
 
     String PLATFORM_ACTOR_PROGRAM_DATES_Q = PLATFORM_ACTOR_PROGRAM_Q + AND + TIMESTAMP_WHERE;
 
-    @Query(value = SELECT + PLATFORM_ACTOR_PROGRAM_DATES_Q + ORDER_BY,
+    @Query(value = SELECT + PLATFORM_ACTOR_PROGRAM_DATES_Q /*+ ORDER_BY*/,
             countQuery = COUNT + PLATFORM_ACTOR_PROGRAM_DATES_Q)
     Page<Event> findAllByPlatformActorProgramDates(@Param("platformIdentifier") String platformIdentifier,
                                                    @Param("actorEmail") String actorEmail,
@@ -82,7 +83,7 @@ public interface EventRepository extends JpaRepository<Event, Long> {
     String PROGRAM_Q = "left join e.program p left join e.actor pe ";
     String CRUISE_PROGRAM_ACTOR_Q = PROGRAM_Q + CRUISE_Q + AND + ACTOR_WHERE + AND + PROGRAM_WHERE + AND + TEXT_WHERE;
 
-    @Query(value = SELECT + CRUISE_PROGRAM_ACTOR_Q + ORDER_BY,
+    @Query(value = SELECT + CRUISE_PROGRAM_ACTOR_Q /*+ ORDER_BY*/,
             countQuery = COUNT + CRUISE_PROGRAM_ACTOR_Q)
     Page<Event> findAllByCruiseProgramActor(@Param("cruiseIdentifier") String cruiseIdentifier,
                                             @Param("programIdentifier") String programIdentifier,
@@ -121,21 +122,21 @@ public interface EventRepository extends JpaRepository<Event, Long> {
     /*No longer used*/
     String TOOL_Q = "left join e.tool t left join t.term l where l.identifier= :identifier or l.urn= :identifier";
 
-    @Query(value = SELECT + TOOL_Q + ORDER_BY,
+    @Query(value = SELECT + TOOL_Q /*+ ORDER_BY*/,
             countQuery = COUNT + TOOL_Q)
     Page<Event> findByTool(@Param("identifier") String identifier, Pageable pageable);
 
     String PLATFORM_CODE_Q = "inner join e.platform p left join p.term l where l.identifier= :platformIdentifier or l.urn= :platformIdentifier";
 
-    @Query(value = SELECT + PLATFORM_CODE_Q + ORDER_BY,
+    @Query(value = SELECT + PLATFORM_CODE_Q /*+ ORDER_BY*/,
             countQuery = COUNT + PLATFORM_CODE_Q)
     Page<Event> findByPlatformCode(@Param("platformIdentifier") String platformIdentifier, Pageable pageable);
 
-    @Query(value = SELECT + WHERE + TIME_WHERE + ORDER_BY,
+    @Query(value = SELECT + WHERE + TIME_WHERE /*+ ORDER_BY*/,
             countQuery = COUNT + WHERE + TIME_WHERE)
     Page<Event> findByCreatedOrModifiedAfter(@Param("after") OffsetDateTime after, Pageable pageable);
 
-    @Query(value = SELECT + CRUISE_Q + ORDER_BY,
+    @Query(value = SELECT + CRUISE_Q /*+ ORDER_BY*/,
             countQuery = COUNT + CRUISE_Q)
     Page<Event> findByCruise(@Param("cruiseIdentifier") String cruiseIdentifier, Pageable pageable);
 

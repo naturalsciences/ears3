@@ -157,7 +157,12 @@ function populateProgramField() {
             }).join("/") + ")";
         }
         return item.identifier + names;
-    }, buildProgramSort(actorFullName));
+    }, buildProgramSort(actorFullName))
+        .done(function () {
+            const $field = $('#programField');
+            $field.val($field.attr('value'));
+            $field.selectpicker('refresh');
+        });
 }
 
 
@@ -201,7 +206,7 @@ function populateFilteredSelectField(selectId, jsonLocation, dataKey, regex, lab
     if ($(selectId).length === 0) {
         return; // this page doesn't have this field - nothing to do
     }
-    $.getJSON(jsonLocation, function (data) {
+    return $.getJSON(jsonLocation, function (data) {
         if (!regex) {
             regex = /.*/
         }

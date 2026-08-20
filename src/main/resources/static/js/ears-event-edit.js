@@ -19,7 +19,9 @@ $(document).ready(function () {
         a: action
     };
 
-    initDropdowns(rdfBindings, selectedValues);
+    initDropdowns(rdfBindings, selectedValues, function () {
+        window.location.href = '/ears3/events'; //after successfully submitting, go back to the main page.
+    });
     initSelectpicker('#programField');
     initSelectpicker('#stationField');
     initSelectpicker('#labelField');
@@ -32,6 +34,36 @@ $(document).ready(function () {
             $(document).off('click', '#btnSubmitEventWithProperties'); //clear it else previous events are readded each time
         }
     });
+
+    $('#deleteEvent').click(function () {
+        const actor = JSON.parse(localStorage.actor);
+        const actorFullName = (actor.firstName + " " + actor.lastName).trim();
+
+        // Adjust this to however `actor` is actually shaped on currentEvent —
+        // e.g. currentEvent.actor.firstName + " " + currentEvent.actor.lastName,
+        // or currentEvent.actorEmail === actor.email if that's more reliable.
+        const eventActorName = (currentEvent.actor.firstName + " " + currentEvent.actor.lastName).trim();
+
+        if (eventActorName !== actorFullName) {
+            alert("You can only delete your own events. The owner is " + eventActorName + ". Please don't mess with other persons' events.");
+            return;
+        }
+
+        const confirmMsg = eventActorName + ', are you sure you want to delete this event "' +
+            currentEvent.tool.term.name + '-' + currentEvent.process.name + '-' + currentEvent.action.name +
+            ' at ' + currentEvent.timeStamp + '"?';
+
+        if (confirm(confirmMsg)) {
+            deleteEvent(currentEvent.identifier)
+                .done(function () {
+                    window.location.href = '/ears3/events';
+                })
+                .fail(function (jqXHR) {
+                    alert('Delete failed (' + jqXHR.status + '): ' + (jqXHR.responseText || 'unknown error'));
+                });
+        }
+    });
+
 
     $("#dropdownForm").validate({
         rules: {
@@ -55,4 +87,5 @@ $(document).ready(function () {
             //alert("alert");
         }
     });
+
 });

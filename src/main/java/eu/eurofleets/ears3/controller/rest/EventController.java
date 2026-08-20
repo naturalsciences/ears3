@@ -86,10 +86,9 @@ public class EventController {
         }
     }
 
-    @DeleteMapping(value = {"event"}, params = {"identifier"}, produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
+    @DeleteMapping(value = {"event"}, params = {"identifier"})
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public String removeEventByIdentifier(@RequestParam(required = true) String identifier) {
+    public void removeEventByIdentifier(@RequestParam(required = true) String identifier) {
         this.eventService.deleteByIdentifier(identifier);
-        return "";
     }
 }
