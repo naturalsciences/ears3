@@ -1,6 +1,6 @@
 const eventPostLocation = "/ears3/api/event";
 
-const conceptHierarchySPARQL=`PREFIX owl: <http://www.w3.org/2002/07/owl#>
+const conceptHierarchySPARQL = `PREFIX owl: <http://www.w3.org/2002/07/owl#>
 PREFIX dc: <http://purl.org/dc/elements/1.1/>
 PREFIX skos:<http://www.w3.org/2004/02/skos/core#>
 PREFIX ears2:<http://ontologies.ef-ears.eu/ears2/1#>
@@ -73,14 +73,13 @@ class EarsEvent {
         // New, in-the-moment events get no timestamp here - the server assigns it.
         this.eventDefinitionId = sparqlResultElement.eid.value;
         this.label = null;
-
-        if (localStorage.actor !== null) {
-            let actor = JSON.parse(localStorage.actor);
+        const me = getCurrentActor()
+        if (me !== null) {
             this.actor = {
-                firstName: actor.firstName,
-                lastName: actor.lastName,
-                email: actor.email,
-                organisation: actor.organisation
+                firstName: me.firstName,
+                lastName: me.lastName,
+                email: me.email,
+                organisation: me.organisation.term.identifier
             };
         }
 

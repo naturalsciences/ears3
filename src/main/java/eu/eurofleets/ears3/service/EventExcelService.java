@@ -9,6 +9,7 @@ import eu.eurofleets.ears3.domain.Weather;
 import eu.eurofleets.ears3.dto.*;
 import eu.eurofleets.ears3.excel.SpreadsheetEvent;
 import eu.eurofleets.ears3.excel.converters.DateHelper;
+import eu.eurofleets.ears3.rdf.OntologySparqlService;
 import eu.eurofleets.ears3.utilities.DatagramUtilities;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.poi.ss.usermodel.Cell;
@@ -29,6 +30,7 @@ import jakarta.validation.ValidatorFactory;
 import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
+import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.util.*;
 import java.util.logging.Level;
@@ -55,6 +57,8 @@ public class EventExcelService {
     @Autowired
     private EventService eventService;
 
+    private final OntologySparqlService sparqlService;
+
     private DatagramUtilities<Navigation> navUtil;
     private DatagramUtilities<Thermosal> thermosalUtil;
     private DatagramUtilities<Weather> weatherUtil;
@@ -62,8 +66,15 @@ public class EventExcelService {
     public static Logger log = Logger.getLogger(EventService.class.getSimpleName());
 
     private static final List<String> ALLOWED_TABS = List.of("events");
-    private static final List<String> REQUIRED_HEADERS = Arrays.stream(SpreadsheetEvent.FIELDS.values()).map(Enum::name)
+
+    private static final List<String> OPTIONAL_HEADERS = List.of(
+            "Dist", "Elapsed Time", "Status", "Region", "Weather", "Navigation");
+
+    private static final List<String> REQUIRED_HEADERS = Arrays.stream(SpreadsheetEvent.FIELDS.values())
+            .map(f -> f.name().replace('_', ' '))
+            .filter(name -> !OPTIONAL_HEADERS.contains(name))
             .collect(Collectors.toList());
+
     private static final Map<String, LinkedDataTermDTO> DEFS = new HashMap<>();
     private static final Map<String, LinkedDataTermDTO> CATMAP = new HashMap<>();
     private static final Map<String, PropertyDTO> PROPMAPDEF = new HashMap<>();
@@ -72,11 +83,13 @@ public class EventExcelService {
     public EventExcelService(EventRepository eventRepository,
                              @Value("${app.navigation.server}") String navServer,
                              @Value("${app.read-only}") Boolean readOnly,
-                             @Value("${app.platform}") String platformUrn) {
+                             @Value("${app.platform}") String platformUrn,
+                             OntologySparqlService sparqlService) {
         this.eventRepository = eventRepository;
         this.navServer = navServer;
         this.readOnly = readOnly;
         this.platformUrn = platformUrn;
+        this.sparqlService = sparqlService;
 
         ValidatorFactory factory = Validation.buildDefaultValidatorFactory();
         this.validator = factory.getValidator();
@@ -85,11 +98,65 @@ public class EventExcelService {
             thermosalUtil = new DatagramUtilities<>(Thermosal.class, navServer);
             weatherUtil = new DatagramUtilities<>(Weather.class, navServer);
             initializeHashmaps();
+            loadRdfBindingsIntoMaps(); // live ontology data, layered on top of the static JSON fallback
         } catch (MalformedURLException ex) {
             Logger.getLogger(EventService.class.getName()).log(Level.SEVERE, null, ex);
         } catch (IOException ioe) {
             throw new RuntimeException(ioe);
         }
+    }
+
+    private void loadRdfBindingsIntoMaps() {
+        try {
+            String json = sparqlService.executeBindings();
+            ObjectMapper objectMapper = new ObjectMapper();
+            JsonNode root = objectMapper.readTree(json);
+            JsonNode bindings = root.path("results").path("bindings");
+
+            int toolCount = 0, processCount = 0, actionCount = 0;
+            for (JsonNode binding : bindings) {
+                String toolLabel = textOrNull(binding, "tl");
+                String toolUri = textOrNull(binding, "tu");
+                String toolTransitiveUri = textOrNull(binding, "ttu");
+
+                String categoryLabel = textOrNull(binding, "cl");
+                String categoryUri = textOrNull(binding, "cu");
+                String categoryTransitiveUri = textOrNull(binding, "ctu");
+
+                String processLabel = textOrNull(binding, "pl");
+                String processUri = textOrNull(binding, "pu");
+
+                String actionLabel = textOrNull(binding, "al");
+                String actionUri = textOrNull(binding, "au");
+
+                if (toolLabel != null && toolUri != null) {
+                    String key = loweredCapitalize(toolLabel);
+                    DEFS.put(key, new LinkedDataTermDTO(toolUri, toolTransitiveUri, toolLabel));
+                    toolCount++;
+                    if (categoryUri != null) {
+                        CATMAP.put(key, new LinkedDataTermDTO(categoryUri, categoryTransitiveUri, categoryLabel));
+                    }
+                }
+                if (processLabel != null && processUri != null) {
+                    DEFS.put(loweredCapitalize(processLabel), new LinkedDataTermDTO(processUri, null, processLabel));
+                    processCount++;
+                }
+                if (actionLabel != null && actionUri != null) {
+                    DEFS.put(loweredCapitalize(actionLabel), new LinkedDataTermDTO(actionUri, null, actionLabel));
+                    actionCount++;
+                }
+            }
+            log.info(String.format("Loaded live ontology bindings for excel import: %d tools, %d processes, %d actions.",
+                    toolCount, processCount, actionCount));
+        } catch (Exception e) {
+            log.log(Level.WARNING, "Could not load live ontology bindings for excel import - "
+                    + "falling back to static custom_ldts.json mappings only.", e);
+        }
+    }
+
+    private static String textOrNull(JsonNode binding, String field) {
+        JsonNode node = binding.path(field).path("value");
+        return node.isMissingNode() ? null : node.asText(null);
     }
 
     private void initializeHashmaps() throws IOException {
@@ -162,13 +229,13 @@ public class EventExcelService {
         }
     }
 
-    private static ZonedDateTime createZonedDateTime(SpreadsheetEvent spreadsheetEvent, int rowNb)
+    private static ZonedDateTime createZonedDateTime(SpreadsheetEvent spreadsheetEvent, int rowNb, String timezone)
             throws ImportException {
         ZonedDateTime zdt = null;
         String date = spreadsheetEvent.getDate();
-        String hour = spreadsheetEvent.getHour();
+        String time = spreadsheetEvent.getTime();
         try {
-            zdt = DateHelper.dateTimeStringToZonedDateTime(date, hour);
+            zdt = DateHelper.dateTimeStringToZonedDateTime(date, time, ZoneId.of(timezone));
         } catch (Exception e) {
             throw new ImportException(EventExcelController.SHEETNAME, rowNb,
                     String.format("Problem with [%s]%n", e.getMessage()), null);
@@ -176,7 +243,7 @@ public class EventExcelService {
         return zdt;
     }
 
-    private EventDTO processSpreadsheetEvent(SpreadsheetEvent spreadsheetEvent, int rowNb, PersonDTO actor, String programIdentifier) throws ImportException {
+    private EventDTO processSpreadsheetEvent(SpreadsheetEvent spreadsheetEvent, int rowNb, PersonDTO actor, String programIdentifier, String timezone) throws ImportException {
         EventDTO eventDTO = new EventDTO();
         eventDTO.setIdentifier(null);
         eventDTO.setActor(actor);
@@ -204,7 +271,7 @@ public class EventExcelService {
                     String.format("Problem with %s%n", errorSummaryForRow.toString()), null);
         }
 
-        ZonedDateTime zdt = createZonedDateTime(spreadsheetEvent, rowNb);
+        ZonedDateTime zdt = createZonedDateTime(spreadsheetEvent, rowNb,timezone);
         eventDTO.setTimeStamp(zdt.toOffsetDateTime());
         eventDTO.setRemarks(spreadsheetEvent.getRemarks());
         eventDTO.setPlatform(platformUrn);
@@ -328,12 +395,12 @@ public class EventExcelService {
     }
 
     public boolean processSpreadsheetEvents(ErrorDTOList errorList, List<SpreadsheetEvent> data,
-                                            List<EventDTO> events, PersonDTO actor, String program) {
+                                            List<EventDTO> events, PersonDTO actor, String program, String timezone) {
         boolean hasProblems = false;
         int rowNb = 1;
         for (SpreadsheetEvent spreadsheetEvent : data) {
             try {
-                EventDTO event = processSpreadsheetEvent(spreadsheetEvent, rowNb, actor, program);
+                EventDTO event = processSpreadsheetEvent(spreadsheetEvent, rowNb, actor, program, timezone);
                 events.add(event);
             } catch (ImportException e) {
                 hasProblems = true;
@@ -352,7 +419,9 @@ public class EventExcelService {
                 eventService.save(dto);
             } catch (DataIntegrityViolationException dve) {
                 problems = true;
-                errorList.addError(new ErrorDTO(i, dve.getMessage(), dve));
+                String msg = (dve.getMessage().split("\\] \\[")[0]) + "]";
+                errorList.addError(new ErrorDTO(i, msg, dve));
+
             } catch (Exception e) {
                 problems = true;
                 errorList.addError(new ErrorDTO(i, e.getMessage() + "exception saving event row", e));

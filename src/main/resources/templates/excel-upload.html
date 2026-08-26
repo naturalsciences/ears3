@@ -10,14 +10,25 @@
     <h1 id="h1">Logfile submission</h1>
     <div class="form-inline mb-3 p-3 border rounded">
         <form layout:fragment="head-form" id="constrain">
-            <div class="form-group">
+            <div class="form-group mr-3 mb-2">
                 <select name="program" id="programField"
                         class="selectpicker target form-control"
-                        data-live-search="true" title="Current program" required>
+                        data-live-search="true" title="Program of all excel rows" required>
                 </select>
+            </div>
+            <div class="form-group mr-3 mb-2">
+                <p>
+                    <select name="timezone" id="timezoneField"
+                            class="selectpicker target form-control"
+                            data-live-search="true" title="Timezone of all excel rows" required>
+                        <option value="UTC">UTC</option>
+                        <option value="Europe/Brussels">Europe/Brussels</option>
+                    </select>
+                </p>
             </div>
         </form>
     </div>
+
     <div class="form-inline mb-3 p-3 border rounded">
         <form id="importCsvForm" method="post" enctype="multipart/form-data" th:action="@{/api/event/import}">
             <div class="input-group mb-3">
@@ -27,89 +38,139 @@
                 <button class="btn btn-primary btn-lg btn-block" type="submit" id="importButton">Import</button>
             </div>
         </form>
+    </div>
+    <div class="row">
+        <div class="col-sm-12">
+            <p id="badFeedbackBox" class="alert alert-danger" role="alert" style="visibility: hidden;">
+            </p>
+            <p id="goodFeedbackBox" class="alert alert-success" style="visibility: hidden;"> Successfully uploaded and imported!</p>
+        </div>
+    </div>
+    <script th:inline="javascript">
+        $(document).ready(function () {
+            const me = getCurrentActor()
 
-        <div id="errors" class="alert alert-danger d-none"></div>
-        <div id="success" class="alert alert-success d-none"> Successfully uploaded and imported !</div>
+            if (me !== null) {
+                this.actor = {
+                    firstName: me.firstName,
+                    lastName: me.lastName,
+                    email: me.email,
+                    organisation: me.organisation.term.identifier
+                };
+            }
 
-        <script th:inline="javascript">
-            $(document).ready(function () {
-                const actorRaw = localStorage.getItem("actor");
-                const actor = actorRaw ? JSON.parse(actorRaw) : null;
+            /*<![CDATA[*/
+            var homelink = /*[[@{'/'}]]*/ '';
+            /*]]>*/
+
+            $("form#importCsvForm").submit(function (e) {
+                e.preventDefault();
+                $(document.getElementById("success")).addClass("d-none");
+                //$(document.getElementById("serverBadFeedbackBox")).addClass("d-none");
+                const token = $("input[name='_csrf']").val();
+                const header = "X-CSRF-TOKEN";
+                const formData = new FormData(this);
+
                 const program = $("#programField").val() === "" ? null : $("#programField").val();
+                if (program === null) {
+                    window.scrollTo(0, 0);
+                    $('#programField').selectpicker('setStyle', 'btn-warning');
+                    $("#importButton").removeClass("btn-success").addClass("btn-warning");
+                    toggleErrorMessage("Please select a program first.")
+                    return;
+                } else {
+                    $('#programField').selectpicker('setStyle', 'btn-warning', 'remove');
+                }
+                const timezone = $("#timezoneField").val() === "" ? null : $("#timezoneField").val();
+                if (timezone === null) {
+                    window.scrollTo(0, 0);
+                    $('#timezoneField').selectpicker('setStyle', 'btn-warning');
+                    $("#importButton").removeClass("btn-success").addClass("btn-warning");
+                    toggleErrorMessage("Please select a timezone first.")
+                    return;
+                } else {
+                    $('#timezoneField').selectpicker('setStyle', 'btn-warning', 'remove');
+                }
+                const file = $("#fileId").val() === "" ? null : $("#fileId").val();
+                if (file === null) {
+                    window.scrollTo(0, 0);
+                    $("#importButton").removeClass("btn-success").addClass("btn-warning");
+                    toggleErrorMessage("Please select a file first.")
+                    return;
+                } else {
+                    $('#fileId').selectpicker('setStyle', 'btn-warning', 'remove');
+                }
 
-                /*<![CDATA[*/
-                var homelink = /*[[@{'/'}]]*/ '';
-                /*]]>*/
+                const actorProgramTZDTO = {
+                    actor: this.actor,
+                    program: program,
+                    timezone: timezone
+                };
+                formData.append("apd", new Blob([JSON.stringify(actorProgramTZDTO)], {type: "application/json"}));
 
-                $("form#importCsvForm").submit(function (e) {
-                    e.preventDefault();
-                    $(document.getElementById("success")).addClass("d-none");
-                    $(document.getElementById("errors")).addClass("d-none");
-                    var token = $("input[name='_csrf']").val();
-                    var header = "X-CSRF-TOKEN";
-                    var formData = new FormData(this);
 
-                    const actorProgramDTO = {
-                        actor: actor,
-                        program: program
-                    };
-                    formData.append("apd", new Blob([JSON.stringify(actorProgramDTO)], {type: "application/json"}));
-
-                    $.ajax({
-                        type: "POST",
-                        url: homelink + "api/event/import",
-                        data: formData,
-                        beforeSend: function (xhr) {
-                            xhr.setRequestHeader(header, token);
-                        },
-                        success: function (result) {
-                            $("div#success").html("Successfully Uploaded and Imported !");
-                            document.getElementById("success").classList.remove('d-none');
-                        },
-                        error: function (result) {
-                            const pretty = JSON.stringify(JSON.parse(result.responseText), null, 2); //render the json nicely
-                            $("div#errors").html(pretty);
-                            document.getElementById("errors").classList.remove('d-none');
-                        },
-                        cache: false,
-                        contentType: false,
-                        processData: false
-                    });
+                $.ajax({
+                    type: "POST",
+                    url: homelink + "api/event/import",
+                    data: formData,
+                    beforeSend: function (xhr) {
+                        xhr.setRequestHeader(header, token);
+                    },
+                    success: function (result) {
+                        // $("div#success").html("Successfully Uploaded and Imported !");
+                        // document.getElementById("success").classList.remove('d-none');
+                        toggleGoodMessage("Successfully uploaded and imported!");
+                    },
+                    error: function (result) {
+                        const pretty = JSON.stringify(JSON.parse(result.responseText), null, 2); //render the json nicely
+                        toggleErrorMessage(pretty);
+                        // $("div#errors").html(pretty);
+                        // document.getElementById("errors").classList.remove('d-none');
+                    },
+                    cache: false,
+                    contentType: false,
+                    processData: false
                 });
             });
-        </script>
-    </div>
+        });
+    </script>
+
+
     <div class="alert alert-light" role="alert">
         <ul>
             <li>
                 Choose the logfile you want to upload via the form above.
             </li>
             <li>
-                This file should be a normal excel file (.xlsx)<br/>
+                Please specify the program that applies to ALL events (no mixing!) in the above dropdown menu. If you want to upload events for another program, you should use another
+                file.
             </li>
             <li>
-                The file size should be less than <em th:text="${maxFileSize}"></em>
+                Please specify the timezone that applies to ALL events (no mixing!) in the above dropdown menu. The list is limited to UTC and Brussels time zone. Any event time marked with 'Z' (=UTC) in the excel, will have the 'Z' be ignored, and the selection of this dropdown applied.
             </li>
-            <li>
-                An empty template with example tab can be downloaded from: <a
-                    th:href="@{/excel/ship_log_template.xlsx}">Ship Log Template</a>
-            </li>
-            <li>However, since the tool/process/action names must exactly correspond, we strongly advise you to do as
+            <!--            <li>-->
+            <!--                An empty template with example tab can be downloaded from: <a-->
+            <!--                    th:href="@{/excel/ship_log_template.xlsx}">Ship Log Template</a>-->
+            <!--            </li>-->
+            <li>Since the tool/process/action names must exactly correspond and their combinations as well, we strongly
+                advise you to do as
                 follows:
             </li>
             <li>
                 <ul>
                     <li>Create the events that should be repeated over the whole cruise by hand on the <a
-                            th:href="@{/event/new}">new
-                        events page</a>.
+                            th:href="@{/event/new}">new events page</a>, for the first time when they happen for real.
                     </li>
-                    <li>Then download the events as csv in the 'Filter Events' pane.</li>
-                    <li>Open it with Excel/LibreOffice and save it as an xlsx file.</li>
+                    <li>If you have a representative set of events for the rest of the cruise, download the events as
+                        csv in the 'Filter Events' pane.
+                    </li>
+                    <li>Open the csv file with Excel/LibreOffice and save it as an xlsx file.</li>
                     <li>Make sure the worksheet is named 'events'.</li>
-                    <li>Now repeat the events as much as needed over the whole cruise.</li>
+                    <li>Now repeat the events as much as needed over the whole cruise. Keep the file under 5MB.</li>
                     <li>Do not complete (or just remove) the following columns, as the info is not essential for a full
                         event (it's built from what you provide):
                         <ul>
+                            <li>Program</li>
                             <li>Program name</li>
                             <li>Principal Investigator</li>
                             <li>Tool category</li>

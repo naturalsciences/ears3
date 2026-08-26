@@ -26,9 +26,17 @@ function isJSON(str) {
 
 function toggleErrorMessage(message) {
     if (!message) {
-        $('#serverBadFeedbackBox').css('visibility', 'hidden').text("");
+        $('#badFeedbackBox').css('visibility', 'hidden').text("");
     } else {
-        $('#serverBadFeedbackBox').css('visibility', 'visible').text(message);
+        $('#badFeedbackBox').css('visibility', 'visible').text(message);
+    }
+}
+
+function toggleGoodMessage(message) {
+    if (!message) {
+        $('#goodFeedbackBox').css('visibility', 'hidden').text("");
+    } else {
+        $('#goodFeedbackBox').css('visibility', 'visible').text(message);
     }
 }
 
@@ -149,6 +157,9 @@ function populateProgramField() {
     const actorFullName = me ? (me.firstName + " " + me.lastName) : null;
 
     const earsProgramRegex = buildYearWindowRegex();
+    if ($('#programField').length === 0) {
+        return; // this page doesn't have this field - nothing to do
+    }
     populateFilteredSelectField('#programField', programsGetLocation, 'programs', earsProgramRegex, function (item) {
         let names = "";
         if (item.principalInvestigators && item.principalInvestigators.length > 0) {

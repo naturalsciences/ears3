@@ -213,5 +213,9 @@ public class OntologyRdfController {
         return sparqlService.executeSelectAsJson(sparqlQuery);
     }
 
+    @GetMapping(value = "/sparql/bindings", produces = MediaType.APPLICATION_JSON_VALUE)
+    public String sparqlBindings() throws IOException {
+        return sparqlService.executeBindings();
+    }
 
 }

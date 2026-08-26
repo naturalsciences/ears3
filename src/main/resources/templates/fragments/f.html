@@ -99,13 +99,13 @@
             if (!isLocalStorageSupported()) {
                 window.location.replace('/ears3/unsupported-browser');
             }
-            const actor = getCurrentActor()
-            if (!actor) {
+            const me = getCurrentActor()
+            if (!me) {
                 if (window.location.pathname !== '/ears3/settings') {
                     window.location.href = '/ears3/settings';
                 }
             } else {
-                document.getElementById("settings-link").innerHTML = actor.firstName + " " + actor.lastName;
+                document.getElementById("settings-link").innerHTML = me.firstName + " " + me.lastName;
             }
         </script>
     </div>

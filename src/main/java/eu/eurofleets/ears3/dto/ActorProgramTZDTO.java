@@ -1,15 +1,17 @@
 package eu.eurofleets.ears3.dto;
 
-public class ActorProgramDTO {
+public class ActorProgramTZDTO {
     private PersonDTO actor;
     private String program;
+    private String timezone;
 
-    public ActorProgramDTO() {
+    public ActorProgramTZDTO() {
     }
 
-    public ActorProgramDTO(PersonDTO actor, String program) {
+    public ActorProgramTZDTO(PersonDTO actor, String program, String timezone) {
         this.actor = actor;
         this.program = program;
+        this.timezone = timezone;
     }
 
     public PersonDTO getActor() {
@@ -26,5 +28,13 @@ public class ActorProgramDTO {
 
     public void setProgram(String program) {
         this.program = program;
+    }
+
+    public String getTimezone() {
+        return timezone;
+    }
+
+    public void setTimezone(String timezone) {
+        this.timezone = timezone;
     }
 }

@@ -1,5 +1,6 @@
 package eu.eurofleets.ears3.excel;
 
+import eu.eurofleets.ears3.excel.converters.ExcelTimeSerialConverter;
 import eu.eurofleets.ears3.excel.converters.StringConverter;
 import io.github.rushuat.ocell.annotation.FieldConverter;
 import io.github.rushuat.ocell.annotation.FieldFormula;
@@ -22,10 +23,9 @@ import jakarta.validation.constraints.NotBlank;
 public class SpreadsheetEvent {
 
     public enum FIELDS {
-        Date, Hour, Actor, Program, Tool, Process, Action, Label, Station, Description,
-        Remarks, Dist, Time, Status, Region, Weather, Navigation
+        Date, Time, Actor, Program, Tool, Process, Action, Label, Station, Description,
+        Remarks, Dist, Elapsed_Time, Status, Region, Weather, Navigation
     };
-
 
     //
     @FieldName("Date")
@@ -34,10 +34,10 @@ public class SpreadsheetEvent {
     @NotBlank
     String date;
 
-    @FieldName("Hour")
-    @FieldConverter(StringConverter.class)
+    @FieldName("Time")
+    @FieldConverter(ExcelTimeSerialConverter.class)
     @NotBlank
-    String hour;
+    String time;
 
     @FieldName("Actor")
     @FieldConverter(StringConverter.class)
@@ -84,10 +84,9 @@ public class SpreadsheetEvent {
     @FieldConverter(StringConverter.class)
     String distance;
 
-    @FieldName("Time")
+    @FieldName("Elapsed Time")
     @FieldConverter(StringConverter.class)
-
-    String time;
+    String elapsedTime;
 
     @FieldName("Status")
     @FieldConverter(StringConverter.class)
@@ -122,15 +121,15 @@ public class SpreadsheetEvent {
     /**
      * @return the hour
      */
-    public String getHour() {
-        return hour;
+    public String getTime() {
+        return time;
     }
 
     /**
-     * @param hour the hour to set
+     * @param time the hour to set
      */
-    public void setHour(String hour) {
-        this.hour = hour;
+    public void setTime(String time) {
+        this.time = time;
     }
 
     /**
@@ -276,15 +275,15 @@ public class SpreadsheetEvent {
     /**
      * @return the time
      */
-    public String getTime() {
-        return time;
+    public String getElapsedTime() {
+        return elapsedTime;
     }
 
     /**
-     * @param time the time to set
+     * @param elapsedTime the time to set
      */
-    public void setTime(String time) {
-        this.time = time;
+    public void setElapsedTime(String elapsedTime) {
+        this.elapsedTime = elapsedTime;
     }
 
     /**
@@ -348,7 +347,7 @@ public class SpreadsheetEvent {
         final int prime = 31;
         int result = 1;
         result = prime * result + ((date == null) ? 0 : date.hashCode());
-        result = prime * result + ((hour == null) ? 0 : hour.hashCode());
+        result = prime * result + ((time == null) ? 0 : time.hashCode());
         result = prime * result + ((actor == null) ? 0 : actor.hashCode());
         result = prime * result + ((program == null) ? 0 : program.hashCode());
         result = prime * result + ((tool == null) ? 0 : tool.hashCode());
@@ -381,10 +380,10 @@ public class SpreadsheetEvent {
                 return false;
         } else if (!date.equals(other.date))
             return false;
-        if (hour == null) {
-            if (other.hour != null)
+        if (time == null) {
+            if (other.time != null)
                 return false;
-        } else if (!hour.equals(other.hour))
+        } else if (!time.equals(other.time))
             return false;
         if (actor == null) {
             if (other.actor != null)

@@ -149,10 +149,10 @@ public class DateHelper implements Serializable {
      * (the common case). Use the {@link #dateTimeStringToZonedDateTime(String, String, ZoneId)}
      * overload directly for the rare case where the source is UTC (or another zone).
      */
-    public static ZonedDateTime dateTimeStringToZonedDateTime(String date, String time)
-            throws IllegalDateConversionException {
-        return dateTimeStringToZonedDateTime(date, time, BRUSSELS);
-    }
+//    public static ZonedDateTime dateTimeStringToZonedDateTime(String date, String time)
+//            throws IllegalDateConversionException {
+//        return dateTimeStringToZonedDateTime(date, time, BRUSSELS);
+//    }
 
 
     private static LocalDate ddmmyyyDateStringToLocalDate(String date) throws IllegalDateConversionException {

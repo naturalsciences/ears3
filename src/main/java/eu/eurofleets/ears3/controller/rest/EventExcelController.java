@@ -11,16 +11,13 @@ import org.apache.commons.io.output.StringBuilderWriter;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import tools.jackson.databind.ObjectMapper;
 import eu.eurofleets.ears3.excel.SpreadsheetEvent;
 import eu.eurofleets.ears3.service.EventExcelService;
-import eu.eurofleets.ears3.service.ProgramService;
 import io.github.rushuat.ocell.document.Document;
 import io.github.rushuat.ocell.document.Documents;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.ss.usermodel.WorkbookFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -34,6 +31,7 @@ import java.io.Writer;
 import java.time.OffsetDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
+import java.util.stream.Collectors;
 
 @RestController()
 @RequestMapping(value = "/api")
@@ -49,7 +47,7 @@ public class EventExcelController {
 
     @PostMapping(value = "event/import", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE}, consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @ResponseStatus(HttpStatus.CREATED)
-    public ResponseEntity<Message> excelImport(@RequestPart("file") MultipartFile mpFile, @RequestPart("apd") ActorProgramDTO actorProgramDTO) {
+    public ResponseEntity<Message> excelImport(@RequestPart("file") MultipartFile mpFile, @RequestPart("apd") ActorProgramTZDTO actorProgramDTO) {
         ErrorDTOList errorList = new ErrorDTOList();
         try (Document document = Documents.OOXML().create()) {
             byte[] byteArr = mpFile.getBytes();
@@ -64,11 +62,15 @@ public class EventExcelController {
                         null);
                 return new ResponseEntity<>(msg, HttpStatus.CONFLICT);
             }
-            List<SpreadsheetEvent> data = document.getSheet(SHEETNAME, SpreadsheetEvent.class);
+            List<SpreadsheetEvent> rawData = document.getSheet(SHEETNAME, SpreadsheetEvent.class);
+            List<SpreadsheetEvent> data = rawData.stream()
+                    .filter(e -> !isBlankRow(e))
+                    .collect(Collectors.toList());
             List<EventDTO> events = new ArrayList<>();
             PersonDTO actor = actorProgramDTO.getActor();
             String program = actorProgramDTO.getProgram();
-            boolean hasProblems = eventExcelService.processSpreadsheetEvents(errorList, data, events, actor, program);
+            String timezone = actorProgramDTO.getTimezone();
+            boolean hasProblems = eventExcelService.processSpreadsheetEvents(errorList, data, events, actor, program, timezone);
             boolean hasSaveProblems = false;
             if (!hasProblems) {
                 hasSaveProblems = eventExcelService.saveSpreadsheetEvents(errorList, events);
@@ -91,6 +93,17 @@ public class EventExcelController {
         Message<String> msg = new Message<>(HttpStatus.CREATED.value(), null, null, "Successfully read Excel and created all events",
                 null);
         return new ResponseEntity<>(msg, HttpStatus.CREATED);
+    }
+
+    private static boolean isBlankRow(SpreadsheetEvent e) {
+        return isBlank(e.getDate()) && isBlank(e.getTime()) && isBlank(e.getTool())
+                && isBlank(e.getProcess()) && isBlank(e.getAction()) && isBlank(e.getLabel())
+                && isBlank(e.getStation()) && isBlank(e.getDescription());
+        // extend with any other core fields as needed
+    }
+
+    private static boolean isBlank(String s) {
+        return s == null || s.isBlank();
     }
 
     private static String doubleOrNull(Double val) {
@@ -142,8 +155,8 @@ public class EventExcelController {
                     programName = program.getName();
                 }
                 List<String> elements = new ArrayList<>(Arrays.asList(
-                        event.getTimeStamp().format(DateTimeFormatter.ISO_DATE),
-                        event.getTimeStamp().format(DateTimeFormatter.ISO_TIME),
+                        event.getTimeStamp().toLocalDate().format(DateTimeFormatter.ISO_DATE), //yyyy-mm-dd
+                        event.getTimeStamp().format(DateTimeFormatter.ofPattern("HH:mm:ss"))+"Z", //hh:mm:ss in UTC
                         event.getActor().getFirstName() + " " + event.getActor().getLastName(),
                         programId,
                         programName,
