@@ -74,7 +74,8 @@
                 $('#actorField').change(function () {
                     const fullName = $(this).find("option:selected").text();
                     const me = actorLookup[fullName]
-                    setCurrentActor(me)
+                    const organisationId = me.organisation.term.identifier;
+                    setCurrentActor({ ...me, organisation: organisationId });
                     window.location.href = "event/new";
                 });
                 $('form').submit(function () {
