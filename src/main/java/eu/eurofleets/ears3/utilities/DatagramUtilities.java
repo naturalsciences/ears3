@@ -10,6 +10,8 @@ import eu.eurofleets.ears3.domain.Coordinate;
 import eu.eurofleets.ears3.domain.Navigation;
 import eu.eurofleets.ears3.domain.Thermosal;
 import eu.eurofleets.ears3.domain.Weather;
+import org.springframework.http.MediaType;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -34,6 +36,7 @@ import java.util.logging.Logger;
 
 /**
  * A class to easily retrieve Objects of a certain acquisition type (nav, met, tss)
+ *
  * @author Thomas Vandenberghe
  */
 public class DatagramUtilities<A extends Acquisition> {
@@ -148,7 +151,7 @@ public class DatagramUtilities<A extends Acquisition> {
                             result.add(acquisitionValue);
                         }
                     } else {
-                        log.log(Level.INFO, "Line is not an EARS datagram (using " + endpoint + ").");
+                        log.log(Level.INFO, "Line (" + line + ") is not an EARS datagram (using " + endpoint + ").");
                     }
                 }
                 br.close();
@@ -170,7 +173,7 @@ public class DatagramUtilities<A extends Acquisition> {
         connection.setReadTimeout(240 * 1000);
         connection.setRequestMethod("GET");
         connection.connect();
-
+        connection.setRequestProperty("Accept", MediaType.TEXT_PLAIN_VALUE);
         int code = connection.getResponseCode();
         if (code == HttpURLConnection.HTTP_OK) {// status 200
             return connection;
