@@ -172,8 +172,8 @@ public class DatagramUtilities<A extends Acquisition> {
         connection.setConnectTimeout(CONNECT_TIMEOUT * 1000);
         connection.setReadTimeout(240 * 1000);
         connection.setRequestMethod("GET");
-        connection.connect();
         connection.setRequestProperty("Accept", MediaType.TEXT_PLAIN_VALUE);
+        connection.connect();
         int code = connection.getResponseCode();
         if (code == HttpURLConnection.HTTP_OK) {// status 200
             return connection;
