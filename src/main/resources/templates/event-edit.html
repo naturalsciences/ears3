@@ -26,7 +26,14 @@
             <p>
                 <input name="label" id="labelField" placeholder=" " type="text"
                        title="Label (event identifier, sample id...)" class="form-control" th:value="${event.label}"
-                       th:attr="data-description=${event.description}"/><label class="txtBox" for="labelField">Event label</label>
+                       th:attr="data-description=${event.label}"/><label class="txtBox" for="labelField">Event label</label>
+            </p>
+        </div>
+        <div class="form-group mr-3 mb-2">
+            <p>
+                <input name="description" id="descriptionField" placeholder=" " type="text"
+                       title="Description (objective narrative)" class="form-control" th:value="${event.description}"
+                       th:attr="data-description=${event.description}"/><label class="txtBox" for="labelField">Description</label>
             </p>
         </div>
         <div class="form-group mr-3 mb-2">
@@ -36,18 +43,24 @@
                            class="form-control dateField" th:value="${#temporals.format(event.timeStamp, 'yyyy-MM-dd')}"
                            required/><label class="txtBox" for="dateField">Date</label>
                 </p>
-                <span class="input-group-btn" style="width:0px;"></span>
+<!--                <span class="input-group-btn" style="width:0px;"></span>-->
                 <p>
-                    <input name="time" id="timeField" placeholder=" " type="text" title="Time"
+                    <input name="time" id="timeField" placeholder=" " type="text" title="UTC time"
                            class="form-control timeField" th:value="${#temporals.format(event.timeStamp, 'HH:mm:ss')}"
                            style="margin-left:-1px" required/><label class="txtBox" for="timeField">Time</label>
                 </p>
-                <span class="input-group-btn" style="width:0px;"></span>
                 <p>
-                    <input name="timezone" id="timeZoneField" placeholder=" " type="text" title="Timezone"
-                           class="form-control timeZoneField" th:value="${#temporals.format(event.timeStamp, 'Z')}"
-                           style="margin-left:-2px" required/><label class="txtBox" for="timeZoneField">Zone</label>
+                    <input name="localTime" id="localTimeField" placeholder=" " type="text" title="Europe/Brussels time"
+                           class="form-control localTimeField" readonly
+                           style="margin-left:-1px"/><label class="txtBox" for="localTimeField">Brussels time</label>
                 </p>
+
+<!--                <span class="input-group-btn" style="width:0px;"></span>-->
+<!--                <p>-->
+<!--                    <input name="timezone" id="timeZoneField" placeholder=" " type="text" title="Timezone"-->
+<!--                           class="form-control timeZoneField" th:value="${#temporals.format(event.timeStamp, 'Z')}"-->
+<!--                           style="margin-left:-2px" required/><label class="txtBox" for="timeZoneField">Zone</label>-->
+<!--                </p>-->
             </div>
         </div>
     </form>
@@ -191,7 +204,7 @@
                     </div>
                 </li>
             </ul>
-            <button id="btnSubmitEventWithProperties" type="submit" class="btn btn-primary btn-lg">Submit</button>
+            <button id="btnSubmitEventWithProperties" type="submit" class="btn btn-primary btn-lg">Submit (no popup!)</button>
         </div>
     </form>
     <br />

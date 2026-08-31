@@ -293,8 +293,9 @@ function postEventInner(event, successFunction, errorFunction) {
             //fixed properties, ie. station and label, get prefilled
             $("input#fixed_property_0").attr('value', $("#stationField").val()); //predefined entry coming from the stationField.
             $("input#fixed_property_1").attr('value', $("#labelField").val()); //predefined entry coming from the labelField.
+            $("input#fixed_property_2").attr('value', $("#descriptionField").val()); //predefined entry coming from the labelField.
 
-            if (eventPropertyUrls) { //we found matches
+            if (window.location.href.includes("event/new") || eventPropertyUrls.length > 0) { //we are newly creating events or there are properties
                 $("#propertyPopup").dialog("open");
                 eventPropertyUrls.forEach(function (eventPropertyUrl, index) {
                     //needed as searches in the rdf return e.g. http://ontologies.ef-ears.eu/ears2/1/#pry_18 whereas they could be stored as http://ontologies.ef-ears.eu/ears2/1#pry_18

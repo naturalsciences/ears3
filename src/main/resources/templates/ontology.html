@@ -39,12 +39,37 @@
     </div>
 
     <div class="row">
-        <div class="col-md-6">
+        <div class="col-md-4">
             <div id="ontologyTree"></div>
         </div>
-        <div class="col-md-6">
+        <div class="col-md-4">
             <div id="propertyPanel" class="p-3 border rounded">
                 <p class="text-muted">Select a node to view/edit its properties.</p>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div id="ontologySource" class="p-3 border rounded">
+                <h5>Predefined Types</h5>
+                <ul class="nav nav-tabs" id="sourceTabs" role="tablist">
+                    <li class="nav-item"><a class="nav-link active" data-toggle="tab" href="#sourceTools">Tools</a></li>
+                    <li class="nav-item"><a class="nav-link" data-toggle="tab" href="#sourceProcesses">Processes</a></li>
+                    <li class="nav-item"><a class="nav-link" data-toggle="tab" href="#sourceActions">Actions</a></li>
+                    <li class="nav-item"><a class="nav-link" data-toggle="tab" href="#sourceProperties">Properties</a></li>
+                </ul>
+                <div class="tab-content mt-2">
+                    <div class="tab-pane fade show active" id="sourceTools">
+                        <div id="sourceToolTree"></div>
+                    </div>
+                    <div class="tab-pane fade" id="sourceProcesses">
+                        <div id="sourceProcessTree"></div>
+                    </div>
+                    <div class="tab-pane fade" id="sourceActions">
+                        <div id="sourceActionTree"></div>
+                    </div>
+                    <div class="tab-pane fade" id="sourceProperties">
+                        <div id="sourcePropertyTree"></div>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
@@ -138,6 +163,155 @@
         });
 
         // ---------------------------------------------------------------
+        // Predefined source data (hardcoded for now; will eventually come
+        // from the ontology API / SKOS vocab, same as the live tree)
+        // ---------------------------------------------------------------
+
+        const sourceActions = [
+            {id: 'act1', prefLabel: 'Start', altLabel: 'Begin', definition: 'Starting a process.', uri: 'http://ontologies.ef-ears.eu/ears2/1#concept_800', code: 'VL'},
+            {id: 'act2', prefLabel: 'End', altLabel: 'Finish', definition: 'Ending a process.', uri: 'http://ontologies.ef-ears.eu/ears2/1#concept_801', code: 'VL'},
+            {id: 'act3', prefLabel: 'Pause', altLabel: '', definition: 'Period during which a process is suspended before it is continued.', uri: 'http://ontologies.ef-ears.eu/ears2/1#concept_802', code: 'VL'},
+            {id: 'act4', prefLabel: 'Resume', altLabel: '', definition: 'The restart of recording after a pause.', uri: 'http://ontologies.ef-ears.eu/ears2/1#concept_803', code: 'VL'},
+            {id: 'act5', prefLabel: 'Deploy', altLabel: '', definition: 'The deployment of an instrument or group of instruments for measurements (e.g. mooring, benthic lander).', uri: 'http://ontologies.ef-ears.eu/ears2/1#concept_810', code: 'DP'},
+            {id: 'act6', prefLabel: 'Recover', altLabel: '', definition: 'The recovery of an instrument or group of instruments after measurements.', uri: 'http://ontologies.ef-ears.eu/ears2/1#concept_811', code: 'DP'},
+            {id: 'act7', prefLabel: 'OnBottom', altLabel: '', definition: 'The instrument or group of instruments reached the bottom.', uri: 'http://ontologies.ef-ears.eu/ears2/1#concept_812', code: 'VL'},
+            {id: 'act8', prefLabel: 'AtMaxDepth', altLabel: '', definition: 'The instrument or group of instrument reached the maximum depth.', uri: 'http://ontologies.ef-ears.eu/ears2/1#concept_813', code: 'VL'},
+            {id: 'act9', prefLabel: 'ErrorDetected', altLabel: '', definition: 'Detecting an error in the data.', uri: 'http://ontologies.ef-ears.eu/ears2/1#concept_816', code: 'VL'},
+            {id: 'act10', prefLabel: 'Setup', altLabel: '', definition: 'The installation of sensors prior to the actual measurements.', uri: 'http://ontologies.ef-ears.eu/ears2/1#concept_817', code: 'VL'},
+            {id: 'act11', prefLabel: 'Failed', altLabel: '', definition: 'Failure during the operation of a given measurement or sampling device due to malfunction or conditions.', uri: 'http://ontologies.ef-ears.eu/ears2/1#concept_820', code: 'VL'},
+            {id: 'act12', prefLabel: 'Lost', altLabel: '', definition: 'Loss of an instrument or group of instruments deployed.', uri: 'http://ontologies.ef-ears.eu/ears2/1#concept_821', code: 'VL'},
+            {id: 'act13', prefLabel: 'AtDepth', altLabel: '', definition: 'Reached the required depth.', uri: 'http://ontologies.ef-ears.eu/ears2/1#concept_822', code: 'VL'},
+            {id: 'act14', prefLabel: 'Descend', altLabel: '', definition: 'Start of descent of measurements along a vertical profile.', uri: 'http://ontologies.ef-ears.eu/ears2/1#concept_825', code: 'VL'},
+            {id: 'act15', prefLabel: 'Ascend', altLabel: '', definition: 'Start of rise of measurements along a vertical profile.', uri: 'http://ontologies.ef-ears.eu/ears2/1#concept_826', code: 'VL'},
+            {id: 'act16', prefLabel: 'InWater', altLabel: '', definition: 'An instrument is placed in the water.', uri: 'http://ontologies.ef-ears.eu/ears2/1#concept_827', code: 'VL'},
+            {id: 'act17', prefLabel: 'Pinging', altLabel: '', definition: 'Start of transmission of a sound pulse.', uri: 'http://ontologies.ef-ears.eu/ears2/1#concept_828', code: 'VL'},
+            {id: 'act19', prefLabel: 'PeopleIn', altLabel: 'CrewIn', definition: 'All crew boarded.', uri: 'http://ontologies.ef-ears.eu/ears2/1#concept_834', code: 'VL'},
+            {id: 'act20', prefLabel: 'PeopleOut', altLabel: 'CrewOut', definition: 'Crew disembarked.', uri: 'http://ontologies.ef-ears.eu/ears2/1#concept_835', code: 'VL'},
+            {id: 'act21', prefLabel: 'Depart', altLabel: 'Leave', definition: 'Leaving a location.', uri: 'http://ontologies.ef-ears.eu/ears2/1#concept_1045', code: 'VL'},
+            {id: 'act22', prefLabel: 'Arrive', altLabel: '', definition: 'Arrival at destination.', uri: 'http://ontologies.ef-ears.eu/ears2/1#concept_1046', code: 'VL'},
+            {id: 'act23', prefLabel: 'Abort', altLabel: 'Cancel', definition: 'Operation was aborted for some reason.', uri: 'http://ontologies.ef-ears.eu/ears2/1#concept_1081', code: 'VL'},
+            {id: 'act24', prefLabel: 'Service', altLabel: '', definition: 'Instrument, mooring or sampling device was serviced.', uri: 'http://ontologies.ef-ears.eu/ears2/1#concept_1082', code: 'DP'},
+            {id: 'act25', prefLabel: 'Release', altLabel: '', definition: 'Instrument, mooring or sampling device was released.', uri: 'http://ontologies.ef-ears.eu/ears2/1#concept_1083', code: 'VL'},
+            {id: 'act26', prefLabel: 'Located', altLabel: '', definition: 'The instrument is located (by acoustic detection or visual observation).', uri: 'http://ontologies.ef-ears.eu/ears2/1#concept_1084', code: 'VL'},
+            {id: 'act27', prefLabel: 'Sighted', altLabel: '', definition: 'The instrument is spotted at the sea surface.', uri: 'http://ontologies.ef-ears.eu/ears2/1#concept_1085', code: 'VL'},
+            {id: 'act28', prefLabel: 'OnBoard', altLabel: 'OnDeck', definition: 'The instrument is put on the deck of the ship after a deployment.', uri: 'http://ontologies.ef-ears.eu/ears2/1#concept_1086', code: 'VL'},
+            {id: 'act29', prefLabel: 'OutWater', altLabel: '', definition: 'An instrument is taken out of the water.', uri: 'http://ontologies.ef-ears.eu/ears2/1#concept_20790', code: 'VL'},
+            {id: 'act30', prefLabel: 'OffBottom', altLabel: '', definition: 'The instrument or group of instruments came off the bottom after being on the bottom.', uri: 'http://ontologies.ef-ears.eu/ears2/1#concept_20791', code: 'VL'},
+            {id: 'act31', prefLabel: 'Close', altLabel: '', definition: 'Closing a net mouth or a sampling bottle.', uri: 'http://ontologies.ef-ears.eu/ears2/1#concept_20792', code: 'VL'},
+            {id: 'act32', prefLabel: 'Open', altLabel: '', definition: 'Opening a net mouth or a sampling bottle.', uri: 'http://ontologies.ef-ears.eu/ears2/1#concept_20793', code: 'VL'}
+        ];
+
+        const sourceProcesses = [
+            {id: 'pro1', prefLabel: 'Sampling', altLabel: '', definition: 'Collecting a physical sample from a matrix (water, sediment, air, biological,...).', uri: 'http://ontologies.ef-ears.eu/ears2/1#concept_793', code: 'VL'},
+            {id: 'pro2', prefLabel: 'Recording', altLabel: 'Logging', definition: 'Capturing data on a storage medium.', uri: 'http://ontologies.ef-ears.eu/ears2/1#concept_794', code: 'VL'},
+            {id: 'pro3', prefLabel: 'Station', altLabel: '', definition: 'Vessel at planned position for measurements and/or sample collection.', uri: 'http://ontologies.ef-ears.eu/ears2/1#concept_795', code: 'VL'},
+            {id: 'pro4', prefLabel: 'Malfunction', altLabel: '', definition: 'General failure of a device to function normally, assessed before any actions were taken with it.', uri: 'http://ontologies.ef-ears.eu/ears2/1#concept_796', code: 'VL'},
+            {id: 'pro5', prefLabel: 'Data Quality', altLabel: '', definition: 'Assessing the state of completeness, validity, consistency and accuracy of data and taking appropriate actions.', uri: 'http://ontologies.ef-ears.eu/ears2/1#concept_797', code: 'VL'},
+            {id: 'pro6', prefLabel: 'Calibration', altLabel: '', definition: 'Comparison of measurement values delivered by a device under test with a calibration standard.', uri: 'http://ontologies.ef-ears.eu/ears2/1#concept_798', code: 'VL'},
+            {id: 'pro7', prefLabel: 'Initialisation', altLabel: '', definition: 'Bringing a device from a passive state into a working state.', uri: 'http://ontologies.ef-ears.eu/ears2/1#concept_799', code: 'VL'},
+            {id: 'pro8', prefLabel: 'Observation', altLabel: '', definition: 'Visual observation of an uncontrolled natural phenomenon (e.g. bird or weather observation).', uri: 'http://ontologies.ef-ears.eu/ears2/1#concept_804', code: 'VL'},
+            {id: 'pro11', prefLabel: 'Track', altLabel: 'Transect', definition: 'Measurements along a trajectory.', uri: 'http://ontologies.ef-ears.eu/ears2/1#concept_807', code: 'VL'},
+            {id: 'pro12', prefLabel: 'Line', altLabel: '', definition: 'Measurements along a straight line.', uri: 'http://ontologies.ef-ears.eu/ears2/1#concept_808', code: 'VL'},
+            {id: 'pro13', prefLabel: 'Profile', altLabel: '', definition: 'Measurements along a vertical profile.', uri: 'http://ontologies.ef-ears.eu/ears2/1#concept_809', code: 'VL'},
+            {id: 'pro14', prefLabel: 'Transit', altLabel: '', definition: 'Vessel in transit between two locations.', uri: 'http://ontologies.ef-ears.eu/ears2/1#concept_814', code: 'VL'},
+            {id: 'pro15', prefLabel: 'Pause', altLabel: '', definition: 'Period during which processes are suspended and no new processes are started.', uri: 'http://ontologies.ef-ears.eu/ears2/1#concept_815', code: 'DP'},
+            {id: 'pro16', prefLabel: 'Embark', altLabel: '', definition: 'To board and load the vessel.', uri: 'http://ontologies.ef-ears.eu/ears2/1#concept_829', code: 'VL'},
+            {id: 'pro17', prefLabel: 'Disembark', altLabel: '', definition: 'To leave and unload a vessel.', uri: 'http://ontologies.ef-ears.eu/ears2/1#concept_830', code: 'VL'},
+            {id: 'pro18', prefLabel: 'Repositioning', altLabel: '', definition: 'Adjusting the position of a vessel.', uri: 'http://ontologies.ef-ears.eu/ears2/1#concept_831', code: 'VL'},
+            {id: 'pro19', prefLabel: 'AtHarbour', altLabel: '', definition: 'Arrival at harbour.', uri: 'http://ontologies.ef-ears.eu/ears2/1#concept_832', code: 'VL'},
+            {id: 'pro20', prefLabel: 'Cruise', altLabel: 'Campaign', definition: 'Determined period of ship time between two harbours on a specific vessel during which one or more scientific research programmes are performed. The vessel can port the same or additional harbours during this period.', uri: 'http://ontologies.ef-ears.eu/ears2/1#concept_1047', code: 'VL'},
+            {id: 'pro21', prefLabel: 'Leg', altLabel: 'Cruise part', definition: 'Part of a cruise.', uri: 'http://ontologies.ef-ears.eu/ears2/1#concept_1048', code: 'VL'},
+            {id: 'pro22', prefLabel: 'Deployment', altLabel: '', definition: 'The deployment of an instrument or group of instruments for measurements on a given place (e.g. mooring, benthic lander).', uri: 'http://ontologies.ef-ears.eu/ears2/1#concept_1077', code: 'VL'},
+            {id: 'pro23', prefLabel: 'Recovery', altLabel: 'Salvage', definition: 'The recovery of an instrument or group of instruments after measurements.', uri: 'http://ontologies.ef-ears.eu/ears2/1#concept_1078', code: 'VL'},
+            {id: 'pro24', prefLabel: 'Towing', altLabel: 'Trawling, Hauling', definition: 'Pulling an object (e.g. net, trawl, glider,...) horizontally or vertically through the water behind or below the boat.', uri: 'http://ontologies.ef-ears.eu/ears2/1#concept_1093', code: 'VL'},
+            {id: 'pro25', prefLabel: 'Manual data acquisition', altLabel: 'Manual data collection', definition: 'Collecting facts or measurements of one or more physical or biological entities.', uri: 'http://ontologies.ef-ears.eu/ears2/1#concept_11183', code: 'VL'},
+            {id: 'pro26', prefLabel: 'Subsampling', altLabel: '', definition: 'Collecting a subsample of an already taken physical sample.', uri: 'http://ontologies.ef-ears.eu/ears2/1#concept_11184', code: 'VL'},
+            {id: 'pro27', prefLabel: 'Maintenance', altLabel: 'Servicing', definition: 'The deployed (e.g. mooring, benthic lander) or on-board instrument or group of instruments receives maintenance.', uri: 'http://ontologies.ef-ears.eu/ears2/1#concept_12513', code: 'VL'},
+            {id: 'pro28', prefLabel: 'Operation', altLabel: 'Usage', definition: 'Using a certain gear, device or instrument for its main intended purpose. A general term, only to be used when others are too specific.', uri: 'http://ontologies.ef-ears.eu/ears2/1#concept_17125', code: 'VL'},
+            {id: 'pro29', prefLabel: 'Installation', altLabel: '', definition: 'Placing a device on a platform and preparing it to be in an operational state, either for the first time or after a temporary removal.', uri: 'http://ontologies.ef-ears.eu/ears2/1#concept_20537', code: 'VL'},
+            {id: 'pro30', prefLabel: 'Removal', altLabel: 'Decommissioning', definition: 'Removing a device from a platform, either for a temporary removal or indefinitely, in which case the device is decommissioned.', uri: 'http://ontologies.ef-ears.eu/ears2/1#concept_20538', code: 'VL'},
+            {id: 'pro31', prefLabel: 'Reading', altLabel: '', definition: 'Taking a reading from an instrument, ie. taking one or more measurements and noting them down.', uri: 'http://ontologies.ef-ears.eu/ears2/1#concept_20789', code: 'VL'}
+        ];
+
+        // Placeholder — no real tool-category/tool vocabulary wired in yet.
+        const sourceToolCategories = [
+            {
+                id: 'tc1', prefLabel: 'CTD', children: [
+                    {id: 'tool1', prefLabel: 'CTD Sensor A'},
+                    {id: 'tool2', prefLabel: 'CTD Sensor B'}
+                ]
+            },
+            {
+                id: 'tc2', prefLabel: 'Winch', children: [
+                    {id: 'tool3', prefLabel: 'Main Winch'}
+                ]
+            }
+        ];
+
+        // Placeholder — property vocabulary not modeled yet.
+        const sourceProperties = [
+            {id: 'prop1', prefLabel: 'Depth'},
+            {id: 'prop2', prefLabel: 'Speed'},
+            {id: 'prop3', prefLabel: 'Latitude'},
+            {id: 'prop4', prefLabel: 'Longitude'}
+        ];
+
+        function flatToJstreeData(list, type) {
+            return list.map(function (item) {
+                return {
+                    id: 'src-' + item.id,
+                    text: item.prefLabel + (item.altLabel ? ' (' + item.altLabel + ')' : ''),
+                    type: type,
+                    data: {
+                        identifier: item.uri || null,
+                        definition: item.definition || '',
+                        altLabel: item.altLabel || '',
+                        code: item.code || null,
+                        sourceId: item.id
+                    }
+                };
+            });
+        }
+
+        function toolCategoriesToJstreeData(categories) {
+            return categories.map(function (cat) {
+                return {
+                    id: 'src-' + cat.id,
+                    text: cat.prefLabel,
+                    type: 'toolcategory',
+                    data: {identifier: null, sourceId: cat.id},
+                    children: (cat.children || []).map(function (tool) {
+                        return {
+                            id: 'src-' + tool.id,
+                            text: tool.prefLabel,
+                            type: 'tool',
+                            data: {identifier: null, sourceId: tool.id}
+                        };
+                    })
+                };
+            });
+        }
+
+        // ---------------------------------------------------------------
+        // Drag-and-drop structural rules
+        // ---------------------------------------------------------------
+        //
+        // An "event definition" is the chain toolcategory -> tool -> process
+        // -> action, with an optional property hanging off the process.
+        // This map is the single source of truth for what may be dropped
+        // under what: parentType -> allowed childTypes.
+        const DND_ALLOWED_CHILDREN = {
+            toolcategory: ['tool'],
+            tool: ['process'],
+            process: ['action', 'property']
+        };
+
+        function isDropAllowed(parentType, childType) {
+            const allowed = DND_ALLOWED_CHILDREN[parentType];
+            return !!allowed && allowed.indexOf(childType) !== -1;
+        }
+
+        // ---------------------------------------------------------------
         // Tree
         // ---------------------------------------------------------------
 
@@ -146,7 +320,28 @@
 
             $('#ontologyTree').jstree({
                 core: {
-                    check_callback: true,
+                    // This is where DnD is actually gated. jstree's dnd plugin
+                    // calls check_callback continuously while a node is being
+                    // dragged over the tree (to decide whether to show the
+                    // "allowed" vs. "no-drop" cursor on each candidate parent)
+                    // and once more just before performing the drop. Rejecting
+                    // here stops the invalid drop from happening at all.
+                    // copy_node.jstree (further below) fires only *after* a
+                    // drop already succeeded, so it's for side effects
+                    // (persisting to the backend), not validation.
+                    check_callback: function (operation, node, parentNode) {
+                        if (operation === 'copy_node' || operation === 'move_node') {
+                            if (parentNode.id === '#') {
+                                // no dropping directly at tree root via DnD;
+                                // roots come from the server
+                                return false;
+                            }
+                            return isDropAllowed(parentNode.type, node.type);
+                        }
+                        // create/rename/delete via the context menu are already
+                        // gated by editingEnabled / _disabled there
+                        return true;
+                    },
                     data: function (node, callback) {
                         if (node.id === '#') {
                             $.get('/ears3/api/ontology/tree/roots', function (roots) {
@@ -237,20 +432,80 @@
                         return items;
                     }
                 },
-                plugins: ['types', 'contextmenu']
+                plugins: ['types', 'contextmenu', 'dnd']
             });
 
-            $('#ontologyTree').on('changed.jstree', function (e, data) {
-                if (data.selected.length === 0) {
+            // ---------------------------------------------------------------
+            // Source trees (predefined types, right-hand panel)
+            // ---------------------------------------------------------------
+
+            const sourceTreeDefaults = {
+                dnd: {
+                    always_copy: true,
+                    is_draggable: function () {
+                        return editingEnabled;
+                    }
+                },
+                plugins: ['types', 'dnd']
+            };
+
+            $('#sourceToolTree').jstree($.extend(true, {
+                core: {check_callback: true, data: toolCategoriesToJstreeData(sourceToolCategories)},
+                types: {toolcategory: {icon: false}, tool: {icon: false}}
+            }, sourceTreeDefaults));
+
+            $('#sourceProcessTree').jstree($.extend(true, {
+                core: {check_callback: true, data: flatToJstreeData(sourceProcesses, 'process')},
+                types: {process: {icon: false}}
+            }, sourceTreeDefaults));
+
+            $('#sourceActionTree').jstree($.extend(true, {
+                core: {check_callback: true, data: flatToJstreeData(sourceActions, 'action')},
+                types: {action: {icon: false}}
+            }, sourceTreeDefaults));
+
+            $('#sourcePropertyTree').jstree($.extend(true, {
+                core: {check_callback: true, data: flatToJstreeData(sourceProperties, 'property')},
+                types: {property: {icon: false, valid_children: []}}
+            }, sourceTreeDefaults));
+
+            // property panel reacts to a selection in ANY of the five trees
+            $('#ontologyTree, #sourceToolTree, #sourceProcessTree, #sourceActionTree, #sourcePropertyTree')
+                .on('changed.jstree', function (e, data) {
+                    if (data.selected.length === 0) {
+                        return;
+                    }
+                    selectedNode = data.instance.get_node(data.selected[0]);
+                    renderPropertyPanel(selectedNode);
+                });
+
+            // Drag from a source tree onto the main tree. By the time this
+            // fires, check_callback above has already approved the
+            // parent/child type pairing — this handler is purely for the
+            // side effect of persisting the drop, not for validating it.
+            $(document).on('copy_node.jstree', function (e, data) {
+                if (!data.new_instance.element.is('#ontologyTree')) {
                     return;
                 }
-                selectedNode = data.instance.get_node(data.selected[0]);
-                renderPropertyPanel(selectedNode);
+                const droppedNode = data.original;
+                const targetParent = data.new_instance.get_node(data.parent);
+
+                // the client-side copy is just a preview; remove it and go through
+                // the real create-node flow once the backend contract is decided
+                data.new_instance.delete_node(data.node);
+
+                alert('TODO: create a "' + droppedNode.text + '" (' + droppedNode.type +
+                    ') under "' + targetParent.text + '" — backend wiring not implemented yet.');
             });
         });
 
         function renderPropertyPanel(node) {
-            const readOnly = editingEnabled ? '' : 'disabled';
+            // A node from a source tree (predefined vocab) has no place in the
+            // live hierarchy yet — it isn't tied to a hierarchyRef/status and
+            // can't be edited or saved from here, only inspected.
+            const isSourceNode = !node.data.hierarchyRef;
+            const readOnly = (editingEnabled && !isSourceNode) ? '' : 'disabled';
+
             const toolFields = node.type === 'tool'
                 ? `
             <hr>
@@ -275,18 +530,24 @@
           `
                 : '';
 
-            const saveSection = editingEnabled
+            const saveSection = isSourceNode
                 ? `
+            <p class="text-muted mt-3">
+                This is a predefined type, not part of the active tree. Drag it onto the tree on the left to add it.
+            </p>
+          `
+                : (editingEnabled
+                    ? `
             <button class="btn btn-primary btn-sm mt-2"
                     id="btnSaveProps">
                 Save
             </button>
           `
-                : `
+                    : `
             <p class="text-muted mt-3">
                 Editing is disabled on this instance.
             </p>
-          `;
+          `);
 
             const html = `
                 <h5 id="ppTitle"></h5>
@@ -339,14 +600,18 @@
 
             $('#propertyPanel').html(html);
             $('#ppPrefLabel').val(node.text);
-            $('#ppAltLabel').val('no alt label yet');
-            $('#ppDefinition').val('no definition yet');
+            $('#ppAltLabel').val(node.data.altLabel ?? 'no alt label yet');
+            $('#ppDefinition').val(node.data.definition ?? 'no definition yet');
             $('#ppTitle').text(node.text);
             $('#ppKind').text(node.type);
-            $('#ppUri').text(node.data.identifier);
-            $('#ppStatus').text(node.data.status);
+            $('#ppUri').text(node.data.identifier ?? '\u2014');
+            $('#ppStatus').text(isSourceNode ? 'predefined (not in tree)' : node.data.status);
             $('#pfToolIdentifier').val(node.data.toolIdentifier ?? '');
             $('#pfSerialNumber').val(node.data.serialNumber ?? '');
+
+            if (isSourceNode) {
+                return;
+            }
 
             $('#btnSaveProps').on('click', function () {
                 $.ajax({
@@ -356,8 +621,8 @@
                     data: JSON.stringify({
                         ref: node.data.hierarchyRef,
                         type: node.type,
-                        prefLabel: $('#pfPrefLabel').val(),
-                        definition: $('#pfDefinition').val(),
+                        prefLabel: $('#ppPrefLabel').val(),
+                        definition: $('#ppDefinition').val(),
                         toolIdentifier: $('#pfToolIdentifier').length ? $('#pfToolIdentifier').val() : null,
                         serialNumber: $('#pfSerialNumber').length ? $('#pfSerialNumber').val() : null
                     }),

@@ -5,6 +5,45 @@ function initSelectpicker(selector) {
     })
 }
 
+function updateLocalTimeField() {
+    const dateVal = $('#dateField').val();
+    const timeVal = $('#timeField').val();
+
+    if (!dateVal || !timeVal) {
+        $('#localTimeField').val('');
+        return;
+    }
+
+    // Build a proper UTC timestamp string and parse it
+    const utcDate = new Date(dateVal + 'T' + timeVal + 'Z');
+
+    if (isNaN(utcDate.getTime())) {
+        $('#localTimeField').val('');
+        return;
+    }
+
+    const formatter = new Intl.DateTimeFormat('en-GB', {
+        timeZone: 'Europe/Brussels',
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit',
+        hour: '2-digit',
+        minute: '2-digit',
+        second: '2-digit',
+        hour12: false
+    });
+
+    const parts = formatter.formatToParts(utcDate).reduce(function (acc, part) {
+        acc[part.type] = part.value;
+        return acc;
+    }, {});
+
+    const localString = parts.year + '-' + parts.month + '-' + parts.day + ' ' +
+        parts.hour + ':' + parts.minute + ':' + parts.second;
+
+    $('#localTimeField').val(localString);
+}
+
 $(document).ready(function () {
     const rdfBindings = getBindings(false); //asynchronous because synchronous messes up the order of the buttons
     const toolCategory = $('#idSelect_tc').attr('value'); //comes from thymeleaf
@@ -87,5 +126,8 @@ $(document).ready(function () {
             //alert("alert");
         }
     });
+
+    updateLocalTimeField();
+    $('#dateField, #timeField').on('change keyup', updateLocalTimeField);
 
 });

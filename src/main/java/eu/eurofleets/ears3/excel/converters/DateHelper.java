@@ -141,7 +141,7 @@ public class DateHelper implements Serializable {
         }
 
         // Interpret the naive datetime in the given source zone, then convert to Brussels time
-        return localDateTime.atZone(sourceZone).withZoneSameInstant(BRUSSELS);
+        return localDateTime.atZone(sourceZone);//.withZoneSameInstant(BRUSSELS);
     }
 
     /**

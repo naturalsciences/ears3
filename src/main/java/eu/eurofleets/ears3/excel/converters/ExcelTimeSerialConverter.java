@@ -11,11 +11,11 @@ import io.github.rushuat.ocell.field.ValueConverter;
 /**
  * Converts an Excel time-of-day value to a "HH:mm:ss" string, regardless of
  * which raw form POI/ocell hands us for that cell:
- *  - a Date sitting on Excel's fake 1899-12-30/31 epoch (cell was formatted
- *    as a time in the workbook), or
- *  - a raw fractional Double serial (0 <= x < 1, fraction of a 24h day) when
- *    the cell wasn't recognized as a formatted date/time by POI.
- *
+ * - a Date sitting on Excel's fake 1899-12-30/31 epoch (cell was formatted
+ * as a time in the workbook), or
+ * - a raw fractional Double serial (0 <= x < 1, fraction of a 24h day) when
+ * the cell wasn't recognized as a formatted date/time by POI.
+ * <p>
  * Scoped narrowly to time-only columns - do NOT reuse for generic numeric
  * fields, since a fractional double is only unambiguously "a time" in that
  * specific column context, not in general.
@@ -63,6 +63,7 @@ public class ExcelTimeSerialConverter implements ValueConverter<String, Object> 
                 return dblValue.toString();
             } else if (value instanceof String s) {
                 String trimmed = s.trim();
+                trimmed = trimmed.replace("Z", "");
                 return trimmed.isEmpty() ? null : trimmed;
             } else {
                 return value.toString();

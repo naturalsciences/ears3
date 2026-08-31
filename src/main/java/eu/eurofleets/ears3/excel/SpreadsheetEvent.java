@@ -1,5 +1,6 @@
 package eu.eurofleets.ears3.excel;
 
+import eu.eurofleets.ears3.excel.converters.ExcelDateSerialConverter;
 import eu.eurofleets.ears3.excel.converters.ExcelTimeSerialConverter;
 import eu.eurofleets.ears3.excel.converters.StringConverter;
 import io.github.rushuat.ocell.annotation.FieldConverter;
@@ -29,7 +30,7 @@ public class SpreadsheetEvent {
 
     //
     @FieldName("Date")
-    @FieldConverter(StringConverter.class)
+    @FieldConverter(ExcelDateSerialConverter.class)
     //@NotNull
     @NotBlank
     String date;

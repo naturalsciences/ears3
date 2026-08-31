@@ -64,7 +64,7 @@ function populateDropdownList(rdfBindings, entityName, dropdownId, selectedValue
     $.each(ddmOptions, function (key, unique) {
         if (unique.url === selectedValue) {
             selectOptionData += '<option value="' + unique.url + '">' + unique.label + '</option>';
-        } else if (unique.transitiveUrl === selectedValue) {
+        } else if (unique.transitiveUrl !== null && unique.transitiveUrl === selectedValue) {
             selectOptionData += '<option value="' + unique.transitiveUrl + '">' + unique.label + '</option>';
         } else {
             selectOptionData += '<option value="' + unique.url + '">' + unique.label + '</option>';
@@ -247,8 +247,8 @@ function initDropdowns(rdfBindings, selectedValues, onEventSubmitted) {
         const identifier = $('#dropdownForm').attr("data-identifier"); //in case of editing an event, this is set
         const date = $('#dateField').val(); //in case of editing an event, this is set
         const time = $('#timeField').val(); //in case of editing an event, this is set
-        const timeZone = $('#timeZoneField').val(); //in case of editing an event, this is set
-        const timeStamp = (date !== undefined && time !== undefined) ? (date + 'T' + time + timeZone) : null;
+        //const timeZone = $('#timeZoneField').val(); //in case of editing an event, this is set
+        const timeStamp = (date !== undefined && time !== undefined) ? (date + 'T' + time + 'Z') : null;
 
         let allSelected = ENTITIES.every(function (entity) {
             return $(entity.selectId).val() !== '1';

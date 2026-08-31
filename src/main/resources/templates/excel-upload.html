@@ -50,14 +50,14 @@
         $(document).ready(function () {
             const me = getCurrentActor()
 
-            if (me !== null) {
-                this.actor = {
-                    firstName: me.firstName,
-                    lastName: me.lastName,
-                    email: me.email,
-                    organisation: me.organisation
-                };
-            }
+            // if (me !== null) {
+            //     this.actor = {
+            //         firstName: me.firstName,
+            //         lastName: me.lastName,
+            //         email: me.email,
+            //         organisation: me.organisation
+            //     };
+            // }
 
             /*<![CDATA[*/
             var homelink = /*[[@{'/'}]]*/ '';
@@ -102,7 +102,7 @@
                 }
 
                 const actorProgramTZDTO = {
-                    actor: this.actor,
+                    actor: me,
                     program: program,
                     timezone: timezone
                 };
@@ -170,12 +170,13 @@
                     <li>Do not complete (or just remove) the following columns, as the info is not essential for a full
                         event (it's built from what you provide):
                         <ul>
-                            <li>Program</li>
-                            <li>Program name</li>
-                            <li>Principal Investigator</li>
-                            <li>Tool category</li>
-                            <li>Tool category code</li>
-                            <li>Tool code</li>
+                            <li>Actor. Taken from the name choice at the top.</li>
+                            <li>Program. Taken from the dropdown above.</li>
+                            <li>Program name. Taken from the dropdown above.</li>
+                            <li>Principal Investigator. Tied to the program anyway.</li>
+                            <li>Tool category. Resolved from the Tool.</li>
+                            <li>Tool category code. Resolved from the Tool.</li>
+                            <li>Tool code. Resolved from the Tool name.</li>
                             <li>Acquisition Timestamp</li>
                             <li>and all subsequent acquisition info (EARS gets this for you!)</E></li>
                         </ul>
