@@ -45,23 +45,26 @@ app:
   security:
     users:
       - username: admin
-        password: REPLACEME
+        password: ${APP_ADMIN_PASSWORD:REPLACEME}
         roles:
           - ADMIN
       - username: admin-tree
-        password: REPLACEME
+        password: ${APP_ADMIN_TREE_PASSWORD:REPLACEME}
         roles:
           - ADMIN_TREE
       - username: admin-event
-        password: REPLACEME
+        password: ${APP_ADMIN_EVENT_PASSWORD:REPLACEME}
         roles:
           - ADMIN_EVENT
-  platform: SDN:C17::11BU
-  send-events-to: http://replace.me
+  platform: ${EARS_PLATFORM:SDN:C17::11BU}
+  send-events-to: ${EARS_SEND_EVENTS_TO:http://replace.me}
   navigation:
-    server: http://replace.me
+    server: ${EARS_NAVIGATION_SERVER:http://replace.me}
   csr:
-    license: UN
+    license: ${EARS_CSR_LICENSE:UN}
+  program:
+    regex: "${EARS_PROGRAM_REGEX:202[6-9]}"
+  read-only: ${EARS_READ_ONLY:false}
   ontology:
     # Gates tree edits. Master only. This overrides the rights of an admin.
     editing-enabled: ${EARS_ONTOLOGY_EDITING_ENABLED:true}
@@ -74,6 +77,3 @@ app:
       # Timestamped backup of outgoing live file on each activate(), for manual rollback.
       # No UI yet at POC stage.
       archive-dir: ${EARS_ONTOLOGY_RDF_ARCHIVE_DIR:/var/ears/ontology/archive}
-  read-only: false
-  program:
-    regex: "202[6-9]"
