@@ -29,53 +29,53 @@ public class Weather extends Acquisition {
     @XmlTransient
     @JsonIgnore
     private Long id;
-    @DatagramOrder(3)
+    @DatagramOrder(1)
     private Double windSpeedAverage;
-    @DatagramOrder(4)
+    @DatagramOrder(2)
     private Instant windSpeedAverageTimestamp;
-    @DatagramOrder(5)
+    @DatagramOrder(3)
     private String windSpeedAverageInstrId;
-    @DatagramOrder(6)
+    @DatagramOrder(4)
     private Double windSpeedInstantaneous;
-    @DatagramOrder(7)
+    @DatagramOrder(5)
     private Instant windSpeedInstantaneousTimestamp;
-    @DatagramOrder(8)
+    @DatagramOrder(6)
     private String windSpeedInstantaneousInstrId;
-    @DatagramOrder(9)
+    @DatagramOrder(7)
     private Double windDirection;
-    @DatagramOrder(10)
+    @DatagramOrder(8)
     private Instant windDirectionTimestamp;
-    @DatagramOrder(11)
+    @DatagramOrder(9)
     private String windDirectionInstrId;
-    @DatagramOrder(12)
+    @DatagramOrder(10)
     private Double atmosphericTemperature;
-    @DatagramOrder(13)
+    @DatagramOrder(11)
     private Instant atmosphericTemperatureTimestamp;
-    @DatagramOrder(14)
+    @DatagramOrder(12)
     private String atmosphericTemperatureInstrId;
-    @DatagramOrder(15)
+    @DatagramOrder(13)
     private Double humidity;
-    @DatagramOrder(16)
+    @DatagramOrder(14)
     private Instant humidityTimestamp;
-    @DatagramOrder(17)
+    @DatagramOrder(15)
     private String humidityInstrId;
-    @DatagramOrder(18)
+    @DatagramOrder(16)
     private Double solarRadiation;
-    @DatagramOrder(19)
+    @DatagramOrder(17)
     private Instant solarRadiationTimestamp;
-    @DatagramOrder(20)
+    @DatagramOrder(18)
     private String solarRadiationInstrId;
-    @DatagramOrder(21)
+    @DatagramOrder(19)
     private Double atmosphericPressure;
-    @DatagramOrder(22)
+    @DatagramOrder(20)
     private Instant atmosphericPressureTimestamp;
-    @DatagramOrder(23)
+    @DatagramOrder(21)
     private String atmosphericPressureInstrId;
-    @DatagramOrder(24)
+    @DatagramOrder(22)
     private Double waterTemperature;
-    @DatagramOrder(25)
+    @DatagramOrder(23)
     private Instant waterTemperatureTimestamp;
-    @DatagramOrder(26)
+    @DatagramOrder(24)
     private String waterTemperatureInstrId;
 
     public Double getWindSpeedAverage() {

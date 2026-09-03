@@ -30,47 +30,47 @@ public class Navigation extends Acquisition {
     @XmlTransient
     @JsonIgnore
     private Long id;
-    @DatagramOrder(3)
+    @DatagramOrder(1)
     private Double lon;
-    @DatagramOrder(4)
+    @DatagramOrder(2)
     private Instant lonTimestamp;
-    @DatagramOrder(5)
+    @DatagramOrder(3)
     private String lonInstrId;
-    @DatagramOrder(6)
+    @DatagramOrder(4)
     private Double lat;
-    @DatagramOrder(7)
+    @DatagramOrder(5)
     private Instant latTimestamp;
-    @DatagramOrder(8)
+    @DatagramOrder(6)
     private String latInstrId;
-    @DatagramOrder(9)
+    @DatagramOrder(7)
     private Double heading;
-    @DatagramOrder(10)
+    @DatagramOrder(8)
     private Instant headingTimestamp;
-    @DatagramOrder(11)
+    @DatagramOrder(9)
     private String headingInstrId;
-    @DatagramOrder(12)
+    @DatagramOrder(10)
     private Double sow;
-    @DatagramOrder(13)
+    @DatagramOrder(11)
     private Instant sowTimestamp;
-    @DatagramOrder(14)
+    @DatagramOrder(12)
     private String sowInstrId;
-    @DatagramOrder(15)
+    @DatagramOrder(13)
     private Double depth;
-    @DatagramOrder(16)
+    @DatagramOrder(14)
     private Instant depthTimestamp;
-    @DatagramOrder(17)
+    @DatagramOrder(15)
     private String depthInstrId;
-    @DatagramOrder(18)
+    @DatagramOrder(16)
     private Double cog;
-    @DatagramOrder(19)
+    @DatagramOrder(17)
     private Instant cogTimestamp;
-    @DatagramOrder(20)
+    @DatagramOrder(18)
     private String cogInstrId;
-    @DatagramOrder(21)
+    @DatagramOrder(19)
     private Double sog;
-    @DatagramOrder(22)
+    @DatagramOrder(20)
     private Instant sogTimestamp;
-    @DatagramOrder(23)
+    @DatagramOrder(21)
     private String sogInstrId;
 
     @ManyToMany(mappedBy = "navigation")

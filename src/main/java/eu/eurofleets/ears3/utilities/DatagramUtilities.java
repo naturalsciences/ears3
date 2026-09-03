@@ -102,7 +102,6 @@ public class DatagramUtilities<A extends Acquisition> {
         String atString = at.withOffsetSameInstant(ZoneOffset.UTC).format(DateTimeFormatter.ISO_DATE_TIME);
         try {
             URL url = new URL(baseUrl, "/ears3Nav/" + abbrevs.get(this.cls) + "/getNearest/datagram?date=" + atString);
-            //log.log(Level.INFO, "Read {0}", url);
             List<A> r = analyzeDatagram(url);
             return r.isEmpty() ? null : r.get(0);
         } catch (MalformedURLException ex) {
@@ -139,18 +138,14 @@ public class DatagramUtilities<A extends Acquisition> {
             try {
                 while ((line = br.readLine()) != null) {
                     if (line.startsWith("$")) {
-                        //  log.log(Level.INFO, "   Read " + line + " from " + endpoint);
+                        log.log(Level.INFO, "   Read " + line + " from " + endpoint);
                         line = line.replace(",,", ", ,");
                         line = line.replaceAll(",$", ", ");
                         String[] vals = line.split(",");
                         A acquisitionValue = cls.getDeclaredConstructor().newInstance();
-                        if (vals.length >= 3) {
-                            String dt = "20" + vals[1].substring(0, 2) + "-" + vals[1].substring(2, 4) + "-"
-                                    + vals[1].substring(4, 6);
-                            String tm = vals[2].substring(0, 2) + ":" + vals[2].substring(2, 4) + ":"
-                                    + vals[2].substring(4, 6) + "Z";
-                            acquisitionValue.setInstrumentTime(Instant.parse(dt + "T" + tm).atOffset(ZoneOffset.UTC));
-                            acquisitionValue.setTimeStamp(Instant.parse(dt + "T" + tm).atOffset(ZoneOffset.UTC));
+                        if (vals.length >= 1) {
+                            // Date/time is no longer a separate pair of fields in the datagram (vals[1]/vals[2]);
+                            // each field now carries its own timestamp via its @DatagramOrder(Instant) counterpart.
                             for (Field field : cls.getDeclaredFields()) {
                                 if (field.isAnnotationPresent(DatagramOrder.class)) {
                                     DatagramOrder annotation = field.getAnnotation(DatagramOrder.class);

@@ -29,35 +29,35 @@ public class Thermosal extends Acquisition {
     @XmlTransient
     @JsonIgnore
     private Long id;
-    @DatagramOrder(3)
+    @DatagramOrder(1)
     private Double salinity;
-    @DatagramOrder(4)
+    @DatagramOrder(2)
     private Instant salinityTimestamp;
-    @DatagramOrder(5)
+    @DatagramOrder(3)
     private String salinityInstrId;
-    @DatagramOrder(6)
+    @DatagramOrder(4)
     private Double temperature;
-    @DatagramOrder(7)
+    @DatagramOrder(5)
     private Instant temperatureTimestamp;
-    @DatagramOrder(8)
+    @DatagramOrder(6)
     private String temperatureInstrId;
-    @DatagramOrder(9)
+    @DatagramOrder(7)
     private Double rawFluorometry;
-    @DatagramOrder(10)
+    @DatagramOrder(8)
     private Instant rawFluorometryTimestamp;
-    @DatagramOrder(11)
+    @DatagramOrder(9)
     private String rawFluorometryInstrId;
-    @DatagramOrder(12)
+    @DatagramOrder(10)
     private Double conductivity;
-    @DatagramOrder(13)
+    @DatagramOrder(11)
     private Instant conductivityTimestamp;
-    @DatagramOrder(14)
+    @DatagramOrder(12)
     private String conductivityInstrId;
-    @DatagramOrder(15)
+    @DatagramOrder(13)
     private Double sigmat;
-    @DatagramOrder(16)
+    @DatagramOrder(14)
     private Instant sigmatTimestamp;
-    @DatagramOrder(17)
+    @DatagramOrder(15)
     private String sigmatInstrId;
 
     public Double getSalinity() {

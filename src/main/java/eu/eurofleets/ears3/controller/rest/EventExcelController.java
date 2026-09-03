@@ -28,6 +28,7 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.Writer;
+import java.time.Instant;
 import java.time.OffsetDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
@@ -110,8 +111,12 @@ public class EventExcelController {
         return (val != null) ? val.toString() : "";
     }
 
-    private static String offsetDateTimeOrNull(OffsetDateTime val) {
+    private static String instantOrNull(Instant val) {
         return (val != null) ? val.toString() : "";
+    }
+
+    private static String fieldHeader(String key, String instrId) {
+        return (instrId != null && !instrId.isEmpty()) ? key + "_" + instrId : key;
     }
 
     // properties but are not saved as properties
@@ -119,6 +124,7 @@ public class EventExcelController {
     public String getEventsAsCSV(@RequestParam Map<String, String> allParams) throws IOException {
         Page<Event> eventsPage = this.eventService.advancedFind(allParams, Pageable.unpaged());
         List<Event> events = eventsPage.stream().toList();
+
         List<String> header = new ArrayList<>(Arrays.asList("Date", "Time", "Actor", "Program", "Program name", "Principal Investigator",
                 "Tool category", "Tool category code", "Tool", "Tool code", "Process", "Action", "Label", "Station",
                 "Description", "Remarks"));
@@ -133,19 +139,10 @@ public class EventExcelController {
             header.add(propertyName);
         }
 
-        header.addAll(Arrays.asList("Acquisition Timestamp", "Latitude", "Longitude", "Depth", "Heading",
-                "Course over Ground", "Speed over Ground"));
-        header.addAll(Arrays.asList("Surface water temperature", "Salinity", "Conductivity", "Sigma T", "Wind speed",
-                "Wind direction", "Air temperature", "Humidity", "Air pressure", "Solar Radiation"));
-
-        String[] entry = new String[header.size()];
-        entry = header.toArray(entry); // convert list to array
-
         Writer writer = new StringBuilderWriter();
-        // CSVWriter csvWriter = null;
 
         try (CSVWriter csvWriter = new CSVWriter(writer)) {
-            csvWriter.writeNext(entry, true);
+            boolean headerWritten = false;
             for (Event event : events) {
                 IProgram program = event.getProgram();
                 String programName = null;
@@ -156,7 +153,7 @@ public class EventExcelController {
                 }
                 List<String> elements = new ArrayList<>(Arrays.asList(
                         event.getTimeStamp().toLocalDate().format(DateTimeFormatter.ISO_DATE), //yyyy-mm-dd
-                        event.getTimeStamp().format(DateTimeFormatter.ofPattern("HH:mm:ss"))+"Z", //hh:mm:ss in UTC
+                        event.getTimeStamp().format(DateTimeFormatter.ofPattern("HH:mm:ss")) + "Z", //hh:mm:ss in UTC
                         event.getActor().getFirstName() + " " + event.getActor().getLastName(),
                         programId,
                         programName,
@@ -181,46 +178,157 @@ public class EventExcelController {
                         elements.add("");
                     }
                 }
+
                 Navigation nav = (!event.getNavigation().isEmpty() ? event.getNavigation().iterator().next() : null);
                 Thermosal tss = (!event.getThermosal().isEmpty() ? event.getThermosal().iterator().next() : null);
                 Weather met = (!event.getWeather().isEmpty() ? event.getWeather().iterator().next() : null);
+
+                if (!headerWritten) {
+                    String latId = nav != null ? nav.getLatInstrId() : null;
+                    String lonId = nav != null ? nav.getLonInstrId() : null;
+                    String depthId = nav != null ? nav.getDepthInstrId() : null;
+                    String headingId = nav != null ? nav.getHeadingInstrId() : null;
+                    String cogId = nav != null ? nav.getCogInstrId() : null;
+                    String sogId = nav != null ? nav.getSogInstrId() : null;
+
+                    String temperatureId = tss != null ? tss.getTemperatureInstrId() : null;
+                    String salinityId = tss != null ? tss.getSalinityInstrId() : null;
+                    String conductivityId = tss != null ? tss.getConductivityInstrId() : null;
+                    String sigmatId = tss != null ? tss.getSigmatInstrId() : null;
+
+                    String windSpeedAverageId = met != null ? met.getWindSpeedAverageInstrId() : null;
+                    String windDirectionId = met != null ? met.getWindDirectionInstrId() : null;
+                    String atmosphericTemperatureId = met != null ? met.getAtmosphericTemperatureInstrId() : null;
+                    String humidityId = met != null ? met.getHumidityInstrId() : null;
+                    String atmosphericPressureId = met != null ? met.getAtmosphericPressureInstrId() : null;
+                    String solarRadiationId = met != null ? met.getSolarRadiationInstrId() : null;
+
+                    header.add(fieldHeader("lat", latId));
+                    header.add(fieldHeader("lat_timestamp", latId));
+                    header.add(fieldHeader("lon", lonId));
+                    header.add(fieldHeader("lon_timestamp", lonId));
+                    header.add(fieldHeader("depth", depthId));
+                    header.add(fieldHeader("depth_timestamp", depthId));
+                    header.add(fieldHeader("heading", headingId));
+                    header.add(fieldHeader("heading_timestamp", headingId));
+                    header.add(fieldHeader("cog", cogId));
+                    header.add(fieldHeader("cog_timestamp", cogId));
+                    header.add(fieldHeader("sog", sogId));
+                    header.add(fieldHeader("sog_timestamp", sogId));
+
+                    header.add(fieldHeader("temperature", temperatureId));
+                    header.add(fieldHeader("temperature_timestamp", temperatureId));
+                    header.add(fieldHeader("salinity", salinityId));
+                    header.add(fieldHeader("salinity_timestamp", salinityId));
+                    header.add(fieldHeader("conductivity", conductivityId));
+                    header.add(fieldHeader("conductivity_timestamp", conductivityId));
+                    header.add(fieldHeader("sigmat", sigmatId));
+                    header.add(fieldHeader("sigmat_timestamp", sigmatId));
+
+                    header.add(fieldHeader("wind_speed_average", windSpeedAverageId));
+                    header.add(fieldHeader("wind_speed_average_timestamp", windSpeedAverageId));
+                    header.add(fieldHeader("wind_direction", windDirectionId));
+                    header.add(fieldHeader("wind_direction_timestamp", windDirectionId));
+                    header.add(fieldHeader("atmospheric_temperature", atmosphericTemperatureId));
+                    header.add(fieldHeader("atmospheric_temperature_timestamp", atmosphericTemperatureId));
+                    header.add(fieldHeader("humidity", humidityId));
+                    header.add(fieldHeader("humidity_timestamp", humidityId));
+                    header.add(fieldHeader("atmospheric_pressure", atmosphericPressureId));
+                    header.add(fieldHeader("atmospheric_pressure_timestamp", atmosphericPressureId));
+                    header.add(fieldHeader("solar_radiation", solarRadiationId));
+                    header.add(fieldHeader("solar_radiation_timestamp", solarRadiationId));
+
+                    csvWriter.writeNext(header.toArray(new String[0]), true);
+                    headerWritten = true;
+                }
+
                 if (nav != null) {
-                    elements.addAll(Arrays.asList(
-                            offsetDateTimeOrNull(nav.getTime()),
-                            doubleOrNull(nav.getLat()),
-                            doubleOrNull(nav.getLon()),
-                            doubleOrNull(nav.getDepth()),
-                            doubleOrNull(nav.getHeading()),
-                            doubleOrNull(nav.getCog()),
-                            doubleOrNull(nav.getSog())));
+                    elements.add(doubleOrNull(nav.getLat()));
+                    elements.add(instantOrNull(nav.getLatTimestamp()));
+                    elements.add(doubleOrNull(nav.getLon()));
+                    elements.add(instantOrNull(nav.getLonTimestamp()));
+                    elements.add(doubleOrNull(nav.getDepth()));
+                    elements.add(instantOrNull(nav.getDepthTimestamp()));
+                    elements.add(doubleOrNull(nav.getHeading()));
+                    elements.add(instantOrNull(nav.getHeadingTimestamp()));
+                    elements.add(doubleOrNull(nav.getCog()));
+                    elements.add(instantOrNull(nav.getCogTimestamp()));
+                    elements.add(doubleOrNull(nav.getSog()));
+                    elements.add(instantOrNull(nav.getSogTimestamp()));
                 } else {
-                    elements.addAll(Arrays.asList("", "", "", "", "", "", ""));
+                    elements.addAll(Collections.nCopies(12, ""));
                 }
 
                 if (tss != null) {
-                    elements.addAll(Arrays.asList(
-                            doubleOrNull(tss.getTemperature()),
-                            doubleOrNull(tss.getSalinity()),
-                            doubleOrNull(tss.getConductivity()),
-                            doubleOrNull(tss.getSigmat())));
+                    elements.add(doubleOrNull(tss.getTemperature()));
+                    elements.add(instantOrNull(tss.getTemperatureTimestamp()));
+                    elements.add(doubleOrNull(tss.getSalinity()));
+                    elements.add(instantOrNull(tss.getSalinityTimestamp()));
+                    elements.add(doubleOrNull(tss.getConductivity()));
+                    elements.add(instantOrNull(tss.getConductivityTimestamp()));
+                    elements.add(doubleOrNull(tss.getSigmat()));
+                    elements.add(instantOrNull(tss.getSigmatTimestamp()));
                 } else {
-                    elements.addAll(Arrays.asList("", "", "", ""));
+                    elements.addAll(Collections.nCopies(8, ""));
                 }
                 if (met != null) {
-                    elements.addAll(Arrays.asList(
-                            doubleOrNull(met.getWindSpeedAverage()),
-                            doubleOrNull(met.getWindDirection()),
-                            doubleOrNull(met.getAtmosphericTemperature()),
-                            doubleOrNull(met.getHumidity()),
-                            doubleOrNull(met.getAtmosphericPressure()),
-                            doubleOrNull(met.getSolarRadiation())));
+                    elements.add(doubleOrNull(met.getWindSpeedAverage()));
+                    elements.add(instantOrNull(met.getWindSpeedAverageTimestamp()));
+                    elements.add(doubleOrNull(met.getWindDirection()));
+                    elements.add(instantOrNull(met.getWindDirectionTimestamp()));
+                    elements.add(doubleOrNull(met.getAtmosphericTemperature()));
+                    elements.add(instantOrNull(met.getAtmosphericTemperatureTimestamp()));
+                    elements.add(doubleOrNull(met.getHumidity()));
+                    elements.add(instantOrNull(met.getHumidityTimestamp()));
+                    elements.add(doubleOrNull(met.getAtmosphericPressure()));
+                    elements.add(instantOrNull(met.getAtmosphericPressureTimestamp()));
+                    elements.add(doubleOrNull(met.getSolarRadiation()));
+                    elements.add(instantOrNull(met.getSolarRadiationTimestamp()));
                 } else {
-                    elements.addAll(Arrays.asList("", "", "", "", "", ""));
+                    elements.addAll(Collections.nCopies(12, ""));
                 }
-                entry = new String[elements.size()];
-                entry = elements.toArray(entry);
 
-                csvWriter.writeNext(entry, true);
+                csvWriter.writeNext(elements.toArray(new String[0]), true);
+            }
+
+            if (!headerWritten) {
+                // No events at all: still emit a header (no acquisition IDs available to append).
+                header.add(fieldHeader("lat", null));
+                header.add(fieldHeader("lat_timestamp", null));
+                header.add(fieldHeader("lon", null));
+                header.add(fieldHeader("lon_timestamp", null));
+                header.add(fieldHeader("depth", null));
+                header.add(fieldHeader("depth_timestamp", null));
+                header.add(fieldHeader("heading", null));
+                header.add(fieldHeader("heading_timestamp", null));
+                header.add(fieldHeader("cog", null));
+                header.add(fieldHeader("cog_timestamp", null));
+                header.add(fieldHeader("sog", null));
+                header.add(fieldHeader("sog_timestamp", null));
+
+                header.add(fieldHeader("temperature", null));
+                header.add(fieldHeader("temperature_timestamp", null));
+                header.add(fieldHeader("salinity", null));
+                header.add(fieldHeader("salinity_timestamp", null));
+                header.add(fieldHeader("conductivity", null));
+                header.add(fieldHeader("conductivity_timestamp", null));
+                header.add(fieldHeader("sigmat", null));
+                header.add(fieldHeader("sigmat_timestamp", null));
+
+                header.add(fieldHeader("wind_speed_average", null));
+                header.add(fieldHeader("wind_speed_average_timestamp", null));
+                header.add(fieldHeader("wind_direction", null));
+                header.add(fieldHeader("wind_direction_timestamp", null));
+                header.add(fieldHeader("atmospheric_temperature", null));
+                header.add(fieldHeader("atmospheric_temperature_timestamp", null));
+                header.add(fieldHeader("humidity", null));
+                header.add(fieldHeader("humidity_timestamp", null));
+                header.add(fieldHeader("atmospheric_pressure", null));
+                header.add(fieldHeader("atmospheric_pressure_timestamp", null));
+                header.add(fieldHeader("solar_radiation", null));
+                header.add(fieldHeader("solar_radiation_timestamp", null));
+
+                csvWriter.writeNext(header.toArray(new String[0]), true);
             }
         }
         writer.flush();

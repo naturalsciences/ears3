@@ -457,9 +457,9 @@ public class EventControllerTest {
                         "<subject><identifier>http://vocab.nerc.ac.uk/collection/C77/current/G71</identifier><name>In-situ seafloor measurement/sampling</name></subject>")))
                 .andExpect(content().string(containsString(
                         "<tool><identifier>http://vocab.nerc.ac.uk/collection/L22/current/TOOL0653</identifier><name>Van Veen grab</name></tool>")))
-                .andExpect(content().string(containsString("</tool><toolCategory>")))
+                .andExpect(content().string(containsString("</toolCategory><tool>")))
                 .andExpect(content().string(containsString(
-                        "<identifier>http://vocab.nerc.ac.uk/collection/L05/current/50</identifier><name>sediment grabs</name></toolCategory><process>")))
+                        "<toolCategory><identifier>http://vocab.nerc.ac.uk/collection/L05/current/50</identifier><name>sediment grabs</name></toolCategory><tool>")))
                 .andExpect(content().string(containsString(
                         "<identifier>http://ontologies.ef-ears.eu/ears2/1#pro_1</identifier><name>Sampling</name></process><action>")))
                 .andExpect(content().string(containsString(
