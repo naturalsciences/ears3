@@ -24,9 +24,11 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLConnection;
 import java.time.Instant;
+import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -43,6 +45,9 @@ public class DatagramUtilities<A extends Acquisition> {
 
     public static final int CONNECT_TIMEOUT = 15; //15 seconds
 
+    // Matches EarsObject.toDatagramTime(Instant) on the ears3Nav (producer) side: yyMMdd'T'HHmmss
+    private static final DateTimeFormatter DATAGRAM_FIELD_TIMESTAMP_FORMAT = DateTimeFormatter.ofPattern("yyMMdd'T'HHmmss");
+
     public static Logger log = Logger.getLogger(DatagramUtilities.class.getSimpleName());
 
     private final Class<A> cls;
@@ -50,10 +55,22 @@ public class DatagramUtilities<A extends Acquisition> {
 
     private static Map<Class, String> abbrevs = new HashMap<>();
 
+    // Derived from Navigation's own @DatagramOrder annotations rather than hardcoded, so a future reorder
+    // of Navigation's fields doesn't silently break coordinate parsing here.
+    private static final int LON_INDEX;
+    private static final int LAT_INDEX;
+
     static {
         abbrevs.put(Navigation.class, "nav");
         abbrevs.put(Thermosal.class, "tss");
         abbrevs.put(Weather.class, "met");
+
+        try {
+            LON_INDEX = Navigation.class.getDeclaredField("lon").getAnnotation(DatagramOrder.class).value();
+            LAT_INDEX = Navigation.class.getDeclaredField("lat").getAnnotation(DatagramOrder.class).value();
+        } catch (NoSuchFieldException e) {
+            throw new ExceptionInInitializerError(e);
+        }
     }
 
     public DatagramUtilities(Class<A> cls, String baseUrl) throws MalformedURLException {
@@ -138,13 +155,37 @@ public class DatagramUtilities<A extends Acquisition> {
                                 if (field.isAnnotationPresent(DatagramOrder.class)) {
                                     DatagramOrder annotation = field.getAnnotation(DatagramOrder.class);
                                     int index = annotation.value();
-                                    String value = null;
-                                    if (index < vals.length) {
-                                        value = vals[index];
+                                    if (index >= vals.length) {
+                                        continue;
                                     }
-                                    if (value != null && !" ".equals(value) && value.contains(".")) {
-                                        field.setAccessible(true);
-                                        field.set(acquisitionValue, Double.valueOf(value));
+                                    String value = vals[index];
+                                    if (value == null) {
+                                        continue;
+                                    }
+                                    String trimmed = value.trim();
+                                    if (trimmed.isEmpty()) {
+                                        continue;
+                                    }
+                                    field.setAccessible(true);
+                                    Class<?> fieldType = field.getType();
+                                    try {
+                                        if (fieldType == Double.class) {
+                                            field.set(acquisitionValue, Double.valueOf(trimmed));
+                                        } else if (fieldType == Instant.class) {
+                                            LocalDateTime parsed = LocalDateTime.parse(trimmed, DATAGRAM_FIELD_TIMESTAMP_FORMAT);
+                                            field.set(acquisitionValue, parsed.toInstant(ZoneOffset.UTC));
+                                        } else if (fieldType == String.class) {
+                                            field.set(acquisitionValue, trimmed);
+                                        } else {
+                                            log.log(Level.WARNING,
+                                                    "Unsupported @DatagramOrder field type {0} for field {1} on {2}",
+                                                    new Object[]{fieldType, field.getName(), cls.getName()});
+                                        }
+                                    } catch (NumberFormatException | DateTimeParseException parseEx) {
+                                        log.log(Level.WARNING,
+                                                "Could not parse value '" + trimmed + "' for field " + field.getName()
+                                                        + " (" + fieldType.getSimpleName() + ") on " + cls.getName(),
+                                                parseEx);
                                     }
                                 }
                             }
@@ -248,16 +289,16 @@ public class DatagramUtilities<A extends Acquisition> {
             String lon = null;
             String lat = null;
             try {
-                lon = line.split(",", -1)[3];
+                lon = line.split(",", -1)[LON_INDEX];
             } catch (ArrayIndexOutOfBoundsException arrayE) {
                 //it happens from time to time that a lat/lons are measured not as pairs but at 2 different timestamps. They are not combined to form 1 then. This is not logged to not flood the messages.
 
-                log.log(Level.SEVERE, "ArrayIndexOutOfBoundsException for lon (index 3) of line " + line);
+                log.log(Level.SEVERE, "ArrayIndexOutOfBoundsException for lon (index " + LON_INDEX + ") of line " + line);
             }
             try {
-                lat = line.split(",", -1)[4]; //-1 to ensure that ,,, is split as well
+                lat = line.split(",", -1)[LAT_INDEX]; //-1 to ensure that ,,, is split as well
             } catch (ArrayIndexOutOfBoundsException arrayE) {
-                log.log(Level.SEVERE, "ArrayIndexOutOfBoundsException for lon (index 4) of line " + line);
+                log.log(Level.SEVERE, "ArrayIndexOutOfBoundsException for lat (index " + LAT_INDEX + ") of line " + line);
             }
             if (lat != null && !lat.isEmpty() && lon != null && !lon.isEmpty()) {
                 newCoordinate = new Coordinate(Double.valueOf(lon), Double.valueOf(lat));

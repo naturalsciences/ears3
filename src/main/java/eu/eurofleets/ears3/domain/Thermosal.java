@@ -12,6 +12,7 @@ import jakarta.xml.bind.annotation.XmlAccessType;
 import jakarta.xml.bind.annotation.XmlAccessorType;
 import jakarta.xml.bind.annotation.XmlRootElement;
 import jakarta.xml.bind.annotation.XmlTransient;
+import java.time.Instant;
 
 @Entity
 @XmlRootElement
@@ -31,13 +32,33 @@ public class Thermosal extends Acquisition {
     @DatagramOrder(3)
     private Double salinity;
     @DatagramOrder(4)
-    private Double temperature;
+    private Instant salinityTimestamp;
     @DatagramOrder(5)
-    private Double rawFluorometry;
+    private String salinityInstrId;
     @DatagramOrder(6)
-    private Double conductivity;
+    private Double temperature;
     @DatagramOrder(7)
+    private Instant temperatureTimestamp;
+    @DatagramOrder(8)
+    private String temperatureInstrId;
+    @DatagramOrder(9)
+    private Double rawFluorometry;
+    @DatagramOrder(10)
+    private Instant rawFluorometryTimestamp;
+    @DatagramOrder(11)
+    private String rawFluorometryInstrId;
+    @DatagramOrder(12)
+    private Double conductivity;
+    @DatagramOrder(13)
+    private Instant conductivityTimestamp;
+    @DatagramOrder(14)
+    private String conductivityInstrId;
+    @DatagramOrder(15)
     private Double sigmat;
+    @DatagramOrder(16)
+    private Instant sigmatTimestamp;
+    @DatagramOrder(17)
+    private String sigmatInstrId;
 
     public Double getSalinity() {
         return this.salinity;
@@ -45,6 +66,22 @@ public class Thermosal extends Acquisition {
 
     public void setSalinity(Double salinity) {
         this.salinity = salinity;
+    }
+
+    public Instant getSalinityTimestamp() {
+        return this.salinityTimestamp;
+    }
+
+    public void setSalinityTimestamp(Instant salinityTimestamp) {
+        this.salinityTimestamp = salinityTimestamp;
+    }
+
+    public String getSalinityInstrId() {
+        return this.salinityInstrId;
+    }
+
+    public void setSalinityInstrId(String salinityInstrId) {
+        this.salinityInstrId = salinityInstrId;
     }
 
     public Double getTemperature() {
@@ -55,12 +92,44 @@ public class Thermosal extends Acquisition {
         this.temperature = temperature;
     }
 
+    public Instant getTemperatureTimestamp() {
+        return this.temperatureTimestamp;
+    }
+
+    public void setTemperatureTimestamp(Instant temperatureTimestamp) {
+        this.temperatureTimestamp = temperatureTimestamp;
+    }
+
+    public String getTemperatureInstrId() {
+        return this.temperatureInstrId;
+    }
+
+    public void setTemperatureInstrId(String temperatureInstrId) {
+        this.temperatureInstrId = temperatureInstrId;
+    }
+
     public Double getRawFluorometry() {
         return this.rawFluorometry;
     }
 
     public void setRawFluorometry(Double rawFluorometry) {
         this.rawFluorometry = rawFluorometry;
+    }
+
+    public Instant getRawFluorometryTimestamp() {
+        return this.rawFluorometryTimestamp;
+    }
+
+    public void setRawFluorometryTimestamp(Instant rawFluorometryTimestamp) {
+        this.rawFluorometryTimestamp = rawFluorometryTimestamp;
+    }
+
+    public String getRawFluorometryInstrId() {
+        return this.rawFluorometryInstrId;
+    }
+
+    public void setRawFluorometryInstrId(String rawFluorometryInstrId) {
+        this.rawFluorometryInstrId = rawFluorometryInstrId;
     }
 
     public Double getConductivity() {
@@ -71,12 +140,44 @@ public class Thermosal extends Acquisition {
         this.conductivity = conductivity;
     }
 
+    public Instant getConductivityTimestamp() {
+        return this.conductivityTimestamp;
+    }
+
+    public void setConductivityTimestamp(Instant conductivityTimestamp) {
+        this.conductivityTimestamp = conductivityTimestamp;
+    }
+
+    public String getConductivityInstrId() {
+        return this.conductivityInstrId;
+    }
+
+    public void setConductivityInstrId(String conductivityInstrId) {
+        this.conductivityInstrId = conductivityInstrId;
+    }
+
     public Double getSigmat() {
         return this.sigmat;
     }
 
     public void setSigmat(Double sigmat) {
         this.sigmat = sigmat;
+    }
+
+    public Instant getSigmatTimestamp() {
+        return this.sigmatTimestamp;
+    }
+
+    public void setSigmatTimestamp(Instant sigmatTimestamp) {
+        this.sigmatTimestamp = sigmatTimestamp;
+    }
+
+    public String getSigmatInstrId() {
+        return this.sigmatInstrId;
+    }
+
+    public void setSigmatInstrId(String sigmatInstrId) {
+        this.sigmatInstrId = sigmatInstrId;
     }
 
     public Long getId() {
@@ -95,13 +196,33 @@ public class Thermosal extends Acquisition {
         sb.append(DATAGRAM_SEPARATOR);
         sb.append(salinity != null ? salinity : "");
         sb.append(DATAGRAM_SEPARATOR);
+        sb.append(salinityTimestamp != null ? salinityTimestamp : "");
+        sb.append(DATAGRAM_SEPARATOR);
+        sb.append(salinityInstrId != null ? salinityInstrId : "");
+        sb.append(DATAGRAM_SEPARATOR);
         sb.append(temperature != null ? temperature : "");
+        sb.append(DATAGRAM_SEPARATOR);
+        sb.append(temperatureTimestamp != null ? temperatureTimestamp : "");
+        sb.append(DATAGRAM_SEPARATOR);
+        sb.append(temperatureInstrId != null ? temperatureInstrId : "");
         sb.append(DATAGRAM_SEPARATOR);
         sb.append(rawFluorometry != null ? rawFluorometry : "");
         sb.append(DATAGRAM_SEPARATOR);
+        sb.append(rawFluorometryTimestamp != null ? rawFluorometryTimestamp : "");
+        sb.append(DATAGRAM_SEPARATOR);
+        sb.append(rawFluorometryInstrId != null ? rawFluorometryInstrId : "");
+        sb.append(DATAGRAM_SEPARATOR);
         sb.append(conductivity != null ? conductivity : "");
         sb.append(DATAGRAM_SEPARATOR);
+        sb.append(conductivityTimestamp != null ? conductivityTimestamp : "");
+        sb.append(DATAGRAM_SEPARATOR);
+        sb.append(conductivityInstrId != null ? conductivityInstrId : "");
+        sb.append(DATAGRAM_SEPARATOR);
         sb.append(sigmat != null ? sigmat : "");
+        sb.append(DATAGRAM_SEPARATOR);
+        sb.append(sigmatTimestamp != null ? sigmatTimestamp : "");
+        sb.append(DATAGRAM_SEPARATOR);
+        sb.append(sigmatInstrId != null ? sigmatInstrId : "");
         return sb.toString();
     }
 }

@@ -7,6 +7,7 @@ import jakarta.xml.bind.annotation.XmlAccessType;
 import jakarta.xml.bind.annotation.XmlAccessorType;
 import jakarta.xml.bind.annotation.XmlRootElement;
 import eu.eurofleets.ears3.utilities.DatagramOrder;
+import java.time.Instant;
 import java.util.Collection;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -32,17 +33,45 @@ public class Navigation extends Acquisition {
     @DatagramOrder(3)
     private Double lon;
     @DatagramOrder(4)
-    private Double lat;
+    private Instant lonTimestamp;
     @DatagramOrder(5)
-    private Double heading;
+    private String lonInstrId;
     @DatagramOrder(6)
-    private Double sow;
+    private Double lat;
     @DatagramOrder(7)
-    private Double depth;
+    private Instant latTimestamp;
     @DatagramOrder(8)
-    private Double cog;
+    private String latInstrId;
     @DatagramOrder(9)
+    private Double heading;
+    @DatagramOrder(10)
+    private Instant headingTimestamp;
+    @DatagramOrder(11)
+    private String headingInstrId;
+    @DatagramOrder(12)
+    private Double sow;
+    @DatagramOrder(13)
+    private Instant sowTimestamp;
+    @DatagramOrder(14)
+    private String sowInstrId;
+    @DatagramOrder(15)
+    private Double depth;
+    @DatagramOrder(16)
+    private Instant depthTimestamp;
+    @DatagramOrder(17)
+    private String depthInstrId;
+    @DatagramOrder(18)
+    private Double cog;
+    @DatagramOrder(19)
+    private Instant cogTimestamp;
+    @DatagramOrder(20)
+    private String cogInstrId;
+    @DatagramOrder(21)
     private Double sog;
+    @DatagramOrder(22)
+    private Instant sogTimestamp;
+    @DatagramOrder(23)
+    private String sogInstrId;
 
     @ManyToMany(mappedBy = "navigation")
     @XmlTransient
@@ -65,12 +94,44 @@ public class Navigation extends Acquisition {
         this.lon = lon;
     }
 
+    public Instant getLonTimestamp() {
+        return this.lonTimestamp;
+    }
+
+    public void setLonTimestamp(Instant lonTimestamp) {
+        this.lonTimestamp = lonTimestamp;
+    }
+
+    public String getLonInstrId() {
+        return this.lonInstrId;
+    }
+
+    public void setLonInstrId(String lonInstrId) {
+        this.lonInstrId = lonInstrId;
+    }
+
     public Double getLat() {
         return this.lat;
     }
 
     public void setLat(Double lat) {
         this.lat = lat;
+    }
+
+    public Instant getLatTimestamp() {
+        return this.latTimestamp;
+    }
+
+    public void setLatTimestamp(Instant latTimestamp) {
+        this.latTimestamp = latTimestamp;
+    }
+
+    public String getLatInstrId() {
+        return this.latInstrId;
+    }
+
+    public void setLatInstrId(String latInstrId) {
+        this.latInstrId = latInstrId;
     }
 
     public Double getDepth() {
@@ -85,12 +146,44 @@ public class Navigation extends Acquisition {
         this.depth = depth;
     }
 
+    public Instant getDepthTimestamp() {
+        return this.depthTimestamp;
+    }
+
+    public void setDepthTimestamp(Instant depthTimestamp) {
+        this.depthTimestamp = depthTimestamp;
+    }
+
+    public String getDepthInstrId() {
+        return this.depthInstrId;
+    }
+
+    public void setDepthInstrId(String depthInstrId) {
+        this.depthInstrId = depthInstrId;
+    }
+
     public Double getCog() {
         return this.cog;
     }
 
     public void setCog(Double cog) {
         this.cog = cog;
+    }
+
+    public Instant getCogTimestamp() {
+        return this.cogTimestamp;
+    }
+
+    public void setCogTimestamp(Instant cogTimestamp) {
+        this.cogTimestamp = cogTimestamp;
+    }
+
+    public String getCogInstrId() {
+        return this.cogInstrId;
+    }
+
+    public void setCogInstrId(String cogInstrId) {
+        this.cogInstrId = cogInstrId;
     }
 
     public Double getSog() {
@@ -101,6 +194,22 @@ public class Navigation extends Acquisition {
         this.sog = sog;
     }
 
+    public Instant getSogTimestamp() {
+        return this.sogTimestamp;
+    }
+
+    public void setSogTimestamp(Instant sogTimestamp) {
+        this.sogTimestamp = sogTimestamp;
+    }
+
+    public String getSogInstrId() {
+        return this.sogInstrId;
+    }
+
+    public void setSogInstrId(String sogInstrId) {
+        this.sogInstrId = sogInstrId;
+    }
+
     public Double getHeading() {
         return this.heading;
     }
@@ -109,12 +218,44 @@ public class Navigation extends Acquisition {
         this.heading = heading;
     }
 
+    public Instant getHeadingTimestamp() {
+        return this.headingTimestamp;
+    }
+
+    public void setHeadingTimestamp(Instant headingTimestamp) {
+        this.headingTimestamp = headingTimestamp;
+    }
+
+    public String getHeadingInstrId() {
+        return this.headingInstrId;
+    }
+
+    public void setHeadingInstrId(String headingInstrId) {
+        this.headingInstrId = headingInstrId;
+    }
+
     public Double getSow() {
         return this.sow;
     }
 
     public void setSow(Double sow) {
         this.sow = sow;
+    }
+
+    public Instant getSowTimestamp() {
+        return this.sowTimestamp;
+    }
+
+    public void setSowTimestamp(Instant sowTimestamp) {
+        this.sowTimestamp = sowTimestamp;
+    }
+
+    public String getSowInstrId() {
+        return this.sowInstrId;
+    }
+
+    public void setSowInstrId(String sowInstrId) {
+        this.sowInstrId = sowInstrId;
     }
 
     public Collection<Event> getEvents() {
@@ -136,17 +277,45 @@ public class Navigation extends Acquisition {
         sb.append(DATAGRAM_SEPARATOR);
         sb.append(lon != null ? lon : "");
         sb.append(DATAGRAM_SEPARATOR);
+        sb.append(lonTimestamp != null ? lonTimestamp : "");
+        sb.append(DATAGRAM_SEPARATOR);
+        sb.append(lonInstrId != null ? lonInstrId : "");
+        sb.append(DATAGRAM_SEPARATOR);
         sb.append(lat != null ? lat : "");
+        sb.append(DATAGRAM_SEPARATOR);
+        sb.append(latTimestamp != null ? latTimestamp : "");
+        sb.append(DATAGRAM_SEPARATOR);
+        sb.append(latInstrId != null ? latInstrId : "");
         sb.append(DATAGRAM_SEPARATOR);
         sb.append(heading != null ? heading : "");
         sb.append(DATAGRAM_SEPARATOR);
+        sb.append(headingTimestamp != null ? headingTimestamp : "");
+        sb.append(DATAGRAM_SEPARATOR);
+        sb.append(headingInstrId != null ? headingInstrId : "");
+        sb.append(DATAGRAM_SEPARATOR);
         sb.append(sow != null ? sow : "");
+        sb.append(DATAGRAM_SEPARATOR);
+        sb.append(sowTimestamp != null ? sowTimestamp : "");
+        sb.append(DATAGRAM_SEPARATOR);
+        sb.append(sowInstrId != null ? sowInstrId : "");
         sb.append(DATAGRAM_SEPARATOR);
         sb.append(depth != null ? Math.abs(depth) : "");
         sb.append(DATAGRAM_SEPARATOR);
+        sb.append(depthTimestamp != null ? depthTimestamp : "");
+        sb.append(DATAGRAM_SEPARATOR);
+        sb.append(depthInstrId != null ? depthInstrId : "");
+        sb.append(DATAGRAM_SEPARATOR);
         sb.append(cog != null ? cog : "");
         sb.append(DATAGRAM_SEPARATOR);
+        sb.append(cogTimestamp != null ? cogTimestamp : "");
+        sb.append(DATAGRAM_SEPARATOR);
+        sb.append(cogInstrId != null ? cogInstrId : "");
+        sb.append(DATAGRAM_SEPARATOR);
         sb.append(sog != null ? sog : "");
+        sb.append(DATAGRAM_SEPARATOR);
+        sb.append(sogTimestamp != null ? sogTimestamp : "");
+        sb.append(DATAGRAM_SEPARATOR);
+        sb.append(sogInstrId != null ? sogInstrId : "");
         return sb.toString();
 
     }
