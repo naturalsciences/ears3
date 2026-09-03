@@ -192,8 +192,9 @@ let actorLookup = {};
 
 function populateActorField(regex) {
     populateFilteredSelectField('#actorField', personsGetLocation, 'persons', null, function (item) {
-        actorLookup[item.firstName + " " + item.lastName] = item;
-        return item.firstName + " " + item.lastName;
+        const label = item.firstName + " " + item.lastName + " (" + item.email + ")"
+        actorLookup[label] = item;
+        return label;
     });
 }
 

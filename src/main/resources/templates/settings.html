@@ -10,7 +10,7 @@
     <h1 id="h1">Actor settings</h1>
     <div class="form-group mb-3 p-3 border rounded">
         <h3>Who are you?</h3>
-        <select name="cruise" id="actorField"
+        <select name="actor" id="actorField"
                 class="selectpicker target form-control"
                 data-live-search="true" title="Actor">
         </select>
@@ -19,7 +19,8 @@
         <h3>I'm not yet in the actor list &dash; or my details are missing/wrong!</h3>
         <p>To get yourself in the list, add your details below and create a first event. From now on you'll stay in the
             actor list.</p>
-        <p>To modify your information, modify the details below and create a first event. From now on your updated personal info stays in the
+        <p>To modify your information, modify the details below and create a first event. From now on your updated
+            personal info stays in the
             actor list.</p>
         <div class="form-group">
             <p><input name="firstName" type="text" class="form-control" id="firstNameField" placeholder=" "
@@ -58,15 +59,19 @@
                 }
                 $.getJSON("json/edmo.json",
                     function (data) {
-                        $.each(data.vocabulary.citRespParty, function (key, item) {
-                            $("#organisationField").append($("<option />").val(item.rpOrgName.SDNIdent).text(item.rpOrgName.text));
+                        var items = data.vocabulary.citRespParty.slice().sort(function (a, b) {
+                            return a.rpOrgName.text.localeCompare(b.rpOrgName.text);
+                        });
+                        $.each(items, function (key, item) {
+                            const identifier = item.rpOrgName.SDNIdent.replace("SDN:EDMO::", "https://edmo.seadatanet.org/report/")
+                            $("#organisationField").append($("<option />").val(identifier).text(item.rpOrgName.text));
                         });
                         $('#organisationField').selectpicker('refresh');
-
                     }
                 ).done(function () {
                     if (actor) {
-                        $("#organisationField").selectpicker('val', actor.organisation?.term?.urn);
+                        $("#organisationField").selectpicker('val', actor.organisation);
+                        //$("#organisationField").selectpicker('val', actor.organisation?.term?.urn);
                         $('#organisationField').selectpicker('refresh');
                     }
                 });
@@ -74,8 +79,8 @@
                 $('#actorField').change(function () {
                     const fullName = $(this).find("option:selected").text();
                     const me = actorLookup[fullName]
-                    const organisationId = me.organisation.term.identifier;
-                    setCurrentActor({ ...me, organisation: organisationId });
+                    const organisationId = me.organisation?.term?.identifier;
+                    setCurrentActor({...me, organisation: organisationId});
                     window.location.href = "event/new";
                 });
                 $('form').submit(function () {
