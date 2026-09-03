@@ -11,7 +11,7 @@
 <div class="container" layout:fragment="main">
     <h1>EARS Web App User
         Guide</h1>
-    <a href="mailto:info@bmdc.be?subject=Problem regarding EARS on RV Belgica&body=
+    <a href="mailto:bmdc@naturalsciences.be?subject=Problem regarding EARS on RV Belgica&body=
             Please adapt the following mail message template to describe your situation.%0D%0A
             Describe the bug%0D%0A
                 &emsp;A clear and concise description of what the bug is.%0D%0A
@@ -76,16 +76,16 @@
         <p><img width="200px" src="/ears3/images/manual/image1.png"/></p>
         <h3 id="what-is-ears">What is EARS</h3>
         <p>EARS stands for "Event Activity Recording System" asd was initially developed under the name
-            “Eurofleets Automatic Reporting System”
+            "Eurofleets Automatic Reporting System".
             It is a tool allowing to log events such as sampling
             events, gear deployments or instrument manipulations and to
-            couple the events with the underway data (i.e. navigation,
+            couple the events with the underway data (i.e. navigation,
             thermosalinometry and meteorology parameters). The concept
-            is as follows: the user defines the event e.g. <em>start of
+            is as follows: the user defines the event e.g. <em>start of
                 sampling with Niskin bottles</em> and <em>submits</em> the
             event while the sampling takes place. The event is logged
             with its exact date and time and coupled with the
-            acquisition data of the same time (e.g. latitude and
+            acquisition data of the same time (e.g. latitude and
             longitude, depth, surface water temperature, salinity,
             conductivity, solar radiation,…) which are continuously
             recorded by the vessel equipment, by finding the nearest
@@ -99,11 +99,11 @@
         <ul>
             <li><strong>Cruise</strong> or <strong>campaign</strong>: a
                 scientific journey of a research vessel, with a start and
-                end harbour, led by a chief scientist.
+                end harbour, led by a chief scientist (CS).
             </li>
             <li><strong>Program</strong>: a specific scientific research
                 project performed during a cruise, led by a principal
-                investigator. This can be a repeated activity across many
+                investigator (PI). This can be a repeated activity across many
                 campaigns (even for many years), or specific to a single
                 cruise. In this case you can use the same name for both
                 cruise and program.
@@ -111,7 +111,7 @@
         </ul>
         <h4 id="event">Event</h4>
         <p>An event is some action that happens at specific time
-            with a scientific device. The person executing it and the
+            with a (scientific) device. The person saving the event (the actor) and the
             research program are also taken into account.</p>
         <p>Events are composed of the following terms:</p>
         <ul>
@@ -123,7 +123,7 @@
                 the event (e.g. sampling gear, instrument, sensor,
                 observational device, research vessel). Tools can belong to
                 one or more tool categories (e.g. Kongsberg (Simrad) TOPAS
-                PS018 sub-bottom profiler is both a sub-bottom profilers and
+                PS018 sub-bottom profiler is both a sub-bottom profiler and
                 a chirper)
             </li>
             <li><strong>Process</strong>: a general activity a tool can
@@ -141,32 +141,37 @@
             from a local IP address.</p>
         <p>The url at any RV is as follows: <a
                 href="/ears3">http://&lt;IP-ADDRESS&gt;:&lt;PORT&gt;/ears3</a>
-            and is specific to each EF+ Research Vessel. Ask your local
+            and is specific to each EF+ Research Vessel. A port is optional. Ask your local
             electronician for the correct location.</p>
         <p>The EARS web application can be used with any internet
             browser. At the moment, the application does not work
             properly with the Chrome browser.</p>
         <p>Note that the figures included in this document are taken
-            from the instance running on the RV Belgica and the shown ip
+            from the instance running on the RV Belgica and the shown IP
             address will not be the same on another vessel.</p>
         <h3 id="using-ears">Using EARS</h3>
         <h4 id="general-1">General</h4>
-        <p>On first use, the user’s <a href="/ears3/settings">first
-            and last name as wel as a valid email address</a> are
-            requested, as well as their affiliation. The list of
-            organizations is extensive and (for now) unsorted. Start
+        <p>On first use, a user is forwarded to the <a href="/ears3/settings">settings page</a> to indicate who he/she
+            is.
+            The active user (actor) is always indicated in the menu bar at the right hand side.
+            This setting can be changed at any moment by
+            clicking on the name in the menu bar and choosing yourself. On the settings page one can select his/her
+            name.
+            This list based on all PI/CSs of the campaigns of this year and all actors of all events made this year.
+            If you do not appear in this list, you should enter your information in the text boxes below.
+            Indicate your first name, last name, email address and affiliation.
+            The list of organizations is extensive and (for now) unsorted. Start
             typing the name of the organization. If the organization
             does not appear, try searching for the full/abbreviated
-            name. These settings can ben changed at any moment by
-            clicking on the provided first and last name in the
-            navigation bar.</p>
+            name.</p>
         <p><img src="/ears3/images/manual/image3.png"/></p>
         <p><img src="/ears3/images/manual/image4.png"/></p>
         <h3 id="event-creation">Event creation</h3>
         <p>Before the user can start submitting a <a
                 href="/ears3/event/new">new event</a>, the <strong>Current
-            program</strong> needs to be selected. If you try to create
-            an event without program, an error is shown.</p>
+            program</strong> must be selected. An event can only belong to a single program; if multiple would apply
+            choose the main one.
+            If you try to create an event without program, an error is shown.</p>
         <p><img src="/ears3/images/manual/image5.png"/></p>
         <p>Drop-down lists show the available tool categories,
             tools, processes and actions. A combination of these
@@ -175,23 +180,26 @@
             available in the selection list, it has to be requested
             beforehand to a data manager who can pre-define it before
             the cruise and make it available on the vessel EARS
-            server.</p>
+            server. Send an email to <a href="mailto:bmdc@naturalsciences.be">bmdc@naturalsciences.be</a> for that, well
+            in advance of your next cruise.</p>
         <p><img src="/ears3/images/manual/image6.png"/></p>
-        <p>To create a new event, define first the station name (ex:
-            MOW1) as well as a label for the event (ex: st1 bodem). Both
+        <p>To create a new event, you may first type the station name (ex:
+            MOW1) as well as a label for the event (ex: st1 bodem).
+            The station stays the same for a whole series of events, hence it's a general text box.
+            The label is something that may repeat for a few events. Both
             are optional but are strongly recommended. In a next step
-            both are copied to the event’s text boxes, where they can be
-            further edited if needed. This way you don’t have to
+            both are copied to the event's text boxes, where they can be
+            further edited if needed. This way you don't have to
             repeatedly type them for each event.</p>
         <p>To create the event, four terms need to be selected. They
             can be selected in any order.</p>
         <ul>
-            <li>Select the Category: e.g. discrete water sampler,
+            <li>Select the Category: e.g. discrete water sampler,
                 sediment grabs
             </li>
-            <li>Select the Tool: e.g. Niskin bottle, Van Veen grab</li>
-            <li>Select the Process: e.g. Sampling</li>
-            <li>Select the Action: e.g. Start</li>
+            <li>Select the Tool: e.g. Niskin bottle, Van Veen grab</li>
+            <li>Select the Process: e.g. Sampling</li>
+            <li>Select the Action: e.g. Start</li>
         </ul>
         <p>Once you select a term, the other terms available become
             more limited. For instance, if you first select
@@ -224,12 +232,12 @@
         <h4 id="accessing-the-logged-events">Accessing the logged
             events</h4>
         <p>The <a href="/ears3/events">Events</a> tab of the web
-            application allows to access the list of logged events. The
+            application allows to access the list of logged events. Any
             user can:</p>
         <ul>
-            <li>Select and display the events details</li>
-            <li>Edit the event</li>
-            <li>Delete an event</li>
+            <li>Filter the events by various parameters</li>
+            <li>Select and display the event's detail page</li>
+            <li>In the detail page, edit the event</li>
         </ul>
         <p>The logged times are in UTC.</p>
         <p><img src="/ears3/images/manual/image11.png"/></p>
@@ -245,13 +253,16 @@
             <em>Submit</em>.</p>
         <p><img src="/ears3/images/manual/image12.png"/></p>
         <p>Events can be edited or created at any time during the
-            cruise. However, it is strongly recommended to log the
-            events while the action is actually performed. Missed events
+            cruise. However, it is recommended to log the
+            events near when the action is actually performed. Missed events
             can still be added or updated retroactively during the
             cruise but beware, the EARS application and database are
             only accessible on board of the vessel. This means that it
             is not possible to make any updates when you have left the
             vessel after the cruise.</p>
+        <p>Events can be modified by anyone, even ones created by other actors.
+            This flexibility comes from not requiring accounts and passwords and is guided by scientific integrity.
+            Events can be only be deleted by an admin from EARS. For access the admin role, a password is required.</p>
         <h4 id="show-current-navigation-information">Show current
             navigation information</h4>
         <p>This function is not directly related to the EARS web
@@ -271,7 +282,7 @@
             <li>Speed over water (sow)</li>
             <li>Depth</li>
             <li>Course over ground (cog)</li>
-            <li>Speed over ground (sog).</li>
+            <li>Speed over ground (sog)</li>
         </ul>
         <p>On <a
                 href="/ears3Nav/nav/getLast/xml">/ears3Nav/nav/getLast/xml</a>,
@@ -285,18 +296,21 @@
         <h4 id="export">Export</h4>
         <h5 id="all-events">ALL events</h5>
         <p>To export logged events, go to <a
-                href="/ears3/events">Events</a> and click on “Download all
-            events”. All events created so far in EARS are exported in a
-            csv file. After opening the csv file (with excel for
-            instance), you may select events of your cruise by filtering
-            by the cruise’s period.</p>
+                href="/ears3/events">Events</a> and click the "Download Filtered CSV" icon.
+            The filter of the event overview is also applied to the csv download.
+            To get all events, disable all filters by clicking the "Clear all filters" icon.
+            We recommend opening csv files with LibreOffice instead of Excel as this immediately presents them in a
+            spreadsheet.
+            All coupled acquisition is included as well. This also includes the timestamps of all separate variables as
+            well as their MDM500 identifier.</p>
         <h5 id="events-linked-to-a-cruise">Events linked to a
             cruise</h5>
         <p>When you select the <a
                 href="/ears3/cruises"><em>Cruises</em></a> tab, you can
             export all events from the selected cruise. Please verify
             after exporting the data, that the export was
-            successful!</p>
+            successful! The number between brackets is the number of events for that cruise.
+            That way it's easy to see who actively logging their events.</p>
         <p><img src="/ears3/images/manual/image14.png"/></p>
         <h4 id="points-of-attention-and-tips">Points of attention
             and tips</h4>
@@ -304,13 +318,14 @@
         <ul>
             <li><p>Time in EARS is in UTC. This is important to couple
                 the events with navigation and acquisition data. Always
-                enter the time in UTC.</p></li>
+                enter the time in UTC. In the event detail page, a read-only conversion to Brussels time is shown.</p>
+            </li>
             <li><p>Any creation or editing action is only successfully
                 executed when the <em>Submit</em> button (or <em>Common
                     scenario button</em>) turns <span
                         style="background-color:green">green</span> for a couple of
                 seconds. When this does not happen, verify that all fields
-                are filled in (e.g. <em>program</em>, <em>station</em>,
+                are filled in (e.g. <em>program</em>, <em>station</em>,
                 <em>label</em>).</p></li>
         </ul>
         <p>Tips:</p>

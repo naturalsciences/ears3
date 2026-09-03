@@ -47,7 +47,7 @@
                 <p>
                     <input name="time" id="timeField" placeholder=" " type="text" title="UTC time"
                            class="form-control timeField" th:value="${#temporals.format(event.timeStamp, 'HH:mm:ss')}"
-                           style="margin-left:-1px" required/><label class="txtBox" for="timeField">Time</label>
+                           style="margin-left:-1px" required/><label class="txtBox" for="timeField">UTC time</label>
                 </p>
                 <p>
                     <input name="localTime" id="localTimeField" placeholder=" " type="text" title="Europe/Brussels time"

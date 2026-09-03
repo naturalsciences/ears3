@@ -297,7 +297,6 @@ public class EventService {
                             eventDTO.setTimeStamp(acquisitionTime);
                         }
                     } else {
-                        // log.log(Level.INFO, "acquisition time: null (last=null)");
                         log.log(Level.INFO, "server time: " + serverTime.toString());
                         log.log(Level.INFO, "event timestamp: none given");
                         eventDTO.setTimeStamp(serverTime);
@@ -318,8 +317,6 @@ public class EventService {
             event.setTimeStamp(eventDTO.getTimeStamp());
             event.setIdentifier(identifier);
 
-            // Navigation last = navigationService.findLast();
-            // last.getTimeStamp()
             LinkedDataTerm action = ldtService.findOrCreate(eventDTO.getAction());
             LinkedDataTerm process = ldtService.findOrCreate(eventDTO.getProcess());
             LinkedDataTerm subject = ldtService.findOrCreate(eventDTO.getSubject());
@@ -335,7 +332,6 @@ public class EventService {
             }
             tool.setTerm(toolLdTerm); // add the linkeddataterm to it
             tool.setParentTool(parentToolLdTerm); // add the parent linkeddataterm to it
-            Logger.getLogger(EventService.class.getName()).log(Level.INFO, "NOW trying to retrieve the tool itself");
             tool = toolService.findOrCreate(tool); // replace it with a managed entity, either by finding it or creating it
 
             Platform platform = platformService.findByIdentifier(eventDTO.getPlatform());
