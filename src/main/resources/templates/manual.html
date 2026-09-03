@@ -144,8 +144,7 @@
             and is specific to each EF+ Research Vessel. A port is optional. Ask your local
             electronician for the correct location.</p>
         <p>The EARS web application can be used with any internet
-            browser. At the moment, the application does not work
-            properly with the Chrome browser.</p>
+            browser.</p>
         <p>Note that the figures included in this document are taken
             from the instance running on the RV Belgica and the shown IP
             address will not be the same on another vessel.</p>
@@ -155,9 +154,8 @@
             is.
             The active user (actor) is always indicated in the menu bar at the right hand side.
             This setting can be changed at any moment by
-            clicking on the name in the menu bar and choosing yourself. On the settings page one can select his/her
-            name.
-            This list based on all PI/CSs of the campaigns of this year and all actors of all events made this year.
+            clicking on the name in the menu bar and choosing yourself from the dropdown list.
+            This list is based on all PI/CSs of the campaigns of this year and all actors of all events made this year.
             If you do not appear in this list, you should enter your information in the text boxes below.
             Indicate your first name, last name, email address and affiliation.
             The list of organizations is extensive and (for now) unsorted. Start
@@ -210,7 +208,9 @@
             <em>Submit</em> button. A pop-up window will appear
             confirming the station name and the event label. A
             <strong>Description</strong> can be added as well from the
-            pop-up window. Click again on <em>Submit</em> when done.
+            pop-up window. Events can also have other properties if defined beforehand,
+            such as track length, haul weight, net opening etc. Complete them if relevant.
+            Click again on <em>Submit</em> when done.
             When the submit button turns to green, the event is created
             and logged in the vessel database of EARS.</p>
         <p><img src="/ears3/images/manual/image8.png"/></p>
@@ -291,15 +291,17 @@
                     href="/ears3Nav/nav/getLast/json">/ears3Nav/nav/getLast/json</a>
             or <a
                     href="/ears3Nav/nav/getLast/datagram">/ears3Nav/nav/getLast/datagram</a>
-            endpoints to view the data as json and csv respectively.</p>
+            endpoints to view the data as json and csv respectively. The same is available for <a
+                    href="/ears3Nav/met/getLast/datagram">meteorology</a> and <a
+                    href="/ears3Nav/tss/getLast/datagram">thermosalinometry</a>.</p>
         <p><img src="/ears3/images/manual/image13.png"/></p>
         <h4 id="export">Export</h4>
-        <h5 id="all-events">ALL events</h5>
+        <h5 id="all-events">Events with custom filter</h5>
         <p>To export logged events, go to <a
                 href="/ears3/events">Events</a> and click the "Download Filtered CSV" icon.
             The filter of the event overview is also applied to the csv download.
             To get all events, disable all filters by clicking the "Clear all filters" icon.
-            We recommend opening csv files with LibreOffice instead of Excel as this immediately presents them in a
+            We recommend opening csv files with LibreOffice instead of Excel as this immediately presents them as a
             spreadsheet.
             All coupled acquisition is included as well. This also includes the timestamps of all separate variables as
             well as their MDM500 identifier.</p>
@@ -310,8 +312,12 @@
             export all events from the selected cruise. Please verify
             after exporting the data, that the export was
             successful! The number between brackets is the number of events for that cruise.
-            That way it's easy to see who actively logging their events.</p>
+            That way it's easy to see who is actively logging their events. From this overview, you can also download the acquisition data and the CSR (Cruise Summary Report).</p>
         <p><img src="/ears3/images/manual/image14.png"/></p>
+        <h4 id="import">Import</h4>
+        <p>You can import an Excel sheet (.xlsx) directly into EARS on the <a
+                href="/ears3/excel/import"><em>excel import</em></a> page. This page includes its own manual.</p>
+
         <h4 id="points-of-attention-and-tips">Points of attention
             and tips</h4>
         <p>Points of attention:</p>
