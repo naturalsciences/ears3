@@ -159,7 +159,7 @@
             <li>
                 <ul>
                     <li>Create the events that should be repeated over the whole cruise by hand on the <a
-                            th:href="@{/event/new}">new events page</a>, for the first time when they happen for real.
+                            th:href="@{/event/new}">new events page</a>, for the first time when they happen for real. Do not create test events in the live database!
                     </li>
                     <li>If you have a representative set of events for the rest of the cruise, download the events as
                         csv in the 'Filter Events' pane.
@@ -186,7 +186,8 @@
             </li>
             <li>
                 When every row sends an error containing <strong>ERROR: duplicate key value violates unique constraint
-                "event_unique"</strong>, the file was probably already uploaded before.
+                "event_unique"</strong>, the file was probably already uploaded before. Please note that this error happens on a row by row basis; some rows (i.e. the new ones) may have passed through successfully.
+                If some of the rows do not pass, it means they were already imported. This means it is ok to keep the original rows from the initial download.
             </li>
         </ul>
     </div>

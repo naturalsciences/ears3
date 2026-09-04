@@ -317,12 +317,12 @@ public class EventExcelService {
             PropertyDTO dist = PROPMAPDEF.get("Distance travelled");
             dist.setValue(spreadsheetEvent.getDistance());
             props.put(SpreadsheetEvent.FIELDS.Dist.name(), dist);
-        }
-        if ((spreadsheetEvent.getTime()) != null && !(spreadsheetEvent.getTime()).isEmpty()) {
+        } //this clashes with time
+        /*if ((spreadsheetEvent.getTime()) != null && !(spreadsheetEvent.getTime()).isEmpty()) {
             PropertyDTO time = PROPMAPDEF.get("Time");
             time.setValue(spreadsheetEvent.getTime());
             props.put(SpreadsheetEvent.FIELDS.Time.name(), time);
-        }
+        }*/
         if ((spreadsheetEvent.getStatus()) != null && !(spreadsheetEvent.getStatus()).isEmpty()) {
             PropertyDTO status = PROPMAPDEF.get("Status");
             status.setValue(spreadsheetEvent.getStatus());

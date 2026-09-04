@@ -245,29 +245,31 @@ public class DatagramUtilities<A extends Acquisition> {
             int i = 0;
             while ((line = br.readLine()) != null) {
                 Coordinate coord = getCoordinate(line);
-                if (coords.size() < 2) { //always add the first and second one that is valid.
-                    if (coord != null && coord.isValid()) {
-                        coords.add(coord);
-                    }
-                } else if ((i + 1) % 2 == 0) {//if at an even numbered frame, evaluate n and n-1
-                    int j = coords.size() - 1;
-                    Coordinate coordn_1 = null;
-                    Coordinate coordn_2 = null;
+                if (coord != null) {
+                    if (coords.size() < 2) { //always add the first and second one that is valid.
+                        if (coord.isValid()) {
+                            coords.add(coord);
+                        }
+                    } else if ((i + 1) % 2 == 0) {//if at an even numbered frame, evaluate n and n-1
+                        int j = coords.size() - 1;
+                        Coordinate coordn_1 = null;
+                        Coordinate coordn_2 = null;
 
-                    coordn_1 = coords.get(j - 1);
+                        coordn_1 = coords.get(j - 1);
 
-                    if (coords.size() > 2) {
-                        coordn_2 = coords.get(j - 2);
-                    }
-                    if (coordn_1 != null) { //there is already a previous addition (at least n-1, possibly n-2)
-                        Double heading1 = SpatialUtil.bearingByCoord(coordn_2, coordn_1);
-                        Double heading2 = SpatialUtil.bearingByCoord(coordn_1, coord);
+                        if (coords.size() > 2) {
+                            coordn_2 = coords.get(j - 2);
+                        }
+                        if (coordn_1 != null) { //there is already a previous addition (at least n-1, possibly n-2)
+                            Double heading1 = SpatialUtil.bearingByCoord(coordn_2, coordn_1);
+                            Double heading2 = SpatialUtil.bearingByCoord(coordn_1, coord);
 
-                        if (Math.abs(heading2 - heading1) > 0.5) {
-                            if (coord.isValid() && !coord.testSpike(coord)) {
-                                coords.add(coord);
-                            } else {
-                                System.out.printf("%s->%s IS INVALID OR A SPIKE%n", coords.get(i - 1), coords.get(i));
+                            if (Math.abs(heading2 - heading1) > 0.5) {
+                                if (coord.isValid() && !coord.testSpike(coord)) {
+                                    coords.add(coord);
+                                } else {
+                                    System.out.printf("%s->%s IS INVALID OR A SPIKE%n", coords.get(i - 1), coords.get(i));
+                                }
                             }
                         }
                     }
