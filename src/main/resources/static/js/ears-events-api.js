@@ -264,13 +264,7 @@ function postEventInner(event, successFunction, errorFunction) {
             // don't work here because the id we have is a URL fragment, not the full
             // stored value. Regex matching (via /i.test(...)) is the one approach that
             // works with both the goessner and jsonpath-plus libraries - keep using it.
-            var eid2 = eid.substring(eid.lastIndexOf('_') + 1); //url -> uuid for comparison
-
-            if (window.location.href.includes("event/new")) {
-                $("input#fixed_property_2").val(""); //description should not be kept the same over each scenario button press.
-                $("input#fixed_property_2").attr('value', ""); //description should not be kept the same over each scenario button press.
-                $("#propertyPopup ul.non-fixed-properties").empty(); //clear all true (non-fixed) properties so they don't repeat on each scenario button press. When editing an existing event, this is skipped so the existing values stay.
-            }
+            const eid2 = eid.substring(eid.lastIndexOf('_') + 1); //url -> uuid for comparison
 
             let eventPropertyUrls = JSONPath.JSONPath("results.bindings[?(/" + eid2 + "/i.test(@.eid.value))].pru.value", data);
             let eventPropertyLabels = JSONPath.JSONPath("results.bindings[?(/" + eid2 + "/i.test(@.eid.value))].prl.value", data);
@@ -281,22 +275,25 @@ function postEventInner(event, successFunction, errorFunction) {
 
             //remove label as a property from the list coming from the event itself.
             //(older trees sometimes still define label as a property; we remove and reattach it so it displays in the right order)
-            if (eventPropertyUrls.includes("http://ontologies.ef-ears.eu/ears2/1#pry_4")) {
-                eventPropertyUrls = eventPropertyUrls.filter(function (value) {
-                    return value != "http://ontologies.ef-ears.eu/ears2/1#pry_4";
-                });
-                eventPropertyLabels = eventPropertyLabels.filter(function (value) {
-                    return value != "label";
-                });
-            }
+            // if (eventPropertyUrls.includes("http://ontologies.ef-ears.eu/ears2/1#pry_4")) {
+            //     eventPropertyUrls = eventPropertyUrls.filter(function (value) {
+            //         return value != "http://ontologies.ef-ears.eu/ears2/1#pry_4";
+            //     });
+            //     eventPropertyLabels = eventPropertyLabels.filter(function (value) {
+            //         return value != "label";
+            //     });
+            // }
+            const regex = /event.*\/edit/g;
 
-            //fixed properties, ie. station and label, get prefilled
-            $("input#fixed_property_0").attr('value', $("#stationField").val()); //predefined entry coming from the stationField.
-            $("input#fixed_property_1").attr('value', $("#labelField").val()); //predefined entry coming from the labelField.
-            $("input#fixed_property_2").attr('value', $("#descriptionField").val()); //predefined entry coming from the labelField.
-
-            if (window.location.href.includes("event/new") || eventPropertyUrls.length > 0) { //we are newly creating events or there are properties
+            if (!editing() || eventPropertyUrls.length > 0) { //we are newly creating events or there are properties (when creatng/editing)
                 $("#propertyPopup").dialog("open");
+                //fixed properties, ie. station and label, get prefilled
+                $("input#fixed_property_station").attr('value', $("#stationField").val()); //predefined entry coming from the stationField.
+                $("input#fixed_property_label").attr('value', $("#labelField").val()); //predefined entry coming from the labelField.
+                $("input#fixed_property_description").val(""); //description should not be kept the same over each scenario button press.
+                $("input#fixed_property_description").attr('value', ""); //description should not be kept the same over each scenario button press.
+                $("#propertyPopup ul.non-fixed-properties").empty(); //clear all true (non-fixed) properties so they don't repeat on each scenario button press. When editing an existing event, this is skipped so the existing values stay.
+
                 eventPropertyUrls.forEach(function (eventPropertyUrl, index) {
                     //needed as searches in the rdf return e.g. http://ontologies.ef-ears.eu/ears2/1/#pry_18 whereas they could be stored as http://ontologies.ef-ears.eu/ears2/1#pry_18
                     eventPropertyUrl = eventPropertyUrl.replace('/#', '#');
@@ -306,46 +303,53 @@ function postEventInner(event, successFunction, errorFunction) {
                         $("#propertyPopup ul.non-fixed-properties").append(li);
                     }
                 });
-            } else { //eventPropertyRdfLocation was reached but yielded no url results, so we have no props
+            } else if (editing()) { //we immediately post the event, there is no popup
+                event.station = $("#stationField").val()
+                event.label = $("#labelField").val()
+                event.description = $("#descriptionField").val()
                 postEventInnerMost(event, successFunction, errorFunction);
             }
         }
     });
 
-    const fakePropsEnum = {
-        "label": "http://ontologies.ef-ears.eu/ears2/1#pry_4",
-        "station": "http://ontologies.ef-ears.eu/ears2/1#pry_station",
-        "description": "http://ontologies.ef-ears.eu/ears2/1#pry_description"
-    };
+    // const fakePropsEnum = {
+    //     "label": "http://ontologies.ef-ears.eu/ears2/1#pry_4",
+    //     "station": "http://ontologies.ef-ears.eu/ears2/1#pry_station",
+    //     "description": "http://ontologies.ef-ears.eu/ears2/1#pry_description"
+    // };
 
     // .one() instead of .on()+.off(): this handler only ever needs to fire once per
     // popup, and unbinds itself automatically instead of relying on a manual .off() call.
     $(document).one('click', '#btnSubmitEventWithProperties', function () {
-        $("#propertyPopup input").each(function (index) {
+
+        event.station = $("input#fixed_property_station").val(); //predefined entry coming from the stationField.
+        event.label = $("input#fixed_property_label").val(); //predefined entry coming from the labelField.
+        event.description = $("input#fixed_property_description").val()
+        $("#propertyPopup ul.non-fixed-properties input").each(function (index) {
             const url = $(this).attr('data-url');
             const name = $(this).attr('name');
-            if (!Object.values(fakePropsEnum).includes(url)) { //label, station and description hide as properties but are not saved as properties
-                const key = {
-                    identifier: url, //eg http://ontologies.ef-ears.eu/ears2/1#pry_6546
-                    name: name //eg label
-                };
-                const property = {
-                    key: key,
-                    uom: '', //TODO
-                    value: $(this).val()
-                };
-                event.properties.push(property);
-            } else {
-                if (url === fakePropsEnum.label) {
-                    event.label = $(this).val();
-                }
-                if (url === fakePropsEnum.station) {
-                    event.station = $(this).val();
-                }
-                if (url === fakePropsEnum.description) {
-                    event.description = $(this).val();
-                }
-            }
+            //if (!Object.values(fakePropsEnum).includes(url)) { //label, station and description hide as properties but are not saved as properties
+            const key = {
+                identifier: url, //eg http://ontologies.ef-ears.eu/ears2/1#pry_6546
+                name: name //eg label
+            };
+            const property = {
+                key: key,
+                uom: '', //TODO
+                value: $(this).val()
+            };
+            event.properties.push(property);
+            // } else {
+            //     if (url === fakePropsEnum.label) {
+            //         event.label = $(this).val();
+            //     }
+            //     if (url === fakePropsEnum.station) {
+            //         event.station = $(this).val();
+            //     }
+            //     if (url === fakePropsEnum.description) {
+            //         event.description = $(this).val();
+            //     }
+            // }
         });
         postEventInnerMost(event, successFunction, errorFunction);
         $("#propertyPopup").dialog("close");
@@ -375,6 +379,11 @@ function buildPropertyListItem(index, eventPropertyUrl, eventPropertyLabel) {
     return $('<li>', {
         html: '<div class="form-group"><p>' + input.get(0).outerHTML + label.get(0).outerHTML + '</p></div>'
     });
+}
+
+function editing() {
+    const regex = /event.*\/edit/g;
+    return window.location.href.match(regex)
 }
 
 /***

@@ -103,7 +103,6 @@ $(document).ready(function () {
         }
     });
 
-
     $("#dropdownForm").validate({
         rules: {
             date: {
