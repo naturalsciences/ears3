@@ -112,6 +112,31 @@ function removeEVfromLocalStorage(objectKey) {
     localStorage.eventDefinitions = JSON.stringify(Array.from(map.entries()));
 }
 
+/**
+ * Swaps the event definition with the given key with whichever entry
+ * currently sits at targetIndex, so the two trade places and everything
+ * else keeps its position. The insertion order of the map is what drives
+ * the order of the scenario buttons, so this is what dragging a button onto
+ * another cell comes down to. If targetIndex is past the end (the button
+ * was dropped on an empty cell, which has nothing to trade places with) the
+ * entry is simply moved there instead. Returns true when the stored order
+ * actually changed.
+ */
+function swapEVinLocalStorage(objectKey, targetIndex) {
+    let entries = Array.from(localStorageEventDefsToMap().entries());
+    let sourceIndex = entries.findIndex(entry => entry[0] === objectKey);
+    if (sourceIndex === -1 || targetIndex === sourceIndex) {
+        return false;
+    }
+    if (targetIndex >= 0 && targetIndex < entries.length) {
+        [entries[sourceIndex], entries[targetIndex]] = [entries[targetIndex], entries[sourceIndex]];
+    } else { //target cell is empty: nothing to trade places with, so just move it to the end
+        entries.push(entries.splice(sourceIndex, 1)[0]);
+    }
+    localStorage.eventDefinitions = JSON.stringify(entries);
+    return true;
+}
+
 
 /**
  * Populates #programField with programs matching earsProgramRegex (a rolling

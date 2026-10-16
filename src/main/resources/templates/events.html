@@ -95,10 +95,11 @@
             <li><a href="#" class="toggle-vis" data-column="3">Cruise</a></li>
             <li><a href="#" class="toggle-vis" data-column="4">Program</a></li>
             <li><a href="#" class="toggle-vis" data-column="5">Category</a></li>
-            <li><a href="#" class="toggle-vis" data-column="9">Station</a></li>
-            <li><a href="#" class="toggle-vis" data-column="10">Label</a></li>
-            <li><a href="#" class="toggle-vis" data-column="11">Note</a></li>
-            <li><a href="#" class="toggle-vis" data-column="12">Actor</a></li>
+            <li><a href="#" class="toggle-vis" data-column="9">Properties</a></li>
+            <li><a href="#" class="toggle-vis" data-column="10">Station</a></li>
+            <li><a href="#" class="toggle-vis" data-column="11">Label</a></li>
+            <li><a href="#" class="toggle-vis" data-column="12">Note</a></li>
+            <li><a href="#" class="toggle-vis" data-column="13">Actor</a></li>
         </ul>
     </div>
     <table id="eventTable" class="display dataTable" style="width:100%" role="grid">
@@ -113,6 +114,7 @@
             <th>Tool</th>
             <th>Process</th>
             <th>Action</th>
+            <th>Properties</th>
             <th>Station</th>
             <th>Label</th>
             <th>Note</th>
@@ -140,12 +142,23 @@
             'toolCategory.name',        // 5
             'tool.term.name',           // 6
             'process.name',             // 7
-            'action.name',              // 8
+            'action.name',              // 8 (properties are not sortable)
             'station',                  // 9
             'label',                    // 10
             'description',              // 11
             'actor.lastName',              // 12
         ];
+
+        function buildPropertyList(properties) {
+            if (!Array.isArray(properties) || properties.length === 0) {
+                return '';
+            }
+            const ul = $('<ul>');
+            for (const property of properties) {
+                ul.append($('<li>', { text: property.key.name + ': ' + property.value }));
+            }
+            return ul.prop('outerHTML');
+        }
 
         function updateCsvLink() {
             const base = document.getElementById('csvDownloadLink').getAttribute('data-base')
@@ -298,6 +311,8 @@
                         return (json.content || []).map(function (event) {
                             const date = event.timeStamp.split("T")[0].split("-").reverse().join("/").replace(/\/20/, "/'");
                             const time = event.timeStamp.split("T")[1].replace(/\+\d{2}:\d{2}$/, "");
+
+                            const properties = buildPropertyList(event.properties)
                             return {
                                 'identifier': event.identifier,
                                 'date': date,
@@ -308,6 +323,7 @@
                                 'tool': event.tool.term.name,
                                 'process': event.process.name,
                                 'action': event.action.name,
+                                'properties': properties,
                                 'station': event.station,
                                 'label': event.label,
                                 'description': event.description,
@@ -326,6 +342,7 @@
                     {'data': 'tool'},
                     {'data': 'process'},
                     {'data': 'action'},
+                    {'data': 'properties'},
                     {'data': 'station'},
                     {'data': 'label'},
                     {'data': 'description'},
@@ -334,18 +351,19 @@
                 "order": [[1, 'desc'], [2, 'desc']],
                 "columnDefs": [
                     {"targets": [0], "visible": false, "searchable": false},
-                    {"targets": [1], "visible": true, "searchable": false, width: '60px'},
-                    {"targets": [2], "visible": true, "searchable": false, width: '60px'},
-                    {"targets": [3], "visible": true, "searchable": false, width: '80px'},
-                    {"targets": [4], "visible": true, "searchable": false, width: '80px'},
+                    {"targets": [1], "visible": true, "searchable": false, width: '40px'},
+                    {"targets": [2], "visible": true, "searchable": false, width: '40px'},
+                    {"targets": [3], "visible": true, "searchable": false, width: '60px'},
+                    {"targets": [4], "visible": true, "searchable": false, width: '60px'},
                     {"targets": [5], "visible": true, "searchable": false, width: '80px'},
-                    {"targets": [6], "visible": true, "searchable": false, width: '140px'},
-                    {"targets": [7], "visible": true, "searchable": false, width: '80px'},
-                    {"targets": [8], "visible": true, "searchable": false, width: '80px'},
-                    {"targets": [9], "visible": true, "searchable": false, width: '40px'},
+                    {"targets": [6], "visible": true, "searchable": false, width: '100px'},
+                    {"targets": [7], "visible": true, "searchable": false, width: '60px'},
+                    {"targets": [8], "visible": true, "searchable": false, width: '60px'},
+                    {"targets": [9], "visible": true, "searchable": false, width: '80px'},
                     {"targets": [10], "visible": true, "searchable": false, width: '40px'},
                     {"targets": [11], "visible": true, "searchable": false, width: '40px'},
                     {"targets": [12], "visible": true, "searchable": false, width: '40px'},
+                    {"targets": [13], "visible": true, "searchable": false, width: '60px'},
                 ],
                 "lengthMenu": [ [50, 100, 200, 300], [50, 100, 200, 300] ]
             });
@@ -357,23 +375,6 @@
             const identifier = table.row(this).data().identifier;
             window.location.href = './event/' + identifier + '/edit';
         });
-
-        /*$('#eventTable').on('click', 'tbody td:has(svg.deleteEvent)', function () {
-            const row = table.row($(this).parents('tr'));
-            const data = row.data();
-            const identifier = data.identifier;
-
-            const actorName = data.actor;
-            const actor = JSON.parse(localStorage.actor);
-            if (actorName === (actor.firstName + " " + actor.lastName).trim()) {
-                if (confirm(actorName + ', are you sure you want to delete this event "' + data.tool + '-' + data.process + '-' + data.action + ' at ' + data.date + '/' + data.time + '"?')) {
-                    deleteEvent(identifier);
-                    table.ajax.reload();
-                }
-            } else {
-                alert("You can only delete your own events. The owner is " + actorName + ". Please don't mess with other persons' events.");
-            }
-        });*/
 
         $('a.toggle-vis').css("font-weight", "bold");
         $('a.toggle-vis').on('click', function (e) {

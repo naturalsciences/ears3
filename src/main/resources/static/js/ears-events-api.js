@@ -236,7 +236,7 @@ function postEventByEventDefinition(eventDefinitionId, successFunction, errorFun
 }
 
 /***
- * Post a provided event to the API, but populate it and display the property popup first
+ * Post a provided event to the API, but populate it and display the property popup first if needed
  */
 function postEventInner(event, successFunction, errorFunction) {
     const programFieldVal = $("#programField").val() === "" ? null : $("#programField").val();
@@ -273,36 +273,47 @@ function postEventInner(event, successFunction, errorFunction) {
                 eventPropertyLabels = [];
             }
 
-            //remove label as a property from the list coming from the event itself.
-            //(older trees sometimes still define label as a property; we remove and reattach it so it displays in the right order)
-            // if (eventPropertyUrls.includes("http://ontologies.ef-ears.eu/ears2/1#pry_4")) {
-            //     eventPropertyUrls = eventPropertyUrls.filter(function (value) {
-            //         return value != "http://ontologies.ef-ears.eu/ears2/1#pry_4";
-            //     });
-            //     eventPropertyLabels = eventPropertyLabels.filter(function (value) {
-            //         return value != "label";
-            //     });
-            // }
-            const regex = /event.*\/edit/g;
+            const badPrys = new Set([
+                "http://ontologies.ef-ears.eu/ears2/1#pry_4",
+                "http://ontologies.ef-ears.eu/ears2/1#pry_station",
+                "http://ontologies.ef-ears.eu/ears2/1#pry_description"
+            ]);
 
-            if (!editing() || eventPropertyUrls.length > 0) { //we are newly creating events or there are properties (when creatng/editing)
-                $("#propertyPopup").dialog("open");
-                //fixed properties, ie. station and label, get prefilled
-                $("input#fixed_property_station").attr('value', $("#stationField").val()); //predefined entry coming from the stationField.
-                $("input#fixed_property_label").attr('value', $("#labelField").val()); //predefined entry coming from the labelField.
+            const eventProperties = new Map(
+                eventPropertyUrls
+                    .map((url, i) => [url.replace('/#', '#'), eventPropertyLabels[i]])
+                    .filter(([url]) => !badPrys.has(url))
+            );
+
+            if (!editing()) { //we are newly creating events, and need to clear some stuff
                 $("input#fixed_property_description").val(""); //description should not be kept the same over each scenario button press.
                 $("input#fixed_property_description").attr('value', ""); //description should not be kept the same over each scenario button press.
-                $("#propertyPopup ul.non-fixed-properties").empty(); //clear all true (non-fixed) properties so they don't repeat on each scenario button press. When editing an existing event, this is skipped so the existing values stay.
 
-                eventPropertyUrls.forEach(function (eventPropertyUrl, index) {
-                    //needed as searches in the rdf return e.g. http://ontologies.ef-ears.eu/ears2/1/#pry_18 whereas they could be stored as http://ontologies.ef-ears.eu/ears2/1#pry_18
-                    eventPropertyUrl = eventPropertyUrl.replace('/#', '#');
+                $("#propertyPopup ul.non-fixed-properties").empty(); //clear all true (non-fixed) properties so they don't repeat on each scenario button press.
 
-                    if ($("input[data-url='" + eventPropertyUrl + "']").length == 0) { //only add if not yet added - relevant for new events; editing an existing event already has values from the backend via the thymeleaf template
-                        var li = buildPropertyListItem(index, eventPropertyUrl, eventPropertyLabels[index]);
-                        $("#propertyPopup ul.non-fixed-properties").append(li);
-                    }
+            }
+
+            if (!editing() || eventProperties.size > 0) { //we are newly creating events or there are properties (when creating/editing)
+                $("#propertyPopup").dialog("open");
+                //fixed properties, ie. station, label and description, get their value from the prefill
+                $("input#fixed_property_station").val($("#stationField").val());
+                $("input#fixed_property_label").val($("#labelField").val());
+                $("input#fixed_property_description").val($("#descriptionField").val()); //descriptionField may be absent
+
+                //editing an existing event already has values from the backend via the thymeleaf template
+                const existingUrls = new Set(
+                    $("input[data-url]").map(function () { return $(this).attr("data-url"); }).get()
+                );
+
+                const items = [];
+                let index = 0;
+                eventProperties.forEach(function (label, url) {
+                    if (existingUrls.has(url)) return;
+                    items.push(buildPropertyListItem(index++, url, label));
                 });
+
+                $("#propertyPopup ul.non-fixed-properties").append(items);
+
             } else if (editing()) { //we immediately post the event, there is no popup
                 event.station = $("#stationField").val()
                 event.label = $("#labelField").val()
@@ -312,18 +323,12 @@ function postEventInner(event, successFunction, errorFunction) {
         }
     });
 
-    // const fakePropsEnum = {
-    //     "label": "http://ontologies.ef-ears.eu/ears2/1#pry_4",
-    //     "station": "http://ontologies.ef-ears.eu/ears2/1#pry_station",
-    //     "description": "http://ontologies.ef-ears.eu/ears2/1#pry_description"
-    // };
-
     // .one() instead of .on()+.off(): this handler only ever needs to fire once per
     // popup, and unbinds itself automatically instead of relying on a manual .off() call.
     $(document).one('click', '#btnSubmitEventWithProperties', function () {
 
-        event.station = $("input#fixed_property_station").val(); //predefined entry coming from the stationField.
-        event.label = $("input#fixed_property_label").val(); //predefined entry coming from the labelField.
+        event.station = $("input#fixed_property_station").val();
+        event.label = $("input#fixed_property_label").val();
         event.description = $("input#fixed_property_description").val()
         $("#propertyPopup ul.non-fixed-properties input").each(function (index) {
             const url = $(this).attr('data-url');
@@ -339,17 +344,6 @@ function postEventInner(event, successFunction, errorFunction) {
                 value: $(this).val()
             };
             event.properties.push(property);
-            // } else {
-            //     if (url === fakePropsEnum.label) {
-            //         event.label = $(this).val();
-            //     }
-            //     if (url === fakePropsEnum.station) {
-            //         event.station = $(this).val();
-            //     }
-            //     if (url === fakePropsEnum.description) {
-            //         event.description = $(this).val();
-            //     }
-            // }
         });
         postEventInnerMost(event, successFunction, errorFunction);
         $("#propertyPopup").dialog("close");
@@ -363,7 +357,7 @@ function postEventInner(event, successFunction, errorFunction) {
 function buildPropertyListItem(index, eventPropertyUrl, eventPropertyLabel) {
     const input = $('<input>', {
         type: 'text',
-        id: 'property_' + index + 3,
+        id: 'property_' + index,
         name: eventPropertyLabel,
         class: 'form-control',
         value: null
@@ -372,7 +366,7 @@ function buildPropertyListItem(index, eventPropertyUrl, eventPropertyLabel) {
 
     const label = $('<label>', {
         class: 'txtBox',
-        for: 'property_' + index + 3,
+        for: 'property_' + index,
         html: eventPropertyLabel
     });
 
@@ -383,7 +377,7 @@ function buildPropertyListItem(index, eventPropertyUrl, eventPropertyLabel) {
 
 function editing() {
     const regex = /event.*\/edit/g;
-    return window.location.href.match(regex)
+    return regex.test(window.location.href)
 }
 
 /***
